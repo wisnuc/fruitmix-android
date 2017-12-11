@@ -376,6 +376,60 @@
     <string name="equipment_system_error">系统错误</string>
     <string name="initial_title">初始化向导</string>
 
+    <string name="create_disk_title">"创建磁盘卷"</string>
+    <string name="create_disk_subtitle">选择磁盘创建新的磁盘卷，所选磁盘的数据会被清除</string>
+
+    <string name="unknown_model">未知型号</string>
+    <string name="unknown_interface">未知接口</string>
+    <string name="file_system">文件系统</string>
+    <string name="is_partitioned">有文件分区</string>
+    <string name="no_fileSystem_or_partition">未发现文件系统或分区</string>
+
+    <string name="active_swap">该磁盘含有在使用的交换分区，不可用</string>
+    <string name="root_fs">该磁盘含有rootfs，不可用</string>
+    <string name="unformattable">该磁盘无法格式化，不可用</string>
+    <string name="removable">该磁盘为可移动磁盘，可以加入磁盘卷，但请谨慎选择</string>
+    <string name="formattable">该磁盘可以加入磁盘卷</string>
+
+    <string name="colon">%1$s : %2$s</string>
+
+    <string name="disk_detail">硬盘详情</string>
+    <string name="disk_model">型号</string>
+    <string name="disk_name">设备名</string>
+    <string name="disk_size">容量</string>
+    <string name="disk_interface">接口</string>
+    <string name="disk_state">状态</string>
+    <string name="disk_instruction">说明</string>
+
+    <string name="disk_mode">磁盘卷模式:</string>
+
+    <string name="select_disk_mode">选择磁盘卷模式</string>
+
+    <string name="not_set_disk_mode">未设置</string>
+    <string name="single_mode">single模式</string>
+    <string name="raid0_mode">raid0模式</string>
+    <string name="raid1_mode">raid1模式</string>
+
+    <string name="next_step">下一步</string>
+    <string name="pre_step">上一步</string>
+    <string name="skip_step">忽略</string>
+    <string name="finish_step">进入</string>
+
+    <string name="create_first_user_title">创建第一个用户</string>
+    <string name="create_first_user_subtitle">请输入第一个用户的用户名和密码，该用户会成为系统权限最高的管理员</string>
+
+    <string name="confirm_install">确认安装</string>
+
+    <string name="mode">模式</string>
+
+    <string name="create">创建</string>
+
+    <string name="bind_wechat_user_instruction">您可以选择现在绑定微信，成功绑定后就可通过微信扫码，远程登录设备</string>
+
+    <string name="install_system_succeed_instruction">您已成功创建了WISNUC系统</string>
+
+    <string name="enter_system">进入系统</string>
+
     <!-- group -->
     <string name="group">"私友群"</string>
 

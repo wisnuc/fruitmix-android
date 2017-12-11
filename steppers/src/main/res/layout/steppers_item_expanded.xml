@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginLeft="@dimen/item_margin_left_right"
-    android:layout_marginRight="@dimen/item_margin_left_right">
+    android:layout_marginRight="@dimen/item_margin_left_right"
+    android:orientation="horizontal">
 
     <LinearLayout
         android:layout_width="@dimen/item_circle_width_height"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="vertical">
 
         <View
             android:layout_width="1dp"
@@ -22,7 +22,7 @@
         <me.drozdzynski.library.steppers.RoundedView
             android:id="@+id/roundedView"
             android:layout_width="@dimen/item_circle_width_height"
-            android:layout_height="@dimen/item_circle_width_height"/>
+            android:layout_height="@dimen/item_circle_width_height" />
 
         <View
             android:layout_width="1dp"
@@ -35,11 +35,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="@dimen/item_text_margin_top"
-        android:layout_marginStart="@dimen/item_text_margin_left"
+        android:layout_marginBottom="@dimen/item_margin_bottom_active"
         android:layout_marginLeft="@dimen/item_text_margin_left"
-        android:layout_marginBottom="@dimen/item_margin_bottom_active">
+        android:layout_marginStart="@dimen/item_text_margin_left"
+        android:layout_marginTop="@dimen/item_text_margin_top"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/textViewLabel"
@@ -57,46 +57,48 @@
 
         <LinearLayout
             android:id="@+id/linearLayoutContent"
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <FrameLayout
                 android:id="@+id/frameLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#ccc"
+                android:layout_marginBottom="@dimen/item_frame_margin_top_bottom"
                 android:layout_marginTop="@dimen/item_frame_margin_top_bottom"
-                android:layout_marginBottom="@dimen/item_frame_margin_top_bottom"/>
+                android:background="#ccc" />
 
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <Button
-                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:id="@+id/buttonContinue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/next_step_item_bg"
+                    android:enabled="false"
                     android:text="@string/step_continue"
-                    android:id="@+id/buttonContinue" />
+                    android:textColor="@color/white" />
 
                 <Button
+                    android:id="@+id/buttonSkip"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:text="@string/step_skip"
-                    android:visibility="gone"
-                    android:id="@+id/buttonSkip" />
+                    android:visibility="gone" />
 
                 <Button
+                    android:id="@+id/buttonCancel"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
-                    android:text="@string/step_cancel"
-                    android:id="@+id/buttonCancel" />
+                    android:text="@string/step_cancel" />
 
             </LinearLayout>
 

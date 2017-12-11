@@ -1,67 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center_vertical"
-    android:orientation="horizontal">
+<layout>
 
-    <CheckBox
-        android:id="@+id/checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="16dp" />
+    <data>
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="8dp"
-        android:layout_toRightOf="@id/checkbox"
-        android:src="@drawable/wisnuc_disk" />
+        <variable
+            name="diskVolumeViewModel"
+            type="com.winsun.fruitmix.equipment.initial.viewmodel.DiskVolumeViewModel" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/icon"
-        android:orientation="vertical">
+        <variable
+            name="showEquipmentInfo"
+            type="com.winsun.fruitmix.equipment.initial.data.ShowFirstInitialEquipmentInfoListener" />
 
-        <TextView
+    </data>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="WDC-WD800BD-08MRA1" />
+            android:layout_centerVertical="true"
+            android:layout_marginRight="16dp"
+            android:checked="@{diskVolumeViewModel.isSelected()}"
+            android:enabled="@{diskVolumeViewModel.isAvailable()}" />
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="8dp"
+            android:layout_toRightOf="@id/checkbox"
+            android:src="@{diskVolumeViewModel.isAvailable()?@drawable/available_disk:@drawable/wisnuc_disk,default=@drawable/wisnuc_disk}" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/icon"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="sda" />
+                android:text="@{diskVolumeViewModel.getModel(context)}"
+                android:textColor="@{diskVolumeViewModel.isAvailable()?@color/fifty_four_percent_black:@color/twenty_six_percent_black,default=@color/fifty_four_percent_black}"
+                android:textSize="14dp"
+                tools:text="WDC-WD800BD-08MRA1" />
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="74.5GB" />
+                android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="ATA" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="8dp"
+                    android:text="@{diskVolumeViewModel.getName()}"
+                    android:textColor="@{diskVolumeViewModel.isAvailable()?@color/fifty_four_percent_black:@color/twenty_six_percent_black,default=@color/fifty_four_percent_black}"
+                    android:textSize="14dp"
+                    tools:text="sda" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="8dp"
+                    android:text="@{diskVolumeViewModel.getSize(context)}"
+                    android:textColor="@{diskVolumeViewModel.isAvailable()?@color/fifty_four_percent_black:@color/twenty_six_percent_black,default=@color/fifty_four_percent_black}"
+                    android:textSize="14dp"
+                    tools:text="74.5GB" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{diskVolumeViewModel.getInterface(context)}"
+                    android:textColor="@{diskVolumeViewModel.isAvailable()?@color/fifty_four_percent_black:@color/twenty_six_percent_black,default=@color/fifty_four_percent_black}"
+                    android:textSize="14dp"
+                    tools:text="ATA" />
+
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="40dp"
+            android:onClick="@{()->showEquipmentInfo.showEquipmentInDialog(diskVolumeViewModel)}"
+            android:src="@drawable/disk_info" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:src="@drawable/modify_user_info" />
 
+    </RelativeLayout>
 
-</RelativeLayout>
+</layout>

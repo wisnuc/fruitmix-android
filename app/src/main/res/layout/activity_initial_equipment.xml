@@ -14,17 +14,18 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         tools:context="com.winsun.fruitmix.equipment.initial.InitialEquipmentActivity">
 
         <include
             android:id="@+id/toolbar_layout"
             layout="@layout/toolbar_layout"
-            app:toolbarViewModel="@{toolbarViewModel}"/>
+            app:toolbarViewModel="@{toolbarViewModel}" />
 
         <me.drozdzynski.library.steppers.SteppersView
             android:id="@+id/steppersView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
 
     </LinearLayout>
 

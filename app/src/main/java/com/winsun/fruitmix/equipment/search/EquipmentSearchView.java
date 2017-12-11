@@ -24,6 +24,6 @@ public interface EquipmentSearchView {
 
     Context getContext();
 
-    void gotoInitialEquipmentActivity();
+    void gotoInitialEquipmentActivity(EquipmentSearchViewModel equipmentSearchViewModel);
 
 }

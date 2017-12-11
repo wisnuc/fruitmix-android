@@ -237,6 +237,23 @@ public class HttpRequestFactory {
 
     }
 
+    public HttpRequest createPostRequestWithoutToken(String ip, String httpPath,String body) {
+
+        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(ip, null);
+
+        return factory.createHttpPostRequest(httpPath, body,false);
+
+    }
+
+    public HttpRequest createPatchRequestWithoutToken(String ip, String httpPath,String body) {
+
+        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(ip, null);
+
+        return factory.createHttpPatchRequest(httpPath, body);
+
+    }
+
+
     public HttpRequest createGetRequestWithToken(String ip,String token, String httpPath) {
 
         BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(ip, new HttpHeader(Util.KEY_AUTHORIZATION,Util.KEY_JWT_HEAD + token));

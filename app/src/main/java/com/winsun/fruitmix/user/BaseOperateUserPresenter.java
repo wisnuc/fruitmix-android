@@ -23,6 +23,10 @@ public class BaseOperateUserPresenter {
 
     protected UserDataRepository mUserDataRepository;
 
+    public BaseOperateUserPresenter() {
+        remoteUserNames = new ArrayList<>();
+    }
+
     public BaseOperateUserPresenter(UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource) {
 
         remoteUserNames = new ArrayList<>();

@@ -78,7 +78,7 @@ public class SteppersView extends LinearLayout {
     }
 
     public void build() {
-        if(config != null) {
+        if (config != null) {
             setOrientation(LinearLayout.HORIZONTAL);
 
             RecyclerView recyclerView = new RecyclerView(getContext());
@@ -103,6 +103,12 @@ public class SteppersView extends LinearLayout {
 
     public static class Config {
 
+        private String nextStepText;
+        private String preStepText;
+        private String finishStepText;
+        private String skipStepText;
+
+
         private OnFinishAction onFinishAction;
         private OnCancelAction onCancelAction;
         private OnChangeStepAction onChangeStepAction;
@@ -111,6 +117,38 @@ public class SteppersView extends LinearLayout {
 
         public Config() {
 
+        }
+
+        public String getNextStepText() {
+            return nextStepText;
+        }
+
+        public void setNextStepText(String nextStepText) {
+            this.nextStepText = nextStepText;
+        }
+
+        public String getPreStepText() {
+            return preStepText;
+        }
+
+        public void setPreStepText(String preStepText) {
+            this.preStepText = preStepText;
+        }
+
+        public String getFinishStepText() {
+            return finishStepText;
+        }
+
+        public void setFinishStepText(String finishStepText) {
+            this.finishStepText = finishStepText;
+        }
+
+        public String getSkipStepText() {
+            return skipStepText;
+        }
+
+        public void setSkipStepText(String skipStepText) {
+            this.skipStepText = skipStepText;
         }
 
         public Config setOnFinishAction(OnFinishAction onFinishAction) {
@@ -157,8 +195,9 @@ public class SteppersView extends LinearLayout {
     }
 
     static int fID = 190980;
+
     protected static int findUnusedId(View view) {
-        while( view.getRootView().findViewById(++fID) != null );
+        while (view.getRootView().findViewById(++fID) != null) ;
         return fID;
     }
 

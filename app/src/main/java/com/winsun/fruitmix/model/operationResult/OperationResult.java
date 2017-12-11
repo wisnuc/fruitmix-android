@@ -8,7 +8,7 @@ import com.winsun.fruitmix.model.OperationResultType;
  * Created by Administrator on 2016/11/23.
  */
 
-public abstract class OperationResult {
+public abstract class OperationResult{
 
     public abstract String getResultMessage(Context context);
 

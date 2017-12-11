@@ -1,0 +1,15 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.winsun.fruitmix.equipment.initial.fragment.FourthFragment">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/bind_wechat_user_instruction"
+        android:textColor="@color/eighty_seven_percent_black"
+        android:textSize="14dp" />
+
+
+</FrameLayout>

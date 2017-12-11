@@ -196,7 +196,7 @@
                         android:layout_height="80dp"
                         android:layout_marginTop="8dp"
                         android:gravity="center"
-                        android:onClick="@{()->equipmentSearchView.gotoInitialEquipmentActivity()}"
+                        android:onClick="@{()->equipmentSearchView.gotoInitialEquipmentActivity(equipmentSearchViewModel)}"
                         android:text="@{equipmentSearchViewModel.equipmentState}"
                         android:textColor="@color/login_ui_blue"
                         android:textSize="18dp"

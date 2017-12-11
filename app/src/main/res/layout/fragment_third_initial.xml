@@ -1,0 +1,46 @@
+<layout>
+
+    <data>
+
+        <variable
+            name="thirdInitialViewModel"
+            type="com.winsun.fruitmix.equipment.initial.viewmodel.ThirdInitialFragmentViewModel" />
+
+    </data>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context="com.winsun.fruitmix.equipment.initial.fragment.ThirdInitialFragment">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginBottom="8dp"
+            android:background="@color/divide_bg" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{thirdInitialViewModel.mode}"
+            tools:text="模式：single" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{thirdInitialViewModel.userName}"
+            tools:text="用户名：admin" />
+
+
+    </LinearLayout>
+
+</layout>
+
+

@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.databinding.ActivityEquipmentSearchBinding;
 
+import com.winsun.fruitmix.equipment.initial.InitialEquipmentActivity;
 import com.winsun.fruitmix.equipment.search.EquipmentPresenter;
 import com.winsun.fruitmix.equipment.search.EquipmentSearchView;
 import com.winsun.fruitmix.equipment.search.EquipmentSearchViewModel;
@@ -70,6 +71,8 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActivityEquipmentSearchBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_equipment_search);
+
+        binding.setEquipmentSearchView(this);
 
         toolbar = binding.toolbar;
 
@@ -235,7 +238,7 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == Util.KEY_LOGIN_REQUEST_CODE && resultCode == RESULT_OK) {
+        if ((requestCode == Util.KEY_LOGIN_REQUEST_CODE || requestCode == InitialEquipmentActivity.REQUEST_CODE) && resultCode == RESULT_OK) {
             setResult(RESULT_OK);
             finish();
 
@@ -323,8 +326,12 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
     }
 
     @Override
-    public void gotoInitialEquipmentActivity() {
+    public void gotoInitialEquipmentActivity(EquipmentSearchViewModel equipmentSearchViewModel) {
 
+        Intent intent = new Intent(this, InitialEquipmentActivity.class);
+        intent.putExtra(InitialEquipmentActivity.EQUIPMENT_IP_KEY, equipmentSearchViewModel.getIp());
+        intent.putExtra(InitialEquipmentActivity.EQUIPMENT_NAME_KEY,equipmentSearchViewModel.getEquipmentName());
+        startActivityForResult(intent, InitialEquipmentActivity.REQUEST_CODE);
 
 
     }

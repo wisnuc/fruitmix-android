@@ -402,12 +402,61 @@
     <string name="equipment_system_error">System Error</string>
     <string name="initial_title">Initialization</string>
 
+    <string name="create_disk_title">"Create disk volume"</string>
+    <string name="create_disk_subtitle">Select the disk to create a new disk volume, and the data of the selected disk will be cleared</string>
+
+    <string name="unknown_model">Unknown Model</string>
+    <string name="unknown_interface">Unknown Interface</string>
+    <string name="file_system">File System</string>
+    <string name="is_partitioned">Has File Partition</string>
+    <string name="no_fileSystem_or_partition">No file system or partition was found</string>
+
+    <string name="active_swap">The disk contains an exchange partition that is used, and it is not available</string>
+    <string name="root_fs">The disk contains rootfs and is not available</string>
+    <string name="unformattable">The disk cannot be formatted and unavailable</string>
+    <string name="removable">This disk is a removable disk and can be added to a disk volume, but please choose carefully</string>
+    <string name="formattable">This disk can be added to the disk volume</string>
+
+    <string name="colon">%1$s : %2$s</string>
+
+    <string name="disk_detail">Disk Detail</string>
+    <string name="disk_model">Model</string>
+    <string name="disk_name">Device Name</string>
+    <string name="disk_size">Size</string>
+    <string name="disk_interface">Interface</string>
+    <string name="disk_state">State</string>
+    <string name="disk_instruction">Instruction</string>
+
+    <string name="disk_mode">Disk Volume Mode:</string>
+
+    <string name="select_disk_mode">Select Disk Volume Mode</string>
+
+    <string name="not_set_disk_mode">not set</string>
+    <string name="single_mode">single mode</string>
+    <string name="raid0_mode">raid0 mode</string>
+    <string name="raid1_mode">raid1 mode</string>
+
+    <string name="next_step">Next Step</string>
+    <string name="pre_step">Previous Step</string>
+    <string name="skip_step">Ignore</string>
+    <string name="finish_step">Enter</string>
+
+    <string name="create_first_user_title">Create first user</string>
+    <string name="create_first_user_subtitle">Please enter the username and password of the first user, which will be the most privileged administrator of the system</string>
+
+    <string name="confirm_install">Confirm Installation</string>
+
+    <string name="mode">Mode</string>
+
+    <string name="create">Create</string>
+
+    <string name="bind_wechat_user_instruction">You can choose to bind WeChat now. After a successful binding, you can use a WeChat scavenging, remote login device</string>
+
+    <string name="install_system_succeed_instruction">You have successfully created the WISNUC system</string>
+
+    <string name="enter_system">Enter System</string>
 
     <!-- group -->
     <string name="group">Group</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
 
 </resources>

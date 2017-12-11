@@ -17,4 +17,22 @@ public class EquipmentSearchViewModel {
 
     public final ObservableField<String> equipmentState = new ObservableField<>();
 
+    private String ip;
+    private String equipmentName;
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public String getEquipmentName() {
+        return equipmentName;
+    }
+
+    public void setEquipmentName(String equipmentName) {
+        this.equipmentName = equipmentName;
+    }
 }

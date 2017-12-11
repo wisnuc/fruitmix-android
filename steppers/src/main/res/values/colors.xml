@@ -3,4 +3,9 @@
     <color name="transparent">#00ffffff</color>
     <color name="circle_color_default_blue">#4184F3</color>
     <color name="circle_color_default_gray">#BDBDBD</color>
+
+    <color name="next_step_enable_background_color">#03a9f4</color>
+    <color name="next_step_disable_background_color">#42000000</color>
+    <color name="white">#FFFFFF</color>
+
 </resources>

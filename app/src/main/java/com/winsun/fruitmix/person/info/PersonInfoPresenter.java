@@ -37,25 +37,14 @@ import java.util.concurrent.Future;
  * Created by Administrator on 2017/10/19.
  */
 
-public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallback {
+public class PersonInfoPresenter extends BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetTokenCallback {
 
     public static final String TAG = PersonInfoPresenter.class.getSimpleName();
 
-    private UserDataRepository userDataRepository;
-
-    private SystemSettingDataSource systemSettingDataSource;
-
-    private PersonInfoView personInfoView;
-
-    private PersonInfoDataSource personInfoDataSource;
 
     private LogoutUseCase logoutUseCase;
 
     private LoginUseCase mLoginUseCase;
-
-    private String ticketID;
-
-    private WeChatTokenUserWrapper mWeChatTokenUserWrapper;
 
     private ThreadManager threadManager;
 
@@ -63,19 +52,13 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
     public PersonInfoPresenter(UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
                                PersonInfoView personInfoView, PersonInfoDataSource personInfoDataSource, LogoutUseCase logoutUseCase,
-                               LoginUseCase loginUseCase,ThreadManager threadManager, FileTool fileTool) {
-        this.userDataRepository = userDataRepository;
-        this.systemSettingDataSource = systemSettingDataSource;
-        this.personInfoView = personInfoView;
-        this.personInfoDataSource = personInfoDataSource;
+                               LoginUseCase loginUseCase, ThreadManager threadManager, FileTool fileTool) {
+
+        super(userDataRepository, systemSettingDataSource, personInfoView, personInfoDataSource);
         this.logoutUseCase = logoutUseCase;
         mLoginUseCase = loginUseCase;
         this.threadManager = threadManager;
         mFileTool = fileTool;
-    }
-
-    public User getCurrentUser() {
-        return userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
     }
 
     public void onDestroy() {
@@ -87,7 +70,7 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
 
     public void logout() {
 
-        if (mFileTool.checkTemporaryUploadFolderNotEmpty(personInfoView.getContext(),systemSettingDataSource.getCurrentLoginUserUUID())) {
+        if (mFileTool.checkTemporaryUploadFolderNotEmpty(personInfoView.getContext(), systemSettingDataSource.getCurrentLoginUserUUID())) {
 
             AlertDialog dialog = new AlertDialog.Builder(personInfoView.getContext())
                     .setMessage(R.string.clear_temporary_folder_before_logout_toast).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
@@ -154,145 +137,5 @@ public class PersonInfoPresenter implements WXEntryActivity.WXEntryGetTokenCallb
         }
     }
 
-    public void bindWeChatUser() {
-
-        personInfoView.showProgressDialog(personInfoView.getString(R.string.operating_title, personInfoView.getString(R.string.initiate_binding_request)));
-
-        personInfoDataSource.createBindWeChatUserTicket(new BaseOperateDataCallback<String>() {
-            @Override
-            public void onSucceed(String data, OperationResult result) {
-
-                personInfoView.dismissDialog();
-
-                ticketID = data;
-
-                WXEntryActivity.setWxEntryGetTokenCallback(PersonInfoPresenter.this);
-
-                IWXAPI iwxapi = MiniProgram.registerToWX(personInfoView.getContext());
-
-                MiniProgram.sendAuthRequest(iwxapi);
-
-            }
-
-            @Override
-            public void onFail(OperationResult result) {
-
-                personInfoView.dismissDialog();
-
-                personInfoView.showToast(result.getResultMessage(personInfoView.getContext()));
-
-            }
-        });
-
-
-    }
-
-    @Override
-    public void succeed(final WeChatTokenUserWrapper weChatTokenUserWrapper) {
-
-        personInfoView.showProgressDialog(personInfoView.getString(R.string.operating_title, personInfoView.getString(R.string.send_wechat_user_info)));
-
-        mWeChatTokenUserWrapper = weChatTokenUserWrapper;
-
-        personInfoDataSource.fillBindWeChatUserTicket(ticketID, weChatTokenUserWrapper.getToken(), new BaseOperateDataCallback<String>() {
-            @Override
-            public void onSucceed(String data, OperationResult result) {
-
-                personInfoView.dismissDialog();
-
-                showConfirmBindDialog(ticketID, data, weChatTokenUserWrapper.getNickName());
-
-            }
-
-            @Override
-            public void onFail(OperationResult result) {
-
-                personInfoView.dismissDialog();
-
-                personInfoView.showToast(result.getResultMessage(personInfoView.getContext()));
-
-            }
-        });
-
-    }
-
-    @Override
-    public void fail() {
-
-        Log.d(TAG, "fail: get token");
-
-    }
-
-    private void showConfirmBindDialog(final String ticketID, final String guid, String wechatUserNickName) {
-
-        new AlertDialog.Builder(personInfoView.getContext()).setMessage(personInfoView.getString(R.string.bind_wechat_user) + " " + wechatUserNickName + " ?")
-                .setPositiveButton(personInfoView.getString(R.string.bind), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        personInfoView.showProgressDialog(personInfoView.getString(R.string.operating_title, personInfoView.getString(R.string.bind_wechat_user)));
-
-                        personInfoDataSource.confirmBindWeChatUserTicket(ticketID, guid, true, new BaseOperateDataCallback<String>() {
-                            @Override
-                            public void onSucceed(String data, OperationResult result) {
-
-                                personInfoView.dismissDialog();
-
-                                personInfoView.showToast(personInfoView.getString(R.string.success, personInfoView.getString(R.string.bind_wechat_user)));
-
-                                handleBindSucceed();
-
-                            }
-
-                            @Override
-                            public void onFail(OperationResult result) {
-
-                                personInfoView.dismissDialog();
-
-                                if (result instanceof OperationNetworkException) {
-
-                                    HttpErrorBodyParser parser = new HttpErrorBodyParser();
-
-                                    try {
-                                        String messageInBody = parser.parse(((OperationNetworkException) result).getHttpResponseData());
-
-                                        personInfoView.showToast(messageInBody);
-
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-
-                                        personInfoView.showToast(result.getResultMessage(personInfoView.getContext()));
-                                    }
-
-                                } else {
-                                    personInfoView.showToast(result.getResultMessage(personInfoView.getContext()));
-                                }
-
-                            }
-                        });
-
-                    }
-                }).setNegativeButton(personInfoView.getString(R.string.cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                personInfoDataSource.confirmBindWeChatUserTicket(ticketID, guid, false, new BaseOperateDataCallbackImpl<String>());
-
-            }
-        }).setCancelable(false).create().show();
-
-    }
-
-    private void handleBindSucceed() {
-
-        User user = getCurrentUser();
-        user.setAvatar(mWeChatTokenUserWrapper.getAvatarUrl());
-        user.setAssociatedWeChatGUID(mWeChatTokenUserWrapper.getGuid());
-
-        userDataRepository.updateUser(user);
-
-        personInfoView.handleBindSucceed();
-
-    }
 
 }

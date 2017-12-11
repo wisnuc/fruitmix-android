@@ -2,6 +2,7 @@ package com.winsun.fruitmix.group.view.customview;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -41,7 +42,7 @@ public class AudioCommentView extends UserCommentView {
 
         audioTimeTextView = new TextView(context);
         audioTimeTextView.setTextColor(ContextCompat.getColor(context, R.color.thirty_eight_percent_black));
-        audioTimeTextView.setTextSize(Util.dip2px(context, 12));
+        audioTimeTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX,Util.dip2px(context, 12));
 
         audioImg = new ImageView(context);
 

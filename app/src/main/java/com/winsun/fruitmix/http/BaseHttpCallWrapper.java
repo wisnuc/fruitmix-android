@@ -5,6 +5,7 @@ import android.util.Patterns;
 import com.winsun.fruitmix.callback.BaseDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.equipment.search.data.EquipmentBootInfo;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationJSONException;
@@ -13,6 +14,7 @@ import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationSuccessWithEquipmentBootInfo;
 import com.winsun.fruitmix.model.operationResult.OperationSuccessWithFile;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteDatasParser;
@@ -163,6 +165,50 @@ public class BaseHttpCallWrapper {
                 List<AbstractRemoteFile> files = parser.parse(httpResponse.getResponseData());
 
                 return new OperationSuccessWithFile(files);
+
+            } else {
+
+                return new OperationNetworkException(httpResponse);
+
+            }
+
+
+        } catch (MalformedURLException e) {
+
+            return new OperationMalformedUrlException();
+
+        } catch (SocketTimeoutException ex) {
+
+            return new OperationSocketTimeoutException();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            return new OperationIOException();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return new OperationJSONException();
+        }
+
+    }
+
+    public OperationResult loadEquipmentBootInfo(HttpRequest httpRequest, RemoteDatasParser<EquipmentBootInfo> parser) {
+
+
+        if (!checkUrl(httpRequest.getUrl()))
+            return new OperationMalformedUrlException();
+
+        try {
+
+            HttpResponse httpResponse = iHttpUtil.remoteCall(httpRequest);
+
+            if (httpResponse.getResponseCode() == 200) {
+
+                List<EquipmentBootInfo> equipmentBootInfos = parser.parse(httpResponse.getResponseData());
+
+                return new OperationSuccessWithEquipmentBootInfo(equipmentBootInfos);
 
             } else {
 

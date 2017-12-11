@@ -27,6 +27,17 @@ public class SteppersItem extends Observable {
 
     private String label;
     private String subLabel;
+
+    private float labelTextSize;
+    private float subLabelTestSize;
+
+    private int labelTextColor;
+    private int subLabelTextColor;
+
+    private String nextBtnText;
+
+    private boolean preStepable = true;
+
     private boolean buttonEnable = true;
     private Fragment fragment;
     private OnClickContinue onClickContinue;
@@ -47,8 +58,56 @@ public class SteppersItem extends Observable {
         return subLabel;
     }
 
+    public void setLabelTextSize(float labelTextSize) {
+        this.labelTextSize = labelTextSize;
+    }
+
+    public float getLabelTextSize() {
+        return labelTextSize;
+    }
+
     public void setSubLabel(String subLabel) {
         this.subLabel = subLabel;
+    }
+
+    public float getSubLabelTestSize() {
+        return subLabelTestSize;
+    }
+
+    public void setSubLabelTestSize(float subLabelTestSize) {
+        this.subLabelTestSize = subLabelTestSize;
+    }
+
+    public int getLabelTextColor() {
+        return labelTextColor;
+    }
+
+    public void setLabelTextColor(int labelTextColor) {
+        this.labelTextColor = labelTextColor;
+    }
+
+    public int getSubLabelTextColor() {
+        return subLabelTextColor;
+    }
+
+    public void setSubLabelTextColor(int subLabelTextColor) {
+        this.subLabelTextColor = subLabelTextColor;
+    }
+
+    public String getNextBtnText() {
+        return nextBtnText;
+    }
+
+    public void setNextBtnText(String nextBtnText) {
+        this.nextBtnText = nextBtnText;
+    }
+
+    public boolean isPreStepable() {
+        return preStepable;
+    }
+
+    public void setPreStepable(boolean preStepable) {
+        this.preStepable = preStepable;
     }
 
     public Fragment getFragment() {
