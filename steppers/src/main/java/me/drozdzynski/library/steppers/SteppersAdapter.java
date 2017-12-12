@@ -92,6 +92,11 @@ public class SteppersAdapter extends RecyclerView.Adapter<SteppersViewHolder> {
             holder.roundedView.setText(position + 1 + "");
         }
 
+        if (position == getItemCount() - 1)
+            holder.lineBelowRoundedView.setVisibility(View.INVISIBLE);
+        else
+            holder.lineBelowRoundedView.setVisibility(View.VISIBLE);
+
         if (position == currentStep || holder.isChecked())
             holder.roundedView.setCircleAccentColor();
         else holder.roundedView.setCircleGrayColor();
@@ -99,8 +104,15 @@ public class SteppersAdapter extends RecyclerView.Adapter<SteppersViewHolder> {
         holder.textViewLabel.setText(steppersItem.getLabel());
         holder.textViewLabel.setTextColor(steppersItem.getLabelTextColor());
 
-        holder.textViewSubLabel.setText(steppersItem.getSubLabel());
-        holder.textViewSubLabel.setTextColor(steppersItem.getSubLabelTextColor());
+        if (steppersItem.getSubLabel().isEmpty()) {
+            holder.textViewSubLabel.setVisibility(View.GONE);
+        } else {
+
+            holder.textViewSubLabel.setVisibility(View.VISIBLE);
+            holder.textViewSubLabel.setText(steppersItem.getSubLabel());
+            holder.textViewSubLabel.setTextColor(steppersItem.getSubLabelTextColor());
+
+        }
 
         holder.linearLayoutContent.setVisibility(position == currentStep || position == beforeStep ? View.VISIBLE : View.GONE);
 
@@ -175,6 +187,9 @@ public class SteppersAdapter extends RecyclerView.Adapter<SteppersViewHolder> {
                 @Override
                 public void onClick(View v) {
 
+                    if (steppersItem.getOnCancelAction() != null)
+                        steppersItem.getOnCancelAction().onCancel();
+
                     if (config.getOnCancelAction() != null)
                         config.getOnCancelAction().onCancel();
 
@@ -205,13 +220,13 @@ public class SteppersAdapter extends RecyclerView.Adapter<SteppersViewHolder> {
             String name = makeFragmentName(steppersView.getId(), position);
             Fragment fragment = fragmentManager.findFragmentByTag(name);
 
-            if (position < beforeStep) {
+            if (position == beforeStep) {
                 if (fragment != null) {
                     if (BuildConfig.DEBUG)
                         Log.v(TAG, "Removing item #" + position + ": f=" + fragment);
                     fragmentTransaction.detach(fragment);
                 }
-            } else if (position == beforeStep || position == currentStep) {
+            } else if (position == currentStep) {
                 if (fragment != null) {
                     if (BuildConfig.DEBUG)
                         Log.v(TAG, "Attaching item #" + position + ": f=" + fragment + " d=" + fragment.isDetached());

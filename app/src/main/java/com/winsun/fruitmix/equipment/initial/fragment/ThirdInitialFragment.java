@@ -66,8 +66,8 @@ public class ThirdInitialFragment extends Fragment {
 
         thirdInitialFragmentViewModel = new ThirdInitialFragmentViewModel();
 
-        thirdInitialFragmentViewModel.mode.set(getString(R.string.colon, getString(R.string.mode), mUserName));
-        thirdInitialFragmentViewModel.userName.set(getString(R.string.colon, getString(R.string.user_name), mMode));
+        thirdInitialFragmentViewModel.userName.set(getString(R.string.colon, getString(R.string.mode), mUserName));
+        thirdInitialFragmentViewModel.mode.set(getString(R.string.colon, getString(R.string.user_name), mMode));
 
         binding.setThirdInitialViewModel(thirdInitialFragmentViewModel);
 

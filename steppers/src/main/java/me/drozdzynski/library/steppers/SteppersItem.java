@@ -20,6 +20,7 @@ import android.support.v4.app.Fragment;
 
 import java.util.Observable;
 
+import me.drozdzynski.library.steppers.interfaces.OnCancelAction;
 import me.drozdzynski.library.steppers.interfaces.OnClickContinue;
 import me.drozdzynski.library.steppers.interfaces.OnSkipStepAction;
 
@@ -37,6 +38,8 @@ public class SteppersItem extends Observable {
     private String nextBtnText;
 
     private boolean preStepable = true;
+
+    private OnCancelAction mOnCancelAction;
 
     private boolean buttonEnable = true;
     private Fragment fragment;
@@ -136,6 +139,14 @@ public class SteppersItem extends Observable {
 
     public void setOnClickContinue(OnClickContinue onClickContinue) {
         this.onClickContinue = onClickContinue;
+    }
+
+    public OnCancelAction getOnCancelAction() {
+        return mOnCancelAction;
+    }
+
+    public void setOnCancelAction(OnCancelAction onCancelAction) {
+        mOnCancelAction = onCancelAction;
     }
 
     public boolean isSkippable() {

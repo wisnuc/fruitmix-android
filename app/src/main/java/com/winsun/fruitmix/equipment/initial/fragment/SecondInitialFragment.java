@@ -12,11 +12,6 @@ import com.winsun.fruitmix.databinding.FragmentSecondInitialBinding;
 import com.winsun.fruitmix.equipment.initial.presenter.SecondInitialPresenter;
 import com.winsun.fruitmix.user.OperateUserViewModel;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link SecondInitialFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class SecondInitialFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -46,7 +41,10 @@ public class SecondInitialFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+    }
 
+    public void setOperateUserViewModel(OperateUserViewModel operateUserViewModel) {
+        this.operateUserViewModel = operateUserViewModel;
     }
 
     @Override
@@ -55,7 +53,8 @@ public class SecondInitialFragment extends Fragment {
         // Inflate the layout for this fragment
         FragmentSecondInitialBinding binding = FragmentSecondInitialBinding.inflate(inflater, container, false);
 
-        operateUserViewModel = new OperateUserViewModel();
+        if (operateUserViewModel == null)
+            operateUserViewModel = new OperateUserViewModel();
 
         binding.setCreateUserViewModel(operateUserViewModel);
 
@@ -67,13 +66,11 @@ public class SecondInitialFragment extends Fragment {
         return operateUserViewModel;
     }
 
-    public boolean checkUserNameAndPassword(){
+    public boolean checkUserNameAndPassword() {
 
-        return mSecondInitialPresenter.checkUserNameAndPassword(getContext(),operateUserViewModel);
+        return mSecondInitialPresenter.checkUserNameAndPassword(getContext(), operateUserViewModel);
 
     }
-
-
 
 
 }

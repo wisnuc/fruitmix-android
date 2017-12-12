@@ -63,6 +63,8 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
 
     private int currentSelectDiskMode;
 
+    private List<DiskVolumeViewModel> selectedDiskVolumeViewModels;
+
     private DiskRecyclerViewAdapter diskRecyclerViewAdapter;
 
     public FirstInitialFragment() {
@@ -74,6 +76,10 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
 
     public void setEquipmentIP(String equipmentIP) {
         mEquipmentIP = equipmentIP;
+    }
+
+    public void setSelectedDiskVolumeViewModels(List<DiskVolumeViewModel> selectedDiskVolumeViewModels) {
+        this.selectedDiskVolumeViewModels = selectedDiskVolumeViewModels;
     }
 
     @Override
@@ -132,6 +138,21 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
 
                 for (EquipmentDiskVolume equipmentDiskVolume : data)
                     diskVolumeViewModels.add(new DiskVolumeViewModel(equipmentDiskVolume));
+
+                if (selectedDiskVolumeViewModels != null) {
+
+                    for (DiskVolumeViewModel selectedDiskVolumeViewModel : selectedDiskVolumeViewModels) {
+
+                        for (DiskVolumeViewModel diskVolumeViewModel : diskVolumeViewModels) {
+                            if (diskVolumeViewModel.getName().equals(selectedDiskVolumeViewModel.getName()))
+                                diskVolumeViewModel.setSelected(true);
+                        }
+
+                    }
+
+                }
+
+                refreshViewAfterSelectDisk(diskVolumeViewModels);
 
                 diskRecyclerViewAdapter.setDiskVolumeViewModels(diskVolumeViewModels);
                 diskRecyclerViewAdapter.notifyDataSetChanged();

@@ -328,9 +328,12 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
     @Override
     public void gotoInitialEquipmentActivity(EquipmentSearchViewModel equipmentSearchViewModel) {
 
+        if (equipmentSearchViewModel.getIp() == null)
+            return;
+
         Intent intent = new Intent(this, InitialEquipmentActivity.class);
         intent.putExtra(InitialEquipmentActivity.EQUIPMENT_IP_KEY, equipmentSearchViewModel.getIp());
-        intent.putExtra(InitialEquipmentActivity.EQUIPMENT_NAME_KEY,equipmentSearchViewModel.getEquipmentName());
+        intent.putExtra(InitialEquipmentActivity.EQUIPMENT_NAME_KEY, equipmentSearchViewModel.getEquipmentName());
         startActivityForResult(intent, InitialEquipmentActivity.REQUEST_CODE);
 
 

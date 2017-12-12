@@ -38,6 +38,7 @@ import java.util.List;
 
 import me.drozdzynski.library.steppers.SteppersItem;
 import me.drozdzynski.library.steppers.SteppersView;
+import me.drozdzynski.library.steppers.interfaces.OnCancelAction;
 import me.drozdzynski.library.steppers.interfaces.OnClickContinue;
 import me.drozdzynski.library.steppers.interfaces.OnFinishAction;
 import me.drozdzynski.library.steppers.interfaces.OnSkipStepAction;
@@ -67,6 +68,8 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
     private String userPwd;
     private String mMode;
     private List<DiskVolumeViewModel> mDiskVolumeViewModels;
+
+    private OperateUserViewModel mOperateUserViewModel;
 
     private User firstUser;
 
@@ -182,11 +185,21 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
                 if (mFirstInitialFragment.getCurrentSelectDiskMode() != 0)
                     steppersView.nextStep();
 
+                saveFirstFragmentData();
+
             }
         });
 
         return steppersItem;
 
+    }
+
+    private void saveFirstFragmentData() {
+        mDiskVolumeViewModels = mFirstInitialFragment.getSelectDisk();
+
+        int mode = mFirstInitialFragment.getCurrentSelectDiskMode();
+
+        mMode = convertMode(mode);
     }
 
     @Override
@@ -228,6 +241,16 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
             }
         });
 
+        steppersItem.setOnCancelAction(new OnCancelAction() {
+            @Override
+            public void onCancel() {
+
+                mFirstInitialFragment.setSelectedDiskVolumeViewModels(mDiskVolumeViewModels);
+
+            }
+        });
+
+
         return steppersItem;
 
     }
@@ -253,6 +276,15 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
                 installSystem();
 
+            }
+        });
+
+
+        steppersItem.setOnCancelAction(new OnCancelAction() {
+            @Override
+            public void onCancel() {
+
+                mSecondInitialFragment.setOperateUserViewModel(mOperateUserViewModel);
 
             }
         });
@@ -321,16 +353,10 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
     private void refreshThirdFragment() {
 
-        OperateUserViewModel operateUserViewModel = mSecondInitialFragment.getOperateUserViewModel();
+        mOperateUserViewModel = mSecondInitialFragment.getOperateUserViewModel();
 
-        userName = operateUserViewModel.getUserName();
-        userPwd = operateUserViewModel.getUserPassword();
-
-        mDiskVolumeViewModels = mFirstInitialFragment.getSelectDisk();
-
-        int mode = mFirstInitialFragment.getCurrentSelectDiskMode();
-
-        mMode = convertMode(mode);
+        userName = mOperateUserViewModel.getUserName();
+        userPwd = mOperateUserViewModel.getUserPassword();
 
         mThirdInitialFragment.refreshView(userName, mMode, mDiskVolumeViewModels);
 

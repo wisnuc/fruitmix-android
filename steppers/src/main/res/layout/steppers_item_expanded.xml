@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_marginLeft="@dimen/item_margin_left_right"
     android:layout_marginRight="@dimen/item_margin_left_right"
+    android:layout_marginTop="@dimen/item_line_first_margin"
     android:orientation="horizontal">
 
     <LinearLayout
@@ -17,7 +18,8 @@
             android:layout_width="1dp"
             android:layout_height="@dimen/item_line_first_height"
             android:layout_marginBottom="@dimen/item_line_first_margin"
-            android:background="#BDBDBD" />
+            android:background="#BDBDBD"
+            android:visibility="gone" />
 
         <me.drozdzynski.library.steppers.RoundedView
             android:id="@+id/roundedView"
@@ -25,6 +27,7 @@
             android:layout_height="@dimen/item_circle_width_height" />
 
         <View
+            android:id="@+id/line_below_rounded_view"
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:layout_marginTop="@dimen/item_line_first_margin"
@@ -35,10 +38,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/item_margin_bottom_active"
         android:layout_marginLeft="@dimen/item_text_margin_left"
         android:layout_marginStart="@dimen/item_text_margin_left"
-        android:layout_marginTop="@dimen/item_text_margin_top"
+        android:layout_marginBottom="24dp"
         android:orientation="vertical">
 
         <TextView
@@ -77,28 +79,35 @@
                 <Button
                     android:id="@+id/buttonContinue"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/step_btn_height"
                     android:background="@drawable/next_step_item_bg"
                     android:enabled="false"
                     android:text="@string/step_continue"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/eighty_seven_percent_white"
+                    android:textSize="14dp" />
 
                 <Button
                     android:id="@+id/buttonSkip"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/step_btn_height"
                     android:layout_marginLeft="8dp"
+                    android:background="@drawable/skip_cancel_btn_bg"
                     android:text="@string/step_skip"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="14dp"
                     android:visibility="gone" />
 
                 <Button
                     android:id="@+id/buttonCancel"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/step_btn_height"
                     android:layout_marginLeft="8dp"
-                    android:text="@string/step_cancel" />
+                    android:background="@drawable/skip_cancel_btn_bg"
+                    android:text="@string/step_cancel"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="14dp" />
 
             </LinearLayout>
 

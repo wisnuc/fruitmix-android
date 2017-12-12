@@ -40,6 +40,8 @@ public class SteppersViewHolder extends RecyclerView.ViewHolder {
     protected Button buttonCancel;
     protected Fragment fragment;
 
+    protected View lineBelowRoundedView;
+
     public SteppersViewHolder(View itemView) {
         super(itemView);
         this.itemView = itemView;
@@ -52,6 +54,8 @@ public class SteppersViewHolder extends RecyclerView.ViewHolder {
         this.buttonContinue = (Button) itemView.findViewById(R.id.buttonContinue);
         this.buttonSkip = (Button) itemView.findViewById(R.id.buttonSkip);
         this.buttonCancel = (Button) itemView.findViewById(R.id.buttonCancel);
+
+        lineBelowRoundedView = itemView.findViewById(R.id.line_below_rounded_view);
     }
 
     public void setFragment(Fragment fragment) {

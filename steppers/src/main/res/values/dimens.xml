@@ -10,9 +10,11 @@
     <dimen name="item_margin_left_right">24dp</dimen>
     <dimen name="item_text_margin_left">12dp</dimen>
     <dimen name="item_text_margin_top">24dp</dimen>
-    <dimen name="item_margin_bottom_inactive">40dp</dimen>
-    <dimen name="item_margin_bottom_active">48dp</dimen>
+    <dimen name="item_margin_bottom_inactive">24dp</dimen>
+    <dimen name="item_margin_bottom_active">24dp</dimen>
 
     <dimen name="item_frame_margin_top_bottom">16dp</dimen>
+
+    <dimen name="step_btn_height">36dp</dimen>
 
 </resources>

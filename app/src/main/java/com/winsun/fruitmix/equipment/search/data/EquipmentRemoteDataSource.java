@@ -8,9 +8,11 @@ import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
+import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.model.operationResult.OperationSuccessWithEquipmentBootInfo;
 import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentBootInfoParser;
 import com.winsun.fruitmix.parser.RemoteEquipmentTypeInfoParser;
@@ -66,34 +68,60 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
 
         HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(equipmentIP, BOOT);
 
-        wrapper.loadCall(httpRequest, new BaseLoadDataCallback<EquipmentBootInfo>() {
-            @Override
-            public void onSucceed(List<EquipmentBootInfo> data, OperationResult operationResult) {
+        while (true){
 
-                EquipmentBootInfo equipmentBootInfo = data.get(0);
-
-                if (equipmentBootInfo.getError() != null && equipmentBootInfo.getError().equals(BOOT_ENOALT)) {
-
-                    Log.d(TAG, "onSucceed: ip:" + equipmentIP + " BOOT_ENOALT");
-
-                    handleGetEquipmentBootInfo(equipmentIP, callback);
-
-                } else {
-
-                    Log.d(TAG, "onSucceed: ip:" + equipmentIP + " ready");
-
-                    callback.onSucceed(EQUIPMENT_READY, new OperationSuccess());
-                }
-
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
-            @Override
-            public void onFail(OperationResult operationResult) {
+            OperationResult operationResult = wrapper.loadEquipmentBootInfo(httpRequest,new RemoteEquipmentBootInfoParser());
+
+            if(operationResult.getOperationResultType() != OperationResultType.SUCCEED){
 
                 callback.onFail(operationResult);
+                break;
+            }
+
+            EquipmentBootInfo equipmentBootInfo = ((OperationSuccessWithEquipmentBootInfo)operationResult).getEquipmentBootInfos().get(0);
+
+            if(equipmentBootInfo.getCurrent() != null && equipmentBootInfo.getCurrent().length() > 0){
+
+                if(equipmentBootInfo.getState().equals("started")){
+
+                    if (equipmentBootInfo.getError() != null && equipmentBootInfo.getError().equals(BOOT_ENOALT)) {
+
+                        Log.d(TAG, "onSucceed: ip:" + equipmentIP + " BOOT_ENOALT");
+
+                        handleGetEquipmentBootInfo(equipmentIP, callback);
+
+                    } else {
+
+                        Log.d(TAG, "onSucceed: ip:" + equipmentIP + " ready");
+
+                        callback.onSucceed(EQUIPMENT_READY, new OperationSuccess());
+                    }
+
+                    break;
+
+
+                }else if(equipmentBootInfo.getState().equals("stopping")){
+
+                    callback.onFail(new OperationFail("device initWizard: fruitmix stopping (unexpected), stop"));
+
+                    break;
+                }
+
+            }else{
+
+                callback.onFail(new OperationFail("device initWizard: fruitmix is null, legal"));
+                break;
 
             }
-        }, new RemoteEquipmentBootInfoParser());
+
+        }
+
 
     }
 

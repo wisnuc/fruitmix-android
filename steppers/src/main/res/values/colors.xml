@@ -6,6 +6,8 @@
 
     <color name="next_step_enable_background_color">#03a9f4</color>
     <color name="next_step_disable_background_color">#42000000</color>
-    <color name="white">#FFFFFF</color>
+
+    <color name="eighty_seven_percent_white">#DEFFFFFF</color>
+    <color name="eighty_seven_percent_black">#DE000000</color>
 
 </resources>
