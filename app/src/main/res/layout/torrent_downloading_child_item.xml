@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools">
+
+
+    <data>
+
+
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
+
+        <ImageView
+            android:id="@+id/file_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="32dp"
+            android:src="@drawable/file_icon"/>
+
+        <ImageButton
+            android:id="@+id/downloading_file_item_menu"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="32dp"
+            android:background="@null"
+            android:clickable="true"
+            android:src="@drawable/ic_more_vert_black"/>
+
+        <RelativeLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/downloading_file_item_menu"
+            android:layout_toRightOf="@id/file_icon">
+
+            <TextView
+                android:id="@+id/speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="14dp"
+                tools:text="125KB/S"/>
+
+            <TextView
+                android:id="@+id/file_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:layout_toLeftOf="@id/speed"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="14dp"
+                tools:text="文件名"/>
+
+
+            <ProgressBar
+                android:id="@+id/downloading_progressbar"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/file_name"
+                android:layout_marginBottom="8dp"
+                />
+
+            <TextView
+                android:id="@+id/percent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/downloading_progressbar"
+                android:textColor="@color/fifty_four_percent_black"
+                android:textSize="12dp"
+                tools:text="35%"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/downloading_progressbar"
+                android:textColor="@color/fifty_four_percent_black"
+                android:textSize="12dp"
+                tools:text="200MB/2.3GB"/>
+
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+</layout>

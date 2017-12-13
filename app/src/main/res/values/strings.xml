@@ -476,6 +476,21 @@
 
     <string name="download_manage">Download Manage</string>
 
+    <string name="all_pause">All Pause</string>
+
+    <string name="all_resume">All Resume</string>
+
+    <string name="create_new_download_task">Create new download task</string>
+
+    <string name="clear_record">Clear Record</string>
+
+    <string name="paused">Paused</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+
+    <string name="delete_task">Delete task</string>
+    <string name="delete_file">Delete downloaded file</string>
+
     <!-- group -->
     <string name="group">Group</string>
 

@@ -42,10 +42,6 @@
                 android:layout_height="match_parent" />
 
             <include
-                layout="@layout/new_no_content_layout"
-                app:noContentViewModel="@{noContentViewModel}" />
-
-            <include
                 layout="@layout/loading_layout"
                 app:loadingViewModel="@{loadingViewModel}" />
 

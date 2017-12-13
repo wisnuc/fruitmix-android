@@ -30,12 +30,6 @@ public class TorrentDownloadManageActivity extends BaseActivity {
 
         binding.setLoadingViewModel(loadingViewModel);
 
-        NoContentViewModel noContentViewModel = new NoContentViewModel();
-        noContentViewModel.setNoContentImgResId(R.drawable.no_file);
-        noContentViewModel.setNoContentText("没有内容");
-
-        binding.setNoContentViewModel(noContentViewModel);
-
         RecyclerView recyclerView = binding.torrentDownloadRecyclerview;
 
 
