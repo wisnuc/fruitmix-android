@@ -72,6 +72,7 @@ import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -492,12 +493,15 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private void doAfterReloadData(NewPhotoListDataLoader loader) {
 
-        List<String> mPhotoDateGroups = loader.getPhotoDateGroups();
         mAdapterItemTotalCount = loader.getAdapterItemTotalCount();
-        mMapKeyIsDateValueIsPhotoList = loader.getMapKeyIsDateValueIsPhotoList();
-        mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getMapKeyIsPhotoPositionValueIsPhotoDate();
-        mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
-        medias = loader.getMedias();
+
+        //fix crash:java.lang.IndexOutOfBoundsException: Inconsistency detected. Invalid item position 10(offset:10).state:611 at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5202)
+
+        List<String> mPhotoDateGroups = new ArrayList<>(loader.getPhotoDateGroups());
+        mMapKeyIsDateValueIsPhotoList = new HashMap<>(loader.getMapKeyIsDateValueIsPhotoList());
+        mMapKeyIsPhotoPositionValueIsPhotoDate = new HashMap<>(loader.getMapKeyIsPhotoPositionValueIsPhotoDate());
+        mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto().clone();
+        medias = new ArrayList<>(loader.getMedias());
 
         clearSelectedPhoto();
 
@@ -938,6 +942,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                 }
             }
+
 
             return null;
         }

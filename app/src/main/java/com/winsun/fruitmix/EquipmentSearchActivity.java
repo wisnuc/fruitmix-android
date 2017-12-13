@@ -185,10 +185,10 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
         Intent intent = new Intent(mContext, LoginActivity.class);
         intent.putExtra(Util.GATEWAY, Util.HTTP + equipment.getHosts().get(0));
 
-        String label = equipment.getEquipmentTypeInfo().getLabel();
+        String label = equipment.getEquipmentTypeInfo().getFormatLabel(this);
 
-        if (label.isEmpty())
-            label = equipment.getEquipmentName();
+//        if (label.isEmpty())
+//            label = equipment.getEquipmentName();
 
         intent.putExtra(Util.USER_GROUP_NAME, label);
         intent.putExtra(Util.USER_NAME, user.getUserName());

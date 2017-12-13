@@ -663,7 +663,7 @@ public class EquipmentPresenter implements ActiveView {
 
             equipmentItemViewModel.type.set(type);
 
-            equipmentItemViewModel.label.set(equipmentTypeInfo.getLabel());
+            equipmentItemViewModel.label.set(equipmentTypeInfo.getFormatLabel(equipmentSearchView.getContext()));
 
             if (type.equals(EquipmentTypeInfo.WS215I)) {
 
@@ -767,14 +767,7 @@ public class EquipmentPresenter implements ActiveView {
 
         public void refreshView(final User user) {
 
-            String childName = user.getUserName();
-
-            if (childName.length() > 20) {
-                childName = childName.substring(0, 20);
-                childName += binding.getRoot().getContext().getString(R.string.android_ellipsize);
-            }
-
-            mChildName.setText(childName);
+            mChildName.setText(user.getFormatUserName(binding.getRoot().getContext()));
 
             if (user.getDefaultAvatarBgColor() == 0) {
 

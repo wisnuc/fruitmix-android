@@ -56,11 +56,11 @@
             android:layout_width="match_parent"
             android:layout_height="28dp"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/mask_layout"
+            android:background="@drawable/mask_layout_bottom"
             android:orientation="horizontal"
             android:paddingLeft="4dp"
             android:gravity="center_vertical"
-            android:visibility="@{photoItemViewModel.showCloudOff?View.VISIBLE:View.INVISIBLE,default=invisible}">
+            android:visibility="@{photoItemViewModel.showCloudOff?View.VISIBLE:View.INVISIBLE,default=visible}">
 
             <ImageView
                 android:layout_width="14dp"

@@ -19,7 +19,7 @@ public interface MainPagePresenter {
 
     RecyclerView.Adapter getNavigationItemAdapter();
 
-    void refreshNavigationLoggedInUsers();
+    void refreshNavigationLoggedInUsers(Context context);
 
     void notifyAdapterDataSetChanged();
 

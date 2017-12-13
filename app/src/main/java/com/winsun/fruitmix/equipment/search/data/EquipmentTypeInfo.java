@@ -17,8 +17,8 @@ public class EquipmentTypeInfo {
 
     public EquipmentTypeInfo() {
 
-        type = WS215I;
-        label = WS215I;
+        type = "";
+        label = "";
 
     }
 
@@ -37,6 +37,14 @@ public class EquipmentTypeInfo {
     public String getLabel() {
         return label;
     }
+
+    public String getFormatLabel(Context context) {
+        if (label.isEmpty())
+            return context.getString(R.string.unknown_equipment_label);
+        else
+            return label;
+    }
+
 
     public void setLabel(String label) {
         this.label = label;

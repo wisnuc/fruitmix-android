@@ -310,6 +310,14 @@ public class FileUtil {
 
             Log.d(TAG, "writeBitmapToLocalPhotoThumbnailFolder: io exception occur,delete file: " + result);
 
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            boolean result = file.delete();
+
+            Log.d(TAG, "writeBitmapToLocalPhotoThumbnailFolder: error,delete file: " + result);
+
         } finally {
 
             bitmap = null;

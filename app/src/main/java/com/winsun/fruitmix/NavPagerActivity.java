@@ -949,7 +949,7 @@ public class NavPagerActivity extends BaseActivity
                 finish();
             } else if (resultCode == RESULT_REFRESH_LOGGED_IN_USER) {
 
-                mainPagePresenter.refreshNavigationLoggedInUsers();
+                mainPagePresenter.refreshNavigationLoggedInUsers(this);
                 mainPagePresenter.notifyAdapterDataSetChanged();
 
             } else if (resultCode == RESULT_LOGOUT) {

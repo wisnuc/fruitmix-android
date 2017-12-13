@@ -173,6 +173,9 @@
         <activity
             android:name=".equipment.initial.InitialEquipmentActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".user.manage.ModifyUserStateActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

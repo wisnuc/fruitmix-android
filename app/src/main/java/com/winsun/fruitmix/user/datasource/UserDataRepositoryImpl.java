@@ -325,4 +325,31 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
         });
 
     }
+
+    @Override
+    public void modifyUserEnableState(final String userUUID, final boolean newState, BaseOperateDataCallback<User> callback) {
+
+        final BaseOperateDataCallback<User> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                userRemoteDataSource.modifyUserEnableState(userUUID, newState, new BaseOperateDataCallback<User>() {
+                    @Override
+                    public void onSucceed(User data, OperationResult result) {
+
+                        cacheUsers.get(data.getUuid()).setDisabled(newState);
+
+                        runOnMainThreadCallback.onSucceed(data, result);
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+                        runOnMainThreadCallback.onFail(operationResult);
+                    }
+                });
+            }
+        });
+
+    }
 }

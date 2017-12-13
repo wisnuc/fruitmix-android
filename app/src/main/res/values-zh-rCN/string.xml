@@ -160,6 +160,8 @@
 
     <string name="virtual_machine">个人计算机</string>
 
+    <string name="unknown_equipment_label">未知</string>
+
     <string name="search_equipment">搜索设备</string>
 
     <string name="equipment_not_found">未搜索到设备</string>
@@ -178,6 +180,18 @@
 
     <!-- 用户管理界面 -->
     <string name="no_user">没有用户</string>
+
+    <string name="super_admin">超级管理员</string>
+    <string name="admin">管理员</string>
+    <string name="ordinary_user">普通用户</string>
+
+    <string name="disable">禁用</string>
+    <string name="enable">启用</string>
+
+    <string name="disabled">已禁用</string>
+
+    <string name="wechat_unbounded">微信未绑定</string>
+    <string name="wechat_bounded">微信已绑定</string>
 
     <!-- 设置  -->
     <string name="setting_text">设置</string>

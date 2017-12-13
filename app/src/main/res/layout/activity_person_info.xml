@@ -100,7 +100,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/modify_user_info" />
+                    android:src="@drawable/modify_icon" />
 
             </RelativeLayout>
 
@@ -152,7 +152,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:src="@drawable/modify_user_info" />
+                    android:src="@drawable/modify_icon" />
 
             </RelativeLayout>
 
@@ -167,7 +167,7 @@
                 android:orientation="horizontal"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
-                android:visibility="@{user.associatedWeChatGUID.length() > 0?View.GONE:View.VISIBLE}">
+                android:visibility="@{user.isBoundedWeChat()?View.GONE:View.VISIBLE}">
 
                 <ImageView
                     android:id="@+id/wechat_icon"
@@ -196,7 +196,7 @@
             android:layout_marginBottom="16dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:background="@drawable/logout_bg"
+            android:background="@drawable/red_btn_bg"
             android:onClick="@{()->personInfoPresenter.logout()}"
             android:text="@string/logout"
             android:textColor="@color/eighty_seven_percent_white"

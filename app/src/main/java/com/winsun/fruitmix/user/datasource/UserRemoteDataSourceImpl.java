@@ -205,4 +205,22 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
         });
 
     }
+
+    @Override
+    public void modifyUserEnableState(String userUUID, boolean newState, BaseOperateDataCallback<User> callback) {
+
+        String path = USER_PARAMETER + "/" + userUUID;
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("disabled",newState);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(path,jsonObject.toString());
+
+        wrapper.operateCall(httpRequest,callback,new RemoteInsertUserParser());
+
+    }
 }

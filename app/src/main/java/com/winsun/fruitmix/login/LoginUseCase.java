@@ -818,9 +818,10 @@ public class LoginUseCase extends BaseDataRepository {
 
                         findUser = true;
 
-                        Log.d(TAG, "onSucceed: currentUser isAdmin: " + user.isAdmin());
+                        Log.d(TAG, "onSucceed: currentUser isAdmin: " + user.isAdmin() + " isFirstUser:"  + user.isFirstUser());
 
                         currentUser.setAdmin(user.isAdmin());
+                        currentUser.setFirstUser(user.isFirstUser());
 
                         userDataRepository.getCurrentUserHome(new BaseLoadDataCallback<String>() {
                             @Override

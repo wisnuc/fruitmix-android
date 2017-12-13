@@ -61,7 +61,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="40dp"
-                android:src="@drawable/modify_user_info" />
+                android:src="@drawable/modify_equipment_mode_icon_bg" />
 
 
         </RelativeLayout>

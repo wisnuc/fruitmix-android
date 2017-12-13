@@ -19,6 +19,7 @@ import com.winsun.fruitmix.equipment.search.data.InjectEquipment;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.stations.InjectStation;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -108,6 +109,16 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
     public void gotoCreateUserActivity() {
         Intent intent = new Intent(this, CreateUserActivity.class);
         startActivityForResult(intent, Util.KEY_CREATE_USER_REQUEST_CODE);
+    }
+
+    @Override
+    public void gotoModifyUserStateActivity(User user) {
+
+        Intent intent = new Intent(this, ModifyUserStateActivity.class);
+        intent.putExtra(ModifyUserStateActivity.MODIFY_USER_UUID_KEY, user.getUuid());
+
+        startActivity(intent);
+
     }
 
     @Override

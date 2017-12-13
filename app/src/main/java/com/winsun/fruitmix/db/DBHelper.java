@@ -26,6 +26,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final int ADD_UPLOAD_FILE_TABLE_VERSION = 34;
 
+    public static final int ADD_USER_IS_FIRST_USER_VERSION = 35;
+
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
     public static final String USER_KEY_UUID = "user_uuid";
@@ -36,6 +38,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String USER_KEY_HOME = "home";
     public static final String USER_KEY_LIBRARY = "library";
     public static final String USER_KEY_IS_ADMIN = "is_admin";
+    public static final String USER_KEY_IS_FIRST_USER = "is_first_user";
     public static final String USER_ASSOCIATED_WECHAT_USER_NAME = "user_associated_wechat_user_name";
 
     public static final String MEDIA_KEY_ID = "id";
@@ -95,7 +98,7 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String REMOTE_VIDEO_TABLE_NAME = "remote_video";
     static final String UPLOAD_FILE_TABLE_NAME = "upload_file";
 
-    private static final int DB_VERSION = ADD_UPLOAD_FILE_TABLE_VERSION;
+    private static final int DB_VERSION = ADD_USER_IS_FIRST_USER_VERSION;
 
     private static final String CREATE_TABLE = "create table if not exists ";
 
@@ -137,7 +140,7 @@ public class DBHelper extends SQLiteOpenHelper {
             + USER_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT + USER_KEY_UUID + TEXT_NOT_NULL
             + USER_KEY_USERNAME + TEXT_NOT_NULL + USER_KEY_AVATAR + TEXT_NOT_NULL
             + USER_KEY_EMAIL + TEXT + USER_KEY_DEFAULT_AVATAR + TEXT_NOT_NULL + USER_KEY_DEFAULT_AVATAR_BG_COLOR + INTEGER_NOT_NULL
-            + USER_KEY_HOME + TEXT_NOT_NULL + USER_KEY_LIBRARY + TEXT_NOT_NULL + USER_KEY_IS_ADMIN + INTEGER_NOT_NULL_WITHOUT_COMMA;
+            + USER_KEY_HOME + TEXT_NOT_NULL + USER_KEY_LIBRARY + TEXT_NOT_NULL + USER_KEY_IS_FIRST_USER + TEXT_NOT_NULL + USER_KEY_IS_ADMIN + INTEGER_NOT_NULL_WITHOUT_COMMA;
 
     private static final String DATABASE_REMOTE_USER_CREATE = CREATE_TABLE + REMOTE_USER_TABLE_NAME + USER_FIELD_CREATE + COMMA + USER_ASSOCIATED_WECHAT_USER_NAME + " text" + END_SQL;
 
@@ -232,6 +235,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
         if (oldVersion < ADD_UPLOAD_FILE_TABLE_VERSION)
             db.execSQL(DROP_TABLE + UPLOAD_FILE_TABLE_NAME);
+
+        if(oldVersion < ADD_USER_IS_FIRST_USER_VERSION)
+            db.execSQL(DROP_TABLE + REMOTE_USER_TABLE_NAME);
 
         onCreate(db);
 

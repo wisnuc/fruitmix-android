@@ -49,6 +49,9 @@ public class RemoteUserJSONObjectParser {
         }
 
         user.setAdmin(itemRaw.optBoolean("isAdmin"));
+
+        user.setFirstUser(itemRaw.optBoolean("isFirstUser"));
+
         user.setDisabled(itemRaw.optBoolean("disabled"));
 
         if (user.getDefaultAvatar() == null || user.getDefaultAvatar().isEmpty()) {

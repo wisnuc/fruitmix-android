@@ -26,4 +26,6 @@ public interface UserRemoteDataSource {
 
     void modifyUserPassword(String userUUID,String originalPassword,String newPassword, BaseOperateDataCallback<Boolean> callback);
 
+    void modifyUserEnableState(String userUUID, boolean newState, BaseOperateDataCallback<User> callback);
+
 }

@@ -130,7 +130,6 @@
             </LinearLayout>
 
             <Button
-                android:id="@+id/logout_btn"
                 android:layout_width="match_parent"
                 android:layout_height="36dp"
                 android:layout_alignParentBottom="true"

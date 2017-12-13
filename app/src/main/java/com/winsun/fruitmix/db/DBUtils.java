@@ -161,6 +161,7 @@ public class DBUtils {
         contentValues.put(DBHelper.USER_KEY_HOME, user.getHome());
         contentValues.put(DBHelper.USER_KEY_LIBRARY, user.getLibrary());
         contentValues.put(DBHelper.USER_KEY_IS_ADMIN, user.isAdmin() ? 1 : 0);
+        contentValues.put(DBHelper.USER_KEY_IS_FIRST_USER, user.isFirstUser() ? 1 : 0);
 
         return contentValues;
     }

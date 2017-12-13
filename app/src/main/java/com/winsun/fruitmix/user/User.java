@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.user;
 
+import android.content.Context;
+
 import com.winsun.fruitmix.R;
 
 /**
@@ -18,6 +20,8 @@ public class User {
     private String home;
     private String library;
     private boolean admin;
+
+    private boolean isFirstUser;
 
     private boolean disabled;
 
@@ -126,6 +130,14 @@ public class User {
         this.admin = admin;
     }
 
+    public boolean isFirstUser() {
+        return isFirstUser;
+    }
+
+    public void setFirstUser(boolean firstUser) {
+        isFirstUser = firstUser;
+    }
+
     public boolean isDisabled() {
         return disabled;
     }
@@ -142,6 +154,10 @@ public class User {
         return associatedWeChatGUID;
     }
 
+    public boolean isBoundedWeChat(){
+        return getAssociatedWeChatGUID().length() > 0;
+    }
+
     public void setAssociatedWeChatUserName(String associatedWeChatUserName) {
         this.associatedWeChatUserName = associatedWeChatUserName;
     }
@@ -155,5 +171,28 @@ public class User {
         return "{\"type\":\"local\",\"username\":\"" + userName + "\",\"password\":\"" + userPassword + "\"}";
 
     }
+
+    public String getFormatUserName(Context context) {
+        String userName = getUserName();
+
+        if (userName.length() > 20) {
+            userName = userName.substring(0, 20);
+            userName += context.getString(R.string.android_ellipsize);
+        }
+
+        return userName;
+    }
+
+    public String getUserType(Context context) {
+
+        if (isFirstUser())
+            return context.getString(R.string.super_admin);
+        else if (isAdmin())
+            return context.getString(R.string.admin);
+        else
+            return context.getString(R.string.ordinary_user);
+
+    }
+
 
 }

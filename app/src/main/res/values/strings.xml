@@ -98,7 +98,7 @@
     <string name="my_file">My Files</string>
     <string name="my_photo">My Photos</string>
 
-    <string name="transmission_manage">Transfer</string>
+    <string name="transmission_manage">Transfers</string>
 
     <string name="account_manage">Account</string>
 
@@ -180,6 +180,8 @@
 
     <string name="virtual_machine">Virtual Machine</string>
 
+    <string name="unknown_equipment_label">Unknown</string>
+
     <string name="search_equipment">Search WISNUC Server</string>
 
     <string name="equipment_not_found">Equipment not found</string>
@@ -201,12 +203,24 @@
 
     <string name="no_user">No User</string>
 
+    <string name="super_admin">super administrator</string>
+    <string name="admin">admin</string>
+    <string name="ordinary_user">ordinary user</string>
+
+    <string name="disable">Disable</string>
+    <string name="enable">Enable</string>
+
+    <string name="disabled">Disabled</string>
+
+    <string name="wechat_unbounded">WeChat unbounded</string>
+    <string name="wechat_bounded">WeChat has been bound</string>
+
     <!-- setting -->
 
     <string name="setting_text">Setting</string>
-    <string name="photo_auto_upload_setting_text">Automatic backup</string>
-    <string name="only_auto_upload_when_connect_with_wifi">Only auto upload when connected with wifi</string>
-    <string name="clear_cache">Erase temporary files</string>
+    <string name="photo_auto_upload_setting_text">Auto backup</string>
+    <string name="only_auto_upload_when_connect_with_wifi">Wi-Fi Only</string>
+    <string name="clear_cache">Clean up temporary files</string>
     <string name="already_upload_media_count_hint">Backups / Total Photos</string>
     <string name="already_upload_media_count_text">%1$d/%2$d</string>
 
@@ -267,7 +281,7 @@
 
     <string name="server_exception">Server exception,error code：%1$s</string>
 
-    <string name="connnect_server_fail">Connect server failed</string>
+    <string name="connnect_server_fail">Server offline</string>
 
     <!-- network error -->
     <string name="no_network">No internet connection, check your network.</string>

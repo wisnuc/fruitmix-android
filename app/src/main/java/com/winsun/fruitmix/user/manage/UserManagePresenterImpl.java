@@ -89,6 +89,13 @@ public class UserManagePresenterImpl implements UserMangePresenter, ActiveView {
     @Override
     public void refreshView() {
 
+        getEquipmentInfoInThread();
+
+        getUserInThread();
+
+    }
+
+    private void getEquipmentInfoInThread() {
         String currentIPWithHttpHead = systemSettingDataSource.getCurrentEquipmentIp();
 
         if (currentIPWithHttpHead.equals(HttpRequestFactory.CLOUD_IP)) {
@@ -136,9 +143,6 @@ public class UserManagePresenterImpl implements UserMangePresenter, ActiveView {
             getEquipmentInfo();
 
         }
-
-        getUserInThread();
-
     }
 
     private void getEquipmentInfo(final Station station) {
@@ -205,7 +209,7 @@ public class UserManagePresenterImpl implements UserMangePresenter, ActiveView {
 
         equipmentItemViewModel.type.set(type);
 
-        equipmentItemViewModel.label.set(equipmentTypeInfo.getLabel());
+        equipmentItemViewModel.label.set(equipmentTypeInfo.getFormatLabel(userManageView.getContext()));
 
         equipmentItemViewModel.ip.set(currentIP);
     }
@@ -244,12 +248,14 @@ public class UserManagePresenterImpl implements UserMangePresenter, ActiveView {
         else
             mUserList.clear();
 
-        for (User user : users) {
+/*        for (User user : users) {
 
             if (!user.isDisabled())
                 mUserList.add(user);
 
-        }
+        }*/
+
+        mUserList.addAll(users);
 
         Collections.sort(mUserList, new Comparator<User>() {
             @Override
@@ -310,7 +316,9 @@ public class UserManagePresenterImpl implements UserMangePresenter, ActiveView {
 
             User user = mUserList.get(position);
 
-            binding.setUser(new UserManageWrap(user));
+            binding.setUser(user);
+
+            binding.setUserManageView(userManageView);
 
             binding.executePendingBindings();
 
@@ -330,30 +338,6 @@ public class UserManagePresenterImpl implements UserMangePresenter, ActiveView {
             userAvatar.setUser(user, imageLoader);
 
             return convertView;
-        }
-    }
-
-    public class UserManageWrap {
-
-        private User user;
-
-        public UserManageWrap(User user) {
-            this.user = user;
-        }
-
-        public String getUserName(Context context) {
-            String userName = user.getUserName();
-
-            if (userName.length() > 20) {
-                userName = userName.substring(0, 20);
-                userName += context.getString(R.string.android_ellipsize);
-            }
-
-            return userName;
-        }
-
-        public String getEmail() {
-            return user.getEmail();
         }
     }
 

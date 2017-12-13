@@ -11,6 +11,4 @@ public class FirstInitialFragmentViewModel {
 
     public final ObservableField<String> installDiskMode = new ObservableField<>();
 
-    public final ObservableBoolean selectInstallDiskModeEnable = new ObservableBoolean(false);
-
 }

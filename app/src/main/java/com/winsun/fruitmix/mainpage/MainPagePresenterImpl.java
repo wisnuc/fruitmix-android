@@ -211,32 +211,32 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
     public void refreshUserInNavigationView(Context context, User user) {
 
         toggleEquipmentManageNavigationItem(context, user);
-        refreshNavigationLoggedInUsers();
+        refreshNavigationLoggedInUsers(context);
 
     }
 
     @Override
-    public void refreshNavigationLoggedInUsers() {
+    public void refreshNavigationLoggedInUsers(final Context context) {
 
         getBindingWeChatLoggedInUser(new BaseOperateDataCallback<Boolean>() {
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
 
-                refreshAllLoggedInUsers(true);
+                refreshAllLoggedInUsers(true,context);
 
             }
 
             @Override
             public void onFail(OperationResult result) {
 
-                refreshAllLoggedInUsers(false);
+                refreshAllLoggedInUsers(false,context);
 
             }
         });
 
     }
 
-    private void refreshAllLoggedInUsers(boolean getBindingWeChatLoggedInUserSucceed) {
+    private void refreshAllLoggedInUsers(boolean getBindingWeChatLoggedInUserSucceed, final Context context) {
         if (loggedInUserDataSource == null) return;
 
         String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
@@ -265,7 +265,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
                 public void onSucceed(List<EquipmentTypeInfo> data, OperationResult operationResult) {
 
                     navPagerViewModel.equipmentNameVisibility.set(true);
-                    navPagerViewModel.equipmentNameText.set(data.get(0).getLabel());
+                    navPagerViewModel.equipmentNameText.set(data.get(0).getFormatLabel(context));
                 }
 
                 @Override
@@ -382,7 +382,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
 
         if (user.isAdmin()) {
 
-            if (user.getAssociatedWeChatGUID().length() > 0) {
+            if (user.isBoundedWeChat()) {
 
                 if (personAddItemPosition == -1) {
 

@@ -68,7 +68,7 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
 
         HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(equipmentIP, BOOT);
 
-        while (true){
+        while (true) {
 
             try {
                 Thread.sleep(1000);
@@ -76,48 +76,39 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
                 e.printStackTrace();
             }
 
-            OperationResult operationResult = wrapper.loadEquipmentBootInfo(httpRequest,new RemoteEquipmentBootInfoParser());
+            OperationResult operationResult = wrapper.loadEquipmentBootInfo(httpRequest, new RemoteEquipmentBootInfoParser());
 
-            if(operationResult.getOperationResultType() != OperationResultType.SUCCEED){
+            if (operationResult.getOperationResultType() != OperationResultType.SUCCEED) {
 
                 callback.onFail(operationResult);
                 break;
             }
 
-            EquipmentBootInfo equipmentBootInfo = ((OperationSuccessWithEquipmentBootInfo)operationResult).getEquipmentBootInfos().get(0);
+            EquipmentBootInfo equipmentBootInfo = ((OperationSuccessWithEquipmentBootInfo) operationResult).getEquipmentBootInfos().get(0);
 
-            if(equipmentBootInfo.getCurrent() != null && equipmentBootInfo.getCurrent().length() > 0){
+            if (equipmentBootInfo.getState().equals("started")) {
 
-                if(equipmentBootInfo.getState().equals("started")){
+                if (equipmentBootInfo.getError() != null && equipmentBootInfo.getError().equals(BOOT_ENOALT)) {
 
-                    if (equipmentBootInfo.getError() != null && equipmentBootInfo.getError().equals(BOOT_ENOALT)) {
+                    Log.d(TAG, "onSucceed: ip:" + equipmentIP + " BOOT_ENOALT");
 
-                        Log.d(TAG, "onSucceed: ip:" + equipmentIP + " BOOT_ENOALT");
+                    handleGetEquipmentBootInfo(equipmentIP, callback);
 
-                        handleGetEquipmentBootInfo(equipmentIP, callback);
+                } else {
 
-                    } else {
+                    Log.d(TAG, "onSucceed: ip:" + equipmentIP + " ready");
 
-                        Log.d(TAG, "onSucceed: ip:" + equipmentIP + " ready");
-
-                        callback.onSucceed(EQUIPMENT_READY, new OperationSuccess());
-                    }
-
-                    break;
-
-
-                }else if(equipmentBootInfo.getState().equals("stopping")){
-
-                    callback.onFail(new OperationFail("device initWizard: fruitmix stopping (unexpected), stop"));
-
-                    break;
+                    callback.onSucceed(EQUIPMENT_READY, new OperationSuccess());
                 }
 
-            }else{
-
-                callback.onFail(new OperationFail("device initWizard: fruitmix is null, legal"));
                 break;
 
+
+            } else if (equipmentBootInfo.getState().equals("stopping")) {
+
+                callback.onFail(new OperationFail("device initWizard: fruitmix stopping (unexpected), stop"));
+
+                break;
             }
 
         }
@@ -221,7 +212,8 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
 
             @Override
             public void onFail(OperationResult operationResult) {
-                callback.onFail(operationResult);
+
+                callback.onSucceed(Collections.singletonList(equipmentTypeInfo), new OperationSuccess());
             }
 
         }, new RemoteStationsCallByStationAPIParser());

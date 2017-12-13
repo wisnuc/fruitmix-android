@@ -230,6 +230,8 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
             @Override
             public void onClick() {
 
+                Util.hideSoftInput(InitialEquipmentActivity.this);
+
                 if (mSecondInitialFragment.checkUserNameAndPassword()) {
 
                     refreshThirdFragment();
