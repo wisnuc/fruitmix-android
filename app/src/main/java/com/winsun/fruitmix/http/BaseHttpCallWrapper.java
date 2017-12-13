@@ -21,6 +21,7 @@ import com.winsun.fruitmix.parser.RemoteDatasParser;
 
 import org.json.JSONException;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -60,7 +61,93 @@ public class BaseHttpCallWrapper {
         operateCall(httpRequest, callback, parser, 0);
     }
 
+    public <T> void operateCall(HttpRequest httpRequest,String name,String fileName,File file, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
+
+        if (!checkPreCondition(httpRequest, callback)) return;
+
+        try {
+
+            HttpResponse httpResponse = iHttpUtil.remoteCallWithFormData(httpRequest,name,fileName,file);
+
+            if (httpResponse.getResponseCode() == 200) {
+
+                T data = parser.parse(httpResponse.getResponseData());
+
+                callback.onSucceed(data, new OperationSuccess());
+
+            } else {
+
+                callback.onFail(new OperationNetworkException(httpResponse));
+
+            }
+
+
+        } catch (MalformedURLException e) {
+
+            callback.onFail(new OperationMalformedUrlException());
+
+        } catch (SocketTimeoutException ex) {
+
+            callback.onFail(new OperationSocketTimeoutException());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            callback.onFail(new OperationIOException());
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            callback.onFail(new OperationJSONException());
+        }
+
+    }
+
+
+    public <T> void operateCall(HttpRequest httpRequest,String name,String value, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
+
+        if (!checkPreCondition(httpRequest, callback)) return;
+
+        try {
+
+            HttpResponse httpResponse = iHttpUtil.remoteCallWithFormData(httpRequest,name,value);
+
+            if (httpResponse.getResponseCode() == 200) {
+
+                T data = parser.parse(httpResponse.getResponseData());
+
+                callback.onSucceed(data, new OperationSuccess());
+
+            } else {
+
+                callback.onFail(new OperationNetworkException(httpResponse));
+
+            }
+
+
+        } catch (MalformedURLException e) {
+
+            callback.onFail(new OperationMalformedUrlException());
+
+        } catch (SocketTimeoutException ex) {
+
+            callback.onFail(new OperationSocketTimeoutException());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            callback.onFail(new OperationIOException());
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            callback.onFail(new OperationJSONException());
+        }
+
+    }
+
+
     public <T> void operateCall(HttpRequest httpRequest, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser, int operationID) {
+
+        if (!checkPreCondition(httpRequest, callback)) return;
 
         try {
 

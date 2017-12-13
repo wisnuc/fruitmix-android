@@ -176,6 +176,9 @@
         <activity
             android:name=".user.manage.ModifyUserStateActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".torrent.view.TorrentDownloadManageActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

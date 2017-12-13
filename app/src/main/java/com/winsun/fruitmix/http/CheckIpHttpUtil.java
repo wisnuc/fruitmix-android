@@ -9,6 +9,7 @@ import com.winsun.fruitmix.equipment.search.data.Equipment;
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.util.Util;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
@@ -226,6 +227,16 @@ public class CheckIpHttpUtil implements IHttpUtil {
 
         return handleRequest(httpRequest);
 
+    }
+
+    @Override
+    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, String name, String value) throws MalformedURLException, IOException, SocketTimeoutException {
+        return handleRequest(httpRequest);
+    }
+
+    @Override
+    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, String name, String fileName, File file) throws MalformedURLException, IOException, SocketTimeoutException {
+        return handleRequest(httpRequest);
     }
 
 }

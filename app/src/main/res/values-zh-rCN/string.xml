@@ -226,9 +226,9 @@
     <string name="download_the_item">下载该文件</string>
     <string name="open_the_item">打开该文件</string>
     <string name="re_download_the_item">重新下载</string>
-    <string name="need_download_and_cover_original_file">重新下载会覆盖原文件！</string>
+    <string name="need_download_and_cover_original_file">%1$s将被覆盖</string>
     <string name="cover">下载</string>
-    <string name="delete_original_file_fail">删除原文件失败</string>
+    <string name="delete_original_file_fail">%1$s无法覆盖</string>
 
     <string name="shared_drive">共享盘</string>
 
@@ -445,6 +445,11 @@
     <string name="install_system_succeed_instruction">您已成功创建了WISNUC系统</string>
 
     <string name="enter_system">进入系统</string>
+
+    <!-- torrent download manage -->
+
+    <string name="download_manage">下载管理</string>
+
 
     <!-- group -->
     <string name="group">"私友群"</string>

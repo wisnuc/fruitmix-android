@@ -299,7 +299,8 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
 
             mFirstInitialFragmentViewModel.installDiskMode.set(getString(R.string.not_set_disk_mode));
 
-            selectDiskModeIV.setEnabled(true);
+            //fix bug:choose two disk but not set mode,user still can enter next step
+            currentSelectDiskMode = 0;
 
             selectDiskModeIV.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -307,6 +308,8 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
                     showSelectDiskModeDialog();
                 }
             });
+
+            selectDiskModeIV.setEnabled(true);
 
         }
 

@@ -27,6 +27,9 @@ import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.parser.RemoteRootDriveFolderParser;
 import com.winsun.fruitmix.util.FileUtil;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
@@ -158,7 +161,11 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         HttpResponse httpResponse;
         try {
-            httpResponse = iHttpFileUtil.createFolder(httpRequest, folderName);
+
+            if (httpRequest.getBody().length() != 0)
+                httpResponse = createFolderWithCloudAPI(httpRequest, folderName);
+            else
+                httpResponse = createFolderWithStationAPI(httpRequest, folderName);
 
             if (httpResponse != null && httpResponse.getResponseCode() == 200)
                 callback.onSucceed(httpResponse, new OperationSuccess());
@@ -180,6 +187,45 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         }
 
     }
+
+    private HttpResponse createFolderWithCloudAPI(HttpRequest httpRequest, String folderName) throws IOException {
+
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = new JSONObject(httpRequest.getBody());
+
+            jsonObject.put("op", "mkdir");
+            jsonObject.put("toName", folderName);
+
+            httpRequest.setBody(jsonObject.toString());
+
+            return iHttpUtil.remoteCall(httpRequest);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private HttpResponse createFolderWithStationAPI(HttpRequest httpRequest, String folderName) throws IOException {
+
+        JSONObject value = null;
+        try {
+            value = new JSONObject();
+
+            value.put("op", "mkdir");
+
+            return iHttpUtil.remoteCallWithFormData(httpRequest, folderName, value.toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
 
     @Override
     public OperationResult uploadFile(LocalFile file, String driveUUID, String dirUUID) {

@@ -332,16 +332,20 @@ public class EquipmentPresenter implements ActiveView {
 
             equipmentSearchViewModel.showEquipmentUsers.set(false);
 
-            if (state == EquipmentDataSource.EQUIPMENT_SYSTEM_ERROR)
+            if (state == EquipmentDataSource.EQUIPMENT_SYSTEM_ERROR) {
+
                 equipmentSearchViewModel.equipmentState.set(equipmentSearchView.getContext().getString(R.string.equipment_system_error));
-            else if (state == EquipmentDataSource.EQUIPMENT_UNINITIALIZED) {
+
+                //fix bug:system error but still can enter initial equipment activity
+                equipmentSearchViewModel.setIp(null);
+
+            } else if (state == EquipmentDataSource.EQUIPMENT_UNINITIALIZED) {
 
                 equipmentSearchViewModel.equipmentState.set(equipmentSearchView.getContext().getString(R.string.initial_equipment));
 
                 equipmentSearchViewModel.setIp(currentEquipment.getHosts().get(0));
                 equipmentSearchViewModel.setEquipmentName(currentEquipment.getEquipmentName());
             }
-
 
         }
 

@@ -25,7 +25,7 @@
 
     <string name="android_ellipsize">…</string>
 
-    <string name="android_no_write_external_storage_permission">Write permission denied in SDCard.</string>
+    <string name="android_no_write_external_storage_permission">Writen permission denied in SDCard.</string>
 
     <!-- android end -->
 
@@ -68,7 +68,7 @@
 
     <string name="cancel">Cancel</string>
 
-    <string name="clear_select_item">Clear selection</string>
+    <string name="clear_select_item">Clean selection</string>
 
     <string name="clear">Erase</string>
 
@@ -182,17 +182,17 @@
 
     <string name="unknown_equipment_label">Unknown</string>
 
-    <string name="search_equipment">Search WISNUC Server</string>
+    <string name="search_equipment">Search WISNUC Device</string>
 
-    <string name="equipment_not_found">Equipment not found</string>
+    <string name="equipment_not_found">Device not found</string>
 
-    <string name="search_equipment_failed">Search equipment failed</string>
+    <string name="search_equipment_failed">Device Searching failed</string>
 
     <!-- enter equipment ip -->
 
-    <string name="enter_ip">Please enter IP without port</string>
+    <string name="enter_ip">Please enter IP address</string>
 
-    <string name="ip_illegal">IP is illegal</string>
+    <string name="ip_illegal">IP invalid.</string>
 
     <!-- share comment -->
 
@@ -226,7 +226,7 @@
     <string name="already_upload_media_count_hint">Backups / Total Photos</string>
     <string name="already_upload_media_count_text">%1$d/%2$d</string>
 
-    <string name="confirm_clear_cache">Erase all temporary files?</string>
+    <string name="confirm_clear_cache">All temporary files will be erased.</string>
 
     <string name="calculating">Calculating</string>
 
@@ -236,10 +236,10 @@
     <string name="create_user">Create User</string>
     <string name="username_not_unique">User name is exist.</string>
     <string name="empty_username">Please enter username</string>
-    <string name="username_has_illegal_character">User name has illegal character</string>
+    <string name="username_has_illegal_character">User name cantains invalid character</string>
     <string name="empty_password">Please enter password</string>
-    <string name="not_same_password">Passwords do not match.</string>
-    <string name="password_has_illegal_character">Password has illegal character</string>
+    <string name="not_same_password">These passwords don\'t match.</string>
+    <string name="password_has_illegal_character">Passwords contain invalid character.</string>
 
     <!-- file -->
 
@@ -249,10 +249,10 @@
     <string name="download_select_item">Download selection</string>
     <string name="download_the_item">Download the item</string>
     <string name="open_the_item">Open</string>
-    <string name="re_download_the_item">Re Download</string>
-    <string name="need_download_and_cover_original_file">Download and cover original file?</string>
+    <string name="re_download_the_item">Download again</string>
+    <string name="need_download_and_cover_original_file">%1$s.fileext will be overwrite.</string>
     <string name="cover">Cover</string>
-    <string name="delete_original_file_fail">Delete original file failed!</string>
+    <string name="delete_original_file_fail">%1$s.fileext cannot be overwrite.</string>
 
     <string name="shared_drive">Shared Drive</string>
 
@@ -265,7 +265,7 @@
     <string name="no_download_record">No download record</string>
 
     <string name="completed">Completed</string>
-    <string name="incomplete">InComplete</string>
+    <string name="incomplete">Running</string>
 
     <string name="upload">Upload</string>
 
@@ -286,7 +286,7 @@
     <string name="connnect_server_fail">Server offline</string>
 
     <!-- network error -->
-    <string name="no_network">No internet connection, check your network.</string>
+    <string name="no_network">Contect internet failed. Pelease check your network.</string>
     <string name="socket_timeout_exception">Socket Timeout Exception</string>
 
     <string name="no_operate_media_share_permission">you do not own this album.</string>
@@ -471,6 +471,10 @@
     <string name="install_system_succeed_instruction">You have successfully created the WISNUC system</string>
 
     <string name="enter_system">Enter System</string>
+
+    <!-- torrent download manage -->
+
+    <string name="download_manage">Download Manage</string>
 
     <!-- group -->
     <string name="group">Group</string>

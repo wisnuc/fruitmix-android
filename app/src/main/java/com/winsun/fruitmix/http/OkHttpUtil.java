@@ -267,42 +267,43 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     @Override
-    public HttpResponse createFolder(HttpRequest httpRequest, String folderName) throws MalformedURLException, IOException, SocketTimeoutException {
+    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, String name, String value) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        try {
+        Request.Builder builder = generateRequestBuilder(httpRequest);
 
-            if (httpRequest.getBody().length() != 0) {
+        RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart(name, value).build();
 
-                JSONObject jsonObject = new JSONObject(httpRequest.getBody());
+        Request request = builder.post(requestBody).build();
 
-                jsonObject.put("op", "mkdir");
-                jsonObject.put("toName", folderName);
+        Response response = executeRequest(request);
 
-                httpRequest.setBody(jsonObject.toString());
+        HttpResponse httpResponse = getHttpResponse(response);
 
-                return remoteCall(httpRequest);
-            }
+        Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
 
-            Request.Builder builder = generateRequestBuilder(httpRequest);
+        return httpResponse;
 
-            RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart(folderName, "{\"op\":\"mkdir\"}").build();
+    }
 
-            Request request = builder.post(requestBody).build();
+    @Override
+    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, String name, String fileName, File file) throws MalformedURLException, IOException, SocketTimeoutException {
 
-            Response response = executeRequest(request);
+        Request.Builder builder = generateRequestBuilder(httpRequest);
 
-            HttpResponse httpResponse = getHttpResponse(response);
+        RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart(name, fileName, RequestBody.create(MediaType.parse(FileUtil.getMIMEType(file.getName())), file)).build();
 
-            Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
+        Request request = builder.post(requestBody).build();
 
-            return httpResponse;
+        Response response = executeRequest(request);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
+        HttpResponse httpResponse = getHttpResponse(response);
 
-            return null;
-        }
+        Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
+
+        return httpResponse;
+
     }
 
     private Request.Builder generateRequestBuilder(HttpRequest httpRequest) {
