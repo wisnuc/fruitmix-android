@@ -34,6 +34,8 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
 
     private UserMangePresenter userMangePresenter;
 
+    public static final int MODIFY_USER_STATE_REQUEST_CODE = 0x1001;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,7 +104,10 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
 
         if (requestCode == Util.KEY_CREATE_USER_REQUEST_CODE && resultCode == RESULT_OK) {
             userMangePresenter.refreshView();
+        }else if(requestCode == MODIFY_USER_STATE_REQUEST_CODE){
+            userMangePresenter.refreshUserFromCache();
         }
+
     }
 
     @Override
@@ -117,7 +122,7 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
         Intent intent = new Intent(this, ModifyUserStateActivity.class);
         intent.putExtra(ModifyUserStateActivity.MODIFY_USER_UUID_KEY, user.getUuid());
 
-        startActivity(intent);
+        startActivityForResult(intent,MODIFY_USER_STATE_REQUEST_CODE);
 
     }
 

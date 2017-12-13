@@ -21,6 +21,8 @@ public interface UserDBDataSource  {
 
     OperationResult modifyUserName(String userUUID,String userName);
 
+    OperationResult modifyUserIsAdminState(String userUUID,boolean isAdmin);
+
     boolean updateUser(User user);
 
 }

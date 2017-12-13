@@ -89,17 +89,19 @@
 
             </LinearLayout>
 
-            <LinearLayout
+            <RelativeLayout
+                android:id="@+id/user_type_layout"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_marginTop="8dp"
                 android:background="?android:attr/selectableItemBackground"
+                android:onClick="@{()->presenter.showModifyUserIsAdminStateDialog(context)}"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp">
 
                 <ImageView
+                    android:id="@+id/user_type_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="32dp"
@@ -109,13 +111,21 @@
                     android:id="@+id/user_type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/user_type_icon"
                     android:gravity="center_vertical"
                     android:text="@{user.getUserType(context)}"
                     android:textColor="@color/eighty_seven_percent_black"
                     android:textSize="16dp"
                     tools:text="@string/ordinary_user" />
 
-            </LinearLayout>
+                <ImageView
+                    android:id="@+id/modify_user_type_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/modify_icon" />
+
+            </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.user.manage;
 
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -91,7 +90,14 @@ public class UserManagePresenterImpl implements UserMangePresenter, ActiveView {
 
         getEquipmentInfoInThread();
 
-        getUserInThread();
+        getUser(true);
+
+    }
+
+    @Override
+    public void refreshUserFromCache() {
+
+        getUser(false);
 
     }
 
@@ -214,9 +220,11 @@ public class UserManagePresenterImpl implements UserMangePresenter, ActiveView {
         equipmentItemViewModel.ip.set(currentIP);
     }
 
-    private void getUserInThread() {
+    private void getUser(boolean setCacheDirty) {
 
-        userDataRepository.setCacheDirty();
+        if (setCacheDirty)
+            userDataRepository.setCacheDirty();
+
         userDataRepository.getUsers(currentLoginUserUUID, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(final List<User> data, OperationResult operationResult) {

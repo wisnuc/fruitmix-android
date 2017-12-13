@@ -59,6 +59,16 @@ public class UserDBDataSourceImpl implements UserDBDataSource {
     }
 
     @Override
+    public OperationResult modifyUserIsAdminState(String userUUID, boolean isAdmin) {
+        long result = dbUtils.updateRemoteUserIsAdminState(userUUID, isAdmin);
+
+        if (result > 0)
+            return new OperationSuccess();
+        else
+            return new OperationSQLException();
+    }
+
+    @Override
     public boolean updateUser(User user) {
 
         return dbUtils.updateUser(user);

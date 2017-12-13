@@ -11,6 +11,8 @@ public interface UserMangePresenter {
 
     void refreshView();
 
+    void refreshUserFromCache();
+
     void onDestroy();
 
     void addUser();

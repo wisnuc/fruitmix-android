@@ -28,4 +28,6 @@ public interface UserRemoteDataSource {
 
     void modifyUserEnableState(String userUUID, boolean newState, BaseOperateDataCallback<User> callback);
 
+    void modifyUserIsAdminState(String userUUID,boolean newIsAdminState,BaseOperateDataCallback<User> callback);
+
 }

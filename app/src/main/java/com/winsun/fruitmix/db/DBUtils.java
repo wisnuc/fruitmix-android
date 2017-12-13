@@ -874,6 +874,22 @@ public class DBUtils {
         return returnValue;
     }
 
+    public long updateRemoteUserIsAdminState(String userUUID, boolean isAdmin) {
+
+        openWritableDB();
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.USER_KEY_IS_ADMIN, isAdmin ? 1 : 0);
+
+        long returnValue = database.update(DBHelper.REMOTE_USER_TABLE_NAME, contentValues, DBHelper.USER_KEY_UUID + " = ?", new String[]{userUUID});
+
+        Log.d(TAG, "updateRemoteUserIsAdminState: " + isAdmin + " userUUID: " + userUUID + " result: " + returnValue);
+
+        close();
+
+        return returnValue;
+    }
+
     public boolean updateUser(User user) {
 
         openWritableDB();

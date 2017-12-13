@@ -172,14 +172,14 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("username",userName);
+            jsonObject.put("username", userName);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(path,jsonObject.toString());
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(path, jsonObject.toString());
 
-        wrapper.operateCall(httpRequest,callback,new RemoteInsertUserParser());
+        wrapper.operateCall(httpRequest, callback, new RemoteInsertUserParser());
 
     }
 
@@ -190,12 +190,12 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("password",newPassword);
+            jsonObject.put("password", newPassword);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        HttpRequest httpRequest = httpRequestFactory.createModifyPasswordRequest(path,jsonObject.toString(),userUUID,originalPassword);
+        HttpRequest httpRequest = httpRequestFactory.createModifyPasswordRequest(path, jsonObject.toString(), userUUID, originalPassword);
 
         wrapper.operateCall(httpRequest, callback, new RemoteDataParser<Boolean>() {
             @Override
@@ -213,14 +213,32 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("disabled",newState);
+            jsonObject.put("disabled", newState);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(path,jsonObject.toString());
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(path, jsonObject.toString());
 
-        wrapper.operateCall(httpRequest,callback,new RemoteInsertUserParser());
+        wrapper.operateCall(httpRequest, callback, new RemoteInsertUserParser());
+
+    }
+
+    @Override
+    public void modifyUserIsAdminState(String userUUID, boolean newIsAdminState, BaseOperateDataCallback<User> callback) {
+
+        String path = USER_PARAMETER + "/" + userUUID;
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("isAdmin", newIsAdminState);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(path, jsonObject.toString());
+
+        wrapper.operateCall(httpRequest, callback, new RemoteInsertUserParser());
 
     }
 }

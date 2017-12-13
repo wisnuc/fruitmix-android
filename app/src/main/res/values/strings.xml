@@ -215,6 +215,8 @@
     <string name="wechat_unbounded">WeChat unbounded</string>
     <string name="wechat_bounded">WeChat has been bound</string>
 
+    <string name="modify_user_operation">Modify user operation</string>
+
     <!-- setting -->
 
     <string name="setting_text">Setting</string>

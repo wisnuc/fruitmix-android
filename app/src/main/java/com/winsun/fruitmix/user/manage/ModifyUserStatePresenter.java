@@ -1,6 +1,9 @@
 package com.winsun.fruitmix.user.manage;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+import android.view.View;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.R;
@@ -56,6 +59,12 @@ public class ModifyUserStatePresenter implements ActiveView {
 
         mActivityModifyUserStateBinding.modifyUserState.setEnabled(hasEnablePermission());
 
+        boolean canModifyUserType = !modifyUser.isFirstUser() && currentUser.isFirstUser();
+
+        mActivityModifyUserStateBinding.modifyUserTypeIcon.setVisibility(canModifyUserType ? View.VISIBLE : View.GONE);
+
+        mActivityModifyUserStateBinding.userTypeLayout.setEnabled(canModifyUserType);
+
     }
 
     public void onDestroy() {
@@ -103,6 +112,56 @@ public class ModifyUserStatePresenter implements ActiveView {
             }
         }, this));
 
+
+    }
+
+    public void showModifyUserIsAdminStateDialog(final Context context) {
+
+        String[] choiceItems = {context.getString(R.string.admin), context.getString(R.string.ordinary_user)};
+
+        final int checkedItem = modifyUser.isAdmin() ? 0 : 1;
+
+        new AlertDialog.Builder(context).setSingleChoiceItems(choiceItems, checkedItem, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                if (which == checkedItem)
+                    return;
+
+                dialog.dismiss();
+
+                modifyUserIsAdminState(which == 0, context);
+
+            }
+        }).create().show();
+
+    }
+
+    private void modifyUserIsAdminState(boolean newIsAdminState, final Context context) {
+
+        mBaseView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.modify_user_operation)));
+
+        mUserDataRepository.modifyUserIsAdminState(modifyUserUUID, newIsAdminState, new BaseOperateDataCallbackWrapper<User>(new BaseOperateDataCallback<User>() {
+            @Override
+            public void onSucceed(User data, OperationResult result) {
+
+                mBaseView.dismissDialog();
+
+                mBaseView.showToast(context.getString(R.string.success, context.getString(R.string.modify_user_operation)));
+
+                refreshView();
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                mBaseView.dismissDialog();
+
+                mBaseView.showToast(operationResult.getResultMessage(context));
+
+            }
+        }, this));
 
     }
 

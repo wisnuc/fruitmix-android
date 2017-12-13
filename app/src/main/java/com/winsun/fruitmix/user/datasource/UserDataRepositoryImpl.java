@@ -352,4 +352,33 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
         });
 
     }
+
+    @Override
+    public void modifyUserIsAdminState(final String userUUID, final boolean newIsAdminState, BaseOperateDataCallback<User> callback) {
+
+        final BaseOperateDataCallback<User> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                userRemoteDataSource.modifyUserEnableState(userUUID, newIsAdminState, new BaseOperateDataCallback<User>() {
+                    @Override
+                    public void onSucceed(User data, OperationResult result) {
+
+                        userDBDataSource.modifyUserIsAdminState(data.getUuid(), data.isAdmin());
+
+                        cacheUsers.get(data.getUuid()).setAdmin(newIsAdminState);
+
+                        runOnMainThreadCallback.onSucceed(data, result);
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+                        runOnMainThreadCallback.onFail(operationResult);
+                    }
+                });
+            }
+        });
+
+    }
 }
