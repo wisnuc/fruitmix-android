@@ -16,62 +16,71 @@
 
     </data>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_centerVertical="true"
-            android:text="@string/downloading"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="14dp" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp">
 
-        <TextView
-            android:id="@+id/item_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="6dp"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/title"
-            android:text="@{viewmodel.formatItemCount}"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="14dp"
-            tools:text="(3)" />
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:text="@string/downloading"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="14dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/item_count"
-            android:text="@{viewmodel.totalSpeed}"
-            android:textColor="@color/fifty_four_percent_black"
-            android:textSize="14dp"
-            tools:text="7.3M/S" />
+            <TextView
+                android:id="@+id/item_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="6dp"
+                android:layout_toRightOf="@id/title"
+                android:text="@{viewmodel.formatItemCount}"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="14dp"
+                tools:text="(3)" />
 
-        <TextView
-            android:id="@+id/all_pause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="16dp"
-            android:layout_centerVertical="true"
-            android:text="@{viewmodel.allPause?@string/all_pause:@string/all_resume}"
-            android:textColor="@{viewmodel.itemCount != 0?@color/all_pause:@color/twenty_six_percent_black}"
-            android:textSize="12dp"
-            tools:text="@string/all_resume" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:layout_toRightOf="@id/item_count"
+                android:text="@{viewmodel.totalSpeed}"
+                android:textColor="@color/fifty_four_percent_black"
+                android:textSize="14dp"
+                tools:text="7.3M/S" />
+
+            <TextView
+                android:id="@+id/all_pause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp"
+                android:text="@{viewmodel.allPause?@string/all_pause:@string/all_resume}"
+                android:textColor="@{viewmodel.itemCount != 0?@color/all_pause:@color/twenty_six_percent_black}"
+                android:textSize="12dp"
+                tools:text="@string/all_resume" />
+
+        </RelativeLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1px"
-            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@{viewmodel.itemCount > 0?@dimen/eight:@dimen/zero}"
             android:background="@color/divide_bg" />
 
-    </RelativeLayout>
+
+    </LinearLayout>
+
 
 </layout>
 

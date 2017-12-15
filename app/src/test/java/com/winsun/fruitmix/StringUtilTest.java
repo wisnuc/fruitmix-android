@@ -1,5 +1,6 @@
 package com.winsun.fruitmix;
 
+import android.text.format.DateFormat;
 import android.text.format.Formatter;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -15,10 +16,13 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Administrator on 2017/7/27.
@@ -242,6 +246,15 @@ public class StringUtilTest {
         String url = "magnet:?xt=urn:btih:56d89ae3ee58595803d51b6be911ffa6de9adf1a&tr=udp://9.rarbg.to:2710/announce&tr=udp://9.rarbg.me:2710/announce&tr=http://tr.cili001.com:8070/announce&tr=http://tracker.trackerfix.com:80/announce&tr=udp://open.demonii.com:1337&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://p4p.arenabg.com:1337&tr=wss://tracker.openwebtorrent.com&tr=wss://tracker.btorrent.xyz&tr=wss://tracker.fastcast.nz";
 
         assertFalse((url.length() < 60 || url.startsWith("magnet:\\?xt=urn:btih:")));
+
+    }
+
+    @Test
+    public void testFormatTime(){
+
+        CharSequence time = DateFormat.format("yyyy.MM.dd",new Date(1513332835525L));
+
+        fail(time.toString());
 
     }
 

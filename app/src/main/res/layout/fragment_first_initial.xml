@@ -54,15 +54,15 @@
                 android:textColor="@color/logout_btn_bg"
                 tools:text="@string/not_set_disk_mode" />
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/select_disk_mode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="40dp"
+                android:background="@null"
                 android:src="@drawable/modify_equipment_mode_icon_bg" />
-
 
         </RelativeLayout>
 

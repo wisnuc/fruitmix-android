@@ -11,7 +11,7 @@
 
         <variable
             name="presenter"
-            type="com.winsun.fruitmix.torrent.TorrentDownloadManagePresenter"/>
+            type="com.winsun.fruitmix.torrent.TorrentDownloadManagePresenter" />
 
     </data>
 
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="72dp"
         android:paddingLeft="16dp"
-        android:paddingRight="16dp">
+        android:paddingRight="4dp">
 
         <ImageView
             android:id="@+id/file_icon"
@@ -35,35 +35,36 @@
             android:layout_height="48dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="32dp"
-            android:onClick="@{()->presenter.showOperateTorrentDownloadingItemBottomDialog(context,viewmodel)}"
             android:background="@null"
+            android:layout_marginLeft="20dp"
             android:clickable="true"
+            android:onClick="@{()->presenter.showOperateTorrentDownloadingItemBottomDialog(context,viewmodel)}"
             android:src="@drawable/ic_more_vert_black" />
 
         <RelativeLayout
             android:id="@+id/content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
+            android:layout_height="match_parent"
             android:layout_toLeftOf="@id/downloading_file_item_menu"
-            android:layout_toRightOf="@id/file_icon">
+            android:layout_toRightOf="@id/file_icon"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/speed"
-                android:layout_width="wrap_content"
+                android:layout_width="108dp"
                 android:layout_height="wrap_content"
+                android:gravity="right"
                 android:layout_alignParentRight="true"
                 android:text="@{viewmodel.getSpeed(context)}"
-                android:textColor="@color/eighty_seven_percent_black"
+                android:textColor="@color/fifty_four_percent_black"
                 android:textSize="14dp"
-                tools:text="125KB/S" />
+                tools:text="1125.12KB/S" />
 
             <TextView
                 android:id="@+id/file_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
+                android:layout_marginRight="8dp"
                 android:layout_toLeftOf="@id/speed"
                 android:ellipsize="end"
                 android:maxLines="1"
@@ -79,7 +80,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/file_name"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="2dp"
                 android:max="100"
                 android:progress="@{viewmodel.progress}" />
 

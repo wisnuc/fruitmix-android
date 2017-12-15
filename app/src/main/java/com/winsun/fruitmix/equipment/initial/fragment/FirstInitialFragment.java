@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.winsun.fruitmix.BR;
@@ -55,7 +56,7 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
 
     private FirstInitialFragmentViewModel mFirstInitialFragmentViewModel;
 
-    private ImageView selectDiskModeIV;
+    private ImageButton selectDiskModeIV;
 
     public static final int SINGLE_MODE = 1;
     public static final int RAID0_MODE = 2;
@@ -318,6 +319,8 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
 
     }
 
+    private int temporarySelectMode = -1;
+
     private void showSelectDiskModeDialog() {
 
         Context context = getContext();
@@ -332,20 +335,27 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
                 .setSingleChoiceItems(modes, -1, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        temporarySelectMode = which + 1;
+                    }
+                })
+                .setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
 
-                        currentSelectDiskMode = which + 1;
+                        currentSelectDiskMode = temporarySelectMode;
 
                         setInstallDiskModelText();
 
                         mListener.onSelectDiskCountChange(currentSelectDiskMode);
 
                     }
-                }).setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        }).setNegativeButton(getString(R.string.cancel), null)
+                })
+                .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        temporarySelectMode = -1;
+                    }
+                })
                 .create().show();
 
     }

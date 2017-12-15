@@ -16,4 +16,13 @@ public class TorrentDownloadedGroupItemViewModel {
         this.itemCount = itemCount;
     }
 
+    private int downloadingItemCount;
+
+    public int getDownloadingItemCount() {
+        return downloadingItemCount;
+    }
+
+    public void setDownloadingItemCount(int downloadingItemCount) {
+        this.downloadingItemCount = downloadingItemCount;
+    }
 }

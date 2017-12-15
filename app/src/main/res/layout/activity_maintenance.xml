@@ -15,6 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
+        android:orientation="vertical"
         tools:context="com.winsun.fruitmix.equipment.maintenance.MaintenanceActivity">
 
         <include
@@ -26,10 +27,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
             android:text="@string/nonsupport_explain"
             android:textColor="@color/eighty_seven_percent_black"
             android:textSize="16dp" />
-
 
     </RelativeLayout>
 

@@ -29,7 +29,7 @@ public class TorrentDownloadingChildItemViewModel {
         if (mTorrentDownloadInfo.isPause())
             return context.getString(R.string.paused);
         else
-            return FileUtil.formatFileSize(mTorrentDownloadInfo.getDownloadedSpeed()) + "/S";
+            return FileUtil.formatFileSize(mTorrentDownloadInfo.getDownloadedSpeed()) + "/s";
 
     }
 

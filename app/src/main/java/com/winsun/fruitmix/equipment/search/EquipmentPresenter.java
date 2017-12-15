@@ -24,13 +24,11 @@ import com.winsun.fruitmix.databinding.EquipmentItemBinding;
 import com.winsun.fruitmix.databinding.EquipmentUserItemBinding;
 import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource;
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
-import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.equipment.search.data.Equipment;
 import com.winsun.fruitmix.equipment.search.data.EquipmentTypeInfo;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 
@@ -487,8 +485,19 @@ public class EquipmentPresenter implements ActiveView {
                         sendUpdateListMessage();
 
                         break;
+                    case EquipmentDataSource.EQUIPMENT_MAINTENANCE:
+
+                        removeAlreadyFoundEquipmentIp(equipment);
+
+                        equipment.setState(EquipmentDataSource.EQUIPMENT_MAINTENANCE);
+
+                        mUserLoadedEquipments.add(equipment);
+
+                        sendUpdateListMessage();
+
+                        break;
                     default:
-                        Log.d(TAG, "onSucceed: equipment not ready or uninitialized,error");
+                        Log.d(TAG, "onSucceed: equipment not ready or uninitialized,error,maintenance");
                 }
 
             }
@@ -496,11 +505,7 @@ public class EquipmentPresenter implements ActiveView {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                equipment.setState(EquipmentDataSource.EQUIPMENT_SYSTEM_ERROR);
-
-                mUserLoadedEquipments.add(equipment);
-
-                sendUpdateListMessage();
+                handleRetrieveEquipmentInfoFail(equipment);
 
             }
         });
@@ -512,33 +517,50 @@ public class EquipmentPresenter implements ActiveView {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
 
-                handleRetrieveUsers(data, equipment);
+                handleRetrieveUsersSucceed(data, equipment);
 
             }
 
             @Override
             public void onFail(OperationResult operationResult) {
 
-                handleRetrieveUserFail(equipment);
+                handleRetrieveEquipmentInfoFail(equipment);
             }
         }, this));
     }
 
-    private void handleRetrieveUserFail(Equipment equipment) {
+    private void handleRetrieveEquipmentInfoFail(Equipment equipment) {
 
-        equipmentSerialNumbers.remove(equipment.getSerialNumber());
-        equipmentIps.remove(equipment.getHosts().get(0));
+        removeAlreadyFoundEquipmentIp(equipment);
 
-        if (mHandler != null && !onPause) {
-            Message message = Message.obtain(mHandler, RETRY_GET_DATA, equipment);
-            mHandler.sendMessageDelayed(message, RETRY_DELAY_MILLISECOND);
-        }
+        equipment.setState(EquipmentDataSource.EQUIPMENT_SYSTEM_ERROR);
+
+        mUserLoadedEquipments.add(equipment);
+
+        sendUpdateListMessage();
+
+//        if (mHandler != null && !onPause) {
+//            Message message = Message.obtain(mHandler, RETRY_GET_DATA, equipment);
+//            mHandler.sendMessageDelayed(message, RETRY_DELAY_MILLISECOND);
+//        }
+
     }
 
 
-    private void handleRetrieveUsers(List<User> data, Equipment equipment) {
-        if (data.isEmpty())
+    private void handleRetrieveUsersSucceed(List<User> data, Equipment equipment) {
+        if (data.isEmpty()) {
+
+            removeAlreadyFoundEquipmentIp(equipment);
+
+            equipment.setState(EquipmentDataSource.EQUIPMENT_MAINTENANCE);
+
+            mUserLoadedEquipments.add(equipment);
+
+            sendUpdateListMessage();
+
             return;
+
+        }
 
         mUserLoadedEquipments.add(equipment);
         mMapKeyIsIpValueIsUsers.put(equipment.getHosts().get(0), data);
@@ -547,6 +569,11 @@ public class EquipmentPresenter implements ActiveView {
 
         sendUpdateListMessage();
 
+    }
+
+    private void removeAlreadyFoundEquipmentIp(Equipment equipment) {
+        equipmentSerialNumbers.remove(equipment.getSerialNumber());
+        equipmentIps.remove(equipment.getHosts().get(0));
     }
 
     private void sendUpdateListMessage() {

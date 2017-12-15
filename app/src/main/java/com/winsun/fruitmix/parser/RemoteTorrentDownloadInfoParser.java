@@ -68,7 +68,7 @@ public class RemoteTorrentDownloadInfoParser extends BaseRemoteDataParser implem
 
             boolean isPause = finish.optBoolean("isPause");
 
-            Long time = finish.optLong("time");
+            Long time = finish.optLong("finishTime");
 
             TorrentDownloadInfo torrentDownloadInfo = new TorrentDownloadInfo(hash, downloaded, downloadSpeed, progress, name, DownloadState.DOWNLOADED,
                     isPause, time);

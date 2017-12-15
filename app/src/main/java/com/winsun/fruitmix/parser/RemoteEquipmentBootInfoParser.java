@@ -19,7 +19,7 @@ public class RemoteEquipmentBootInfoParser implements RemoteDatasParser<Equipmen
         JSONObject jsonObject = new JSONObject(json);
 
         return Collections.singletonList(new EquipmentBootInfo(jsonObject.optString("mode"),
-                jsonObject.optString("last"),jsonObject.optString("state"),jsonObject.optString("current"),
+                jsonObject.optString("last"), jsonObject.optString("state"), jsonObject.optString("current"),
                 jsonObject.optString("error")));
 
     }

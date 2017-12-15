@@ -39,4 +39,20 @@ public class DataBindingSetting {
         view.setLayoutParams(layoutParams);
     }
 
+    @BindingAdapter("android:layout_marginTop")
+    public static void setLayoutMarginTop(View view, float topMargin) {
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+        layoutParams.setMargins(layoutParams.leftMargin, Math.round(topMargin),
+                layoutParams.rightMargin, layoutParams.bottomMargin);
+        view.setLayoutParams(layoutParams);
+    }
+
+    @BindingAdapter("android:layout_marginBottom")
+    public static void setLayoutMarginBottom(View view, float bottomMargin) {
+        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+        layoutParams.setMargins(layoutParams.leftMargin, layoutParams.topMargin,
+                layoutParams.rightMargin, Math.round(bottomMargin));
+        view.setLayoutParams(layoutParams);
+    }
+
 }

@@ -33,7 +33,7 @@ public class TorrentDownloadingGroupItemViewModel {
         if (totalSpeed == 0)
             return "";
         else
-            return FileUtil.formatFileSize(totalSpeed) + "/S";
+            return FileUtil.formatFileSize(totalSpeed) + "/s";
     }
 
     public void setTotalSpeed(double totalSpeed) {

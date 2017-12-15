@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +50,7 @@ import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -96,12 +98,19 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
         private int itemCount;
 
-        public DownloadedGroupItem(int itemCount) {
+        private int downloadingItemCount;
+
+        public DownloadedGroupItem(int itemCount, int downloadingItemCount) {
             this.itemCount = itemCount;
+            this.downloadingItemCount = downloadingItemCount;
         }
 
         public int getItemCount() {
             return itemCount;
+        }
+
+        public int getDownloadingItemCount() {
+            return downloadingItemCount;
         }
 
         @Override
@@ -163,6 +172,8 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
     private static final int REFRESH_VIEW = 0x1001;
 
+    public static final String TAG = TorrentDownloadManagePresenter.class.getSimpleName();
+
     private static class RefreshViewTimelyHandler extends Handler {
 
         private WeakReference<TorrentDownloadManagePresenter> mWeakReference;
@@ -184,6 +195,9 @@ public class TorrentDownloadManagePresenter implements ActiveView {
             switch (msg.what) {
 
                 case REFRESH_VIEW:
+
+                    Log.d(TAG, "handleMessage: refreshView after 2 seconds");
+
                     mWeakReference.get().refreshView();
                     break;
             }
@@ -224,7 +238,8 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
                         handleGetAllTorrentDownloadInfo(data);
 
-                        mRefreshViewTimelyHandler.sendEmptyMessageDelayed(REFRESH_VIEW, 2 * 1000);
+                        if (mBaseView != null)
+                            mRefreshViewTimelyHandler.sendEmptyMessageDelayed(REFRESH_VIEW, 2 * 1000);
 
                     }
 
@@ -278,7 +293,7 @@ public class TorrentDownloadManagePresenter implements ActiveView {
         }
 
         DownloadingGroupItem downloadingGroupItem = new DownloadingGroupItem(downloadingChildItems.size(), totalSpeed);
-        DownloadedGroupItem downloadedGroupItem = new DownloadedGroupItem(downloadedChildItems.size());
+        DownloadedGroupItem downloadedGroupItem = new DownloadedGroupItem(downloadedChildItems.size(), downloadingChildItems.size());
 
         downloadItems.add(downloadingGroupItem);
         downloadItems.addAll(downloadingChildItems);
@@ -492,10 +507,24 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
             TorrentDownloadedGroupItemViewModel viewModel = new TorrentDownloadedGroupItemViewModel();
             viewModel.setItemCount(downloadedGroupItem.getItemCount());
+            viewModel.setDownloadingItemCount(downloadedGroupItem.getDownloadingItemCount());
 
             getViewDataBinding().setVariable(BR.viewmodel, viewModel);
 
             getViewDataBinding().executePendingBindings();
+
+            final TorrentDownloadedGroupItemBinding binding = (TorrentDownloadedGroupItemBinding) getViewDataBinding();
+
+            binding.clearAllRecord.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    showClearRecordDialog(binding.getRoot().getContext(), mDownloadedTorrentDownloadInfo);
+
+                }
+            });
+
+
         }
     }
 
@@ -508,31 +537,46 @@ public class TorrentDownloadManagePresenter implements ActiveView {
         @Override
         public void refreshDownloadItemView(IDownloadItem downloadItem) {
 
-            TorrentDownloadedChildItemViewModel viewModel = new TorrentDownloadedChildItemViewModel(((DownloadedChildItem) downloadItem).getTorrentDownloadInfo());
+            final TorrentDownloadInfo torrentDownloadInfo = ((DownloadedChildItem) downloadItem).getTorrentDownloadInfo();
+
+            TorrentDownloadedChildItemViewModel viewModel = new TorrentDownloadedChildItemViewModel(torrentDownloadInfo);
 
             getViewDataBinding().setVariable(BR.viewmodel, viewModel);
 
             getViewDataBinding().executePendingBindings();
 
+            final TorrentDownloadedChildItemBinding binding = (TorrentDownloadedChildItemBinding) getViewDataBinding();
+
+            binding.downloadingFileItemMenu.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    showClearRecordDialog(binding.getRoot().getContext(), Collections.singletonList(torrentDownloadInfo));
+
+                }
+            });
+
         }
     }
 
-    public void showClearRecordDialog(Context context) {
+    public void showClearRecordDialog(final Context context, final List<TorrentDownloadInfo> torrentDownloadInfos) {
 
-        final DeleteRecordViewInDialogBinding binding = DeleteRecordViewInDialogBinding.inflate(LayoutInflater.from(context), null, false);
+//        final DeleteRecordViewInDialogBinding binding = DeleteRecordViewInDialogBinding.inflate(LayoutInflater.from(context), null, false);
 
         new AlertDialog.Builder(context).setTitle(context.getString(R.string.clear_record))
-                .setView(binding.getRoot())
                 .setPositiveButton(context.getString(R.string.confirm), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if (binding.checkbox.isChecked()) {
-                            //TODO:delete record and file
+                        for (TorrentDownloadInfo torrentDownloadInfo : torrentDownloadInfos) {
 
-                        } else {
-                            //TODO:delete record
+                            mTorrentDataRepository.deleteTorrentDownloadTask(new TorrentRequestParam(torrentDownloadInfo.getHash()),
+                                    new BaseOperateDataCallbackWrapper<>(new BaseOperateDataCallbackImpl<Void>(), TorrentDownloadManagePresenter.this));
+
                         }
+
+                        mBaseView.showToast(context.getString(R.string.success, context.getString(R.string.clear_record)));
+
 
                     }
                 }).setNegativeButton(context.getString(R.string.cancel), null)

@@ -48,7 +48,10 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
     public static final String STORAGE = "/storage";
 
     public static final String BOOT_ENOALT = "ENOALT";
-
+    public static final String BOOT_ELASTNOTMOUNT = "ELASTNOTMOUNT";
+    public static final String BOOT_ELASTMISSING = "ELASTMISSING";
+    public static final String BOOT_ELASTDAMAGED = "ELASTDAMAGED";
+    public static final String MODE_MAINTENANCE = "maintenance";
 
     public EquipmentRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         super(iHttpUtil, httpRequestFactory);
@@ -88,17 +91,38 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
 
             if (equipmentBootInfo.getState().equals("started")) {
 
-                if (equipmentBootInfo.getError() != null && equipmentBootInfo.getError().equals(BOOT_ENOALT)) {
-
-                    Log.d(TAG, "onSucceed: ip:" + equipmentIP + " BOOT_ENOALT");
-
-                    handleGetEquipmentBootInfo(equipmentIP, callback);
-
-                } else {
+                if (equipmentBootInfo.getError().equals("null") && (!equipmentBootInfo.getCurrent().equals("null") && equipmentBootInfo.getCurrent().length() > 0)) {
 
                     Log.d(TAG, "onSucceed: ip:" + equipmentIP + " ready");
 
                     callback.onSucceed(EQUIPMENT_READY, new OperationSuccess());
+
+                } else {
+
+                    if (equipmentBootInfo.getError().equals(BOOT_ELASTNOTMOUNT) || equipmentBootInfo.getError().equals(BOOT_ELASTMISSING)
+                            || equipmentBootInfo.getError().equals(BOOT_ELASTDAMAGED)) {
+
+                        Log.d(TAG, "checkEquipmentState: ip:" + equipmentIP + " " + BOOT_ELASTNOTMOUNT + " or " + BOOT_ELASTDAMAGED + " or " + BOOT_ELASTMISSING);
+
+                        callback.onSucceed(EQUIPMENT_MAINTENANCE, new OperationSuccess());
+
+                    } else if (equipmentBootInfo.getError().equals(BOOT_ENOALT)) {
+
+                        handleGetEquipmentBootInfo(equipmentIP, callback);
+
+                    } else if (equipmentBootInfo.getMode().equals(MODE_MAINTENANCE)) {
+
+                        Log.d(TAG, "checkEquipmentState: ip:" + equipmentIP + " " + MODE_MAINTENANCE);
+
+                        callback.onSucceed(EQUIPMENT_MAINTENANCE, new OperationSuccess());
+
+                    } else {
+
+                        Log.d(TAG, "checkEquipmentState: ip:" + equipmentIP + "unknown maintenance");
+
+                        callback.onSucceed(EQUIPMENT_MAINTENANCE, new OperationSuccess());
+                    }
+
                 }
 
                 break;
