@@ -491,6 +491,13 @@
     <string name="delete_task">Delete task</string>
     <string name="delete_file">Delete downloaded file</string>
 
+    <string name="magnet_illegal">Magnet invalid.</string>
+
+    <!-- maintenance -->
+
+    <string name="maintenance">Maintenance</string>
+    <string name="nonsupport_explain">WISNUC OS you connected is under maintenance mode,  we have not yet supported this mode on Android client, please download WISNUC Windows or Mac client.</string>
+
     <!-- group -->
     <string name="group">Group</string>
 

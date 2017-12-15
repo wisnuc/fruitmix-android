@@ -27,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/7/13.
@@ -61,13 +62,54 @@ public class BaseHttpCallWrapper {
         operateCall(httpRequest, callback, parser, 0);
     }
 
-    public <T> void operateCall(HttpRequest httpRequest,String name,String fileName,File file, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
+    public <T> void operateCall(HttpRequest httpRequest, Map<String,String> map, String name, String fileName, File file, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
 
         if (!checkPreCondition(httpRequest, callback)) return;
 
         try {
 
-            HttpResponse httpResponse = iHttpUtil.remoteCallWithFormData(httpRequest,name,fileName,file);
+            HttpResponse httpResponse = iHttpUtil.remoteCallWithFormData(httpRequest,map, name, fileName, file);
+
+            if (httpResponse.getResponseCode() == 200) {
+
+                T data = parser.parse(httpResponse.getResponseData());
+
+                callback.onSucceed(data, new OperationSuccess());
+
+            } else {
+
+                callback.onFail(new OperationNetworkException(httpResponse));
+
+            }
+
+
+        } catch (MalformedURLException e) {
+
+            callback.onFail(new OperationMalformedUrlException());
+
+        } catch (SocketTimeoutException ex) {
+
+            callback.onFail(new OperationSocketTimeoutException());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            callback.onFail(new OperationIOException());
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            callback.onFail(new OperationJSONException());
+        }
+
+    }
+
+    public <T> void operateCall(HttpRequest httpRequest, String name, String fileName, File file, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
+
+        if (!checkPreCondition(httpRequest, callback)) return;
+
+        try {
+
+            HttpResponse httpResponse = iHttpUtil.remoteCallWithFormData(httpRequest, name, fileName, file);
 
             if (httpResponse.getResponseCode() == 200) {
 
@@ -103,13 +145,13 @@ public class BaseHttpCallWrapper {
     }
 
 
-    public <T> void operateCall(HttpRequest httpRequest,String name,String value, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
+    public <T> void operateCall(HttpRequest httpRequest, Map<String,String> map,BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
 
         if (!checkPreCondition(httpRequest, callback)) return;
 
         try {
 
-            HttpResponse httpResponse = iHttpUtil.remoteCallWithFormData(httpRequest,name,value);
+            HttpResponse httpResponse = iHttpUtil.remoteCallWithFormData(httpRequest, map);
 
             if (httpResponse.getResponseCode() == 200) {
 

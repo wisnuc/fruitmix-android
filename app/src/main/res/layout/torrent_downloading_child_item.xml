@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools">
 
 
     <data>
 
+        <variable
+            name="viewmodel"
+            type="com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadingChildItemViewModel" />
+
+        <variable
+            name="presenter"
+            type="com.winsun.fruitmix.torrent.TorrentDownloadManagePresenter"/>
 
     </data>
 
@@ -20,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="32dp"
-            android:src="@drawable/file_icon"/>
+            android:src="@drawable/file_icon" />
 
         <ImageButton
             android:id="@+id/downloading_file_item_menu"
@@ -29,9 +36,10 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="32dp"
+            android:onClick="@{()->presenter.showOperateTorrentDownloadingItemBottomDialog(context,viewmodel)}"
             android:background="@null"
             android:clickable="true"
-            android:src="@drawable/ic_more_vert_black"/>
+            android:src="@drawable/ic_more_vert_black" />
 
         <RelativeLayout
             android:id="@+id/content"
@@ -46,9 +54,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
+                android:text="@{viewmodel.getSpeed(context)}"
                 android:textColor="@color/eighty_seven_percent_black"
                 android:textSize="14dp"
-                tools:text="125KB/S"/>
+                tools:text="125KB/S" />
 
             <TextView
                 android:id="@+id/file_name"
@@ -58,9 +67,10 @@
                 android:layout_toLeftOf="@id/speed"
                 android:ellipsize="end"
                 android:maxLines="1"
+                android:text="@{viewmodel.name}"
                 android:textColor="@color/eighty_seven_percent_black"
                 android:textSize="14dp"
-                tools:text="文件名"/>
+                tools:text="文件名" />
 
 
             <ProgressBar
@@ -70,7 +80,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/file_name"
                 android:layout_marginBottom="8dp"
-                />
+                android:max="100"
+                android:progress="@{viewmodel.progress}" />
 
             <TextView
                 android:id="@+id/percent"
@@ -78,17 +89,19 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_below="@id/downloading_progressbar"
+                android:text="@{viewmodel.percent}"
                 android:textColor="@color/fifty_four_percent_black"
                 android:textSize="12dp"
-                tools:text="35%"/>
+                tools:text="35%" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/downloading_progressbar"
+                android:text="@{viewmodel.getDownloadedAndTotalSize(context)}"
                 android:textColor="@color/fifty_four_percent_black"
                 android:textSize="12dp"
-                tools:text="200MB/2.3GB"/>
+                tools:text="200MB/2.3GB" />
 
         </RelativeLayout>
 

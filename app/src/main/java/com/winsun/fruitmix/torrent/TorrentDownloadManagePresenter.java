@@ -2,37 +2,52 @@ package com.winsun.fruitmix.torrent;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.databinding.ViewDataBinding;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackWrapper;
+import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.databinding.ActivityTorrentDownloadManageBinding;
 import com.winsun.fruitmix.databinding.CreateTorrentDownloadTaskViewInDialogBinding;
 import com.winsun.fruitmix.databinding.DeleteRecordViewInDialogBinding;
-import com.winsun.fruitmix.databinding.DownloadedFileItemBinding;
-import com.winsun.fruitmix.databinding.DownloadingFileItemBinding;
-import com.winsun.fruitmix.databinding.FileDownloadGroupItemBinding;
 import com.winsun.fruitmix.databinding.TorrentDownloadedChildItemBinding;
 import com.winsun.fruitmix.databinding.TorrentDownloadedGroupItemBinding;
 import com.winsun.fruitmix.databinding.TorrentDownloadingChildItemBinding;
 import com.winsun.fruitmix.databinding.TorrentDownloadingGroupItemBinding;
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
-import com.winsun.fruitmix.file.view.fragment.FileDownloadFragment;
+import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.torrent.data.DownloadState;
 import com.winsun.fruitmix.torrent.data.TorrentDataRepository;
 import com.winsun.fruitmix.torrent.data.TorrentDownloadInfo;
-import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.torrent.data.TorrentRequestParam;
+import com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadedChildItemViewModel;
+import com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadedGroupItemViewModel;
+import com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadingChildItemViewModel;
+import com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadingGroupItemViewModel;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,8 +78,12 @@ public class TorrentDownloadManagePresenter implements ActiveView {
             this.totalSpeed = totalSpeed;
         }
 
-        public void setTotalSpeed(double totalSpeed) {
-            this.totalSpeed = totalSpeed;
+        public double getTotalSpeed() {
+            return totalSpeed;
+        }
+
+        public int getItemCount() {
+            return itemCount;
         }
 
         @Override
@@ -81,6 +100,10 @@ public class TorrentDownloadManagePresenter implements ActiveView {
             this.itemCount = itemCount;
         }
 
+        public int getItemCount() {
+            return itemCount;
+        }
+
         @Override
         public int getDownloadItemType() {
             return DOWNLOADED_GROUP;
@@ -89,10 +112,14 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
     private class DownloadingChildItem implements IDownloadItem {
 
-        private List<TorrentDownloadInfo> mTorrentDownloadInfos;
+        private TorrentDownloadInfo mTorrentDownloadInfo;
 
-        public DownloadingChildItem(List<TorrentDownloadInfo> torrentDownloadInfos) {
-            mTorrentDownloadInfos = torrentDownloadInfos;
+        public DownloadingChildItem(TorrentDownloadInfo torrentDownloadInfo) {
+            mTorrentDownloadInfo = torrentDownloadInfo;
+        }
+
+        public TorrentDownloadInfo getTorrentDownloadInfo() {
+            return mTorrentDownloadInfo;
         }
 
         @Override
@@ -103,7 +130,15 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
     private class DownloadedChildItem implements IDownloadItem {
 
-        private List<TorrentDownloadInfo> mTorrentDownloadInfos;
+        private TorrentDownloadInfo mTorrentDownloadInfo;
+
+        public DownloadedChildItem(TorrentDownloadInfo torrentDownloadInfo) {
+            mTorrentDownloadInfo = torrentDownloadInfo;
+        }
+
+        public TorrentDownloadInfo getTorrentDownloadInfo() {
+            return mTorrentDownloadInfo;
+        }
 
         @Override
         public int getDownloadItemType() {
@@ -115,21 +150,68 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
     private ActivityTorrentDownloadManageBinding mBinding;
 
-    private User currentUser;
-
     private LoadingViewModel mLoadingViewModel;
 
     private TorrentDownloadItemAdapter mTorrentDownloadItemAdapter;
 
-    public TorrentDownloadManagePresenter(TorrentDataRepository torrentDataRepository,
-                                          ActivityTorrentDownloadManageBinding binding, User currentUser,
-                                          LoadingViewModel loadingViewModel) {
-        mTorrentDataRepository = torrentDataRepository;
-        mBinding = binding;
-        this.currentUser = currentUser;
-        mLoadingViewModel = loadingViewModel;
+    private List<TorrentDownloadInfo> mDownloadingTorrentDownloadInfo;
+    private List<TorrentDownloadInfo> mDownloadedTorrentDownloadInfo;
+
+    private BaseView mBaseView;
+
+    private CreateTorrentDownloadTaskViewInDialogBinding mCreateTorrentDownloadTaskViewInDialogBinding;
+
+    private static final int REFRESH_VIEW = 0x1001;
+
+    private static class RefreshViewTimelyHandler extends Handler {
+
+        private WeakReference<TorrentDownloadManagePresenter> mWeakReference;
+
+        /**
+         * Use the provided {@link Looper} instead of the default one.
+         *
+         * @param looper The looper, must not be null.
+         */
+        public RefreshViewTimelyHandler(Looper looper, TorrentDownloadManagePresenter torrentDownloadManagePresenter) {
+            super(looper);
+            mWeakReference = new WeakReference<>(torrentDownloadManagePresenter);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            switch (msg.what) {
+
+                case REFRESH_VIEW:
+                    mWeakReference.get().refreshView();
+                    break;
+            }
+        }
     }
 
+    private RefreshViewTimelyHandler mRefreshViewTimelyHandler;
+
+    private boolean allPauseFlag = true;
+
+    public TorrentDownloadManagePresenter(TorrentDataRepository torrentDataRepository,
+                                          ActivityTorrentDownloadManageBinding binding,
+                                          LoadingViewModel loadingViewModel, BaseView baseView) {
+        mTorrentDataRepository = torrentDataRepository;
+        mBinding = binding;
+        mLoadingViewModel = loadingViewModel;
+        mBaseView = baseView;
+
+        mDownloadedTorrentDownloadInfo = new ArrayList<>();
+        mDownloadingTorrentDownloadInfo = new ArrayList<>();
+
+        mTorrentDownloadItemAdapter = new TorrentDownloadItemAdapter();
+
+        mBinding.torrentDownloadRecyclerview.setAdapter(mTorrentDownloadItemAdapter);
+
+        mRefreshViewTimelyHandler = new RefreshViewTimelyHandler(Looper.getMainLooper(), this);
+
+    }
 
     public void refreshView() {
 
@@ -138,6 +220,12 @@ public class TorrentDownloadManagePresenter implements ActiveView {
                     @Override
                     public void onSucceed(List<TorrentDownloadInfo> data, OperationResult operationResult) {
 
+                        mLoadingViewModel.showLoading.set(false);
+
+                        handleGetAllTorrentDownloadInfo(data);
+
+                        mRefreshViewTimelyHandler.sendEmptyMessageDelayed(REFRESH_VIEW, 2 * 1000);
+
                     }
 
                     @Override
@@ -145,16 +233,66 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
                         mLoadingViewModel.showLoading.set(false);
 
-
                     }
-                }
-                , this));
+                }, this));
+
+    }
+
+    public void onDestroy() {
+
+        mBaseView = null;
+
+    }
+
+    private void handleGetAllTorrentDownloadInfo(List<TorrentDownloadInfo> torrentDownloadInfos) {
+
+        mDownloadingTorrentDownloadInfo.clear();
+        mDownloadedTorrentDownloadInfo.clear();
+
+        List<IDownloadItem> downloadItems = new ArrayList<>();
+
+        List<DownloadingChildItem> downloadingChildItems = new ArrayList<>();
+        List<DownloadedChildItem> downloadedChildItems = new ArrayList<>();
+
+        double totalSpeed = 0;
+
+        for (TorrentDownloadInfo torrentDownloadInfo : torrentDownloadInfos) {
+
+            if (torrentDownloadInfo.getState() == DownloadState.DOWNLOADED) {
+
+                mDownloadedTorrentDownloadInfo.add(torrentDownloadInfo);
+
+                downloadedChildItems.add(new DownloadedChildItem(torrentDownloadInfo));
+
+            } else {
+
+                mDownloadingTorrentDownloadInfo.add(torrentDownloadInfo);
+
+                downloadingChildItems.add(new DownloadingChildItem(torrentDownloadInfo));
+
+                if (!torrentDownloadInfo.isPause())
+                    totalSpeed += torrentDownloadInfo.getDownloadedSpeed();
+
+            }
+
+        }
+
+        DownloadingGroupItem downloadingGroupItem = new DownloadingGroupItem(downloadingChildItems.size(), totalSpeed);
+        DownloadedGroupItem downloadedGroupItem = new DownloadedGroupItem(downloadedChildItems.size());
+
+        downloadItems.add(downloadingGroupItem);
+        downloadItems.addAll(downloadingChildItems);
+        downloadItems.add(downloadedGroupItem);
+        downloadItems.addAll(downloadedChildItems);
+
+        mTorrentDownloadItemAdapter.setIDownloadItems(downloadItems);
+        mTorrentDownloadItemAdapter.notifyDataSetChanged();
 
     }
 
     @Override
     public boolean isActive() {
-        return false;
+        return mBaseView != null;
     }
 
     private class TorrentDownloadItemAdapter extends RecyclerView.Adapter<DownloadViewHolder> {
@@ -225,6 +363,11 @@ public class TorrentDownloadManagePresenter implements ActiveView {
         public int getItemCount() {
             return mIDownloadItems.size();
         }
+
+        @Override
+        public int getItemViewType(int position) {
+            return mIDownloadItems.get(position).getDownloadItemType();
+        }
     }
 
 
@@ -241,8 +384,15 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
         private DownloadingGroupItem mDownloadingGroupItem;
 
+        private TextView allPause;
+
         public DownloadingGroupViewHolder(ViewDataBinding viewDataBinding) {
             super(viewDataBinding);
+
+            TorrentDownloadingGroupItemBinding binding = (TorrentDownloadingGroupItemBinding) viewDataBinding;
+
+            allPause = binding.allPause;
+
         }
 
         @Override
@@ -250,9 +400,60 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
             mDownloadingGroupItem = (DownloadingGroupItem) downloadItem;
 
+            final TorrentDownloadingGroupItemViewModel viewModel = new TorrentDownloadingGroupItemViewModel();
+            viewModel.setItemCount(mDownloadingGroupItem.getItemCount());
+            viewModel.setTotalSpeed(mDownloadingGroupItem.getTotalSpeed());
+
+            viewModel.allPause.set(allPauseFlag);
+
+            getViewDataBinding().setVariable(BR.viewmodel, viewModel);
+
+            getViewDataBinding().setVariable(BR.presenter, TorrentDownloadManagePresenter.this);
+
+            allPause.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    allPauseBtnClick(viewModel);
+
+                    getViewDataBinding().executePendingBindings();
+                }
+            });
+
+            getViewDataBinding().executePendingBindings();
 
         }
     }
+
+    private void allPauseBtnClick(TorrentDownloadingGroupItemViewModel viewModel) {
+
+        if (mDownloadingTorrentDownloadInfo.isEmpty())
+            return;
+
+        for (TorrentDownloadInfo torrentDownloadInfo : mDownloadingTorrentDownloadInfo) {
+
+            if (!torrentDownloadInfo.isPause() && allPauseFlag) {
+
+                mTorrentDataRepository.pauseTorrentDownloadTask(new TorrentRequestParam(torrentDownloadInfo.getHash()), new BaseOperateDataCallbackWrapper<Void>(
+                        new BaseOperateDataCallbackImpl<Void>(), this
+                ));
+
+            } else if (torrentDownloadInfo.isPause() && !allPauseFlag) {
+
+                mTorrentDataRepository.resumeTorrentDownloadTask(new TorrentRequestParam(torrentDownloadInfo.getHash()), new BaseOperateDataCallbackWrapper<Void>(
+                        new BaseOperateDataCallbackImpl<Void>(), this
+                ));
+
+            }
+
+        }
+
+        allPauseFlag = !allPauseFlag;
+
+        viewModel.allPause.set(allPauseFlag);
+
+    }
+
 
     private class DownloadingChildViewHolder extends DownloadViewHolder {
 
@@ -265,6 +466,14 @@ public class TorrentDownloadManagePresenter implements ActiveView {
         public void refreshDownloadItemView(IDownloadItem downloadItem) {
 
             DownloadingChildItem downloadingChildItem = (DownloadingChildItem) downloadItem;
+
+            TorrentDownloadingChildItemViewModel viewModel = new TorrentDownloadingChildItemViewModel(downloadingChildItem.getTorrentDownloadInfo());
+
+            getViewDataBinding().setVariable(BR.viewmodel, viewModel);
+
+            getViewDataBinding().setVariable(BR.presenter, TorrentDownloadManagePresenter.this);
+
+            getViewDataBinding().executePendingBindings();
 
         }
     }
@@ -281,11 +490,16 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
             DownloadedGroupItem downloadedGroupItem = (DownloadedGroupItem) downloadItem;
 
+            TorrentDownloadedGroupItemViewModel viewModel = new TorrentDownloadedGroupItemViewModel();
+            viewModel.setItemCount(downloadedGroupItem.getItemCount());
+
+            getViewDataBinding().setVariable(BR.viewmodel, viewModel);
+
+            getViewDataBinding().executePendingBindings();
         }
     }
 
     private class DownloadedChildViewHolder extends DownloadViewHolder {
-
 
         DownloadedChildViewHolder(ViewDataBinding viewDataBinding) {
             super(viewDataBinding);
@@ -294,7 +508,11 @@ public class TorrentDownloadManagePresenter implements ActiveView {
         @Override
         public void refreshDownloadItemView(IDownloadItem downloadItem) {
 
-            DownloadedChildItem downloadedChildItem = (DownloadedChildItem) downloadItem;
+            TorrentDownloadedChildItemViewModel viewModel = new TorrentDownloadedChildItemViewModel(((DownloadedChildItem) downloadItem).getTorrentDownloadInfo());
+
+            getViewDataBinding().setVariable(BR.viewmodel, viewModel);
+
+            getViewDataBinding().executePendingBindings();
 
         }
     }
@@ -311,6 +529,7 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
                         if (binding.checkbox.isChecked()) {
                             //TODO:delete record and file
+
                         } else {
                             //TODO:delete record
                         }
@@ -321,25 +540,172 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
     }
 
-    public void showCreateDownloadTaskDialog(Context context) {
+    public void showCreateDownloadTaskDialog(final Context context) {
 
-        final CreateTorrentDownloadTaskViewInDialogBinding binding = CreateTorrentDownloadTaskViewInDialogBinding
+        mCreateTorrentDownloadTaskViewInDialogBinding = CreateTorrentDownloadTaskViewInDialogBinding
                 .inflate(LayoutInflater.from(context), null, false);
 
-        new AlertDialog.Builder(context).setTitle(context.getString(R.string.create_new_download_task))
-                .setView(binding.getRoot())
+        mCreateTorrentDownloadTaskViewInDialogBinding.setPresenter(this);
+
+        new AlertDialog.Builder(context)
+                .setView(mCreateTorrentDownloadTaskViewInDialogBinding.getRoot())
                 .setPositiveButton(context.getString(R.string.confirm), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        String url = binding.editText.getText().toString();
+                        String url = mCreateTorrentDownloadTaskViewInDialogBinding.editText.getText().toString();
 
-                        //TODO:create task
+                        createDownloadTask(context, url);
+
 
                     }
                 }).setNegativeButton(context.getString(R.string.cancel), null)
                 .create().show();
 
+    }
+
+    public void pasteContentInTheClipboard(Context context) {
+
+        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+
+        if (clipboardManager == null || !clipboardManager.hasPrimaryClip())
+            return;
+
+        ClipData clipData = clipboardManager.getPrimaryClip();
+
+        String text = clipData.getItemAt(0).coerceToText(context).toString();
+
+        mCreateTorrentDownloadTaskViewInDialogBinding.editText.setText(text);
+
+    }
+
+
+    private void createDownloadTask(final Context context, String url) {
+
+        if (url.length() < 60 || url.startsWith("magnet:\\?xt=urn:btih:")) {
+
+            mBaseView.showToast(context.getString(R.string.magnet_illegal));
+            return;
+        }
+
+        mBaseView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.create_new_download_task)));
+
+        mTorrentDataRepository.postTorrentDownloadTask(url, new BaseOperateDataCallback<TorrentRequestParam>() {
+            @Override
+            public void onSucceed(TorrentRequestParam data, OperationResult result) {
+
+                mBaseView.dismissDialog();
+
+                mBaseView.showToast(context.getString(R.string.success, context.getString(R.string.create_new_download_task)));
+
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                mBaseView.dismissDialog();
+
+                mBaseView.showToast(operationResult.getResultMessage(context));
+            }
+        });
+
+    }
+
+    public void showOperateTorrentDownloadingItemBottomDialog(final Context context, final TorrentDownloadingChildItemViewModel viewModel) {
+
+        String pauseOrResume = viewModel.isPause() ? context.getString(R.string.resume) : context.getString(R.string.pause);
+
+        int resID = viewModel.isPause() ? R.drawable.pause_download_task : R.drawable.resume_download_task;
+
+        BottomMenuItem bottomMenuItem = new BottomMenuItem(resID, pauseOrResume, new AbstractCommand() {
+            @Override
+            public void execute() {
+
+                if (viewModel.isPause()) {
+
+                    mTorrentDataRepository.resumeTorrentDownloadTask(new TorrentRequestParam(viewModel.getHash()), new BaseOperateDataCallbackWrapper<Void>(
+                            new BaseOperateDataCallback<Void>() {
+                                @Override
+                                public void onSucceed(Void data, OperationResult result) {
+
+                                    mBaseView.showToast(context.getString(R.string.success, context.getString(R.string.resume)));
+
+                                }
+
+                                @Override
+                                public void onFail(OperationResult operationResult) {
+
+                                    mBaseView.showToast(operationResult.getResultMessage(context));
+
+                                }
+                            }, TorrentDownloadManagePresenter.this
+                    ));
+
+                } else {
+
+                    mTorrentDataRepository.pauseTorrentDownloadTask(new TorrentRequestParam(viewModel.getHash()), new BaseOperateDataCallbackWrapper<Void>(
+                            new BaseOperateDataCallback<Void>() {
+                                @Override
+                                public void onSucceed(Void data, OperationResult result) {
+
+                                    mBaseView.showToast(context.getString(R.string.success, context.getString(R.string.pause)));
+
+                                }
+
+                                @Override
+                                public void onFail(OperationResult operationResult) {
+
+                                    mBaseView.showToast(operationResult.getResultMessage(context));
+
+                                }
+                            }, TorrentDownloadManagePresenter.this
+                    ));
+
+                }
+
+            }
+
+            @Override
+            public void unExecute() {
+
+            }
+        });
+
+        BottomMenuItem deleteTaskItem = new BottomMenuItem(R.drawable.delete_download_task, context.getString(R.string.delete_task), new AbstractCommand() {
+            @Override
+            public void execute() {
+
+                mTorrentDataRepository.deleteTorrentDownloadTask(new TorrentRequestParam(viewModel.getHash()), new BaseOperateDataCallbackWrapper<Void>(
+                        new BaseOperateDataCallback<Void>() {
+                            @Override
+                            public void onSucceed(Void data, OperationResult result) {
+
+                                mBaseView.showToast(context.getString(R.string.success, context.getString(R.string.delete_task)));
+
+                            }
+
+                            @Override
+                            public void onFail(OperationResult operationResult) {
+
+                                mBaseView.showToast(operationResult.getResultMessage(context));
+                            }
+                        }, TorrentDownloadManagePresenter.this
+                ));
+
+            }
+
+            @Override
+            public void unExecute() {
+
+            }
+        });
+
+        List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
+        bottomMenuItems.add(bottomMenuItem);
+        bottomMenuItems.add(deleteTaskItem);
+
+        getBottomSheetDialog(bottomMenuItems, context).show();
 
     }
 

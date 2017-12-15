@@ -3,43 +3,56 @@
 
     <data>
 
+        <variable
+            name="viewmodel"
+            type="com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadedGroupItemViewModel" />
 
     </data>
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:gravity="center_vertical">
+        android:layout_width="match_parent"
+        android:layout_height="48dp">
+
 
         <TextView
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_marginLeft="16dp"
             android:text="@string/completed"
             android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="14dp"/>
+            android:textSize="14dp" />
 
         <TextView
             android:id="@+id/item_count"
             android:layout_width="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_height="wrap_content"
             android:layout_marginLeft="6dp"
             android:layout_toRightOf="@id/title"
+            android:text="@{viewmodel.itemCount}"
             android:textColor="@color/eighty_seven_percent_black"
             android:textSize="14dp"
-            tools:text="(5)"/>
+            tools:text="(5)" />
 
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:layout_marginRight="16dp"
             android:textColor="#03a9f5"
             android:textSize="12dp"
-            tools:text="@string/clear_record"/>
+            tools:text="@string/clear_record" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginTop="1dp"
+            android:layout_alignParentBottom="true"
+            android:background="@color/divide_bg"/>
 
     </RelativeLayout>
 

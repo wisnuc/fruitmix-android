@@ -179,6 +179,9 @@
         <activity
             android:name=".torrent.view.TorrentDownloadManageActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".equipment.maintenance.MaintenanceActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

@@ -8,12 +8,12 @@
             type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
         <variable
-            name="noContentViewModel"
-            type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
-
-        <variable
             name="loadingViewModel"
             type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
+
+        <variable
+            name="presenter"
+            type="com.winsun.fruitmix.torrent.TorrentDownloadManagePresenter" />
 
 
     </data>
@@ -42,7 +42,7 @@
                 android:layout_height="match_parent" />
 
             <include
-                layout="@layout/loading_layout"
+                layout="@layout/new_loading_layout"
                 app:loadingViewModel="@{loadingViewModel}" />
 
             <android.support.design.widget.FloatingActionButton
@@ -52,6 +52,7 @@
                 android:layout_gravity="bottom|end"
                 android:layout_marginBottom="60dp"
                 android:layout_marginRight="30dp"
+                android:onClick="@{()->presenter.showCreateDownloadTaskDialog(context)}"
                 android:src="@drawable/ic_add_white_24dp"
                 android:visibility="visible"
                 app:borderWidth="0dp"

@@ -461,9 +461,16 @@
     <string name="paused">已暂停</string>
     <string name="pause">暂停</string>
     <string name="resume">继续</string>
-    
+
     <string name="delete_task">删除任务</string>
     <string name="delete_file">删除已下载文件</string>
+
+    <!-- maintenance -->
+
+    <string name="maintenance">维护模式</string>
+    <string name="nonsupport_explain">您的WISNUC系统处于维护模式，安卓客户端暂不支持该功能，请下载WISNUC客户端软件对系统进行维护。</string>
+
+    <string name="magnet_illegal">Magnet链接格式错误</string>
 
     <!-- group -->
     <string name="group">"私友群"</string>

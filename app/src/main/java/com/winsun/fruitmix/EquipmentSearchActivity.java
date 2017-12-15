@@ -23,6 +23,7 @@ import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.databinding.ActivityEquipmentSearchBinding;
 
 import com.winsun.fruitmix.equipment.initial.InitialEquipmentActivity;
+import com.winsun.fruitmix.equipment.maintenance.MaintenanceActivity;
 import com.winsun.fruitmix.equipment.search.EquipmentPresenter;
 import com.winsun.fruitmix.equipment.search.EquipmentSearchView;
 import com.winsun.fruitmix.equipment.search.EquipmentSearchViewModel;
@@ -326,16 +327,23 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
     }
 
     @Override
-    public void gotoInitialEquipmentActivity(EquipmentSearchViewModel equipmentSearchViewModel) {
+    public void gotoActivity(EquipmentSearchViewModel equipmentSearchViewModel) {
 
-        if (equipmentSearchViewModel.getIp() == null)
-            return;
+        if (equipmentSearchViewModel.getEquipmentStateCode() == EquipmentDataSource.EQUIPMENT_UNINITIALIZED) {
 
-        Intent intent = new Intent(this, InitialEquipmentActivity.class);
-        intent.putExtra(InitialEquipmentActivity.EQUIPMENT_IP_KEY, equipmentSearchViewModel.getIp());
-        intent.putExtra(InitialEquipmentActivity.EQUIPMENT_NAME_KEY, equipmentSearchViewModel.getEquipmentName());
-        startActivityForResult(intent, InitialEquipmentActivity.REQUEST_CODE);
+            Intent intent = new Intent(this, InitialEquipmentActivity.class);
+            intent.putExtra(InitialEquipmentActivity.EQUIPMENT_IP_KEY, equipmentSearchViewModel.getIp());
+            intent.putExtra(InitialEquipmentActivity.EQUIPMENT_NAME_KEY, equipmentSearchViewModel.getEquipmentName());
+            startActivityForResult(intent, InitialEquipmentActivity.REQUEST_CODE);
+
+        } else if (equipmentSearchViewModel.getEquipmentStateCode() == EquipmentDataSource.EQUIPMENT_MAINTENANCE) {
+
+            Util.startActivity(this, MaintenanceActivity.class);
+
+        }
 
 
     }
+
+
 }

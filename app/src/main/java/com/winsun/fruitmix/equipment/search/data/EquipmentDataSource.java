@@ -17,6 +17,7 @@ public interface EquipmentDataSource {
     int EQUIPMENT_FAIL_LAST_LAUNCHER = 0x1005;
     int EQUIPMENT_FAIL_ENOALT = 0x1006;
     int EQUIPMENT_UNKNOWN_ERROR = 0x1007;
+    int EQUIPMENT_MAINTENANCE = 0x1008;
 
     void getUsersInEquipment(Equipment equipment, BaseLoadDataCallback<User> callback);
 

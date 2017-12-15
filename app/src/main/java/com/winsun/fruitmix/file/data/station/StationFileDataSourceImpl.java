@@ -34,7 +34,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.ResponseBody;
 
@@ -216,7 +218,10 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
             value.put("op", "mkdir");
 
-            return iHttpUtil.remoteCallWithFormData(httpRequest, folderName, value.toString());
+            Map<String, String> map = new HashMap<>();
+            map.put(folderName, value.toString());
+
+            return iHttpUtil.remoteCallWithFormData(httpRequest, map);
 
         } catch (JSONException e) {
             e.printStackTrace();

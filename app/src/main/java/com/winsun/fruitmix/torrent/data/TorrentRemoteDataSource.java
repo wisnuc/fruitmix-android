@@ -13,6 +13,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/12/13.
@@ -44,12 +46,14 @@ public class TorrentRemoteDataSource extends BaseRemoteDataSourceImpl implements
 
         HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(POST_DOWNLOAD_TORRENT_PATH, "");
 
-        wrapper.operateCall(httpRequest, dirUUID, torrent.getName(), torrent, callback, new RemoteDataParser<TorrentRequestParam>() {
+        Map<String, String> map = new HashMap<>();
+        map.put("dirUUID", dirUUID);
+
+        wrapper.operateCall(httpRequest, map, "torrent", torrent.getName(), torrent, callback, new RemoteDataParser<TorrentRequestParam>() {
             @Override
             public TorrentRequestParam parse(String json) throws JSONException {
-                String torrentID = new JSONObject(json).optString("torrentId");
 
-                return new TorrentRequestParam(torrentID);
+                return new TorrentRequestParam("");
             }
         });
 
@@ -58,14 +62,21 @@ public class TorrentRemoteDataSource extends BaseRemoteDataSourceImpl implements
     @Override
     public void postTorrentDownloadTask(String dirUUID, String magnetUrl, BaseOperateDataCallback<TorrentRequestParam> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(POST_DOWNLOAD_TORRENT_PATH, "");
+        JSONObject jsonObject = new JSONObject();
 
-        wrapper.operateCall(httpRequest, dirUUID, magnetUrl, callback, new RemoteDataParser<TorrentRequestParam>() {
+        try {
+            jsonObject.put("dirUUID", dirUUID);
+            jsonObject.put("magnetURL", magnetUrl);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(POST_DOWNLOAD_MAGNET_PATH, jsonObject.toString());
+
+        wrapper.operateCall(httpRequest, callback, new RemoteDataParser<TorrentRequestParam>() {
             @Override
             public TorrentRequestParam parse(String json) throws JSONException {
-                String torrentID = new JSONObject(json).optString("torrentId");
-
-                return new TorrentRequestParam(torrentID);
+                return new TorrentRequestParam("");
             }
         });
 
@@ -76,7 +87,7 @@ public class TorrentRemoteDataSource extends BaseRemoteDataSourceImpl implements
 
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("ops", "pause");
+            jsonObject.put("op", "pause");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -98,7 +109,7 @@ public class TorrentRemoteDataSource extends BaseRemoteDataSourceImpl implements
 
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("ops", "resume");
+            jsonObject.put("op", "resume");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -120,7 +131,7 @@ public class TorrentRemoteDataSource extends BaseRemoteDataSourceImpl implements
 
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("ops", "destroy");
+            jsonObject.put("op", "destroy");
         } catch (JSONException e) {
             e.printStackTrace();
         }

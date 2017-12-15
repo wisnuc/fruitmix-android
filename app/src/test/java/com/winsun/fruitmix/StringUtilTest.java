@@ -236,5 +236,14 @@ public class StringUtilTest {
 
     }
 
+    @Test
+    public void testMagnet() {
+
+        String url = "magnet:?xt=urn:btih:56d89ae3ee58595803d51b6be911ffa6de9adf1a&tr=udp://9.rarbg.to:2710/announce&tr=udp://9.rarbg.me:2710/announce&tr=http://tr.cili001.com:8070/announce&tr=http://tracker.trackerfix.com:80/announce&tr=udp://open.demonii.com:1337&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://p4p.arenabg.com:1337&tr=wss://tracker.openwebtorrent.com&tr=wss://tracker.btorrent.xyz&tr=wss://tracker.fastcast.nz";
+
+        assertFalse((url.length() < 60 || url.startsWith("magnet:\\?xt=urn:btih:")));
+
+    }
+
 
 }

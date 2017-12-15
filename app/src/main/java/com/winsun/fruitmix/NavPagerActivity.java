@@ -61,6 +61,7 @@ import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.torrent.view.TorrentDownloadManageActivity;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
@@ -120,6 +121,11 @@ public class NavPagerActivity extends BaseActivity
     @Override
     public void gotoAccountManageActivity() {
         startActivityForResult(new Intent(mContext, AccountManageActivity.class), START_ACCOUNT_MANAGE);
+    }
+
+    @Override
+    public void gotoDownloadManageActivity() {
+        Util.startActivity(mContext, TorrentDownloadManageActivity.class);
     }
 
     @Override

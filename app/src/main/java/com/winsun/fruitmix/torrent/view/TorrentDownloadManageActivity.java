@@ -4,20 +4,27 @@ import android.databinding.DataBindingUtil;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityTorrentDownloadManageBinding;
+import com.winsun.fruitmix.interfaces.BaseView;
+import com.winsun.fruitmix.torrent.TorrentDownloadManagePresenter;
+import com.winsun.fruitmix.torrent.data.InjectTorrentDataRepository;
+import com.winsun.fruitmix.torrent.data.TorrentDataRepository;
+import com.winsun.fruitmix.torrent.data.TorrentDataRepositoryImpl;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
-public class TorrentDownloadManageActivity extends BaseActivity {
+public class TorrentDownloadManageActivity extends BaseActivity implements BaseView {
 
-
+    private TorrentDownloadManagePresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,8 +39,15 @@ public class TorrentDownloadManageActivity extends BaseActivity {
 
         RecyclerView recyclerView = binding.torrentDownloadRecyclerview;
 
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
 
+        presenter = new TorrentDownloadManagePresenter(InjectTorrentDataRepository.provideInstance(this),
+                binding, loadingViewModel, this);
 
+        binding.setPresenter(presenter);
+
+        presenter.refreshView();
 
     }
 
@@ -57,5 +71,10 @@ public class TorrentDownloadManageActivity extends BaseActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
+        presenter.onDestroy();
+    }
 }

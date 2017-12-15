@@ -19,6 +19,8 @@ public interface MainPageView extends BaseView{
 
     void gotoFileDownloadActivity();
 
+    void gotoDownloadManageActivity();
+
     void gotoConfirmInviteUserActivity();
 
     void loggedInUserItemOnClick(LoggedInUser loggedInUser);

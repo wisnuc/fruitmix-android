@@ -5,10 +5,15 @@ package com.winsun.fruitmix.torrent.data
  */
 
 enum class DownloadState {
-    DOWNLOADING, PAUSE,DOWNLOADED
+    DOWNLOADING, DOWNLOADED
 }
 
-data class TorrentDownloadInfo(val hash: String, val timeRemaining: Double, val downloaded: Long, val downloadedSpeed: Long,
-                               val peerNum: Int, val fileName: String, val state: DownloadState, val isPause: Boolean)
+data class TorrentDownloadInfo(val hash: String,val downloaded: Long, val downloadedSpeed: Double,
+                               val progress: Double, val fileName: String, val state: DownloadState, val isPause: Boolean,
+                               val time:Long) {
+    fun getTotalSize(): Double {
+        return downloaded / progress
+    }
+}
 
-data class TorrentRequestParam(val id:String)
+data class TorrentRequestParam(val id: String)

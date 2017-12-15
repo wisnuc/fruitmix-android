@@ -932,39 +932,46 @@ public class FileUtil {
             {"", "*/*"}
     };
 
-    public static String formatFileSize(long fileSize) {
+    public static String formatFileSize(double byteSize) {
 
         String formatFileSize = "";
 
         DecimalFormat decimalFormat = new DecimalFormat("####.00");
 
-        if (fileSize < 0) {
+        if (byteSize < 0) {
 
             formatFileSize = "0 B";
 
-        } else if (fileSize < 1024L) {
+        } else if (byteSize < 1024L) {
 
-            formatFileSize = fileSize + " B";
+            formatFileSize = byteSize + " B";
 
-        } else if (fileSize < 1024L * 1024L) {
+        } else if (byteSize < 1024L * 1024L) {
 
-            formatFileSize = decimalFormat.format(fileSize / (float) 1024) + " KB";
+            formatFileSize = decimalFormat.format(byteSize / (float) 1024) + " KB";
 
-        } else if (fileSize < 1024L * 1024L * 1024L) {
+        } else if (byteSize < 1024L * 1024L * 1024L) {
 
-            formatFileSize = decimalFormat.format(fileSize / (float) 1024 / 1024) + " MB";
+            formatFileSize = decimalFormat.format(byteSize / (float) 1024 / 1024) + " MB";
 
-        } else if (fileSize < 1024L * 1024L * 1024L * 1024L) {
+        } else if (byteSize < 1024L * 1024L * 1024L * 1024L) {
 
-            formatFileSize = decimalFormat.format(fileSize / (float) 1024 / 1024 / 1024) + " GB";
+            formatFileSize = decimalFormat.format(byteSize / (float) 1024 / 1024 / 1024) + " GB";
 
-        } else if (fileSize < 1024L * 1024L * 1024L * 1024L * 1024L) {
+        } else if (byteSize < 1024L * 1024L * 1024L * 1024L * 1024L) {
 
-            formatFileSize = decimalFormat.format(fileSize / (float) 1024 / 1024 / 1024 / 1024) + " TB";
+            formatFileSize = decimalFormat.format(byteSize / (float) 1024 / 1024 / 1024 / 1024) + " TB";
 
         }
 
         return formatFileSize;
+
+    }
+
+    public static String formatFileSize(long fileSize) {
+
+        return formatFileSize((double) fileSize);
+
     }
 
     public static long getTotalCacheSize(Context context) {

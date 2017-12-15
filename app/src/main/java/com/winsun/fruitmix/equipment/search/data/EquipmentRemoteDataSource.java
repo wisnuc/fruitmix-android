@@ -135,7 +135,7 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
 
                     Log.d(TAG, "onSucceed: ip:" + ip + " no volume");
 
-                    callback.onFail(new OperationFail("no volume"));
+                    callback.onSucceed(EQUIPMENT_MAINTENANCE, new OperationSuccess());
 
                 }
 

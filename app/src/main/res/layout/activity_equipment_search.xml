@@ -189,14 +189,14 @@
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/initial_equipment" />
+                        android:src="@{equipmentSearchViewModel.equipmentStateIcon,default=@drawable/initial_equipment}" />
 
                     <TextView
                         android:layout_width="120dp"
                         android:layout_height="80dp"
                         android:layout_marginTop="8dp"
                         android:gravity="center"
-                        android:onClick="@{()->equipmentSearchView.gotoInitialEquipmentActivity(equipmentSearchViewModel)}"
+                        android:onClick="@{()->equipmentSearchView.gotoActivity(equipmentSearchViewModel)}"
                         android:text="@{equipmentSearchViewModel.equipmentState}"
                         android:textColor="@color/login_ui_blue"
                         android:textSize="18dp"

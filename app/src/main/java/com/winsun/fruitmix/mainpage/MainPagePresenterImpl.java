@@ -167,6 +167,22 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
         model = new NavigationMenuViewModel() {
             @Override
             public void onClick() {
+
+                super.onClick();
+
+                mainPageView.gotoDownloadManageActivity();
+
+            }
+        };
+        model.setMenuIconResId(R.drawable.transfer_menu_icon);
+        model.setMenuText(context.getString(R.string.download_manage));
+
+        mNavigationMenuItems.add(model);
+
+
+        model = new NavigationMenuViewModel() {
+            @Override
+            public void onClick() {
                 super.onClick();
                 mainPageView.gotoSettingActivity();
             }

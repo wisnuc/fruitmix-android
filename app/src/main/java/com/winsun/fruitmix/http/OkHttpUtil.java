@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -267,12 +268,20 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     @Override
-    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, String name, String value) throws MalformedURLException, IOException, SocketTimeoutException {
+    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, Map<String, String> map) throws MalformedURLException, IOException, SocketTimeoutException {
 
         Request.Builder builder = generateRequestBuilder(httpRequest);
 
-        RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart(name, value).build();
+        RequestBody requestBody;
+
+        MultipartBody.Builder builder1 = new MultipartBody.Builder().setType(MultipartBody.FORM);
+
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+
+            builder1.addFormDataPart(entry.getKey(), entry.getValue());
+        }
+
+        requestBody = builder1.build();
 
         Request request = builder.post(requestBody).build();
 
@@ -304,6 +313,32 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         return httpResponse;
 
+    }
+
+    @Override
+    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, Map<String, String> map, String name, String fileName, File file) throws IOException {
+        Request.Builder builder = generateRequestBuilder(httpRequest);
+
+        RequestBody requestBody;
+        MultipartBody.Builder builder1 = new MultipartBody.Builder().setType(MultipartBody.FORM);
+
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+
+            builder1.addFormDataPart(entry.getKey(), entry.getValue());
+
+        }
+
+        requestBody = builder1.addFormDataPart(name, fileName, RequestBody.create(MediaType.parse(FileUtil.getMIMEType(file.getName())), file)).build();
+
+        Request request = builder.post(requestBody).build();
+
+        Response response = executeRequest(request);
+
+        HttpResponse httpResponse = getHttpResponse(response);
+
+        Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
+
+        return httpResponse;
     }
 
     private Request.Builder generateRequestBuilder(HttpRequest httpRequest) {
