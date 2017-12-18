@@ -35,7 +35,7 @@
             android:layout_marginRight="16dp"
             android:layout_marginTop="8dp"
             app:counterEnabled="true"
-            app:counterMaxLength="20"
+            app:counterMaxLength="@dimen/max_user_name"
             app:error="@{operateUserViewModel.userNameError}"
             app:errorEnabled="@{operateUserViewModel.userNameErrorEnable}">
 
@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/user_name"
                 android:inputType="text"
-                android:maxLength="20"
+                android:maxLength="@dimen/max_user_name"
                 android:text="@={operateUserViewModel.userName}"
                 android:textColor="@color/eighty_seven_percent_black" />
 

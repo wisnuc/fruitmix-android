@@ -8,8 +8,12 @@ public class TorrentDownloadedGroupItemViewModel {
 
     private int itemCount;
 
-    public String getItemCount() {
+    public String getFormatItemCount() {
         return "(" + itemCount + ")";
+    }
+
+    public int getItemCount() {
+        return itemCount;
     }
 
     public void setItemCount(int itemCount) {

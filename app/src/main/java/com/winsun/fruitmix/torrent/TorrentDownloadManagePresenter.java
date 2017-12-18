@@ -28,7 +28,6 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallbackWrapper;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.databinding.ActivityTorrentDownloadManageBinding;
 import com.winsun.fruitmix.databinding.CreateTorrentDownloadTaskViewInDialogBinding;
-import com.winsun.fruitmix.databinding.DeleteRecordViewInDialogBinding;
 import com.winsun.fruitmix.databinding.TorrentDownloadedChildItemBinding;
 import com.winsun.fruitmix.databinding.TorrentDownloadedGroupItemBinding;
 import com.winsun.fruitmix.databinding.TorrentDownloadingChildItemBinding;
@@ -505,7 +504,7 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
             DownloadedGroupItem downloadedGroupItem = (DownloadedGroupItem) downloadItem;
 
-            TorrentDownloadedGroupItemViewModel viewModel = new TorrentDownloadedGroupItemViewModel();
+            final TorrentDownloadedGroupItemViewModel viewModel = new TorrentDownloadedGroupItemViewModel();
             viewModel.setItemCount(downloadedGroupItem.getItemCount());
             viewModel.setDownloadingItemCount(downloadedGroupItem.getDownloadingItemCount());
 
@@ -518,6 +517,9 @@ public class TorrentDownloadManagePresenter implements ActiveView {
             binding.clearAllRecord.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
+                    if (viewModel.getItemCount() == 0)
+                        return;
 
                     showClearRecordDialog(binding.getRoot().getContext(), mDownloadedTorrentDownloadInfo);
 
@@ -551,7 +553,7 @@ public class TorrentDownloadManagePresenter implements ActiveView {
                 @Override
                 public void onClick(View v) {
 
-                    showClearRecordDialog(binding.getRoot().getContext(), Collections.singletonList(torrentDownloadInfo));
+                    showClearRecordBottomDialog(binding.getRoot().getContext(), Collections.singletonList(torrentDownloadInfo));
 
                 }
             });
@@ -559,10 +561,29 @@ public class TorrentDownloadManagePresenter implements ActiveView {
         }
     }
 
-    public void showClearRecordDialog(final Context context, final List<TorrentDownloadInfo> torrentDownloadInfos) {
+    private void showClearRecordBottomDialog(final Context context, final List<TorrentDownloadInfo> torrentDownloadInfos) {
 
 //        final DeleteRecordViewInDialogBinding binding = DeleteRecordViewInDialogBinding.inflate(LayoutInflater.from(context), null, false);
 
+        BottomMenuItem bottomMenuItem = new BottomMenuItem(R.drawable.delete_download_task, context.getString(R.string.delete_task), new AbstractCommand() {
+            @Override
+            public void execute() {
+
+                showClearRecordDialog(context, torrentDownloadInfos);
+
+            }
+
+            @Override
+            public void unExecute() {
+
+            }
+        });
+
+        getBottomSheetDialog(Collections.singletonList(bottomMenuItem), context).show();
+
+    }
+
+    private void showClearRecordDialog(final Context context, final List<TorrentDownloadInfo> torrentDownloadInfos) {
         new AlertDialog.Builder(context).setTitle(context.getString(R.string.clear_record))
                 .setPositiveButton(context.getString(R.string.confirm), new DialogInterface.OnClickListener() {
                     @Override
@@ -581,7 +602,6 @@ public class TorrentDownloadManagePresenter implements ActiveView {
                     }
                 }).setNegativeButton(context.getString(R.string.cancel), null)
                 .create().show();
-
     }
 
     public void showCreateDownloadTaskDialog(final Context context) {

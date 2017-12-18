@@ -64,7 +64,7 @@ public class UserRemoteDataSourceTest {
 
             HttpResponse httpResponse = new HttpResponse(404, "");
 
-            when(httpRequestFactory.createHttpPostRequest(anyString(), anyString())).thenReturn(new HttpRequest("", ""));
+            when(httpRequestFactory.createHttpPostRequest(anyString(), anyString())).thenReturn(new HttpRequest("http://10.10.9.1/user", ""));
 
             when(iHttpUtil.remoteCall(any(HttpRequest.class))).thenReturn(httpResponse);
 

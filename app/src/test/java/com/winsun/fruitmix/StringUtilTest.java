@@ -254,7 +254,7 @@ public class StringUtilTest {
 
         CharSequence time = DateFormat.format("yyyy.MM.dd",new Date(1513332835525L));
 
-        fail(time.toString());
+        assertEquals("2017.12.15",time.toString());
 
     }
 
