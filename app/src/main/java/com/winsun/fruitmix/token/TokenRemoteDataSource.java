@@ -13,12 +13,16 @@ import com.winsun.fruitmix.parser.RemoteWeChatTokenParser;
  * Created by Administrator on 2017/7/13.
  */
 
-public class TokenRemoteDataSource extends BaseRemoteDataSourceImpl implements TokenDataSource{
+public class TokenRemoteDataSource extends BaseRemoteDataSourceImpl implements TokenDataSource {
 
     public TokenRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         super(iHttpUtil, httpRequestFactory);
     }
 
+    /*
+     * WISNUC API:GET TOKEN
+     * get token by user uuid and password
+     */
     @Override
     public void getToken(LoadTokenParam loadTokenParam, BaseLoadDataCallback<String> callback) {
 
@@ -44,7 +48,7 @@ public class TokenRemoteDataSource extends BaseRemoteDataSourceImpl implements T
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest("/token");
 
-        wrapper.loadCall(httpRequest,callback,new RemoteTokenParser());
+        wrapper.loadCall(httpRequest, callback, new RemoteTokenParser());
 
     }
 

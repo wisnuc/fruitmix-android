@@ -41,6 +41,10 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
     }
 
+    /*
+     * WISNUC API: POST USER LIST
+     * Insert User
+     */
     @Override
     public void insertUser(String userName, String userPwd, BaseOperateDataCallback<User> callback) {
 
@@ -90,6 +94,9 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
     }
 
+    /*
+     * WISNUC API:GET USER LIST
+     */
     private void getOtherUsers(final List<User> users, final BaseLoadDataCallback<User> callback) {
         HttpRequest loginHttpRequest = httpRequestFactory.createHttpGetRequest(USER_PARAMETER);
 
@@ -127,6 +134,11 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
         }
     }
 
+
+    /*
+     * WISNUC API:GET DRIVE LIST
+     * Get User Home
+     */
     @Override
     public void getCurrentUserHome(BaseLoadDataCallback<String> callback) {
 
@@ -135,8 +147,6 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
         wrapper.loadCall(httpRequest, callback, new RemoteUserHomeParser());
 
     }
-
-    //TODO: refactor get users:save current user name,avatar,and do not insert into db
 
     @Override
     public void getUsersByStationIDWithCloudAPI(String stationID, BaseLoadDataCallback<User> callback) {
@@ -147,6 +157,10 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
     }
 
+    /*
+     * WISNUC API:GET USER
+     * Get User Detailed Info
+     */
     @Override
     public void getUserDetailedInfoByUUID(String userUUID, BaseLoadDataCallback<User> callback) {
 
@@ -165,6 +179,10 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
     }
 
+    /*
+     * WISNUC API:PATCH USER
+     * Modify User Name
+     */
     @Override
     public void modifyUserName(String userUUID, String userName, BaseOperateDataCallback<User> callback) {
 
@@ -183,6 +201,10 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
     }
 
+    /*
+     * WISNUC API:PUT USER PASSWORD
+     * Modify User Password
+     */
     @Override
     public void modifyUserPassword(String userUUID, String originalPassword, String newPassword, BaseOperateDataCallback<Boolean> callback) {
 
@@ -206,6 +228,10 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
     }
 
+    /*
+     * WISNUC API:PATCH USER DISABLED
+     * Modify User Enable State
+     */
     @Override
     public void modifyUserEnableState(String userUUID, boolean newState, BaseOperateDataCallback<User> callback) {
 
@@ -224,6 +250,10 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
 
     }
 
+    /*
+     * WISNUC API: PATCH USER IsAdmin
+     * Modify User Is Admin Or Not
+     */
     @Override
     public void modifyUserIsAdminState(String userUUID, boolean newIsAdminState, BaseOperateDataCallback<User> callback) {
 
@@ -241,4 +271,5 @@ public class UserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl implement
         wrapper.operateCall(httpRequest, callback, new RemoteInsertUserParser());
 
     }
+
 }

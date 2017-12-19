@@ -30,6 +30,9 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl impleme
         super(iHttpUtil, httpRequestFactory);
     }
 
+    /*
+     * WISNUC API:POST TICKET LIST
+     */
     @Override
     public void createInvitation(final BaseOperateDataCallback<String> callback) {
 
@@ -39,6 +42,9 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl impleme
 
     }
 
+    /*
+     * WISNUC API:GET TICKET LIST
+     */
     @Override
     public void getInvitation(final BaseLoadDataCallback<ConfirmInviteUser> callback) {
 
@@ -48,6 +54,9 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl impleme
 
     }
 
+    /*
+     * WISNUC API:POST TICKET
+     */
     @Override
     public void confirmInvitation(final ConfirmInviteUser confirmInviteUser, final BaseOperateDataCallback<String> callback) {
 

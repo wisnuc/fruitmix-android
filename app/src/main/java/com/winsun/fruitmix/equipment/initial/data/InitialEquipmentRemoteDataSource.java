@@ -51,6 +51,9 @@ public class InitialEquipmentRemoteDataSource extends BaseRemoteDataSourceImpl i
         super(iHttpUtil, httpRequestFactory);
     }
 
+    /*
+     * WISNUC API:GET STORAGE
+     */
     @Override
     public void getStorageInfo(@NotNull String ip, @NotNull BaseLoadDataCallback<EquipmentDiskVolume> callback) {
 
@@ -107,6 +110,9 @@ public class InitialEquipmentRemoteDataSource extends BaseRemoteDataSourceImpl i
 
     }
 
+    /*
+     * WISNUC API:POST VOLUME LIST
+     */
     @Override
     public void installSystem(@NotNull final String ip, @NotNull final String userName, @NotNull final String userPassword,
                               @NotNull String mode, @NotNull List<? extends DiskVolumeViewModel> diskVolumeViewModels,
@@ -184,6 +190,9 @@ public class InitialEquipmentRemoteDataSource extends BaseRemoteDataSourceImpl i
 
     }
 
+    /*
+     * WISNUC API:PATCH BOOT
+     */
     private void handleRefreshStorageSucceed(final String ip, String fileSystemUUID, final String userName, final String userPwd,
                                              final BaseOperateDataCallback<User> callback) {
 
@@ -222,6 +231,9 @@ public class InitialEquipmentRemoteDataSource extends BaseRemoteDataSourceImpl i
 
     }
 
+    /*
+     * WISNUC API:GET BOOT
+     */
     private void checkInstallSucceed(String ip, String userName, String userPwd,
                                      final BaseOperateDataCallback<User> callback){
 

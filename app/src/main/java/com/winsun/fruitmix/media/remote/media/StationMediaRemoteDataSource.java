@@ -47,6 +47,9 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
         this.iHttpFileUtil = iHttpFileUtil;
     }
 
+    /*
+     * WISNUC API:GET MEDIA LIST
+     */
     public void getMedia(BaseLoadDataCallback<Media> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(MEDIA_PARAMETER);
@@ -55,6 +58,9 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     }
 
+    /*
+     * WISNUC API:GET MEDIA
+     */
     boolean downloadMedia(Media media) throws MalformedURLException, IOException, SocketTimeoutException, NetworkException {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequest(media.getRemoteMediaRequestPath());

@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.file.data.station;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
@@ -12,12 +13,15 @@ import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
+import com.winsun.fruitmix.http.FileFormData;
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.http.TextFormData;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpResponse;
 import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
+import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -26,18 +30,19 @@ import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.parser.RemoteRootDriveFolderParser;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Collections;
 
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
 /**
@@ -87,6 +92,9 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
     }
 
+    /*
+     * WISNUC API:GET DRIVE
+     */
     @Override
     public void getFile(String rootUUID, final String folderUUID, BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
@@ -105,6 +113,9 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
     }
 
+    /*
+     * WISNUC API:GET DIRENTRY
+     */
     @Override
     public void downloadFile(FileDownloadState fileDownloadState, BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException {
 
@@ -148,6 +159,9 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
     }
 
+    /*
+     * WISNUC API:POST DIRENTRY LIST
+     */
     @Override
     public void createFolder(String folderName, String driveUUID, String dirUUID, BaseOperateDataCallback<HttpResponse> callback) {
 
@@ -212,16 +226,16 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
     private HttpResponse createFolderWithStationAPI(HttpRequest httpRequest, String folderName) throws IOException {
 
-        JSONObject value = null;
+        JSONObject value;
         try {
             value = new JSONObject();
 
             value.put("op", "mkdir");
 
-            Map<String, String> map = new HashMap<>();
-            map.put(folderName, value.toString());
+            TextFormData textFormData = new TextFormData(folderName, value.toString());
 
-            return iHttpUtil.remoteCallWithFormData(httpRequest, map);
+            return iHttpUtil.remoteCallRequest(iHttpUtil.createPostRequest(httpRequest,
+                    iHttpUtil.createFormDataRequestBody(Collections.singletonList(textFormData), Collections.<FileFormData>emptyList())));
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -249,7 +263,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         try {
 
-            httpResponse = iHttpFileUtil.uploadFile(httpRequest, file);
+            httpResponse = iHttpUtil.remoteCallRequest(iHttpUtil.createPostRequest(httpRequest, getUploadFileRequestBody(httpRequest,file)));
 
             if (httpResponse != null && httpResponse.getResponseCode() == 200)
                 return new OperationSuccess();
@@ -268,6 +282,10 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
             e.printStackTrace();
 
             return new OperationIOException();
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return new OperationJSONException();
         }
 
     }
@@ -289,7 +307,8 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         try {
 
-            httpResponse = iHttpFileUtil.uploadFileWithProgress(fileUploadState, httpRequest, file);
+            httpResponse = iHttpUtil.remoteCallRequest(iHttpFileUtil.createUploadWithProgressRequest(httpRequest,
+                    getUploadFileRequestBody(httpRequest,file),fileUploadState));
 
             if (httpResponse != null && httpResponse.getResponseCode() == 200)
                 return new OperationSuccess();
@@ -308,7 +327,54 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
             e.printStackTrace();
 
             return new OperationIOException();
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return new OperationJSONException();
         }
 
     }
+
+
+    @NonNull
+    private RequestBody getUploadFileRequestBody(HttpRequest httpRequest, LocalFile localFile) throws JSONException {
+        RequestBody requestBody;
+
+        if (httpRequest.getBody().length() != 0) {
+
+            JSONObject jsonObject = new JSONObject(httpRequest.getBody());
+
+            jsonObject.put("op", "newfile");
+            jsonObject.put("toName", localFile.getName());
+            jsonObject.put(Util.SHA_256_STRING, localFile.getFileHash());
+            jsonObject.put(Util.SIZE_STRING, Integer.valueOf(localFile.getSize()));
+
+            String jsonObjectStr = jsonObject.toString();
+
+            Log.d(TAG, "uploadFile: " + jsonObjectStr);
+
+            TextFormData textFormData = new TextFormData(Util.MANIFEST_STRING, jsonObjectStr);
+            FileFormData fileFormData = new FileFormData("", localFile.getName(), new File(localFile.getPath()));
+
+            requestBody = iHttpUtil.createFormDataRequestBody(Collections.singletonList(textFormData), Collections.singletonList(fileFormData));
+
+
+        } else {
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(Util.SIZE_STRING, Integer.valueOf(localFile.getSize()));
+            jsonObject.put(Util.SHA_256_STRING, localFile.getFileHash());
+
+            String jsonObjectStr = jsonObject.toString();
+
+            Log.d(TAG, "uploadFile: " + jsonObjectStr);
+
+            FileFormData fileFormData = new FileFormData(localFile.getName(), jsonObjectStr, new File(localFile.getPath()));
+
+            requestBody = iHttpUtil.createFormDataRequestBody(Collections.<TextFormData>emptyList(), Collections.singletonList(fileFormData));
+
+        }
+        return requestBody;
+    }
+
 }

@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -42,9 +43,6 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
     private static final String APPLICATION_JSON_STRING = "application/json";
     private static final String JPEG_STRING = "image/*";
-
-    private static final String SHA_256_STRING = "sha256";
-    private static final String SIZE_STRING = "size";
 
     private static OkHttpUtil instance;
 
@@ -164,179 +162,55 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     @Override
-    public HttpResponse uploadFile(HttpRequest httpRequest, LocalFile localFile) throws MalformedURLException, IOException, SocketTimeoutException {
+    public RequestBody createFormDataRequestBody(List<TextFormData> textFormDatas, List<FileFormData> fileFormDatas) {
 
-        try {
-
-            Request.Builder builder;
-
-            builder = generateRequestBuilder(httpRequest);
-
-            RequestBody requestBody = getUploadFileRequestBody(httpRequest, localFile);
-
-            Request request = builder.post(requestBody).build();
-
-            Response response = executeRequest(request);
-
-            HttpResponse httpResponse = getHttpResponse(response);
-
-            Log.d(TAG, "remoteCallMethod: after read response body" + Util.getCurrentFormatTime());
-
-            return httpResponse;
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            return null;
-        }
-
-    }
-
-    @NonNull
-    private RequestBody getUploadFileRequestBody(HttpRequest httpRequest, LocalFile localFile) throws JSONException {
         RequestBody requestBody;
 
-        if (httpRequest.getBody().length() != 0) {
+        MultipartBody.Builder multipartBodyBuilder = new MultipartBody.Builder().setType(MultipartBody.FORM);
 
-            JSONObject jsonObject = new JSONObject(httpRequest.getBody());
+        for (TextFormData textFormData : textFormDatas) {
+            multipartBodyBuilder.addFormDataPart(textFormData.getName(), textFormData.getValue());
+        }
 
-            jsonObject.put("op", "newfile");
-            jsonObject.put("toName", localFile.getName());
-            jsonObject.put(SHA_256_STRING, localFile.getFileHash());
-            jsonObject.put(SIZE_STRING, Integer.valueOf(localFile.getSize()));
+        for (FileFormData fileFormData : fileFormDatas) {
 
-            String jsonOjbectStr = jsonObject.toString();
+            File file = fileFormData.getFile();
 
-            Log.d(TAG, "uploadFile: " + jsonOjbectStr);
-
-            requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart("manifest", jsonOjbectStr)
-                    .addFormDataPart("", localFile.getName(), RequestBody.create(MediaType.parse(FileUtil.getMIMEType(localFile.getName())), new File(localFile.getPath())))
-                    .build();
-
-        } else {
-
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put(SIZE_STRING, Integer.valueOf(localFile.getSize()));
-            jsonObject.put(SHA_256_STRING, localFile.getFileHash());
-
-            String jsonObjectStr = jsonObject.toString();
-
-            Log.d(TAG, "uploadFile: " + jsonObjectStr);
-
-//            String fileName = "{" +
-//                    "\"size\":" + localFile.getSize() + "," +
-//                    "\"sha256\":\"" + localFile.getFileHash() + "\"" +
-//                    "}";
-
-            requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart(localFile.getName(), jsonObjectStr, RequestBody.create(MediaType.parse(FileUtil.getMIMEType(localFile.getName())), new File(localFile.getPath())))
-                    .build();
+            multipartBodyBuilder.addFormDataPart(fileFormData.getName(), fileFormData.getFileName(), RequestBody.create(MediaType.parse(FileUtil.getMIMEType(file.getName())), file));
 
         }
+
+        requestBody = multipartBodyBuilder.build();
+
         return requestBody;
-    }
-
-    @Override
-    public HttpResponse uploadFileWithProgress(FileUploadState fileUploadState, HttpRequest httpRequest, LocalFile localFile) throws IOException {
-
-        try {
-
-            Request.Builder builder;
-
-            builder = generateRequestBuilder(httpRequest);
-
-            RequestBody requestBody = getUploadFileRequestBody(httpRequest, localFile);
-
-            Request request = builder.post(new ProgressRequestBody(requestBody, fileUploadState)).build();
-
-            Response response = executeRequest(request);
-
-            HttpResponse httpResponse = getHttpResponse(response);
-
-            Log.d(TAG, "remoteCallMethod: after read response body" + Util.getCurrentFormatTime());
-
-            return httpResponse;
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            return null;
-        }
-
 
     }
 
     @Override
-    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, Map<String, String> map) throws MalformedURLException, IOException, SocketTimeoutException {
+    public Request createPostRequest(HttpRequest httpRequest,RequestBody requestBody) {
 
         Request.Builder builder = generateRequestBuilder(httpRequest);
 
-        RequestBody requestBody;
+        return builder.post(requestBody).build();
+    }
 
-        MultipartBody.Builder builder1 = new MultipartBody.Builder().setType(MultipartBody.FORM);
+    @Override
+    public Request createUploadWithProgressRequest(HttpRequest httpRequest, RequestBody requestBody,FileUploadState fileUploadState) {
+        Request.Builder builder;
 
-        for (Map.Entry<String, String> entry : map.entrySet()) {
+        builder = generateRequestBuilder(httpRequest);
 
-            builder1.addFormDataPart(entry.getKey(), entry.getValue());
-        }
+        return builder.post(new ProgressRequestBody(requestBody, fileUploadState)).build();
+    }
 
-        requestBody = builder1.build();
-
-        Request request = builder.post(requestBody).build();
+    @Override
+    public HttpResponse remoteCallRequest(Request request) throws MalformedURLException, IOException, SocketTimeoutException {
 
         Response response = executeRequest(request);
 
         HttpResponse httpResponse = getHttpResponse(response);
 
-        Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
-
-        return httpResponse;
-
-    }
-
-    @Override
-    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, String name, String fileName, File file) throws MalformedURLException, IOException, SocketTimeoutException {
-
-        Request.Builder builder = generateRequestBuilder(httpRequest);
-
-        RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart(name, fileName, RequestBody.create(MediaType.parse(FileUtil.getMIMEType(file.getName())), file)).build();
-
-        Request request = builder.post(requestBody).build();
-
-        Response response = executeRequest(request);
-
-        HttpResponse httpResponse = getHttpResponse(response);
-
-        Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
-
-        return httpResponse;
-
-    }
-
-    @Override
-    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, Map<String, String> map, String name, String fileName, File file) throws IOException {
-        Request.Builder builder = generateRequestBuilder(httpRequest);
-
-        RequestBody requestBody;
-        MultipartBody.Builder builder1 = new MultipartBody.Builder().setType(MultipartBody.FORM);
-
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-
-            builder1.addFormDataPart(entry.getKey(), entry.getValue());
-
-        }
-
-        requestBody = builder1.addFormDataPart(name, fileName, RequestBody.create(MediaType.parse(FileUtil.getMIMEType(file.getName())), file)).build();
-
-        Request request = builder.post(requestBody).build();
-
-        Response response = executeRequest(request);
-
-        HttpResponse httpResponse = getHttpResponse(response);
-
-        Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
+        Log.d(TAG, "remoteCallRequest: after read response body" + Util.formatDate(System.currentTimeMillis()));
 
         return httpResponse;
     }

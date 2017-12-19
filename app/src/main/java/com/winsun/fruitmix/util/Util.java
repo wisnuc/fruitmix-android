@@ -69,6 +69,10 @@ public class Util {
     public static final String GATEWAY = "gateway";
     public static final String USER_UUID = "user_uuid";
 
+    public static final String SHA_256_STRING = "sha256";
+    public static final String SIZE_STRING = "size";
+    public static final String MANIFEST_STRING = "manifest";
+
     public static final String AUTO_UPLOAD_OR_NOT = "auto_upload_or_not";
 
     public static final String REMOTE_USER_CREATED = "remote_user_created";
@@ -256,7 +260,7 @@ public class Util {
     }
 
 
-    public static String calcSHA256OfFile(String fname) {
+    public static String calcSHA256OfFile(String filePath) {
         MessageDigest md;
         FileInputStream fin;
         byte[] buffer;
@@ -268,7 +272,7 @@ public class Util {
         try {
             buffer = new byte[15000];
             md = MessageDigest.getInstance("SHA-256");
-            fin = new FileInputStream(fname);
+            fin = new FileInputStream(filePath);
             len = 0;
             while ((len = fin.read(buffer)) != -1) {
                 md.update(buffer, 0, len);

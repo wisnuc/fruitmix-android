@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
 /**
@@ -20,8 +22,6 @@ public interface IHttpFileUtil {
 
     ResponseBody downloadFile(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException,NetworkException;
 
-    HttpResponse uploadFile(HttpRequest httpRequest, LocalFile localFile) throws MalformedURLException, IOException, SocketTimeoutException;
-
-    HttpResponse uploadFileWithProgress(FileUploadState fileUploadState,HttpRequest httpRequest,LocalFile localFile) throws MalformedURLException, IOException, SocketTimeoutException;
+    Request createUploadWithProgressRequest(HttpRequest httpRequest, RequestBody requestBody,FileUploadState fileUploadState);
 
 }

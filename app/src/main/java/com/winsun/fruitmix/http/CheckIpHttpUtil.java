@@ -14,7 +14,11 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.util.List;
 import java.util.Map;
+
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 /**
  * Created by Administrator on 2017/5/16.
@@ -231,17 +235,18 @@ public class CheckIpHttpUtil implements IHttpUtil {
     }
 
     @Override
-    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, Map<String, String> map) throws MalformedURLException, IOException, SocketTimeoutException {
+    public RequestBody createFormDataRequestBody(List<TextFormData> textFormDatas, List<FileFormData> fileFormDatas) {
         return null;
     }
 
     @Override
-    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, String name, String fileName, File file) throws MalformedURLException, IOException, SocketTimeoutException {
+    public Request createPostRequest(HttpRequest httpRequest, RequestBody requestBody) {
         return null;
     }
 
     @Override
-    public HttpResponse remoteCallWithFormData(HttpRequest httpRequest, Map<String, String> map, String name, String fileName, File file) throws MalformedURLException, IOException, SocketTimeoutException {
+    public HttpResponse remoteCallRequest(Request request) throws MalformedURLException, IOException, SocketTimeoutException {
         return null;
     }
+
 }

@@ -6,8 +6,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
+import java.util.List;
 import java.util.Map;
 
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
 /**
@@ -18,11 +21,10 @@ public interface IHttpUtil {
 
     HttpResponse remoteCall(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException;
 
-    HttpResponse remoteCallWithFormData(HttpRequest httpRequest, Map<String,String> map) throws MalformedURLException, IOException, SocketTimeoutException;
+    RequestBody createFormDataRequestBody(List<TextFormData> textFormDatas, List<FileFormData> fileFormDatas);
 
-    HttpResponse remoteCallWithFormData(HttpRequest httpRequest,String name,String fileName,File file)throws MalformedURLException, IOException, SocketTimeoutException;
+    Request createPostRequest(HttpRequest httpRequest,RequestBody requestBody);
 
-    HttpResponse remoteCallWithFormData(HttpRequest httpRequest,Map<String,String> map,String name,String fileName,File file)throws MalformedURLException, IOException, SocketTimeoutException;
-
+    HttpResponse remoteCallRequest(Request request) throws MalformedURLException, IOException, SocketTimeoutException;
 
 }

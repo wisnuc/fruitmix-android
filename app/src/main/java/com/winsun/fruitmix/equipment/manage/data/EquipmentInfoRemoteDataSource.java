@@ -50,6 +50,9 @@ public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl impl
         super(iHttpUtil, httpRequestFactory);
     }
 
+    /*
+     * WISNUC API:GET SYSTEM
+     */
     @Override
     public void getBaseEquipmentInfo(final BaseLoadDataCallback<BaseEquipmentInfo> callback) {
 
@@ -71,6 +74,9 @@ public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl impl
 
     }
 
+    /*
+     * WISNUC API:GET STATION INFO
+     */
     private void getEquipmentInfo(final EquipmentInfoInControlSystem equipmentInfoInControlSystem, final BaseLoadDataCallback<BaseEquipmentInfo> callback) {
 
         HttpRequest equipmentInfoHttpRequest = httpRequestFactory.createGetRequestByPathWithoutToken(EQUIPMENT_INFO);
@@ -163,6 +169,9 @@ public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl impl
 
     }
 
+    /*
+     * WISNUC API:GET NETWORK INTERFACES
+     */
     @Override
     public void getEquipmentNetworkInfo(BaseLoadDataCallback<EquipmentNetworkInfo> callback) {
 
@@ -172,6 +181,9 @@ public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl impl
 
     }
 
+    /*
+     * WISNUC API:GET TIMEDATE
+     */
     @Override
     public void getEquipmentTimeInfo(BaseLoadDataCallback<EquipmentTimeInfo> callback) {
 
@@ -242,6 +254,9 @@ public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl impl
 
     }
 
+    /*
+     * WISNUC API:PATCH STATION INFO
+     */
     @Override
     public void modifyEquipmentLabel(String newEquipmentLabel, BaseOperateDataCallback<Boolean> callback) {
 
