@@ -3,32 +3,19 @@ package com.winsun.fruitmix.person.info;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 
-import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.EquipmentSearchActivity;
 import com.winsun.fruitmix.NavPagerActivity;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.logout.LogoutUseCase;
-import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
-import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileTool;
-import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.wxapi.MiniProgram;
 import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
-import org.json.JSONException;
-
-import java.io.File;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -37,10 +24,9 @@ import java.util.concurrent.Future;
  * Created by Administrator on 2017/10/19.
  */
 
-public class PersonInfoPresenter extends BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetTokenCallback {
+public class PersonInfoPresenter extends BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetWeChatCodeCallback {
 
     public static final String TAG = PersonInfoPresenter.class.getSimpleName();
-
 
     private LogoutUseCase logoutUseCase;
 
@@ -51,10 +37,11 @@ public class PersonInfoPresenter extends BindWeChatUserPresenter implements WXEn
     private FileTool mFileTool;
 
     public PersonInfoPresenter(UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
-                               PersonInfoView personInfoView, PersonInfoDataSource personInfoDataSource, LogoutUseCase logoutUseCase,
+                               PersonInfoView personInfoView, PersonInfoDataSource personInfoDataSource,
+                               TokenDataSource tokenDataSource,LogoutUseCase logoutUseCase,
                                LoginUseCase loginUseCase, ThreadManager threadManager, FileTool fileTool) {
 
-        super(userDataRepository, systemSettingDataSource, personInfoView, personInfoDataSource);
+        super(userDataRepository, systemSettingDataSource, personInfoView, personInfoDataSource,tokenDataSource);
         this.logoutUseCase = logoutUseCase;
         mLoginUseCase = loginUseCase;
         this.threadManager = threadManager;

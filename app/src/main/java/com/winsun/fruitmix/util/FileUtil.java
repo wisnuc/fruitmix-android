@@ -1028,25 +1028,10 @@ public class FileUtil {
         return dir == null || dir.delete();
     }
 
+
     public static boolean checkFileIsVideo(String fileName) {
 
-        int dotIndex = fileName.lastIndexOf(".");
-
-        if (dotIndex < 0)
-            return false;
-
-        String end = fileName.substring(dotIndex, fileName.length()).toLowerCase();
-
-        if (end.isEmpty())
-            return false;
-
-        String type = "";
-        for (String[] aMIME_MapTable : MIME_MapTable) {
-            if (end.equals(aMIME_MapTable[0]))
-                type = aMIME_MapTable[1];
-        }
-
-        return type.startsWith("video");
+        return getMIMEType(fileName).startsWith("video");
 
     }
 
@@ -1099,5 +1084,11 @@ public class FileUtil {
             return R.drawable.file_icon;
 
     }
+
+    public static boolean checkFileIsTorrent(String filePath){
+        return filePath.endsWith("torrent");
+    }
+
+
 
 }

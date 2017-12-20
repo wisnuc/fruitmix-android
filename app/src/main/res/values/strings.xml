@@ -230,6 +230,8 @@
 
     <string name="calculating">Calculating</string>
 
+    <string name="clear_default_open_torrent_file_behavior">Clear default open torrent file behavior</string>
+
     <!-- create user -->
     <string name="user_name">User Name</string>
     <string name="confirm_user_password">Confirm Password</string>
@@ -492,6 +494,12 @@
     <string name="delete_file">Delete downloaded file</string>
 
     <string name="magnet_illegal">Magnet invalid.</string>
+
+    <string name="upload_torrent_file_title">This file is a BT download file</string>
+
+    <string name="upload_file_to_wisnuc">Upload file to WISNUC</string>
+
+    <string name="always">Always</string>
 
     <!-- maintenance -->
 

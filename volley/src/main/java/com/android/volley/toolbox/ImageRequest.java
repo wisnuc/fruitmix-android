@@ -45,7 +45,7 @@ public class ImageRequest extends Request<Bitmap> {
     /**
      * Socket timeout in milliseconds for image requests
      */
-    public static final int DEFAULT_IMAGE_TIMEOUT_MS = 10 * 1000;
+    public static final int DEFAULT_IMAGE_TIMEOUT_MS = 30 * 1000;
 
     /**
      * Default number of retries for image requests

@@ -18,6 +18,7 @@ import com.winsun.fruitmix.person.info.PersonInfoPresenter;
 import com.winsun.fruitmix.person.info.PersonInfoView;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.FileTool;
@@ -59,8 +60,8 @@ public class PersonInfoActivity extends BaseActivity implements PersonInfoView, 
 
         personInfoPresenter = new PersonInfoPresenter(InjectUser.provideRepository(this),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(this), this, InjectPersonInfoDataSource.provideInstance(this),
-                InjectLogoutUseCase.provideLogoutUseCase(this), InjectLoginUseCase.provideLoginUseCase(this),
-                ThreadManagerImpl.getInstance(), FileTool.getInstance());
+                InjectTokenRemoteDataSource.provideTokenDataSource(this), InjectLogoutUseCase.provideLogoutUseCase(this),
+                InjectLoginUseCase.provideLoginUseCase(this), ThreadManagerImpl.getInstance(), FileTool.getInstance());
 
         currentUser = personInfoPresenter.getCurrentUser();
 

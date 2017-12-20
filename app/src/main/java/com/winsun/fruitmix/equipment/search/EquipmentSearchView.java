@@ -4,13 +4,14 @@ import android.content.Context;
 
 import com.winsun.fruitmix.equipment.search.data.Equipment;
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
+import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.user.User;
 
 /**
  * Created by Administrator on 2017/8/15.
  */
 
-public interface EquipmentSearchView {
+public interface EquipmentSearchView extends BaseView{
 
     void handleLoginWithUserSucceed(boolean autoUpload);
 
@@ -26,6 +27,6 @@ public interface EquipmentSearchView {
 
     void gotoActivity(EquipmentSearchViewModel equipmentSearchViewModel);
 
-
+    void handleStartActivityAfterLoginSucceed();
 
 }

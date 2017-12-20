@@ -1,17 +1,20 @@
 package com.winsun.fruitmix.equipment.search;
 
+import android.content.DialogInterface;
 import android.databinding.ViewDataBinding;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.R;
@@ -24,13 +27,19 @@ import com.winsun.fruitmix.databinding.EquipmentItemBinding;
 import com.winsun.fruitmix.databinding.EquipmentUserItemBinding;
 import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource;
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
+import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.equipment.search.data.Equipment;
 import com.winsun.fruitmix.equipment.search.data.EquipmentTypeInfo;
+import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.model.operationResult.OperationFail;
+import com.winsun.fruitmix.model.operationResult.OperationMoreThanOneStation;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
+import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -39,6 +48,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * Created by Administrator on 2017/8/15.
@@ -308,23 +319,29 @@ public class EquipmentPresenter implements ActiveView {
 
         currentEquipment = mUserLoadedEquipments.get(position);
 
+//        int preUserSize = equipmentUserRecyclerViewAdapter.mCurrentUsers.size();
+//
+//        equipmentUserRecyclerViewAdapter.clearCurrentUsers();
+//
+//        equipmentUserRecyclerViewAdapter.notifyItemRangeRemoved(0, preUserSize);
+
         int state = currentEquipment.getState();
 
         if (state == EquipmentDataSource.EQUIPMENT_READY) {
 
             equipmentSearchViewModel.showEquipmentUsers.set(true);
 
-            int size = equipmentUserRecyclerViewAdapter.mCurrentUsers.size();
+            String ip = currentEquipment.getHosts().get(0);
+
+            List<User> users = mMapKeyIsIpValueIsUsers.get(ip);
 
             equipmentUserRecyclerViewAdapter.clearCurrentUsers();
 
-            equipmentUserRecyclerViewAdapter.notifyItemRangeRemoved(0, size);
-
-            List<User> users = mMapKeyIsIpValueIsUsers.get(currentEquipment.getHosts().get(0));
-
             equipmentUserRecyclerViewAdapter.setCurrentUsers(users);
 
-            equipmentUserRecyclerViewAdapter.notifyItemRangeInserted(0, users.size());
+//            equipmentUserRecyclerViewAdapter.notifyItemRangeInserted(0, users.size());
+
+            equipmentUserRecyclerViewAdapter.notifyDataSetChanged();
 
         } else {
 
@@ -844,11 +861,13 @@ public class EquipmentPresenter implements ActiveView {
 
             userAvatar.setUser(user, imageLoader);
 
+            final String ip = currentEquipment.getHosts().get(0);
+
             equipmentUserItemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    loginWithUserInThread(user);
+                    loginWithUserInThread(user, ip);
 
                 }
             });
@@ -857,9 +876,9 @@ public class EquipmentPresenter implements ActiveView {
     }
 
 
-    private void loginWithUserInThread(final User user) {
+    private void loginWithUserInThread(final User user, String ip) {
 
-        loginUseCase.loginWithUser(user, new BaseOperateDataCallback<Boolean>() {
+        loginUseCase.loginWithUser(ip, user, new BaseOperateDataCallback<Boolean>() {
             @Override
             public void onSucceed(final Boolean data, OperationResult result) {
 
@@ -877,6 +896,155 @@ public class EquipmentPresenter implements ActiveView {
             }
 
         });
+    }
+
+    public void loginInThread(String code) {
+
+        equipmentSearchView.showProgressDialog(equipmentSearchView.getString(R.string.operating_title, equipmentSearchView.getString(R.string.login)));
+
+        loginUseCase.loginWithWeChatCode(code, new BaseOperateDataCallback<Boolean>() {
+            @Override
+            public void onSucceed(Boolean data, OperationResult result) {
+
+                if (result.getOperationResultType() == OperationResultType.MORE_THAN_ONE_STATION) {
+
+                    OperationMoreThanOneStation operationMoreThanOneStation = (OperationMoreThanOneStation) result;
+
+                    List<LoggedInWeChatUser> loggedInWeChatUsers = operationMoreThanOneStation.getLoggedInWeChatUsers();
+
+                    WeChatTokenUserWrapper weChatTokenUserWrapper = operationMoreThanOneStation.getWeChatTokenUserWrapper();
+
+                    if (loggedInWeChatUsers.isEmpty()) {
+
+                        handleLoginFail(new OperationFail(R.string.no_binding_user_in_nas));
+
+                    } else {
+
+                        equipmentSearchView.dismissDialog();
+
+                        showChooseStationDialog(weChatTokenUserWrapper, loggedInWeChatUsers);
+
+                    }
+
+                } else {
+
+                    handleLoginSucceed();
+
+                }
+
+            }
+
+            @Override
+            public void onFail(final OperationResult result) {
+
+                handleLoginFail(result);
+
+            }
+        });
+    }
+
+    private class SelectItem {
+
+        private int selectItemPosition;
+
+        int getSelectItemPosition() {
+            return selectItemPosition;
+        }
+
+        void setSelectItemPosition(int selectItemPosition) {
+            this.selectItemPosition = selectItemPosition;
+        }
+    }
+
+    private void showChooseStationDialog(final WeChatTokenUserWrapper weChatTokenUserWrapper, final List<LoggedInWeChatUser> loggedInWeChatUsers) {
+
+        String[] items = new String[loggedInWeChatUsers.size()];
+
+        for (int i = 0; i < loggedInWeChatUsers.size(); i++) {
+
+            LoggedInWeChatUser loggedInWeChatUser = loggedInWeChatUsers.get(i);
+
+            String item = loggedInWeChatUser.getUser().getUserName() + "\n" +
+                    String.format(equipmentSearchView.getString(R.string.on_equipment), loggedInWeChatUser.getEquipmentName());
+
+            items[i] = item;
+
+        }
+
+        final SelectItem selectItem = new SelectItem();
+        selectItem.setSelectItemPosition(0);
+
+        AlertDialog dialog;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(equipmentSearchView.getContext()).setTitle(equipmentSearchView.getString(R.string.select_one_winsuc))
+                .setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        selectItem.setSelectItemPosition(which);
+
+                    }
+                }).setPositiveButton(equipmentSearchView.getString(R.string.login), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        equipmentSearchView.showProgressDialog(equipmentSearchView.getString(R.string.operating_title, equipmentSearchView.getString(R.string.login)));
+
+                        final String stationID = loggedInWeChatUsers.get(selectItem.getSelectItemPosition()).getStationID();
+
+                        loginUseCase.getUsersAfterChooseStationID(weChatTokenUserWrapper, stationID,
+                                new BaseOperateDataCallback<Boolean>() {
+                                    @Override
+                                    public void onSucceed(Boolean data, OperationResult result) {
+
+                                        loginUseCase.handleLoginWithWeChatCodeSucceed(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(), stationID);
+
+                                        handleLoginSucceed();
+
+                                    }
+
+                                    @Override
+                                    public void onFail(OperationResult result) {
+
+                                        handleLoginFail(result);
+
+                                    }
+                                });
+
+                    }
+                }).setNegativeButton(equipmentSearchView.getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        handleLoginFail(new OperationFail(equipmentSearchView.getString(R.string.success, equipmentSearchView.getString(R.string.cancel_login))));
+
+                    }
+                }).setCancelable(false);
+
+        dialog = builder.create();
+
+        dialog.show();
+
+    }
+
+    private void handleLoginSucceed() {
+        equipmentSearchView.dismissDialog();
+
+        equipmentSearchView.showToast(equipmentSearchView.getString(R.string.success, equipmentSearchView.getString(R.string.login)));
+
+        equipmentSearchView.setResult(RESULT_OK);
+
+        equipmentSearchView.finishView();
+
+        equipmentSearchView.handleStartActivityAfterLoginSucceed();
+
+    }
+
+    private void handleLoginFail(OperationResult result) {
+
+        equipmentSearchView.dismissDialog();
+
+        Toast.makeText(equipmentSearchView.getContext(), result.getResultMessage(equipmentSearchView.getContext()), Toast.LENGTH_SHORT).show();
     }
 
 }

@@ -11,8 +11,6 @@ import com.winsun.fruitmix.interfaces.BaseView;
 
 public interface ConfirmInviteUserView extends BaseView {
 
-    String getString(int resID);
-
     Context getContext();
 
     void setInviteUserFabVisibility(int visibility);

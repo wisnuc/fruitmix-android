@@ -47,6 +47,7 @@ import com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadingGroupItemViewMode
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -197,7 +198,11 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
                     Log.d(TAG, "handleMessage: refreshView after 2 seconds");
 
-                    mWeakReference.get().refreshView();
+                    TorrentDownloadManagePresenter presenter = mWeakReference.get();
+
+                    if (presenter != null)
+                        presenter.refreshView();
+
                     break;
             }
         }
@@ -223,6 +228,26 @@ public class TorrentDownloadManagePresenter implements ActiveView {
         mBinding.torrentDownloadRecyclerview.setAdapter(mTorrentDownloadItemAdapter);
 
         mRefreshViewTimelyHandler = new RefreshViewTimelyHandler(Looper.getMainLooper(), this);
+
+    }
+
+    public void startTorrentFileDownloadTask(final Context context, String torrentFilePath) {
+
+        mTorrentDataRepository.postTorrentDownloadTask(new File(torrentFilePath), new BaseOperateDataCallbackWrapper<>(
+                new BaseOperateDataCallback<TorrentRequestParam>() {
+                    @Override
+                    public void onSucceed(TorrentRequestParam data, OperationResult result) {
+
+                        mBaseView.showToast(context.getString(R.string.success, context.getString(R.string.create_new_download_task)));
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+                        mBaseView.showToast(operationResult.getResultMessage(context));
+                    }
+                }, this
+        ));
 
     }
 

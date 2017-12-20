@@ -26,6 +26,8 @@ public class TorrentDownloadManageActivity extends BaseActivity implements BaseV
 
     private TorrentDownloadManagePresenter presenter;
 
+    public static final String KEY_TORRENT_FILE_PATH = "key_torrent_file_path";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +50,12 @@ public class TorrentDownloadManageActivity extends BaseActivity implements BaseV
         binding.setPresenter(presenter);
 
         presenter.refreshView();
+
+        String torrentFilePath = getIntent().getStringExtra(KEY_TORRENT_FILE_PATH);
+
+        if (torrentFilePath != null && torrentFilePath.length() > 0) {
+            presenter.startTorrentFileDownloadTask(this, torrentFilePath);
+        }
 
     }
 

@@ -492,8 +492,12 @@ public class UploadFileUseCase {
 
             OperationResult result = stationFileRepository.getFileWithoutCreateNewThread(currentUserHome, uploadFolderUUID);
 
-            if (!(result instanceof OperationSuccessWithFile))
+            if (!(result instanceof OperationSuccessWithFile)){
+
+                fileUploadItem.setFileUploadState(new FileUploadPendingState(fileUploadItem,this,networkStateManager));
+
                 return;
+            }
 
             List<AbstractRemoteFile> files = ((OperationSuccessWithFile) result).getList();
 

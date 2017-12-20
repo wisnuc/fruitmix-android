@@ -21,4 +21,9 @@ public interface BaseView {
     void showCustomErrorCode(String text);
 
     void onBackPressed();
+
+    String getString(int resID);
+
+    String getString(int resID,Object... formatArgs);
+
 }

@@ -3,6 +3,7 @@ package com.winsun.fruitmix.http;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.android.volley.toolbox.ImageRequest;
 import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
@@ -48,8 +49,8 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
     private OkHttpUtil() {
 
-        okHttpClient = new OkHttpClient.Builder().retryOnConnectionFailure(true).connectTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(Util.HTTP_CONNECT_TIMEOUT, TimeUnit.MILLISECONDS).writeTimeout(60, TimeUnit.SECONDS)
+        okHttpClient = new OkHttpClient.Builder().retryOnConnectionFailure(true).connectTimeout(ImageRequest.DEFAULT_IMAGE_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+                .readTimeout(ImageRequest.DEFAULT_IMAGE_TIMEOUT_MS, TimeUnit.MILLISECONDS).writeTimeout(Util.HTTP_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .addInterceptor(createHttpInterceptor()).build();
     }
 
@@ -187,7 +188,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     @Override
-    public Request createPostRequest(HttpRequest httpRequest,RequestBody requestBody) {
+    public Request createPostRequest(HttpRequest httpRequest, RequestBody requestBody) {
 
         Request.Builder builder = generateRequestBuilder(httpRequest);
 
@@ -195,7 +196,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     @Override
-    public Request createUploadWithProgressRequest(HttpRequest httpRequest, RequestBody requestBody,FileUploadState fileUploadState) {
+    public Request createUploadWithProgressRequest(HttpRequest httpRequest, RequestBody requestBody, FileUploadState fileUploadState) {
         Request.Builder builder;
 
         builder = generateRequestBuilder(httpRequest);

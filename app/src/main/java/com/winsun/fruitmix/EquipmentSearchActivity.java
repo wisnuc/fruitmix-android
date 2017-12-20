@@ -276,23 +276,22 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
     @Override
     public void wechatLogin() {
 
-        WXEntryActivity.setWxEntryLoginCallback(new WXEntryActivity.WXEntryLoginCallback() {
+        WXEntryActivity.setWxEntryGetWeChatCodeCallback(new WXEntryActivity.WXEntryGetWeChatCodeCallback() {
             @Override
-            public void loginSucceed() {
+            public void succeed(String code) {
 
-                Log.d(TAG, "login with wechat code succeed and finish EquipmentSearchActivity");
+                Log.d(TAG, "get code and start login");
 
-                setResult(RESULT_OK);
+                equipmentPresenter.loginInThread(code);
 
-                finish();
-
-                handleStartActivityAfterLoginSucceed();
             }
 
             @Override
-            public void loginFail() {
+            public void fail(int resID) {
 
                 Log.d(TAG, "login with wechat code fail");
+
+                showToast(getString(resID));
             }
         });
 
@@ -302,7 +301,8 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
 
     }
 
-    private void handleStartActivityAfterLoginSucceed() {
+    @Override
+    public void handleStartActivityAfterLoginSucceed() {
 
         Log.d(TAG, "handleStartActivityAfterLoginSucceed: uploadFilePath: " + uploadFilePath);
 

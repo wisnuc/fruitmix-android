@@ -178,6 +178,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".torrent.view.TorrentDownloadManageActivity"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
             android:name=".equipment.maintenance.MaintenanceActivity"

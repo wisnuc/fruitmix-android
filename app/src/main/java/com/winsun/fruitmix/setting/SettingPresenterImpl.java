@@ -247,6 +247,14 @@ public class SettingPresenterImpl implements SettingPresenter {
 
     }
 
+    @Override
+    public void clearDefaultOpenTorrentFileBehavior() {
+
+        systemSettingDataSource.setOpenTorrentFileDefaultBehavior(0);
+
+        baseView.showToast(baseView.getString(R.string.success, baseView.getString(R.string.clear_default_open_torrent_file_behavior)));
+
+    }
 
     @Override
     public void onDestroy(Context context) {

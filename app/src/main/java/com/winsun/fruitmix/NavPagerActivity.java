@@ -124,7 +124,7 @@ public class NavPagerActivity extends BaseActivity
     }
 
     @Override
-    public void gotoDownloadManageActivity() {
+    public void gotoTorrentDownloadManageActivity() {
         Util.startActivity(mContext, TorrentDownloadManageActivity.class);
     }
 

@@ -26,6 +26,7 @@ import com.winsun.fruitmix.person.info.BindWeChatUserPresenter;
 import com.winsun.fruitmix.person.info.InjectPersonInfoDataSource;
 import com.winsun.fruitmix.person.info.PersonInfoView;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
 import com.winsun.fruitmix.token.LoadTokenParam;
 import com.winsun.fruitmix.user.OperateUserViewModel;
 import com.winsun.fruitmix.user.User;
@@ -87,7 +88,7 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
         mBindWeChatUserPresenter = new BindWeChatUserPresenter(InjectUser.provideRepository(this),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(this),
-                this, InjectPersonInfoDataSource.provideInstance(this));
+                this, InjectPersonInfoDataSource.provideInstance(this), InjectTokenRemoteDataSource.provideTokenDataSource(this));
 
         initToolbar(binding);
 

@@ -494,7 +494,7 @@ public class LoginUseCase extends BaseDataRepository {
     }
 
 
-    public void loginWithUser(User user, BaseOperateDataCallback<Boolean> callback) {
+    public void loginWithUser(String equipmentIP, User user, BaseOperateDataCallback<Boolean> callback) {
 
         BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
@@ -503,7 +503,8 @@ public class LoginUseCase extends BaseDataRepository {
         LoggedInUser currentLoggedInUser = null;
 
         for (LoggedInUser loggedInUser : loggedInUsers) {
-            if (loggedInUser.getUser().getUuid().equals(user.getUuid()))
+
+            if (loggedInUser.getUser().getUuid().equals(user.getUuid()) && loggedInUser.getGateway().equals(equipmentIP))
                 currentLoggedInUser = loggedInUser;
 
         }
@@ -818,7 +819,7 @@ public class LoginUseCase extends BaseDataRepository {
 
                         findUser = true;
 
-                        Log.d(TAG, "onSucceed: currentUser isAdmin: " + user.isAdmin() + " isFirstUser:"  + user.isFirstUser());
+                        Log.d(TAG, "onSucceed: currentUser isAdmin: " + user.isAdmin() + " isFirstUser:" + user.isFirstUser());
 
                         currentUser.setAdmin(user.isAdmin());
                         currentUser.setFirstUser(user.isFirstUser());

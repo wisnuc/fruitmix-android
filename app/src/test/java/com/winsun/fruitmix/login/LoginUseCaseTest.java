@@ -530,7 +530,7 @@ public class LoginUseCaseTest {
 
         when(loggedInUserDataSource.getAllLoggedInUsers()).thenReturn(Collections.singletonList(loggedInUser));
 
-        loginUseCase.loginWithUser(user, new BaseOperateDataCallbackImpl<Boolean>());
+        loginUseCase.loginWithUser(testGateway,user, new BaseOperateDataCallbackImpl<Boolean>());
 
         verify(httpRequestFactory).setCurrentData(testToken, testGateway);
 

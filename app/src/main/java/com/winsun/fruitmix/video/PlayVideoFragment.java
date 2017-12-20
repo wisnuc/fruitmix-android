@@ -29,8 +29,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.winsun.fruitmix.file.data.station.StationFileDataSourceImpl.DOWNLOAD_FILE_PARAMETER;
-
 /**
  * Created by Administrator on 2017/11/2.
  */
@@ -38,6 +36,8 @@ import static com.winsun.fruitmix.file.data.station.StationFileDataSourceImpl.DO
 public class PlayVideoFragment {
 
     public static final String TAG = PlayVideoFragment.class.getSimpleName();
+
+    private static final String DOWNLOAD_FILE_PARAMETER = "/drives";
 
     private VideoView videoView;
 

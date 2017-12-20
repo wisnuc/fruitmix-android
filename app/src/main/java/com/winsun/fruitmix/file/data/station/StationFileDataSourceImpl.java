@@ -42,6 +42,7 @@ import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.util.Collections;
 
+import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 
@@ -51,13 +52,12 @@ import okhttp3.ResponseBody;
 
 public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implements StationFileDataSource {
 
-    public static final String LIST_FILE_PARAMETER = "/drives";
-
-    public static final String DOWNLOAD_FILE_PARAMETER = "/drives";
-
-    public static final String ROOT_DRIVE_PARAMETER = "/drives";
+    private static final String ROOT_DRIVE_PARAMETER = "/drives";
 
     public static final String TAG = StationFileDataSourceImpl.class.getSimpleName();
+    private static final String OP = "op";
+    private static final String MKDIR = "mkdir";
+    private static final String DIRS = "/dirs/";
 
     private IHttpFileUtil iHttpFileUtil;
 
@@ -98,7 +98,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     @Override
     public void getFile(String rootUUID, final String folderUUID, BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(LIST_FILE_PARAMETER + "/" + rootUUID + "/dirs/" + folderUUID);
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(ROOT_DRIVE_PARAMETER + "/" + rootUUID + DIRS + folderUUID);
 
         wrapper.loadCall(httpRequest, callback, new RemoteFileFolderParser());
 
@@ -107,7 +107,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     @Override
     public OperationResult getFile(String rootUUID, String folderUUID) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(LIST_FILE_PARAMETER + "/" + rootUUID + "/dirs/" + folderUUID);
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(ROOT_DRIVE_PARAMETER + "/" + rootUUID + DIRS + folderUUID);
 
         return wrapper.loadCall(httpRequest, new RemoteFileFolderParser());
 
@@ -121,8 +121,8 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         String encodedFileName = URLEncoder.encode(fileDownloadState.getFileName(), "UTF-8");
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequest(DOWNLOAD_FILE_PARAMETER + "/"
-                + fileDownloadState.getDriveUUID() + "/dirs/" + fileDownloadState.getParentFolderUUID()
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequest(ROOT_DRIVE_PARAMETER + "/"
+                + fileDownloadState.getDriveUUID() + DIRS + fileDownloadState.getParentFolderUUID()
                 + "/entries/" + fileDownloadState.getFileUUID() + "?name=" + encodedFileName);
 
         if (!wrapper.checkPreCondition(httpRequest, callback))
@@ -165,7 +165,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     @Override
     public void createFolder(String folderName, String driveUUID, String dirUUID, BaseOperateDataCallback<HttpResponse> callback) {
 
-        String path = "/drives/" + driveUUID + "/dirs/" + dirUUID + "/entries";
+        String path = ROOT_DRIVE_PARAMETER + "/" + driveUUID + DIRS + dirUUID + "/entries";
 
         HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path, "");
 
@@ -206,11 +206,11 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
     private HttpResponse createFolderWithCloudAPI(HttpRequest httpRequest, String folderName) throws IOException {
 
-        JSONObject jsonObject = null;
+        JSONObject jsonObject;
         try {
             jsonObject = new JSONObject(httpRequest.getBody());
 
-            jsonObject.put("op", "mkdir");
+            jsonObject.put(OP, MKDIR);
             jsonObject.put("toName", folderName);
 
             httpRequest.setBody(jsonObject.toString());
@@ -230,7 +230,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         try {
             value = new JSONObject();
 
-            value.put("op", "mkdir");
+            value.put(OP, MKDIR);
 
             TextFormData textFormData = new TextFormData(folderName, value.toString());
 
@@ -249,9 +249,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     @Override
     public OperationResult uploadFile(LocalFile file, String driveUUID, String dirUUID) {
 
-        String path = "/drives/" + driveUUID + "/dirs/" + dirUUID + "/entries";
-
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "");
+        HttpRequest httpRequest = createUploadFileHttpRequest(driveUUID, dirUUID);
 
         if (!wrapper.checkUrl(httpRequest.getUrl())) {
             return new OperationMalformedUrlException();
@@ -259,11 +257,25 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         Log.i(TAG, "uploadFile: start upload: " + httpRequest.getUrl());
 
-        HttpResponse httpResponse;
+        Request request;
+        try {
+            request = iHttpUtil.createPostRequest(httpRequest, getUploadFileRequestBody(httpRequest, file));
+        } catch (JSONException e) {
+            e.printStackTrace();
 
+            return new OperationJSONException();
+        }
+
+        return handleUploadFileRequest(request);
+
+    }
+
+    @NonNull
+    private OperationResult handleUploadFileRequest(Request request) {
+        HttpResponse httpResponse;
         try {
 
-            httpResponse = iHttpUtil.remoteCallRequest(iHttpUtil.createPostRequest(httpRequest, getUploadFileRequestBody(httpRequest,file)));
+            httpResponse = iHttpUtil.remoteCallRequest(request);
 
             if (httpResponse != null && httpResponse.getResponseCode() == 200)
                 return new OperationSuccess();
@@ -282,20 +294,21 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
             e.printStackTrace();
 
             return new OperationIOException();
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            return new OperationJSONException();
         }
-
     }
+
+
+    private HttpRequest createUploadFileHttpRequest(String driveUUID, String dirUUID) {
+        String path = ROOT_DRIVE_PARAMETER + "/" + driveUUID + DIRS + dirUUID + "/entries";
+
+        return httpRequestFactory.createHttpPostFileRequest(path, "");
+    }
+
 
     @Override
     public OperationResult uploadFileWithProgress(LocalFile file, FileUploadState fileUploadState, String driveUUID, String dirUUID) {
 
-        String path = "/drives/" + driveUUID + "/dirs/" + dirUUID + "/entries";
-
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "");
+        HttpRequest httpRequest = createUploadFileHttpRequest(driveUUID, dirUUID);
 
         if (!wrapper.checkUrl(httpRequest.getUrl())) {
             return new OperationMalformedUrlException();
@@ -303,35 +316,17 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         Log.i(TAG, "uploadFile: start upload: " + httpRequest.getUrl());
 
-        HttpResponse httpResponse;
-
+        Request request;
         try {
-
-            httpResponse = iHttpUtil.remoteCallRequest(iHttpFileUtil.createUploadWithProgressRequest(httpRequest,
-                    getUploadFileRequestBody(httpRequest,file),fileUploadState));
-
-            if (httpResponse != null && httpResponse.getResponseCode() == 200)
-                return new OperationSuccess();
-            else
-                return new OperationNetworkException(httpResponse);
-
-        } catch (MalformedURLException e) {
-
-            return new OperationMalformedUrlException();
-
-        } catch (SocketTimeoutException ex) {
-
-            return new OperationSocketTimeoutException();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            return new OperationIOException();
+            request = iHttpFileUtil.createUploadWithProgressRequest(httpRequest,
+                    getUploadFileRequestBody(httpRequest, file), fileUploadState);
         } catch (JSONException e) {
             e.printStackTrace();
 
             return new OperationJSONException();
         }
+
+        return handleUploadFileRequest(request);
 
     }
 
@@ -344,10 +339,10 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
             JSONObject jsonObject = new JSONObject(httpRequest.getBody());
 
-            jsonObject.put("op", "newfile");
+            jsonObject.put(OP, "newfile");
             jsonObject.put("toName", localFile.getName());
             jsonObject.put(Util.SHA_256_STRING, localFile.getFileHash());
-            jsonObject.put(Util.SIZE_STRING, Integer.valueOf(localFile.getSize()));
+            jsonObject.put(Util.SIZE_STRING, Long.valueOf(localFile.getSize()));
 
             String jsonObjectStr = jsonObject.toString();
 
@@ -362,7 +357,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         } else {
 
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put(Util.SIZE_STRING, Integer.valueOf(localFile.getSize()));
+            jsonObject.put(Util.SIZE_STRING, Long.valueOf(localFile.getSize()));
             jsonObject.put(Util.SHA_256_STRING, localFile.getFileHash());
 
             String jsonObjectStr = jsonObject.toString();

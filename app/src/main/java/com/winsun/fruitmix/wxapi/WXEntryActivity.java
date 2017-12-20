@@ -16,9 +16,6 @@ import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.callback.ActiveView;
-import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
@@ -27,8 +24,6 @@ import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationMoreThanOneStation;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
-import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 
 import java.util.List;
@@ -37,40 +32,18 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
     public static final String TAG = WXEntryActivity.class.getSimpleName();
 
-    private LoginUseCase loginUseCase;
+    public interface WXEntryGetWeChatCodeCallback {
 
-    private ProgressDialog dialog;
+        void succeed(String code);
 
-    private Context mContext;
-
-    private ActiveView activeView;
-
-    public interface WXEntryLoginCallback {
-
-        void loginSucceed();
-
-        void loginFail();
+        void fail(int resID);
 
     }
 
-    public interface WXEntryGetTokenCallback {
+    private static WXEntryGetWeChatCodeCallback wxEntryGetWeChatCodeCallback;
 
-        void succeed(WeChatTokenUserWrapper weChatTokenUserWrapper);
-
-        void fail();
-
-    }
-
-    private static WXEntryGetTokenCallback wxEntryGetTokenCallback;
-
-    public static void setWxEntryGetTokenCallback(WXEntryGetTokenCallback wxEntryGetTokenCallback) {
-        WXEntryActivity.wxEntryGetTokenCallback = wxEntryGetTokenCallback;
-    }
-
-    private static WXEntryLoginCallback wxEntryLoginCallback;
-
-    public static void setWxEntryLoginCallback(WXEntryLoginCallback wxEntryLoginCallback) {
-        WXEntryActivity.wxEntryLoginCallback = wxEntryLoginCallback;
+    public static void setWxEntryGetWeChatCodeCallback(WXEntryGetWeChatCodeCallback wxEntryGetWeChatCodeCallback) {
+        WXEntryActivity.wxEntryGetWeChatCodeCallback = wxEntryGetWeChatCodeCallback;
     }
 
     public interface WXEntrySendMiniProgramCallback {
@@ -91,17 +64,6 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mContext = this;
-
-        loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
-
-        activeView = new ActiveView() {
-            @Override
-            public boolean isActive() {
-                return mContext != null;
-            }
-        };
-
         Log.d(TAG, "onCreate: ");
 
         IWXAPI iwxapi = MiniProgram.registerToWX(this);
@@ -113,12 +75,6 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        mContext = null;
-
-        dismissDialog();
-
-        dialog = null;
 
     }
 
@@ -149,24 +105,18 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
                     Log.d(TAG, "onResp: wechat code: " + code);
 
-                    if (wxEntryLoginCallback != null) {
+                    if (wxEntryGetWeChatCodeCallback != null) {
 
-                        showLoadingDialog();
+                        finishWhenGetWeChatCodeSucceed(code);
 
-                        loginInThread(code);
-
-                    } else if (wxEntryGetTokenCallback != null) {
-
-                        showGetTokenDialog();
-
-                        getTokenInThread(code);
-
-                    }
+                    } else
+                        finish();
 
                 } else if (baseResp instanceof SendMessageToWX.Resp) {
 
                     if (wxEntrySendMiniProgramCallback != null) {
                         wxEntrySendMiniProgramCallback.succeed();
+                        wxEntrySendMiniProgramCallback = null;
                     }
 
                     finish();
@@ -177,10 +127,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             case BaseResp.ErrCode.ERR_USER_CANCEL:
                 result = R.string.errcode_cancel;
 
-                if (wxEntryLoginCallback != null)
-                    finishWhenLoginFail();
-                else if (wxEntryGetTokenCallback != null)
-                    finishWhenGetTokenFail();
+                if (wxEntryGetWeChatCodeCallback != null)
+                    finishWhenGetWeChatCodeFail(result);
                 else if (wxEntrySendMiniProgramCallback != null)
                     finishWhenSendMiniProgramFail();
                 else
@@ -190,10 +138,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             case BaseResp.ErrCode.ERR_AUTH_DENIED:
                 result = R.string.errcode_deny;
 
-                if (wxEntryLoginCallback != null)
-                    finishWhenLoginFail();
-                else if (wxEntryGetTokenCallback != null)
-                    finishWhenGetTokenFail();
+                if (wxEntryGetWeChatCodeCallback != null)
+                    finishWhenGetWeChatCodeFail(result);
                 else if (wxEntrySendMiniProgramCallback != null)
                     finishWhenSendMiniProgramFail();
                 else
@@ -203,10 +149,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             case BaseResp.ErrCode.ERR_UNSUPPORT:
                 result = R.string.errcode_unsupported;
 
-                if (wxEntryLoginCallback != null)
-                    finishWhenLoginFail();
-                else if (wxEntryGetTokenCallback != null)
-                    finishWhenGetTokenFail();
+                if (wxEntryGetWeChatCodeCallback != null)
+                    finishWhenGetWeChatCodeFail(result);
                 else if (wxEntrySendMiniProgramCallback != null)
                     finishWhenSendMiniProgramFail();
                 else
@@ -216,10 +160,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
             default:
                 result = R.string.errcode_unknown;
 
-                if (wxEntryLoginCallback != null)
-                    finishWhenLoginFail();
-                else if (wxEntryGetTokenCallback != null)
-                    finishWhenGetTokenFail();
+                if (wxEntryGetWeChatCodeCallback != null)
+                    finishWhenGetWeChatCodeFail(result);
                 else if (wxEntrySendMiniProgramCallback != null)
                     finishWhenSendMiniProgramFail();
                 else
@@ -233,60 +175,23 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
     }
 
-    private void showGetTokenDialog() {
-        dialog = ProgressDialog.show(this, null, String.format(getString(R.string.operating_title), getString(R.string.get_wechat_user_info)), true, false);
-    }
-
-    private void getTokenInThread(String code) {
-
-        TokenDataSource tokenDataSource = InjectTokenRemoteDataSource.provideTokenDataSource(this);
-
-        tokenDataSource.getToken(code, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<WeChatTokenUserWrapper>() {
-            @Override
-            public void onSucceed(List<WeChatTokenUserWrapper> data, OperationResult operationResult) {
-
-                dismissDialog();
-
-                finishWhenGetTokenSucceed(data.get(0));
-
-            }
-
-            @Override
-            public void onFail(OperationResult operationResult) {
-
-                dismissDialog();
-
-                finishWhenGetTokenFail();
-
-                Toast.makeText(WXEntryActivity.this, operationResult.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-            }
-        }, activeView));
-
-    }
-
-    private void finishWhenGetTokenSucceed(WeChatTokenUserWrapper weChatTokenUserWrapper) {
+    private void finishWhenGetWeChatCodeSucceed(String code) {
 
         finish();
 
-        if (wxEntryGetTokenCallback != null) {
+        wxEntryGetWeChatCodeCallback.succeed(code);
+        wxEntryGetWeChatCodeCallback = null;
 
-            wxEntryGetTokenCallback.succeed(weChatTokenUserWrapper);
-            wxEntryGetTokenCallback = null;
-
-        }
 
     }
 
-    private void finishWhenGetTokenFail() {
+    private void finishWhenGetWeChatCodeFail(int resID) {
 
         finish();
 
-        if (wxEntryGetTokenCallback != null) {
+        wxEntryGetWeChatCodeCallback.fail(resID);
 
-            wxEntryGetTokenCallback.fail();
-            wxEntryGetTokenCallback = null;
-
-        }
+        wxEntryGetWeChatCodeCallback = null;
 
     }
 
@@ -294,190 +199,9 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
         finish();
 
-        if (wxEntrySendMiniProgramCallback != null) {
-
-            wxEntrySendMiniProgramCallback.fail();
-            wxEntrySendMiniProgramCallback = null;
-
-        }
+        wxEntrySendMiniProgramCallback.fail();
+        wxEntrySendMiniProgramCallback = null;
 
     }
 
-
-    private void showLoadingDialog() {
-        dialog = ProgressDialog.show(this, null, String.format(getString(R.string.operating_title), getString(R.string.login)), true, false);
-    }
-
-    private void loginInThread(String code) {
-        loginUseCase.loginWithWeChatCode(code, new BaseOperateDataCallback<Boolean>() {
-            @Override
-            public void onSucceed(Boolean data, OperationResult result) {
-
-                if (result.getOperationResultType() == OperationResultType.MORE_THAN_ONE_STATION) {
-
-                    OperationMoreThanOneStation operationMoreThanOneStation = (OperationMoreThanOneStation) result;
-
-                    List<LoggedInWeChatUser> loggedInWeChatUsers = operationMoreThanOneStation.getLoggedInWeChatUsers();
-
-                    WeChatTokenUserWrapper weChatTokenUserWrapper = operationMoreThanOneStation.getWeChatTokenUserWrapper();
-
-                    if (loggedInWeChatUsers.isEmpty()) {
-
-                        handleLoginFail(new OperationFail(R.string.no_binding_user_in_nas));
-
-                    } else {
-
-                        dismissDialog();
-
-                        showChooseStationDialog(weChatTokenUserWrapper, loggedInWeChatUsers);
-
-                    }
-
-                } else {
-
-                    handleLoginSucceed();
-
-                }
-
-            }
-
-            @Override
-            public void onFail(final OperationResult result) {
-
-                handleLoginFail(result);
-
-            }
-        });
-    }
-
-    private class SelectItem {
-
-        private int selectItemPosition;
-
-        int getSelectItemPosition() {
-            return selectItemPosition;
-        }
-
-        void setSelectItemPosition(int selectItemPosition) {
-            this.selectItemPosition = selectItemPosition;
-        }
-    }
-
-    private void showChooseStationDialog(final WeChatTokenUserWrapper weChatTokenUserWrapper, final List<LoggedInWeChatUser> loggedInWeChatUsers) {
-
-        String[] items = new String[loggedInWeChatUsers.size()];
-
-        for (int i = 0; i < loggedInWeChatUsers.size(); i++) {
-
-            LoggedInWeChatUser loggedInWeChatUser = loggedInWeChatUsers.get(i);
-
-            String item = loggedInWeChatUser.getUser().getUserName() + "\n" +
-                    String.format(getString(R.string.on_equipment), loggedInWeChatUser.getEquipmentName());
-
-            items[i] = item;
-
-        }
-
-        final SelectItem selectItem = new SelectItem();
-        selectItem.setSelectItemPosition(0);
-
-        AlertDialog dialog;
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(WXEntryActivity.this).setTitle(getString(R.string.select_one_winsuc))
-                .setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        selectItem.setSelectItemPosition(which);
-
-                    }
-                }).setPositiveButton(getString(R.string.login), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        showLoadingDialog();
-
-                        final String stationID = loggedInWeChatUsers.get(selectItem.getSelectItemPosition()).getStationID();
-
-                        loginUseCase.getUsersAfterChooseStationID(weChatTokenUserWrapper, stationID,
-                                new BaseOperateDataCallback<Boolean>() {
-                                    @Override
-                                    public void onSucceed(Boolean data, OperationResult result) {
-
-                                        loginUseCase.handleLoginWithWeChatCodeSucceed(weChatTokenUserWrapper.getGuid(), weChatTokenUserWrapper.getToken(), stationID);
-
-                                        handleLoginSucceed();
-
-                                    }
-
-                                    @Override
-                                    public void onFail(OperationResult result) {
-
-                                        handleLoginFail(result);
-
-                                    }
-                                });
-
-                    }
-                }).setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        handleLoginFail(new OperationFail(getString(R.string.success, getString(R.string.cancel_login))));
-
-                    }
-                }).setCancelable(false);
-
-        dialog = builder.create();
-
-        dialog.show();
-
-    }
-
-    private void handleLoginSucceed() {
-        dismissDialog();
-
-        finishWhenLoginSucceed();
-
-        Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.login)), Toast.LENGTH_SHORT).show();
-    }
-
-    private void handleLoginFail(OperationResult result) {
-        dismissDialog();
-
-        finishWhenLoginFail();
-
-        Toast.makeText(WXEntryActivity.this, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
-    }
-
-    private void finishWhenLoginSucceed() {
-
-        finish();
-
-        if (wxEntryLoginCallback != null) {
-
-            wxEntryLoginCallback.loginSucceed();
-            wxEntryLoginCallback = null;
-
-        }
-
-    }
-
-    private void finishWhenLoginFail() {
-
-        finish();
-
-        if (wxEntryLoginCallback != null) {
-
-            wxEntryLoginCallback.loginFail();
-            wxEntryLoginCallback = null;
-
-        }
-
-    }
-
-    private void dismissDialog() {
-        if (dialog != null)
-            dialog.dismiss();
-    }
 }

@@ -36,6 +36,11 @@ public class SystemSettingDataSource {
 
     public static final String LOGIN_WITH_WECHAT_CODE_OR_NOT = "login_with_wechat_code_or_not";
 
+    public static final String OPEN_TORRENT_FILE_DEFAULT_BEHAVIOR = "open_torrent_file_default_behavior";
+
+    public static final int OPEN_TORRENT_FILE_BEHAVIOR_CREATE_DOWNLOAD_TASK = 1;
+    public static final int OPEN_TORRENT_FILE_BEHAVIOR_UPLOAD_FILE = 2;
+
     private static SystemSettingDataSource instance;
 
     static SystemSettingDataSource getInstance(Context context) {
@@ -234,5 +239,17 @@ public class SystemSettingDataSource {
 
     }
 
+    public int getOpenTorrentFileBehavior() {
+        return sharedPreferences.getInt(OPEN_TORRENT_FILE_DEFAULT_BEHAVIOR, 0);
+    }
 
+    public void setOpenTorrentFileDefaultBehavior(int behavior) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putInt(OPEN_TORRENT_FILE_DEFAULT_BEHAVIOR, behavior);
+        editor.apply();
+
+    }
 }

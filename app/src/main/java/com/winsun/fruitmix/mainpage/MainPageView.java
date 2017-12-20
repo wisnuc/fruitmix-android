@@ -19,7 +19,7 @@ public interface MainPageView extends BaseView{
 
     void gotoFileDownloadActivity();
 
-    void gotoDownloadManageActivity();
+    void gotoTorrentDownloadManageActivity();
 
     void gotoConfirmInviteUserActivity();
 
@@ -34,7 +34,5 @@ public interface MainPageView extends BaseView{
     void showMediaHideFile();
 
     void closeDrawer();
-
-    String getString(int resID);
 
 }

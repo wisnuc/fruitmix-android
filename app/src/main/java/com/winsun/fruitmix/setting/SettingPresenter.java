@@ -22,4 +22,7 @@ public interface SettingPresenter {
     void onDestroy(Context context);
 
     void onCheckedChanged(CompoundButton buttonView,boolean isChecked);
+
+    void clearDefaultOpenTorrentFileBehavior();
+
 }

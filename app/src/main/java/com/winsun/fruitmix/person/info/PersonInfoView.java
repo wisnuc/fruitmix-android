@@ -10,10 +10,6 @@ import com.winsun.fruitmix.interfaces.BaseView;
 
 public interface PersonInfoView extends BaseView {
 
-    String getString(int resID);
-
-    String getString(int resID,Object... formatArgs);
-
     Context getContext();
 
     void handleBindSucceed();

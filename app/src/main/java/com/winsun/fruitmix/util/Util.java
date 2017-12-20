@@ -157,7 +157,8 @@ public class Util {
     public static final String HTTP_PUT_METHOD = "PUT";
     public static final int HTTP_CONNECT_TIMEOUT = 30 * 1000;
 
-    public static final int HTTP_READ_TIMEOUT = 60 * 1000;
+    public static final int HTTP_READ_TIMEOUT = 30 * 1000;
+    public static final int HTTP_WRITE_TIMEOUT = 60 * 1000;
 
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
     public static final String CURRENT_PHOTO_POSITION = "current_photo_position";

@@ -3,15 +3,20 @@ package com.winsun.fruitmix.person.info;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.ActiveView;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
@@ -20,11 +25,13 @@ import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
 import org.json.JSONException;
 
+import java.util.List;
+
 /**
  * Created by Administrator on 2017/12/10.
  */
 
-public class BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetTokenCallback {
+public class BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetWeChatCodeCallback,ActiveView{
 
     public static final String TAG = BindWeChatUserPresenter.class.getSimpleName();
 
@@ -40,12 +47,15 @@ public class BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetTokenC
 
     private WeChatTokenUserWrapper mWeChatTokenUserWrapper;
 
+    private TokenDataSource mTokenDataSource;
+
     public BindWeChatUserPresenter(UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
-                                   PersonInfoView personInfoView, PersonInfoDataSource personInfoDataSource) {
+                                   PersonInfoView personInfoView, PersonInfoDataSource personInfoDataSource,TokenDataSource tokenDataSource) {
         this.userDataRepository = userDataRepository;
         this.systemSettingDataSource = systemSettingDataSource;
         this.personInfoView = personInfoView;
         this.personInfoDataSource = personInfoDataSource;
+        mTokenDataSource = tokenDataSource;
     }
 
     public void bindWeChatUser() {
@@ -60,7 +70,7 @@ public class BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetTokenC
 
                 ticketID = data;
 
-                WXEntryActivity.setWxEntryGetTokenCallback(BindWeChatUserPresenter.this);
+                WXEntryActivity.setWxEntryGetWeChatCodeCallback(BindWeChatUserPresenter.this);
 
                 IWXAPI iwxapi = MiniProgram.registerToWX(personInfoView.getContext());
 
@@ -82,7 +92,32 @@ public class BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetTokenC
     }
 
     @Override
-    public void succeed(final WeChatTokenUserWrapper weChatTokenUserWrapper) {
+    public void succeed(String code) {
+
+        personInfoView.showProgressDialog(personInfoView.getString(R.string.operating_title,personInfoView.getString(R.string.get_wechat_user_info)));
+
+        mTokenDataSource.getToken(code, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<WeChatTokenUserWrapper>() {
+            @Override
+            public void onSucceed(List<WeChatTokenUserWrapper> data, OperationResult operationResult) {
+
+                personInfoView.dismissDialog();
+
+                handleGetTokenUserWrapperSucceed(data.get(0));
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                personInfoView.dismissDialog();
+
+                Toast.makeText(personInfoView.getContext(), operationResult.getResultMessage(personInfoView.getContext()), Toast.LENGTH_SHORT).show();
+            }
+        }, this));
+
+    }
+
+    private void handleGetTokenUserWrapperSucceed(final WeChatTokenUserWrapper weChatTokenUserWrapper) {
 
         personInfoView.showProgressDialog(personInfoView.getString(R.string.operating_title, personInfoView.getString(R.string.send_wechat_user_info)));
 
@@ -111,9 +146,11 @@ public class BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetTokenC
     }
 
     @Override
-    public void fail() {
+    public void fail(int resID) {
 
-        Log.d(TAG, "fail: get token");
+        Log.d(TAG, "fail: get wechat code");
+
+        Toast.makeText(personInfoView.getContext(), personInfoView.getString(R.string.fail,personInfoView.getString(resID)), Toast.LENGTH_SHORT).show();
 
     }
 
@@ -194,4 +231,8 @@ public class BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetTokenC
         return userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
     }
 
+    @Override
+    public boolean isActive() {
+        return personInfoView != null;
+    }
 }

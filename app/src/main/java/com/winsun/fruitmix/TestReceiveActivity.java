@@ -1,14 +1,18 @@
 package com.winsun.fruitmix;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.databinding.HandleTorrentDialogViewBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.upload.InjectUploadFileCase;
@@ -20,6 +24,10 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.retrieve.file.from.other.app.RetrieveFileFromOtherAppUseCase;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.torrent.view.TorrentDownloadManageActivity;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -40,7 +48,7 @@ public class TestReceiveActivity extends AppCompatActivity {
 
     private Context mContext;
 
-    private String uploadFilePath;
+    private SystemSettingDataSource mSystemSettingDataSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +60,7 @@ public class TestReceiveActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        uploadFilePath = retrieveFileFromOtherAppUseCase.getUploadFilePath(intent);
+        String uploadFilePath = retrieveFileFromOtherAppUseCase.getUploadFilePath(intent);
 
         if (uploadFilePath != null) {
 
@@ -71,7 +79,7 @@ public class TestReceiveActivity extends AppCompatActivity {
 
 //                finishCurrentRunningActivity();
 
-                startTaskManageActivity(uploadFilePath);
+                handleUploadFilePath(uploadFilePath);
 
             } else {
 
@@ -104,7 +112,7 @@ public class TestReceiveActivity extends AppCompatActivity {
 
                 Log.d(TAG, "onSucceed: login with no param and start task manage activity");
 
-                startTaskManageActivity(uploadFilePath);
+                handleUploadFilePath(uploadFilePath);
 
             }
 
@@ -125,11 +133,81 @@ public class TestReceiveActivity extends AppCompatActivity {
         });
     }
 
+    private void handleUploadFilePath(String uploadFilePath) {
+
+        Log.d(TAG, "handleUploadFilePath: uploadFilePath: " + uploadFilePath);
+
+        mSystemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(mContext);
+
+        if (FileUtil.checkFileIsTorrent(uploadFilePath)) {
+
+            int behavior = mSystemSettingDataSource.getOpenTorrentFileBehavior();
+
+            if (behavior == SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_CREATE_DOWNLOAD_TASK) {
+                startTorrentDownloadTask(uploadFilePath, mContext);
+            } else if (behavior == SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_UPLOAD_FILE) {
+                startTaskManageActivity(uploadFilePath);
+            } else
+                showHandleTorrentDialog(mContext, uploadFilePath);
+
+        } else {
+
+            startTaskManageActivity(uploadFilePath);
+
+        }
+
+    }
+
+    private void showHandleTorrentDialog(final Context context, final String uploadFilePath) {
+
+        final HandleTorrentDialogViewBinding binding = HandleTorrentDialogViewBinding.inflate(LayoutInflater.from(context),
+                null, false);
+
+        new AlertDialog.Builder(context).setTitle(context.getString(R.string.upload_torrent_file_title))
+                .setView(binding.getRoot())
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        boolean isAlways = binding.alwaysCheckbox.isChecked();
+
+                        if (binding.createNewDownloadTask.isChecked()) {
+
+                            if (isAlways)
+                                mSystemSettingDataSource.setOpenTorrentFileDefaultBehavior(SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_CREATE_DOWNLOAD_TASK);
+
+                            startTorrentDownloadTask(uploadFilePath, context);
+
+                        } else if (binding.uplaodFile.isChecked()) {
+
+                            if (isAlways)
+                                mSystemSettingDataSource.setOpenTorrentFileDefaultBehavior(SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_UPLOAD_FILE);
+
+                            startTaskManageActivity(uploadFilePath);
+
+                        }
+
+
+                    }
+                }).create().show();
+
+    }
+
+    private void startTorrentDownloadTask(String uploadFilePath, Context context) {
+
+        Intent intent = new Intent(context, TorrentDownloadManageActivity.class);
+        intent.putExtra(TorrentDownloadManageActivity.KEY_TORRENT_FILE_PATH, uploadFilePath);
+        startActivity(intent);
+
+        finish();
+
+    }
+
     private void startTaskManageActivity(String uploadFilePath) {
 
         Log.d(TAG, "startTaskManageActivity: uploadFilePath: " + uploadFilePath);
 
-        startUploadFileTask(uploadFilePath, mContext);
+        startUploadFileTask(uploadFilePath,mContext);
 
         finish();
 

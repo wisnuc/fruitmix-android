@@ -170,7 +170,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
 
                 super.onClick();
 
-                mainPageView.gotoDownloadManageActivity();
+                mainPageView.gotoTorrentDownloadManageActivity();
 
             }
         };
@@ -406,14 +406,6 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
                         @Override
                         public void onClick() {
                             super.onClick();
-
-                            if (systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
-
-                                mainPageView.showToast(mainPageView.getString(R.string.operation_not_support_when_login_with_wechat_code));
-
-                                return;
-
-                            }
 
                             mainPageView.gotoConfirmInviteUserActivity();
 
