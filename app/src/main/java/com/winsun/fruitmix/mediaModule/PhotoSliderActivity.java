@@ -20,6 +20,7 @@ import android.support.v4.util.Pair;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.transition.Transition;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -215,7 +216,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             Pair mediaPair = new Pair<>((View) transitionView, currentMedia.getKey());
 
-            Pair[] pairs = Util.createSafeTransitionPairs(toolbar, activity, true, mediaPair);
+            Pair<View, String>[] pairs = Util.createSafeTransitionPairs(toolbar, activity, true, mediaPair);
 
             ActivityOptionsCompat options = ActivityOptionsCompat.
                     makeSceneTransitionAnimation(activity, pairs);
@@ -337,7 +338,11 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         });
 
         setSupportActionBar(binding.toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null)
+            actionBar.setDisplayShowTitleEnabled(false);
 
 //        initShareBtn();
 

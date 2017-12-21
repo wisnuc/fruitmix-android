@@ -368,14 +368,16 @@ public class Util {
 
     public static void hideSoftInput(Activity activity) {
         InputMethodManager methodManager = (InputMethodManager) activity.getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (activity.getCurrentFocus() != null) {
+        if (activity.getCurrentFocus() != null && methodManager != null) {
             methodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
         }
     }
 
     public static void showSoftInput(Activity activity, View view) {
         InputMethodManager methodManager = (InputMethodManager) activity.getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        methodManager.showSoftInput(view, 0);
+
+        if (methodManager != null)
+            methodManager.showSoftInput(view, 0);
     }
 
     public static int[] formatPhotoWidthHeight(int width, int height) {

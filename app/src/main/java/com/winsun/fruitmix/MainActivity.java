@@ -88,6 +88,7 @@ public class MainActivity extends Activity {
                     in = new BufferedReader(fstream, 1024);
                     mac = in.readLine();
                 } catch (IOException e) {
+                    e.printStackTrace();
                 } finally {
                     if (fstream != null) {
                         try {

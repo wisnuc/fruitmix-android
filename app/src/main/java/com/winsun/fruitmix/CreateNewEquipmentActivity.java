@@ -2,6 +2,7 @@ package com.winsun.fruitmix;
 
 import android.content.Intent;
 import android.support.design.widget.TextInputEditText;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -39,7 +40,11 @@ public class CreateNewEquipmentActivity extends BaseActivity implements View.OnC
         mLayoutTitle.setText(getString(R.string.enter_ip));
 
         setSupportActionBar(mToolBar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null)
+            actionBar.setDisplayShowTitleEnabled(false);
 
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,14 +74,14 @@ public class CreateNewEquipmentActivity extends BaseActivity implements View.OnC
 
                 } else {
 
-                    if(Util.checkIpLegal(ip)){
+                    if (Util.checkIpLegal(ip)) {
 
                         Intent intent = new Intent();
                         intent.putExtra(Util.KEY_MANUAL_INPUT_IP, ip);
                         setResult(RESULT_OK, intent);
                         finish();
 
-                    }else {
+                    } else {
 
                         Toast.makeText(CreateNewEquipmentActivity.this, getString(R.string.ip_illegal), Toast.LENGTH_SHORT).show();
 

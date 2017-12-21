@@ -18,13 +18,19 @@ public class GifRequest extends Request<byte[]> {
 
     public static final String TAG = GifRequest.class.getSimpleName();
 
-    /** Socket timeout in milliseconds for image requests */
-    public static final int DEFAULT_IMAGE_TIMEOUT_MS =  10 * 1000;
+    /**
+     * Socket timeout in milliseconds for image requests
+     */
+    public static final int DEFAULT_IMAGE_TIMEOUT_MS = 10 * 1000;
 
-    /** Default number of retries for image requests */
+    /**
+     * Default number of retries for image requests
+     */
     public static final int DEFAULT_IMAGE_MAX_RETRIES = 2;
 
-    /** Default backoff multiplier for image requests */
+    /**
+     * Default backoff multiplier for image requests
+     */
     public static final float DEFAULT_IMAGE_BACKOFF_MULT = 2f;
 
     /**
@@ -64,7 +70,7 @@ public class GifRequest extends Request<byte[]> {
                     return Response.success(response.data, HttpHeaderParser.parseCacheHeaders(response));
                 }
             } catch (OutOfMemoryError e) {
-                VolleyLog.e("Caught OOM for %d byte image, url=%s", response.data.length, getUrl());
+                VolleyLog.e("Caught OOM for %d byte image, url=%s", response.data != null ? response.data.length : "", getUrl());
                 return Response.error(new ParseError(e));
             }
         }

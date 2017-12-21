@@ -106,9 +106,7 @@ public class DBUtils {
 
         for (User user : users) {
 
-            contentValues = createUserContentValues(user);
-
-            contentValues.put(DBHelper.USER_ASSOCIATED_WECHAT_USER_NAME, user.getAssociatedWeChatUserName());
+            contentValues = createRemoteUserContentValues(user);
 
             returnValue = database.insert(DBHelper.REMOTE_USER_TABLE_NAME, null, contentValues);
         }
@@ -116,6 +114,31 @@ public class DBUtils {
         close();
 
         return returnValue;
+    }
+
+    @NonNull
+    private ContentValues createRemoteUserContentValues(User user) {
+        ContentValues contentValues;
+        contentValues = createUserContentValues(user);
+
+        contentValues.put(DBHelper.USER_ASSOCIATED_WECHAT_USER_NAME, user.getAssociatedWeChatUserName());
+        contentValues.put(DBHelper.USER_KEY_IS_FIRST_USER, user.isFirstUser() ? 1 : 0);
+        return contentValues;
+    }
+
+    private ContentValues createUserContentValues(User user) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.USER_KEY_USERNAME, user.getUserName());
+        contentValues.put(DBHelper.USER_KEY_UUID, user.getUuid());
+        contentValues.put(DBHelper.USER_KEY_AVATAR, user.getAvatar());
+        contentValues.put(DBHelper.USER_KEY_EMAIL, user.getEmail());
+        contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR, user.getDefaultAvatar());
+        contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR_BG_COLOR, user.getDefaultAvatarBgColor());
+        contentValues.put(DBHelper.USER_KEY_HOME, user.getHome());
+        contentValues.put(DBHelper.USER_KEY_LIBRARY, user.getLibrary());
+        contentValues.put(DBHelper.USER_KEY_IS_ADMIN, user.isAdmin() ? 1 : 0);
+
+        return contentValues;
     }
 
     public long insertLoggedInUserInDB(Collection<LoggedInUser> loggedInUsers) {
@@ -146,22 +169,6 @@ public class DBUtils {
         contentValues.put(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME, loggedInUser.getEquipmentName());
         contentValues.put(DBHelper.LOGGED_IN_USER_TOKEN, loggedInUser.getToken());
         contentValues.put(DBHelper.LOGGED_IN_USER_DEVICE_ID, loggedInUser.getDeviceID());
-
-        return contentValues;
-    }
-
-    private ContentValues createUserContentValues(User user) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.USER_KEY_USERNAME, user.getUserName());
-        contentValues.put(DBHelper.USER_KEY_UUID, user.getUuid());
-        contentValues.put(DBHelper.USER_KEY_AVATAR, user.getAvatar());
-        contentValues.put(DBHelper.USER_KEY_EMAIL, user.getEmail());
-        contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR, user.getDefaultAvatar());
-        contentValues.put(DBHelper.USER_KEY_DEFAULT_AVATAR_BG_COLOR, user.getDefaultAvatarBgColor());
-        contentValues.put(DBHelper.USER_KEY_HOME, user.getHome());
-        contentValues.put(DBHelper.USER_KEY_LIBRARY, user.getLibrary());
-        contentValues.put(DBHelper.USER_KEY_IS_ADMIN, user.isAdmin() ? 1 : 0);
-        contentValues.put(DBHelper.USER_KEY_IS_FIRST_USER, user.isFirstUser() ? 1 : 0);
 
         return contentValues;
     }
@@ -896,7 +903,7 @@ public class DBUtils {
 
         long returnValue;
 
-        ContentValues contentValues = createUserContentValues(user);
+        ContentValues contentValues = createRemoteUserContentValues(user);
 
         returnValue = database.update(DBHelper.REMOTE_USER_TABLE_NAME, contentValues, DBHelper.USER_KEY_UUID + " = ?", new String[]{user.getUuid()});
 

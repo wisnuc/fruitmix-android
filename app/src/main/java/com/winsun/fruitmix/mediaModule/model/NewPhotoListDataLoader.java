@@ -6,6 +6,7 @@ import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
@@ -19,6 +20,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /**
  * Created by Administrator on 2016/12/19.
@@ -118,26 +123,31 @@ public class NewPhotoListDataLoader {
             return;
         }
 
-        new AsyncTask<Void, Void, Void>() {
+        Future<Void> future = ThreadManagerImpl.getInstance().runOnCacheThread(new Callable<Void>() {
             @Override
-            protected Void doInBackground(Void... params) {
+            public Void call() throws Exception {
 
                 reloadData(medias);
 
                 return null;
             }
+        });
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
+        try {
 
-                needRefreshData = false;
+            future.get();
 
-                listener.onDataLoadFinished();
+            needRefreshData = false;
 
-                isOperate = false;
-            }
-        }.execute();
+            listener.onDataLoadFinished();
+
+            isOperate = false;
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
     }
 

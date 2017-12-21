@@ -57,6 +57,8 @@ public class SettingPresenterImpl implements SettingPresenter {
 
     private ThreadManager threadManager;
 
+    private int newBehavior;
+
     public SettingPresenterImpl(BaseView baseView, SettingActivity.SettingViewModel settingViewModel, SystemSettingDataSource systemSettingDataSource,
                                 MediaDataSourceRepository mediaDataSourceRepository, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
                                 UploadMediaUseCase uploadMediaUseCase, String currentUserUUID, ThreadManager threadManager) {
@@ -247,12 +249,38 @@ public class SettingPresenterImpl implements SettingPresenter {
 
     }
 
+
     @Override
-    public void clearDefaultOpenTorrentFileBehavior() {
+    public void setDefaultOpenTorrentFileBehavior(Context context) {
 
-        systemSettingDataSource.setOpenTorrentFileDefaultBehavior(0);
+        String[] items = new String[]{context.getString(R.string.ask_everytime),
+                context.getString(R.string.create_new_download_task), context.getString(R.string.upload_file_to_wisnuc)};
 
-        baseView.showToast(baseView.getString(R.string.success, baseView.getString(R.string.clear_default_open_torrent_file_behavior)));
+        final int behavior = systemSettingDataSource.getOpenTorrentFileBehavior();
+
+        new AlertDialog.Builder(context).setTitle(context.getString(R.string.how_to_handle_bt_file))
+                .setSingleChoiceItems(items, behavior, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        newBehavior = which;
+
+                    }
+                })
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        if (behavior != newBehavior){
+
+                            systemSettingDataSource.setOpenTorrentFileDefaultBehavior(newBehavior);
+
+                            baseView.showToast(baseView.getString(R.string.success, baseView.getString(R.string.how_to_handle_bt_file)));
+
+                        }
+
+                    }
+                }).create().show();
 
     }
 

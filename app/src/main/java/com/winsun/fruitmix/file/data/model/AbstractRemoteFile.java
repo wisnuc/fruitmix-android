@@ -12,6 +12,8 @@ import java.util.List;
 
 public abstract class AbstractRemoteFile extends AbstractFile{
 
+    public static final String ALL_CAN_VIEW = "*";
+
     private String uuid;
     private List<String> owners;
     private List<String> writeList;

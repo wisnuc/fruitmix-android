@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -100,7 +102,11 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
         binding.setEquipmentSearchViewModel(equipmentSearchViewModel);
 
         setSupportActionBar(binding.toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null)
+            actionBar.setDisplayShowTitleEnabled(false);
 
         EquipmentDataSource mEquipmentDataSource = InjectEquipment.provideEquipmentDataSource(mContext);
 
@@ -118,7 +124,10 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
 
         circleIndicator.setViewPager(equipmentViewPager);
 
-        equipmentViewPager.getAdapter().registerDataSetObserver(circleIndicator.getDataSetObserver());
+        PagerAdapter pagerAdapter = equipmentViewPager.getAdapter();
+
+        if (pagerAdapter != null)
+            pagerAdapter.registerDataSetObserver(circleIndicator.getDataSetObserver());
 
         equipmentUserRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         equipmentUserRecyclerView.setItemAnimator(new DefaultItemAnimator());

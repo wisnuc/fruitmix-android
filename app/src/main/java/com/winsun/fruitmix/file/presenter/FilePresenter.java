@@ -49,6 +49,7 @@ import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.FileTaskItem;
+import com.winsun.fruitmix.file.data.model.RemoteBuiltInDrive;
 import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.file.data.model.RemoteFolder;
 import com.winsun.fruitmix.file.data.model.RemotePrivateDrive;
@@ -411,8 +412,14 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                 result.add(file);
             } else if (file instanceof RemotePublicDrive) {
 
-                if (file.getWriteList().contains(currentUserUUID))
+                if (file.getWriteList().contains(currentUserUUID) || file.getWriteList().contains(AbstractRemoteFile.ALL_CAN_VIEW))
                     sharedDriveFiles.add(file);
+
+            } else if (file instanceof RemoteBuiltInDrive) {
+
+                file.setName(activity.getString(R.string.built_in_drive));
+
+                result.add(file);
 
             }
 
@@ -1091,10 +1098,12 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                     retrievedFolderNameList.add(currentFolderName);
 
-                    if (abstractRemoteFile instanceof RemotePrivateDrive)
-                        driveRootUUID = currentFolderUUID;
-                    else if (abstractRemoteFile instanceof RemotePublicDrive)
-                        driveRootUUID = currentFolderUUID;
+//                    if (abstractRemoteFile instanceof RemotePrivateDrive)
+//                        driveRootUUID = currentFolderUUID;
+//                    else if (abstractRemoteFile instanceof RemotePublicDrive)
+//                        driveRootUUID = currentFolderUUID;
+
+                    driveRootUUID = currentFolderUUID;
 
                     getFile();
 

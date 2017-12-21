@@ -207,7 +207,9 @@
 
     <string name="calculating">计算中…</string>
 
-    <string name="clear_default_open_torrent_file_behavior">清除打开BT文件默认行为</string>
+    <string name="how_to_handle_bt_file">如何处理来自第三方应用的BT文件</string>
+    
+    <string name="ask_everytime">每次都询问如何处理</string>
 
     <!-- create user -->
     <string name="user_name">用户名</string>
@@ -233,6 +235,8 @@
     <string name="delete_original_file_fail">%1$s无法覆盖</string>
 
     <string name="shared_drive">共享盘</string>
+
+    <string name="built_in_drive">公共盘</string>
 
     <string name="file_not_exist">文件不存在</string>
 

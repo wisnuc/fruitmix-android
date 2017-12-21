@@ -23,6 +23,6 @@ public interface SettingPresenter {
 
     void onCheckedChanged(CompoundButton buttonView,boolean isChecked);
 
-    void clearDefaultOpenTorrentFileBehavior();
+    void setDefaultOpenTorrentFileBehavior(Context context);
 
 }

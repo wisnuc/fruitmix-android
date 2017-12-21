@@ -230,7 +230,9 @@
 
     <string name="calculating">Calculating</string>
 
-    <string name="clear_default_open_torrent_file_behavior">Clear default open torrent file behavior</string>
+    <string name="how_to_handle_bt_file">How to handle BT files from third party applications</string>
+
+    <string name="ask_everytime">Every time you ask how to deal with it</string>
 
     <!-- create user -->
     <string name="user_name">User Name</string>
@@ -257,6 +259,8 @@
     <string name="delete_original_file_fail">%1$s.fileext cannot be overwrite.</string>
 
     <string name="shared_drive">Shared Drive</string>
+
+    <string name="built_in_drive">Public Drive</string>
 
     //retrieve other app share file,but file path is empty
     <string name="file_not_exist">File Not Exist</string>

@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
@@ -419,7 +420,13 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private void dismissToolbarBottomBarWhenSharedElementTransition() {
         if (Util.checkRunningOnLollipopOrHigher()) {
-            getActivity().getWindow().getSharedElementEnterTransition().addListener(new CustomTransitionListener() {
+
+            FragmentActivity activity = getActivity();
+
+            if (activity == null)
+                return;
+
+            activity.getWindow().getSharedElementEnterTransition().addListener(new CustomTransitionListener() {
 
                 @Override
                 public void onTransitionStart(Transition transition) {
@@ -715,14 +722,26 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private boolean getShowAlbumTipsValue() {
         SharedPreferences sp;
-        sp = getActivity().getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+
+        FragmentActivity activity = getActivity();
+
+        if (activity == null)
+            return false;
+
+        sp = activity.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         return sp.getBoolean(Util.SHOW_ALBUM_TIPS, true);
     }
 
     private void setShowAlbumTipsValue(boolean value) {
         SharedPreferences sp;
         SharedPreferences.Editor editor;
-        sp = getActivity().getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
+
+        FragmentActivity activity = getActivity();
+
+        if (activity == null)
+            return;
+
+        sp = activity.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
         editor = sp.edit();
         editor.putBoolean(Util.SHOW_ALBUM_TIPS, value);
         editor.apply();
@@ -945,19 +964,23 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         int currentItem = viewPager.getCurrentItem();
 
+        Context context = getContext();
+        if (context == null)
+            return;
+
         if (noPhotoItem && currentItem == PAGE_PHOTO) {
 
 //            toolbarViewModel.showSelect.set(false);
 
             toolbarViewModel.showSelect.set(true);
 
-            toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(getContext(), R.color.twenty_six_percent_black));
+            toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(context, R.color.twenty_six_percent_black));
 
         } else if (!noPhotoItem && currentItem == PAGE_PHOTO) {
 
             toolbarViewModel.showSelect.set(true);
 
-            toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(getContext(), R.color.eighty_seven_percent_black));
+            toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(context, R.color.eighty_seven_percent_black));
 
         }
 
@@ -1265,6 +1288,10 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         Log.d(TAG, "onFileSelectOperationAvailable: ");
 
+        Context context = getContext();
+        if(context == null)
+            return;
+
         int currentItem = viewPager.getCurrentItem();
 
         if (currentItem == PAGE_FILE) {
@@ -1276,6 +1303,10 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     public void onFileSelectOperationUnavailable() {
 
         Log.d(TAG, "onFileSelectOperationUnavailable: ");
+
+        Context context = getContext();
+        if(context == null)
+            return;
 
         if (viewPager.getCurrentItem() == PAGE_FILE)
             toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(getContext(), R.color.twenty_six_percent_black));

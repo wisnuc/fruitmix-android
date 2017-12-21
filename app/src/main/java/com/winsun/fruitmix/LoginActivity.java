@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
@@ -70,7 +71,12 @@ public class LoginActivity extends BaseActivity implements LoginPresenter {
         Util.setStatusBarColor(this, R.color.login_ui_blue);
 
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null)
+            actionBar.setDisplayShowTitleEnabled(false);
+
         getSupportActionBar().setElevation(0f);
 
         Intent intent = getIntent();

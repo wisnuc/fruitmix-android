@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.parser;
 
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.model.RemoteBuiltInDrive;
 import com.winsun.fruitmix.file.data.model.RemotePrivateDrive;
 import com.winsun.fruitmix.file.data.model.RemotePublicDrive;
 
@@ -33,21 +34,46 @@ public class RemoteRootDriveFolderParser extends BaseRemoteDataParser implements
 
             AbstractRemoteFile file;
 
-            if (object.optString("type").equals("public")) {
-                file = new RemotePublicDrive();
+            String tag = object.optString("tag");
 
-                JSONArray writeList = object.optJSONArray("writelist");
+            switch (tag) {
+                case "home":
 
-                if (writeList == null)
-                    continue;
+                    file = new RemotePrivateDrive();
 
-                for (int j = 0; j < writeList.length(); j++)
-                    file.addWriteList(writeList.optString(j));
+                    break;
+                case "built-in":
 
-                file.setName(object.optString("label"));
+                    file = new RemoteBuiltInDrive();
 
-            } else {
-                file = new RemotePrivateDrive();
+                    String str = object.optString("writelist");
+
+                    file.addWriteList(str);
+
+                    break;
+                default:
+
+                    file = new RemotePublicDrive();
+
+                    Object obj = object.opt("writelist");
+
+                    if (obj instanceof JSONArray) {
+
+                        JSONArray writeList = (JSONArray) obj;
+
+                        for (int j = 0; j < writeList.length(); j++)
+                            file.addWriteList(writeList.optString(j));
+
+                    } else if (obj instanceof String) {
+
+                        file.addWriteList((String) obj);
+
+                    } else
+                        continue;
+
+                    file.setName(object.optString("label"));
+
+                    break;
             }
 
             file.setUuid(object.optString("uuid"));
