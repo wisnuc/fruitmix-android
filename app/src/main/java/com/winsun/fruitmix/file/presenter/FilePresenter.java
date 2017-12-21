@@ -1098,12 +1098,12 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                     retrievedFolderNameList.add(currentFolderName);
 
-//                    if (abstractRemoteFile instanceof RemotePrivateDrive)
-//                        driveRootUUID = currentFolderUUID;
-//                    else if (abstractRemoteFile instanceof RemotePublicDrive)
-//                        driveRootUUID = currentFolderUUID;
-
-                    driveRootUUID = currentFolderUUID;
+                    if (abstractRemoteFile instanceof RemotePrivateDrive)
+                        driveRootUUID = currentFolderUUID;
+                    else if (abstractRemoteFile instanceof RemotePublicDrive)
+                        driveRootUUID = currentFolderUUID;
+                    else if (abstractRemoteFile instanceof RemoteBuiltInDrive)
+                        driveRootUUID = currentFolderUUID;
 
                     getFile();
 

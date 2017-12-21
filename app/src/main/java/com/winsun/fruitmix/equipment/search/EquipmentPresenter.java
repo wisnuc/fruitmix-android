@@ -1034,8 +1034,6 @@ public class EquipmentPresenter implements ActiveView {
 
         equipmentSearchView.setResult(RESULT_OK);
 
-        equipmentSearchView.finishView();
-
         equipmentSearchView.handleStartActivityAfterLoginSucceed();
 
     }
@@ -1046,5 +1044,7 @@ public class EquipmentPresenter implements ActiveView {
 
         Toast.makeText(equipmentSearchView.getContext(), result.getResultMessage(equipmentSearchView.getContext()), Toast.LENGTH_SHORT).show();
     }
+
+
 
 }

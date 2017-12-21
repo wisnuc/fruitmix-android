@@ -38,6 +38,7 @@ import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.equipment.search.data.Equipment;
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
+import com.winsun.fruitmix.retrieve.file.from.other.app.RetrieveFilePresenter;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.util.Util;
@@ -183,7 +184,6 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
             Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
 
         setResult(RESULT_OK);
-        finish();
 
         handleStartActivityAfterLoginSucceed();
 
@@ -250,7 +250,6 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
 
         if ((requestCode == Util.KEY_LOGIN_REQUEST_CODE || requestCode == InitialEquipmentActivity.REQUEST_CODE) && resultCode == RESULT_OK) {
             setResult(RESULT_OK);
-            finish();
 
             handleStartActivityAfterLoginSucceed();
 
@@ -317,9 +316,13 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
 
         if (uploadFilePath == null) {
             startActivity(new Intent(mContext, NavPagerActivity.class));
+
+            finishView();
         } else {
 
-            TestReceiveActivity.startUploadFileTask(uploadFilePath, mContext);
+            RetrieveFilePresenter retrieveFilePresenter = new RetrieveFilePresenter();
+
+            retrieveFilePresenter.handleUploadFilePath(uploadFilePath, this);
 
         }
 

@@ -24,6 +24,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.retrieve.file.from.other.app.RetrieveFileFromOtherAppUseCase;
+import com.winsun.fruitmix.retrieve.file.from.other.app.RetrieveFilePresenter;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.torrent.view.TorrentDownloadManageActivity;
@@ -40,6 +41,11 @@ public class TestReceiveActivity extends AppCompatActivity {
 
     public static final String UPLOAD_FILE_PATH = "login_for_upload_file_path";
 
+    public static final String UPLOAD_OR_DOWNLOAD_TORRENT = "upload_or_download_torrent";
+
+    public static final int UPLOAD_FILE = 1;
+    public static final int DOWNLOAD_TORRENT = 2;
+
     public static final String UPLOAD_FILE_SOURCE_FROM_APP_NAME = "upload_file_source_from_app_name";
 
     public static final int EQUIPMENT_SEARCH_REQUEST_CODE = 0x1001;
@@ -48,7 +54,7 @@ public class TestReceiveActivity extends AppCompatActivity {
 
     private Context mContext;
 
-    private SystemSettingDataSource mSystemSettingDataSource;
+    private RetrieveFilePresenter mRetrieveFilePresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +63,8 @@ public class TestReceiveActivity extends AppCompatActivity {
         mContext = this;
 
         RetrieveFileFromOtherAppUseCase retrieveFileFromOtherAppUseCase = new RetrieveFileFromOtherAppUseCase();
+
+        mRetrieveFilePresenter = new RetrieveFilePresenter();
 
         Intent intent = getIntent();
 
@@ -79,7 +87,7 @@ public class TestReceiveActivity extends AppCompatActivity {
 
 //                finishCurrentRunningActivity();
 
-                handleUploadFilePath(uploadFilePath);
+                mRetrieveFilePresenter.handleUploadFilePath(uploadFilePath,this);
 
             } else {
 
@@ -112,7 +120,7 @@ public class TestReceiveActivity extends AppCompatActivity {
 
                 Log.d(TAG, "onSucceed: login with no param and start task manage activity");
 
-                handleUploadFilePath(uploadFilePath);
+                mRetrieveFilePresenter.handleUploadFilePath(uploadFilePath,TestReceiveActivity.this);
 
             }
 
@@ -133,97 +141,6 @@ public class TestReceiveActivity extends AppCompatActivity {
         });
     }
 
-    private void handleUploadFilePath(String uploadFilePath) {
-
-        Log.d(TAG, "handleUploadFilePath: uploadFilePath: " + uploadFilePath);
-
-        mSystemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(mContext);
-
-        if (FileUtil.checkFileIsTorrent(uploadFilePath)) {
-
-            int behavior = mSystemSettingDataSource.getOpenTorrentFileBehavior();
-
-            if (behavior == SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_CREATE_DOWNLOAD_TASK) {
-                startTorrentDownloadTask(uploadFilePath, mContext);
-            } else if (behavior == SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_UPLOAD_FILE) {
-                startTaskManageActivity(uploadFilePath);
-            } else
-                showHandleTorrentDialog(mContext, uploadFilePath);
-
-        } else {
-
-            startTaskManageActivity(uploadFilePath);
-
-        }
-
-    }
-
-    private void showHandleTorrentDialog(final Context context, final String uploadFilePath) {
-
-        final HandleTorrentDialogViewBinding binding = HandleTorrentDialogViewBinding.inflate(LayoutInflater.from(context),
-                null, false);
-
-        new AlertDialog.Builder(context).setTitle(context.getString(R.string.upload_torrent_file_title))
-                .setView(binding.getRoot())
-                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        boolean isAlways = binding.alwaysCheckbox.isChecked();
-
-                        if (binding.createNewDownloadTask.isChecked()) {
-
-                            if (isAlways)
-                                mSystemSettingDataSource.setOpenTorrentFileDefaultBehavior(SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_CREATE_DOWNLOAD_TASK);
-
-                            startTorrentDownloadTask(uploadFilePath, context);
-
-                        } else if (binding.uplaodFile.isChecked()) {
-
-                            if (isAlways)
-                                mSystemSettingDataSource.setOpenTorrentFileDefaultBehavior(SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_UPLOAD_FILE);
-
-                            startTaskManageActivity(uploadFilePath);
-
-                        }
-
-
-                    }
-                }).create().show();
-
-    }
-
-    private void startTorrentDownloadTask(String uploadFilePath, Context context) {
-
-        Intent intent = new Intent(context, TorrentDownloadManageActivity.class);
-        intent.putExtra(TorrentDownloadManageActivity.KEY_TORRENT_FILE_PATH, uploadFilePath);
-        startActivity(intent);
-
-        finish();
-
-    }
-
-    private void startTaskManageActivity(String uploadFilePath) {
-
-        Log.d(TAG, "startTaskManageActivity: uploadFilePath: " + uploadFilePath);
-
-        startUploadFileTask(uploadFilePath,mContext);
-
-        finish();
-
-    }
-
-    public static void startUploadFileTask(String uploadFilePath, Context context) {
-
-        Intent gotoTaskManageActivityIntent = new Intent(context, FileDownloadActivity.class);
-        context.startActivity(gotoTaskManageActivityIntent);
-
-        FileTaskManager fileTaskManager = FileTaskManager.getInstance();
-
-        fileTaskManager.addFileUploadItem(uploadFilePath, InjectUploadFileCase.provideInstance(context),
-                InjectNetworkStateManager.provideNetworkStateManager(context), true);
-
-    }
 
     //TODO:consider alreadyLogin logic,init system and destroy instance will cause large gc?
 
