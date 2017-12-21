@@ -36,7 +36,7 @@ public class RemoteMkDirParser extends BaseRemoteDataParser implements RemoteDat
 
         abstractRemoteFile.setUuid(data.optString("uuid"));
         abstractRemoteFile.setName(data.optString("name"));
-        abstractRemoteFile.setTime(data.optString("time"));
+        abstractRemoteFile.setTime(data.optString("mtime"));
 
         return abstractRemoteFile;
     }

@@ -79,7 +79,6 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl impleme
 
         wrapper.operateCall(httpRequest, callback, new RemoteConfirmTicketResultParser());
 
-
     }
 
 }

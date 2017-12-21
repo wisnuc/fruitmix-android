@@ -12,11 +12,13 @@ import java.util.List;
  * Created by Administrator on 2017/12/7.
  */
 
-public class RemoteEquipmentBootInfoParser implements RemoteDatasParser<EquipmentBootInfo> {
+public class RemoteEquipmentBootInfoParser extends BaseRemoteDataParser implements RemoteDatasParser<EquipmentBootInfo> {
     @Override
     public List<EquipmentBootInfo> parse(String json) throws JSONException {
 
-        JSONObject jsonObject = new JSONObject(json);
+        String root = checkHasWrapper(json);
+
+        JSONObject jsonObject = new JSONObject(root);
 
         return Collections.singletonList(new EquipmentBootInfo(jsonObject.optString("mode"),
                 jsonObject.optString("last"), jsonObject.optString("state"), jsonObject.optString("current"),

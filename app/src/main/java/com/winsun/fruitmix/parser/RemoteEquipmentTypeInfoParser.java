@@ -12,14 +12,16 @@ import java.util.List;
  * Created by Administrator on 2017/8/24.
  */
 
-public class RemoteEquipmentTypeInfoParser implements RemoteDatasParser<EquipmentTypeInfo> {
+public class RemoteEquipmentTypeInfoParser extends BaseRemoteDataParser implements RemoteDatasParser<EquipmentTypeInfo> {
 
     @Override
     public List<EquipmentTypeInfo> parse(String json) throws JSONException {
 
         EquipmentTypeInfo equipmentTypeInfo = new EquipmentTypeInfo();
 
-        JSONObject jsonObject = new JSONObject(json);
+        String root = checkHasWrapper(json);
+
+        JSONObject jsonObject = new JSONObject(root);
 
         String type;
 

@@ -7,13 +7,15 @@ import org.json.JSONObject;
  * Created by Administrator on 2017/7/12.
  */
 
-public class RemoteTicketParser implements RemoteDataParser<String> {
+public class RemoteTicketParser extends BaseRemoteDataParser implements RemoteDataParser<String> {
 
     public String parse(String json) throws JSONException {
 
-        JSONObject root = new JSONObject(json);
+        String root = checkHasWrapper(json);
 
-        String url = root.getString("url");
+        JSONObject jsonObject = new JSONObject(root);
+
+        String url = jsonObject.getString("url");
 
         String[] result = url.split("/");
 

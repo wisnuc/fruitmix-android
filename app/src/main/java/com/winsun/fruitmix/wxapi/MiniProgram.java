@@ -58,6 +58,8 @@ public class MiniProgram {
 
         wxMiniProgramObject.path = "pages/login/login" + "?ticket=" + ticket;
 
+        Log.d(TAG, "shareMiniWXApp: path:" + wxMiniProgramObject.path);
+
 //        wxMiniProgramObject.path = "pages/login/login";
 
         WXMediaMessage wxMediaMessage = new WXMediaMessage(wxMiniProgramObject);
