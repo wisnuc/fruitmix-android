@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+
+        <variable
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
+
+        <variable
+            name="pluginViewModel"
+            type="com.winsun.fruitmix.plugin.PluginViewModel" />
+
+        <variable
+            name="pluginPresenter"
+            type="com.winsun.fruitmix.plugin.PluginManagePresenter" />
+
+    </data>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:bind="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical"
+        tools:context="com.winsun.fruitmix.plugin.view.PluginManageActivity">
+
+        <include
+            android:id="@+id/toolbar_layout"
+            layout="@layout/toolbar_layout"
+            bind:toolbarViewModel="@{toolbarViewModel}" />
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
+
+            <ImageView
+                android:id="@+id/samba_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                bind:layout_constraintBottom_toBottomOf="parent"
+                bind:layout_constraintStart_toStartOf="parent"
+                bind:layout_constraintTop_toTopOf="parent"
+                bind:srcCompat="@drawable/account_manage" />
+
+            <TextView
+                android:id="@+id/samba_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:text="@string/samba_service"
+                android:textColor="@{pluginViewModel.pluginUpdateEnable?@color/eighty_seven_percent_black:@color/twenty_six_percent_black}"
+                android:textSize="16dp"
+                bind:layout_constraintBottom_toBottomOf="parent"
+                bind:layout_constraintStart_toEndOf="@+id/samba_icon"
+                bind:layout_constraintTop_toTopOf="parent" />
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/samba_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="@{pluginViewModel.sambaOpenOrNot}"
+                android:enabled="@{pluginViewModel.pluginUpdateEnable}"
+                android:onCheckedChanged="@{(buttonView,isChecked) -> pluginPresenter.onCheckedChanged(buttonView, isChecked)}"
+                bind:layout_constraintBottom_toBottomOf="parent"
+                bind:layout_constraintEnd_toEndOf="parent"
+                bind:layout_constraintTop_toTopOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
+
+            <ImageView
+                android:id="@+id/dlna_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                bind:layout_constraintBottom_toBottomOf="parent"
+                bind:layout_constraintStart_toStartOf="parent"
+                bind:layout_constraintTop_toTopOf="parent"
+                bind:srcCompat="@drawable/account_manage" />
+
+            <TextView
+                android:id="@+id/dlna_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:text="@string/dlna_service"
+                android:textColor="@{pluginViewModel.pluginUpdateEnable?@color/eighty_seven_percent_black:@color/twenty_six_percent_black}"
+                android:textSize="16dp"
+                bind:layout_constraintBottom_toBottomOf="parent"
+                bind:layout_constraintStart_toEndOf="@+id/dlna_icon"
+                bind:layout_constraintTop_toTopOf="parent" />
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/dlna_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="@{pluginViewModel.dlnaOpenOrNot}"
+                android:enabled="@{pluginViewModel.pluginUpdateEnable}"
+                android:onCheckedChanged="@{(buttonView,isChecked) -> pluginPresenter.onCheckedChanged(buttonView, isChecked)}"
+                bind:layout_constraintBottom_toBottomOf="parent"
+                bind:layout_constraintEnd_toEndOf="parent"
+                bind:layout_constraintTop_toTopOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
+
+            <ImageView
+                android:id="@+id/bt_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                bind:layout_constraintBottom_toBottomOf="parent"
+                bind:layout_constraintStart_toStartOf="parent"
+                bind:layout_constraintTop_toTopOf="parent"
+                bind:srcCompat="@drawable/account_manage" />
+
+            <TextView
+                android:id="@+id/bt_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:text="@string/bt_download_service"
+                android:textColor="@{pluginViewModel.pluginUpdateEnable?@color/eighty_seven_percent_black:@color/twenty_six_percent_black}"
+                android:textSize="16dp"
+                bind:layout_constraintBottom_toBottomOf="parent"
+                bind:layout_constraintStart_toEndOf="@+id/bt_icon"
+                bind:layout_constraintTop_toTopOf="parent" />
+
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/bt_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="@{pluginViewModel.btOpenOrNot}"
+                android:onCheckedChanged="@{(buttonView,isChecked) -> pluginPresenter.onCheckedChanged(buttonView, isChecked)}"
+                bind:layout_constraintBottom_toBottomOf="parent"
+                bind:layout_constraintEnd_toEndOf="parent"
+                bind:layout_constraintTop_toTopOf="parent" />
+
+        </android.support.constraint.ConstraintLayout>
+
+    </LinearLayout>
+
+
+</layout>

@@ -36,6 +36,8 @@ import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.plugin.data.PluginManageDataSource;
+import com.winsun.fruitmix.plugin.data.PluginStatus;
 import com.winsun.fruitmix.torrent.data.DownloadState;
 import com.winsun.fruitmix.torrent.data.TorrentDataRepository;
 import com.winsun.fruitmix.torrent.data.TorrentDownloadInfo;
@@ -46,6 +48,7 @@ import com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadingChildItemViewMode
 import com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadingGroupItemViewModel;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
+import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -157,9 +160,13 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
     private TorrentDataRepository mTorrentDataRepository;
 
+    private PluginManageDataSource mPluginManageDataSource;
+
     private ActivityTorrentDownloadManageBinding mBinding;
 
     private LoadingViewModel mLoadingViewModel;
+
+    private NoContentViewModel mNoContentViewModel;
 
     private TorrentDownloadItemAdapter mTorrentDownloadItemAdapter;
 
@@ -167,6 +174,8 @@ public class TorrentDownloadManagePresenter implements ActiveView {
     private List<TorrentDownloadInfo> mDownloadedTorrentDownloadInfo;
 
     private BaseView mBaseView;
+
+    private String mTorrentFilePath;
 
     private CreateTorrentDownloadTaskViewInDialogBinding mCreateTorrentDownloadTaskViewInDialogBinding;
 
@@ -212,12 +221,15 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
     private boolean allPauseFlag = true;
 
-    public TorrentDownloadManagePresenter(TorrentDataRepository torrentDataRepository,
+    public TorrentDownloadManagePresenter(TorrentDataRepository torrentDataRepository, PluginManageDataSource pluginManageDataSource,
                                           ActivityTorrentDownloadManageBinding binding,
-                                          LoadingViewModel loadingViewModel, BaseView baseView) {
+                                          LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel, BaseView baseView,
+                                          String torrentFilePath) {
         mTorrentDataRepository = torrentDataRepository;
+        mPluginManageDataSource = pluginManageDataSource;
         mBinding = binding;
         mLoadingViewModel = loadingViewModel;
+        mNoContentViewModel = noContentViewModel;
         mBaseView = baseView;
 
         mDownloadedTorrentDownloadInfo = new ArrayList<>();
@@ -229,9 +241,53 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
         mRefreshViewTimelyHandler = new RefreshViewTimelyHandler(Looper.getMainLooper(), this);
 
+        mTorrentFilePath = torrentFilePath;
+
     }
 
-    public void startTorrentFileDownloadTask(final Context context, String torrentFilePath) {
+    public void initView(final Context context) {
+
+        mPluginManageDataSource.getBTStatus(new BaseLoadDataCallbackWrapper<>(
+                new BaseLoadDataCallback<PluginStatus>() {
+                    @Override
+                    public void onSucceed(List<PluginStatus> data, OperationResult operationResult) {
+
+                        if (!data.get(0).isActive()) {
+
+                            mLoadingViewModel.showLoading.set(false);
+
+                            mNoContentViewModel.showNoContent.set(true);
+
+                            mBinding.addUser.setVisibility(View.GONE);
+
+                            return;
+
+                        }
+
+                        refreshView();
+
+                        if (mTorrentFilePath != null && mTorrentFilePath.length() > 0) {
+                            startTorrentFileDownloadTask(context, mTorrentFilePath);
+                        }
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        refreshView();
+
+                        if (mTorrentFilePath != null && mTorrentFilePath.length() > 0) {
+                            startTorrentFileDownloadTask(context, mTorrentFilePath);
+                        }
+
+                    }
+                }, this
+        ));
+
+    }
+
+    private void startTorrentFileDownloadTask(final Context context, String torrentFilePath) {
 
         mTorrentDataRepository.postTorrentDownloadTask(new File(torrentFilePath), new BaseOperateDataCallbackWrapper<>(
                 new BaseOperateDataCallback<TorrentRequestParam>() {
@@ -271,6 +327,11 @@ public class TorrentDownloadManagePresenter implements ActiveView {
                     public void onFail(OperationResult operationResult) {
 
                         mLoadingViewModel.showLoading.set(false);
+
+                        handleGetAllTorrentDownloadInfo(Collections.<TorrentDownloadInfo>emptyList());
+
+                        if (mBaseView != null)
+                            mRefreshViewTimelyHandler.sendEmptyMessageDelayed(REFRESH_VIEW, 2 * 1000);
 
                     }
                 }, this));

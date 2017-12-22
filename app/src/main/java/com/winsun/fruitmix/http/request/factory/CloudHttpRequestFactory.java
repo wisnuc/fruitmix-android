@@ -7,7 +7,7 @@ package com.winsun.fruitmix.http.request.factory;
 
 public class CloudHttpRequestFactory extends BaseAbsHttpRequestFactory {
 
-    static final String CLOUD_DOMAIN_NAME = "www.siyouqun.org";
+    static final String CLOUD_DOMAIN_NAME = "www.siyouqun.com";
 
     private static final String TEST_CLOUD_DOMAIN_NAME = "test.siyouqun.org";
 

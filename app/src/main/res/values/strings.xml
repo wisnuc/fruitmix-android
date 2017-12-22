@@ -230,9 +230,21 @@
 
     <string name="calculating">Calculating</string>
 
-    <string name="how_to_handle_bt_file">How to handle BT files from third party applications</string>
+    <string name="how_to_handle_bt_file">BT files from the other applications</string>
 
-    <string name="ask_everytime">Every time you ask how to deal with it</string>
+    <string name="ask_everytime">Ask every time</string>
+
+    <string name="service_manage">Service Manage</string>
+
+    <!-- plugin -->
+    <string name="samba_service">Samba</string>
+    <string name="dlna_service">miniDLNA</string>
+    <string name="bt_download_service">BT Download</string>
+
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+
+    <string name="bt_download_service_stopped">BT download service stopped</string>
 
     <!-- create user -->
     <string name="user_name">User Name</string>

@@ -20,6 +20,10 @@
             name="toolbarViewModel"
             type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
+        <variable
+            name="settingView"
+            type="com.winsun.fruitmix.setting.SettingView" />
+
     </data>
 
     <LinearLayout
@@ -221,6 +225,23 @@
                     android:textSize="16dp" />
 
             </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:gravity="center_vertical"
+                android:onClick="@{()->settingView.gotoPluginManageActivity()}"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/service_manage"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="16dp" />
+
+            </LinearLayout>
+
 
             <View
                 android:layout_width="match_parent"

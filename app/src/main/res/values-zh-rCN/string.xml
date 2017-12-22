@@ -207,9 +207,21 @@
 
     <string name="calculating">计算中…</string>
 
-    <string name="how_to_handle_bt_file">如何处理来自第三方应用的BT文件</string>
-    
+    <string name="how_to_handle_bt_file">来自第三方应用的BT文件</string>
+
     <string name="ask_everytime">每次都询问如何处理</string>
+
+    <string name="service_manage">服务管理</string>
+
+    <!-- 插件 -->
+    <string name="samba_service">Samba服务</string>
+    <string name="dlna_service">miniDLNA服务</string>
+    <string name="bt_download_service">BT下载服务</string>
+
+    <string name="start">开启</string>
+    <string name="stop">停止</string>
+
+    <string name="bt_download_service_stopped">BT下载服务已停止</string>
 
     <!-- create user -->
     <string name="user_name">用户名</string>

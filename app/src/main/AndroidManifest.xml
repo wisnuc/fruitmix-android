@@ -183,6 +183,9 @@
         <activity
             android:name=".equipment.maintenance.MaintenanceActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".plugin.view.PluginManageActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

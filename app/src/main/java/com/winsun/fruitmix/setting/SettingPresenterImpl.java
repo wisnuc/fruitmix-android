@@ -7,12 +7,21 @@ import android.widget.CompoundButton;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.SettingActivity;
+import com.winsun.fruitmix.callback.ActiveView;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackWrapper;
+import com.winsun.fruitmix.databinding.ActivitySettingBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.model.OperationType;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.plugin.data.PluginManageDataSource;
+import com.winsun.fruitmix.plugin.data.PluginStatus;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
@@ -23,11 +32,13 @@ import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
 /**
  * Created by Administrator on 2017/6/22.
  */
 
-public class SettingPresenterImpl implements SettingPresenter {
+public class SettingPresenterImpl implements SettingPresenter, ActiveView {
 
     private boolean mAutoUploadOrNot = false;
 
@@ -57,11 +68,16 @@ public class SettingPresenterImpl implements SettingPresenter {
 
     private ThreadManager threadManager;
 
+    private PluginManageDataSource mPluginManageDataSource;
+
+    private ActivitySettingBinding mActivitySettingBinding;
+
     private int newBehavior;
 
     public SettingPresenterImpl(BaseView baseView, SettingActivity.SettingViewModel settingViewModel, SystemSettingDataSource systemSettingDataSource,
                                 MediaDataSourceRepository mediaDataSourceRepository, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
-                                UploadMediaUseCase uploadMediaUseCase, String currentUserUUID, ThreadManager threadManager) {
+                                UploadMediaUseCase uploadMediaUseCase, String currentUserUUID, ThreadManager threadManager, PluginManageDataSource pluginManageDataSource,
+                                ActivitySettingBinding binding) {
         this.baseView = baseView;
         this.settingViewModel = settingViewModel;
         this.systemSettingDataSource = systemSettingDataSource;
@@ -70,6 +86,8 @@ public class SettingPresenterImpl implements SettingPresenter {
         this.uploadMediaUseCase = uploadMediaUseCase;
         this.currentUserUUID = currentUserUUID;
         this.threadManager = threadManager;
+        mPluginManageDataSource = pluginManageDataSource;
+        mActivitySettingBinding = binding;
     }
 
     @Override
@@ -125,6 +143,7 @@ public class SettingPresenterImpl implements SettingPresenter {
         };
 
         calcAlreadyUploadMediaCountAndTotalCacheSize(context);
+
 
     }
 
@@ -271,7 +290,7 @@ public class SettingPresenterImpl implements SettingPresenter {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if (behavior != newBehavior){
+                        if (behavior != newBehavior) {
 
                             systemSettingDataSource.setOpenTorrentFileDefaultBehavior(newBehavior);
 
@@ -289,5 +308,10 @@ public class SettingPresenterImpl implements SettingPresenter {
 
         baseView = null;
 
+    }
+
+    @Override
+    public boolean isActive() {
+        return baseView != null;
     }
 }

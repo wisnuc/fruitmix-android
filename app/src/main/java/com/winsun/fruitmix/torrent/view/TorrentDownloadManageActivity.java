@@ -2,7 +2,6 @@ package com.winsun.fruitmix.torrent.view;
 
 import android.databinding.DataBindingUtil;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,10 +12,9 @@ import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityTorrentDownloadManageBinding;
 import com.winsun.fruitmix.interfaces.BaseView;
+import com.winsun.fruitmix.plugin.data.InjectPluginManageDataSource;
 import com.winsun.fruitmix.torrent.TorrentDownloadManagePresenter;
 import com.winsun.fruitmix.torrent.data.InjectTorrentDataRepository;
-import com.winsun.fruitmix.torrent.data.TorrentDataRepository;
-import com.winsun.fruitmix.torrent.data.TorrentDataRepositoryImpl;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -39,23 +37,24 @@ public class TorrentDownloadManageActivity extends BaseActivity implements BaseV
 
         binding.setLoadingViewModel(loadingViewModel);
 
+        NoContentViewModel noContentViewModel = new NoContentViewModel();
+        noContentViewModel.setNoContentText(getString(R.string.bt_download_service_stopped));
+
+        binding.setNoContentViewModel(noContentViewModel);
+
         RecyclerView recyclerView = binding.torrentDownloadRecyclerview;
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
+        String torrentFilePath = getIntent().getStringExtra(KEY_TORRENT_FILE_PATH);
+
         presenter = new TorrentDownloadManagePresenter(InjectTorrentDataRepository.provideInstance(this),
-                binding, loadingViewModel, this);
+                InjectPluginManageDataSource.provideInstance(this),binding, loadingViewModel,noContentViewModel, this,torrentFilePath);
 
         binding.setPresenter(presenter);
 
-        presenter.refreshView();
-
-        String torrentFilePath = getIntent().getStringExtra(KEY_TORRENT_FILE_PATH);
-
-        if (torrentFilePath != null && torrentFilePath.length() > 0) {
-            presenter.startTorrentFileDownloadTask(this, torrentFilePath);
-        }
+        presenter.initView(this);
 
     }
 

@@ -12,6 +12,10 @@
             type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
 
         <variable
+            name="noContentViewModel"
+            type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
+
+        <variable
             name="presenter"
             type="com.winsun.fruitmix.torrent.TorrentDownloadManagePresenter" />
 
@@ -40,6 +44,10 @@
                 android:id="@+id/torrent_download_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
+
+            <include
+                layout="@layout/new_no_content_layout"
+                app:noContentViewModel="@{noContentViewModel}" />
 
             <include
                 layout="@layout/new_loading_layout"

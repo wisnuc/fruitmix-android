@@ -1,42 +1,26 @@
 package com.winsun.fruitmix;
 
-import android.content.DialogInterface;
 import android.databinding.DataBindingUtil;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
-import android.os.AsyncTask;
-import android.support.v7.app.AlertDialog;
 import android.os.Bundle;
-import android.support.v7.widget.SwitchCompat;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.TextView;
 
 import com.winsun.fruitmix.databinding.ActivitySettingBinding;
-import com.winsun.fruitmix.eventbus.RequestEvent;
-import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.media.InjectMedia;
-import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.OperationType;
+import com.winsun.fruitmix.plugin.view.PluginManageActivity;
 import com.winsun.fruitmix.setting.SettingPresenter;
 import com.winsun.fruitmix.setting.SettingPresenterImpl;
+import com.winsun.fruitmix.plugin.data.InjectPluginManageDataSource;
+import com.winsun.fruitmix.setting.SettingView;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
-import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
-import org.greenrobot.eventbus.EventBus;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
-public class SettingActivity extends BaseActivity {
+public class SettingActivity extends BaseActivity implements SettingView {
 
     public static final String TAG = "SettingActivity";
 
@@ -55,7 +39,8 @@ public class SettingActivity extends BaseActivity {
         settingPresenter = new SettingPresenterImpl(this, settingViewModel, systemSettingDataSource,
                 InjectMedia.provideMediaDataSourceRepository(this), CheckMediaIsUploadStrategy.getInstance(),
                 InjectUploadMediaUseCase.provideUploadMediaUseCase(this), systemSettingDataSource.getCurrentLoginUserUUID(),
-                ThreadManagerImpl.getInstance());
+                ThreadManagerImpl.getInstance(), InjectPluginManageDataSource.provideInstance(this),
+                binding);
 
         binding.setSettingPresenter(settingPresenter);
 
@@ -68,6 +53,8 @@ public class SettingActivity extends BaseActivity {
         toolbarViewModel.setBaseView(this);
 
         binding.setToolbarViewModel(toolbarViewModel);
+
+        binding.setSettingView(this);
 
         settingPresenter.onCreate(this);
 
@@ -95,6 +82,13 @@ public class SettingActivity extends BaseActivity {
 
     }
 
+    @Override
+    public void gotoPluginManageActivity() {
+
+        Util.startActivity(this, PluginManageActivity.class);
+
+    }
+
     public class SettingViewModel {
 
         public final ObservableBoolean autoUploadOrNot = new ObservableBoolean(false);
@@ -102,7 +96,6 @@ public class SettingActivity extends BaseActivity {
         public final ObservableBoolean onlyAutoUploadWhenConnectedWithWifi = new ObservableBoolean(true);
         public final ObservableField<String> alreadyUploadMediaCountText = new ObservableField<>();
         public final ObservableField<String> cacheSizeText = new ObservableField<>();
-
     }
 
 }
