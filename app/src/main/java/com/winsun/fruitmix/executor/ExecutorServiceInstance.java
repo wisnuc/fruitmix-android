@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.executor;
 
+import android.os.Process;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,6 +34,59 @@ public enum ExecutorServiceInstance {
         cacheThreadPool = Executors.newCachedThreadPool();
     }
 
+    private class BackgroundPriorityRunnable implements Runnable {
+
+        private Runnable mRunnable;
+
+        BackgroundPriorityRunnable(Runnable runnable) {
+            mRunnable = runnable;
+        }
+
+        /**
+         * When an object implementing interface <code>Runnable</code> is used
+         * to create a thread, starting the thread causes the object's
+         * <code>run</code> method to be called in that separately executing
+         * thread.
+         * <p>
+         * The general contract of the method <code>run</code> is that it may
+         * take any action whatsoever.
+         *
+         * @see Thread#run()
+         */
+        @Override
+        public void run() {
+
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
+            mRunnable.run();
+
+        }
+    }
+
+    private class BackgroundPriorityCallable<V> implements Callable<V> {
+
+        private Callable<V> mCallable;
+
+        BackgroundPriorityCallable(Callable<V> callable) {
+            mCallable = callable;
+        }
+
+        /**
+         * Computes a result, or throws an exception if unable to do so.
+         *
+         * @return computed result
+         * @throws Exception if unable to compute a result
+         */
+        @Override
+        public V call() throws Exception {
+
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
+            return mCallable.call();
+        }
+    }
+
+
     public void doOneTaskInCachedThread(Runnable runnable) {
         cacheThreadPool.execute(runnable);
     }
@@ -45,7 +100,7 @@ public enum ExecutorServiceInstance {
         if (updateMediaThreadPool == null || updateMediaThreadPool.isShutdown())
             startUploadMediaThreadPool();
 
-        return updateMediaThreadPool.submit(callable);
+        return updateMediaThreadPool.submit(new BackgroundPriorityCallable<>(callable));
     }
 
     public void doOneTaskInUploadMediaThreadPool(Runnable runnable) {
@@ -53,7 +108,7 @@ public enum ExecutorServiceInstance {
         if (updateMediaThreadPool == null || updateMediaThreadPool.isShutdown())
             startUploadMediaThreadPool();
 
-        updateMediaThreadPool.execute(runnable);
+        updateMediaThreadPool.execute(new BackgroundPriorityRunnable(runnable));
     }
 
     private void startUploadMediaThreadPool() {
@@ -65,7 +120,8 @@ public enum ExecutorServiceInstance {
         if (generateMiniThumbThreadPool == null || generateMiniThumbThreadPool.isShutdown())
             startGenerateMiniThumbThreadPool();
 
-        generateMiniThumbThreadPool.submit(callable);
+        generateMiniThumbThreadPool.submit(new BackgroundPriorityCallable<>(callable));
+
     }
 
     private void startGenerateMiniThumbThreadPool() {
@@ -77,7 +133,7 @@ public enum ExecutorServiceInstance {
         if (generateThumbThreadPool == null || generateThumbThreadPool.isShutdown())
             startGenerateThumbThreadPool();
 
-        generateThumbThreadPool.execute(runnable);
+        generateThumbThreadPool.execute(new BackgroundPriorityRunnable(runnable));
     }
 
     private void startGenerateThumbThreadPool() {
@@ -89,7 +145,7 @@ public enum ExecutorServiceInstance {
         if (downloadFileThreadPool == null || downloadFileThreadPool.isShutdown())
             startDownloadFileThreadPool();
 
-        return downloadFileThreadPool.submit(callable);
+        return downloadFileThreadPool.submit(new BackgroundPriorityCallable<>(callable));
 
     }
 
@@ -102,7 +158,7 @@ public enum ExecutorServiceInstance {
         if (uploadFileThreadPool == null || uploadFileThreadPool.isShutdown())
             startUploadFileThreadPool();
 
-        return uploadFileThreadPool.submit(callable);
+        return uploadFileThreadPool.submit(new BackgroundPriorityCallable<>(callable));
 
     }
 

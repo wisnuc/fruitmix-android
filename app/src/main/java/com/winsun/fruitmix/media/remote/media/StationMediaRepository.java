@@ -11,6 +11,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.Util;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,13 +67,15 @@ public class StationMediaRepository {
             return;
         }
 
-        Log.d(TAG, "getMedia: start get media from station");
+        Log.d(TAG, "getMedia: start get media from station," + Util.getCurrentFormatTime());
 
         stationMediaRemoteDataSource.getMedia(new BaseLoadDataCallbackImpl<Media>() {
 
             @Override
             public void onSucceed(List<Media> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
+
+                Log.d(StationMediaRepository.TAG, "onSucceed: finish get media from station," + Util.getCurrentFormatTime());
 
                 cacheDirty = false;
 
@@ -81,24 +84,30 @@ public class StationMediaRepository {
                 for (Media media : data) {
                     if (!mediaConcurrentMap.containsKey(media.getUuid())) {
                         hasNewMedia = true;
+                        break;
                     }
                 }
 
                 if (hasNewMedia) {
 
-                    Log.d(TAG, "onSucceed: get media from station has new media");
+                    Log.d(StationMediaRepository.TAG, "onSucceed: get media from station has new media," + Util.getCurrentFormatTime());
 
                     mediaConcurrentMap.clear();
 
                     mediaConcurrentMap.putAll(LocalCache.BuildMediaMapKeyIsUUID(data));
 
+                    Log.d(StationMediaRepository.TAG, "onSucceed: finish put all media to mediaConcurrentMap,"+ Util.getCurrentFormatTime());
+
+                    callback.onSucceed(data, new OperationMediaDataChanged());
+
                     stationMediaDBDataSource.clearAllMedias();
                     stationMediaDBDataSource.insertMedias(data);
 
-                    callback.onSucceed(data, new OperationMediaDataChanged());
+                    Log.d(StationMediaRepository.TAG, "onSucceed: finish insert medias," + Util.getCurrentFormatTime());
+
                 } else {
 
-                    Log.d(TAG, "onSucceed: get media no new media");
+                    Log.d(StationMediaRepository.TAG, "onSucceed: get media no new media");
 
                     callback.onSucceed(data, operationResult);
                 }

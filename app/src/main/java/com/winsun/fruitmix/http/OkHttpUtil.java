@@ -144,7 +144,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     @Override
-    public ResponseBody downloadFile(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException, NetworkException {
+    public ResponseBody getResponseBody(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException, NetworkException {
 
         Request.Builder builder = generateRequestBuilder(httpRequest);
 

@@ -20,8 +20,6 @@ import okhttp3.ResponseBody;
 
 public interface IHttpFileUtil {
 
-    ResponseBody downloadFile(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException,NetworkException;
-
     Request createUploadWithProgressRequest(HttpRequest httpRequest, RequestBody requestBody,FileUploadState fileUploadState);
 
 }

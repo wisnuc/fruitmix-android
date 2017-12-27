@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.http;
 
+import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.mediaModule.model.Media;
 
 import java.io.File;
@@ -26,5 +27,7 @@ public interface IHttpUtil {
     Request createPostRequest(HttpRequest httpRequest,RequestBody requestBody);
 
     HttpResponse remoteCallRequest(Request request) throws MalformedURLException, IOException, SocketTimeoutException;
+
+    ResponseBody getResponseBody(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException,NetworkException;
 
 }

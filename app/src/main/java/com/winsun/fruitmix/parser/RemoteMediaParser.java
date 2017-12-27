@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.parser;
 
+
 import android.util.Log;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -10,7 +11,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,9 +32,17 @@ public class RemoteMediaParser extends BaseRemoteDataParser implements RemoteDat
 
         Media media;
 
+        Log.d(TAG, "parse media start," + Util.getCurrentFormatTime());
+
         jsonArray = new JSONArray(rootStr);
 
+        Log.d(TAG, "parse: get jsonArray" + Util.getCurrentFormatTime());
+
         for (int i = 0; i < jsonArray.length(); i++) {
+
+            if (i == 0)
+                Log.d(TAG, "parse: before parse a json object," + Util.getCurrentFormatTime());
+
             JSONObject root = jsonArray.getJSONObject(i);
 
             String type = root.optString("m");
@@ -71,7 +79,13 @@ public class RemoteMediaParser extends BaseRemoteDataParser implements RemoteDat
                 media.setTime(Util.DEFAULT_DATE);
             } else {
 
-                try {
+                //TODO:性能瓶颈：处理dateTime耗费大量时间
+
+                dateTime = dateTime.substring(0, 10).replace(":", "-") + dateTime.substring(10);
+
+                media.setTime(dateTime);
+
+  /*              try {
 
                     String year = dateTime.substring(0, 4);
 
@@ -93,7 +107,7 @@ public class RemoteMediaParser extends BaseRemoteDataParser implements RemoteDat
                 } catch (NumberFormatException e) {
 
                     media.setTime(Util.DEFAULT_DATE);
-                }
+                }*/
             }
 
             int orientationNumber = root.optInt("orient");
@@ -111,6 +125,9 @@ public class RemoteMediaParser extends BaseRemoteDataParser implements RemoteDat
             media.setLongitude(root.optString("long"));
 
             medias.add(media);
+
+            if (i == 0)
+                Log.d(TAG, "parse: finish parse a json object," + Util.getCurrentFormatTime());
 
         }
 

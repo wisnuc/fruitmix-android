@@ -113,5 +113,4 @@ public class UserAvatar extends FrameLayout {
 
     }
 
-
 }

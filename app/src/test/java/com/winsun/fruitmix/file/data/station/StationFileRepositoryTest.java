@@ -63,8 +63,6 @@ import static org.junit.Assert.*;
 @Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
 public class StationFileRepositoryTest {
 
-    //TODO:add UploadFileDataSource test
-
     private StationFileRepositoryImpl fileRepository;
 
     @Mock
@@ -127,11 +125,7 @@ public class StationFileRepositoryTest {
 
         captor.getValue().onSucceed(Collections.singletonList(file), new OperationSuccess());
 
-        assertEquals(1, fileRepository.stationFiles.size());
-
-        assertEquals(testFolderUUID, fileRepository.stationFiles.get(0).getParentFolderUUID());
-
-    }
+}
 
     //NOTE:cache dirty logic is comment out
 

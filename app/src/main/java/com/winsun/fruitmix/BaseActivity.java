@@ -5,14 +5,19 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.databinding.ViewDataBinding;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.databinding.ActivityMaintenanceBinding;
+import com.winsun.fruitmix.databinding.ToolbarLayoutBinding;
 import com.winsun.fruitmix.dialog.DialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.interfaces.BaseView;
@@ -25,6 +30,7 @@ import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.util.FNAS;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -155,5 +161,26 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     public void showCustomErrorCode(String text) {
         Toast.makeText(this, String.format(getString(R.string.server_exception), text), Toast.LENGTH_SHORT).show();
     }
+
+    protected void initToolBar(ViewDataBinding binding,ToolbarLayoutBinding toolbarLayoutBinding,String title) {
+
+        Toolbar mToolbar = toolbarLayoutBinding.toolbar;
+
+        toolbarLayoutBinding.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
+
+        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
+        toolbarViewModel.setBaseView(this);
+
+        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
+        toolbarViewModel.titleText.set(title);
+
+        binding.setVariable(BR.toolbarViewModel,toolbarViewModel);
+
+        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
+
+        Util.setStatusBarColor(this, R.color.login_ui_blue);
+
+    }
+
 
 }

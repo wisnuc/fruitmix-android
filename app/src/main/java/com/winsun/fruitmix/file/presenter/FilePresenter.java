@@ -1022,7 +1022,6 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                     viewHolder = new FileViewHolder(binding);
             }
 
-
             return viewHolder;
         }
 

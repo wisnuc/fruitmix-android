@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="32dp"
-            android:src="@drawable/file_icon" />
+            android:src="@{viewmodel.iconResID,default=@drawable/file_icon}" />
 
         <ImageButton
             android:id="@+id/downloading_file_item_menu"
@@ -35,8 +35,8 @@
             android:layout_height="48dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:background="@null"
             android:layout_marginLeft="20dp"
+            android:background="@null"
             android:clickable="true"
             android:onClick="@{()->presenter.showOperateTorrentDownloadingItemBottomDialog(context,viewmodel)}"
             android:src="@drawable/ic_more_vert_black" />
@@ -53,8 +53,8 @@
                 android:id="@+id/speed"
                 android:layout_width="108dp"
                 android:layout_height="wrap_content"
-                android:gravity="right"
                 android:layout_alignParentRight="true"
+                android:gravity="right"
                 android:text="@{viewmodel.getSpeed(context)}"
                 android:textColor="@color/fifty_four_percent_black"
                 android:textSize="14dp"

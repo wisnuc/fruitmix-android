@@ -2,6 +2,7 @@ package com.winsun.fruitmix.torrent.viewmodel;
 
 import android.content.Context;
 import android.databinding.ObservableField;
+import android.databinding.ObservableInt;
 import android.text.format.Formatter;
 
 import com.winsun.fruitmix.R;
@@ -45,11 +46,11 @@ public class TorrentDownloadingChildItemViewModel {
 
     }
 
-    public boolean isPause(){
+    public boolean isPause() {
         return mTorrentDownloadInfo.isPause();
     }
 
-    public String getHash(){
+    public String getHash() {
         return mTorrentDownloadInfo.getHash();
     }
 
@@ -60,5 +61,8 @@ public class TorrentDownloadingChildItemViewModel {
 
     }
 
+    public int getIconResID() {
+        return mTorrentDownloadInfo.isMagnet() ? R.drawable.magnet : R.drawable.bt_file;
+    }
 
 }

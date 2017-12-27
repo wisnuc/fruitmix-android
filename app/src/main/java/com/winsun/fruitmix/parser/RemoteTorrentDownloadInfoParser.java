@@ -32,22 +32,9 @@ public class RemoteTorrentDownloadInfoParser extends BaseRemoteDataParser implem
 
             JSONObject running = runnings.optJSONObject(i);
 
-            String hash = running.optString("infoHash");
+            TorrentDownloadInfo torrentDownloadInfo = createInstance(running);
 
-            Long downloaded = running.optLong("downloaded");
-
-            Double downloadSpeed = running.optDouble("downloadSpeed");
-
-            Double progress = running.optDouble("progress");
-
-            String name = running.optString("name");
-
-            boolean isPause = running.optBoolean("isPause");
-
-            Long time = running.optLong("time");
-
-            TorrentDownloadInfo torrentDownloadInfo = new TorrentDownloadInfo(hash, downloaded, downloadSpeed, progress, name, DownloadState.DOWNLOADING,
-                    isPause, time);
+            torrentDownloadInfo.setState(DownloadState.DOWNLOADING);
 
             torrentDownloadInfos.add(torrentDownloadInfo);
         }
@@ -56,26 +43,45 @@ public class RemoteTorrentDownloadInfoParser extends BaseRemoteDataParser implem
 
             JSONObject finish = finishs.optJSONObject(i);
 
-            String hash = finish.optString("infoHash");
+            TorrentDownloadInfo torrentDownloadInfo = createInstance(finish);
 
-            Long downloaded = finish.optLong("downloaded");
-
-            Double downloadSpeed = finish.optDouble("downloadSpeed");
-
-            Double progress = finish.optDouble("progress");
-
-            String name = finish.optString("name");
-
-            boolean isPause = finish.optBoolean("isPause");
-
-            Long time = finish.optLong("finishTime");
-
-            TorrentDownloadInfo torrentDownloadInfo = new TorrentDownloadInfo(hash, downloaded, downloadSpeed, progress, name, DownloadState.DOWNLOADED,
-                    isPause, time);
+            torrentDownloadInfo.setState(DownloadState.DOWNLOADED);
 
             torrentDownloadInfos.add(torrentDownloadInfo);
         }
 
         return torrentDownloadInfos;
     }
+
+    private TorrentDownloadInfo createInstance(JSONObject jsonObject) {
+
+        String hash = jsonObject.optString("infoHash");
+
+        Long downloaded = jsonObject.optLong("downloaded");
+
+        Double downloadSpeed = jsonObject.optDouble("downloadSpeed");
+
+        Double progress = jsonObject.optDouble("progress");
+
+        String name = jsonObject.optString("name");
+
+        boolean isPause = jsonObject.optBoolean("isPause");
+
+        Long time = jsonObject.optLong("finishTime");
+
+        String torrentPath = jsonObject.optString("torrentPath");
+
+        if (torrentPath.equals("null"))
+            torrentPath = "";
+
+        String magnetUrl = jsonObject.optString("magnetUrl");
+
+        if (magnetUrl.equals("null"))
+            magnetUrl = "";
+
+        return new TorrentDownloadInfo(hash, downloaded, downloadSpeed, progress, name, DownloadState.UNDEFINED,
+                isPause, time, torrentPath, magnetUrl);
+
+    }
+
 }

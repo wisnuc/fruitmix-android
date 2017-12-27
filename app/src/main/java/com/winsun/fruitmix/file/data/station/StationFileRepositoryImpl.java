@@ -45,10 +45,6 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
     private UploadFileDataSource uploadFileDataSource;
 
-    List<AbstractRemoteFile> stationFiles;
-
-    private String currentFolderUUID;
-
     boolean cacheDirty = true;
 
     private FileTaskManager fileTaskManager;
@@ -62,7 +58,6 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
         this.uploadFileDataSource = uploadFileDataSource;
         this.fileTaskManager = fileTaskManager;
 
-        stationFiles = new ArrayList<>();
 
     }
 
@@ -153,21 +148,15 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     }
 
     private void handleGetFileFail(String folderUUID) {
-        currentFolderUUID = folderUUID;
 
         cacheDirty = false;
     }
 
     private void handleGetFileSucceed(List<AbstractRemoteFile> data, String folderUUID) {
-        currentFolderUUID = folderUUID;
 
         for (AbstractRemoteFile file : data) {
             file.setParentFolderUUID(folderUUID);
         }
-
-        stationFiles.clear();
-
-        stationFiles.addAll(data);
 
         cacheDirty = false;
 

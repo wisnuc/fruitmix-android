@@ -42,9 +42,9 @@ public class DownloadFileTask implements Callable<Boolean> {
         HttpRequest httpRequest = new HttpRequest(downloadFileUrl, Util.HTTP_GET_METHOD);
         httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
 
-        ResponseBody responseBody = OkHttpUtil.getInstance().downloadFile(httpRequest);
+        ResponseBody responseBody = OkHttpUtil.getInstance().getResponseBody(httpRequest);
 
-        Log.d(TAG, "call: downloadFile");
+        Log.d(TAG, "call: getResponseBody");
 
         boolean result = FileUtil.writeResponseBodyToFolder(responseBody, fileDownloadState);
 

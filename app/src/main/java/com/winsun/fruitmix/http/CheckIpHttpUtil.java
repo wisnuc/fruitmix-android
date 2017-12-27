@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.equipment.search.data.Equipment;
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 
 /**
  * Created by Administrator on 2017/5/16.
@@ -249,4 +251,8 @@ public class CheckIpHttpUtil implements IHttpUtil {
         return null;
     }
 
+    @Override
+    public ResponseBody getResponseBody(HttpRequest httpRequest) throws IOException, NetworkException {
+        return null;
+    }
 }

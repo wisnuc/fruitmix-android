@@ -341,6 +341,9 @@ public class NetworkImageView extends ImageView {
             mImageContainer = null;
             cancelRequest = true;
         }
+
+        unregisterImageLoadListener();
+
         super.onDetachedFromWindow();
     }
 

@@ -992,7 +992,7 @@ public class NavPagerActivity extends BaseActivity
 
                 logoutUseCase.logout();
 
-                //TODO:check put setAlreadyLogin here will cause everytime call logout need call logout
+                //TODO:check put setAlreadyLogin here will cause every time call logout need call this method
                 loginUseCase.setAlreadyLogin(false);
 
                 return true;

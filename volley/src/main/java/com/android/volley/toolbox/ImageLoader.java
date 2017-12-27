@@ -650,7 +650,6 @@ public class ImageLoader {
 
 //                mCache.putBitmap(url, response);
 
-                Log.d(TAG, "onResponse: " + url);
 
             }
         }, width, height, ImageView.ScaleType.CENTER_CROP, Bitmap.Config.RGB_565, new ErrorListener() {

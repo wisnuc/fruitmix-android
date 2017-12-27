@@ -1,7 +1,9 @@
 package com.winsun.fruitmix.torrent.viewmodel;
 
+import android.databinding.ObservableInt;
 import android.text.format.DateFormat;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.torrent.data.TorrentDownloadInfo;
 import com.winsun.fruitmix.util.FileUtil;
 
@@ -27,6 +29,10 @@ public class TorrentDownloadedChildItemViewModel {
 
     public String getTime() {
         return DateFormat.format("yyyy.MM.dd", mTorrentDownloadInfo.getTime()).toString();
+    }
+
+    public int getIconResID() {
+        return mTorrentDownloadInfo.isMagnet() ? R.drawable.magnet : R.drawable.bt_file;
     }
 
 }

@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="32dp"
-            android:src="@drawable/file_icon" />
+            android:src="@{viewmodel.iconResID,default=@drawable/file_icon}" />
 
         <ImageButton
             android:id="@+id/downloading_file_item_menu"
@@ -43,7 +43,6 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/downloading_file_item_menu"
             android:layout_toRightOf="@id/file_icon">
-
 
             <TextView
                 android:id="@+id/file_name"

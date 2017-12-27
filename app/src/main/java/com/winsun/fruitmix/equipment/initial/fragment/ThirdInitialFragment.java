@@ -2,6 +2,7 @@ package com.winsun.fruitmix.equipment.initial.fragment;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,23 +25,11 @@ import java.util.List;
 
 
 public class ThirdInitialFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private static final String ARG_MODE = "mode";
-
-    private ThirdInitialFragmentViewModel thirdInitialFragmentViewModel;
-
-    private FragmentThirdInitialBinding binding;
-
-    private InstallDiskItemAdapter installDiskItemAdapter;
 
     private String mUserName;
     private String mMode;
 
     private List<DiskVolumeViewModel> mSelectDiskVolumeViewModels;
-
 
     public ThirdInitialFragment() {
         // Required empty public constructor
@@ -49,8 +38,8 @@ public class ThirdInitialFragment extends Fragment {
         mMode = "";
 
         mSelectDiskVolumeViewModels = new ArrayList<>();
-    }
 
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,12 +48,12 @@ public class ThirdInitialFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        binding = FragmentThirdInitialBinding.inflate(inflater, container, false);
+        FragmentThirdInitialBinding binding = FragmentThirdInitialBinding.inflate(inflater, container, false);
 
-        thirdInitialFragmentViewModel = new ThirdInitialFragmentViewModel();
+        ThirdInitialFragmentViewModel thirdInitialFragmentViewModel = new ThirdInitialFragmentViewModel();
 
         thirdInitialFragmentViewModel.userName.set(getString(R.string.colon, getString(R.string.mode), mUserName));
         thirdInitialFragmentViewModel.mode.set(getString(R.string.colon, getString(R.string.user_name), mMode));
@@ -76,7 +65,7 @@ public class ThirdInitialFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        installDiskItemAdapter = new InstallDiskItemAdapter();
+        InstallDiskItemAdapter installDiskItemAdapter = new InstallDiskItemAdapter();
 
         installDiskItemAdapter.setDiskVolumeViewModels(mSelectDiskVolumeViewModels);
         installDiskItemAdapter.notifyDataSetChanged();

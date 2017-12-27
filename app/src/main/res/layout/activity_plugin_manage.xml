@@ -33,7 +33,8 @@
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="64dp"
+            android:layout_marginTop="8dp"
             android:paddingLeft="16dp"
             android:paddingRight="16dp">
 
@@ -44,14 +45,14 @@
                 bind:layout_constraintBottom_toBottomOf="parent"
                 bind:layout_constraintStart_toStartOf="parent"
                 bind:layout_constraintTop_toTopOf="parent"
-                bind:srcCompat="@drawable/account_manage" />
+                bind:srcCompat="@drawable/samba_plugin" />
 
             <TextView
                 android:id="@+id/samba_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
                 android:text="@string/samba_service"
                 android:textColor="@{pluginViewModel.pluginUpdateEnable?@color/eighty_seven_percent_black:@color/twenty_six_percent_black}"
                 android:textSize="16dp"
@@ -73,7 +74,7 @@
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="64dp"
             android:paddingLeft="16dp"
             android:paddingRight="16dp">
 
@@ -84,14 +85,14 @@
                 bind:layout_constraintBottom_toBottomOf="parent"
                 bind:layout_constraintStart_toStartOf="parent"
                 bind:layout_constraintTop_toTopOf="parent"
-                bind:srcCompat="@drawable/account_manage" />
+                bind:srcCompat="@drawable/dlna_plugin" />
 
             <TextView
                 android:id="@+id/dlna_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
                 android:text="@string/dlna_service"
                 android:textColor="@{pluginViewModel.pluginUpdateEnable?@color/eighty_seven_percent_black:@color/twenty_six_percent_black}"
                 android:textSize="16dp"
@@ -113,7 +114,7 @@
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="64dp"
             android:paddingLeft="16dp"
             android:paddingRight="16dp">
 
@@ -124,14 +125,14 @@
                 bind:layout_constraintBottom_toBottomOf="parent"
                 bind:layout_constraintStart_toStartOf="parent"
                 bind:layout_constraintTop_toTopOf="parent"
-                bind:srcCompat="@drawable/account_manage" />
+                bind:srcCompat="@drawable/bt_plugin" />
 
             <TextView
                 android:id="@+id/bt_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
                 android:text="@string/bt_download_service"
                 android:textColor="@{pluginViewModel.pluginUpdateEnable?@color/eighty_seven_percent_black:@color/twenty_six_percent_black}"
                 android:textSize="16dp"

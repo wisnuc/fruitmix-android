@@ -174,11 +174,10 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
 
             }
         };
-        model.setMenuIconResId(R.drawable.transfer_menu_icon);
+        model.setMenuIconResId(R.drawable.bt_download_icon);
         model.setMenuText(context.getString(R.string.download_manage));
 
         mNavigationMenuItems.add(model);
-
 
         model = new NavigationMenuViewModel() {
             @Override

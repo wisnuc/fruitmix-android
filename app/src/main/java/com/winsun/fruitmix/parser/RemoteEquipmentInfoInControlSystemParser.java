@@ -41,12 +41,13 @@ public class RemoteEquipmentInfoInControlSystemParser extends BaseRemoteDataPars
     }
 
     private void parseHardware(EquipmentInfoInControlSystem equipmentInfoInControlSystem, JSONObject jsonObject) {
-        if (jsonObject.has(EquipmentTypeInfo.WS215I)) {
+
+        JSONObject ws215i = jsonObject.optJSONObject(EquipmentTypeInfo.WS215I);
+
+        if (ws215i != null) {
 
             EquipmentHardware equipmentHardware = new EquipmentHardware();
             equipmentHardware.setEquipmentType(EquipmentTypeInfo.WS215I.toUpperCase());
-
-            JSONObject ws215i = jsonObject.optJSONObject(EquipmentTypeInfo.WS215I);
 
             equipmentHardware.setEquipmentHardwareSerialNumber(ws215i.optString("serial"));
 
