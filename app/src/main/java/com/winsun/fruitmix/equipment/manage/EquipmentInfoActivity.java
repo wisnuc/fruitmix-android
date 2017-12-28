@@ -103,7 +103,7 @@ public class EquipmentInfoActivity extends BaseActivity implements EquipmentInfo
 
                 title = getString(R.string.equipment_info);
 
-                Log.d(TAG, "onCreate: should not enter default case");
+                Log.d(TAG, "refreshView: should not enter default case");
         }
 
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();

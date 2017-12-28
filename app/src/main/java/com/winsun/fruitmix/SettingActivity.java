@@ -6,6 +6,7 @@ import android.databinding.ObservableField;
 import android.os.Bundle;
 
 import com.winsun.fruitmix.databinding.ActivitySettingBinding;
+import com.winsun.fruitmix.firmware.FirmwareActivity;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.plugin.view.PluginManageActivity;
 import com.winsun.fruitmix.setting.SettingPresenter;
@@ -86,6 +87,14 @@ public class SettingActivity extends BaseActivity implements SettingView {
     public void gotoPluginManageActivity() {
 
         Util.startActivity(this, PluginManageActivity.class);
+
+    }
+
+    @Override
+    public void gotoFirmwareActivity() {
+
+
+        Util.startActivity(this, FirmwareActivity.class);
 
     }
 

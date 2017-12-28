@@ -186,6 +186,9 @@
         <activity
             android:name=".plugin.view.PluginManageActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".firmware.FirmwareActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

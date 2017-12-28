@@ -50,7 +50,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_marginRight="15dp"
                 android:onClick="@{()->toolbarViewModel.toolbarMenuBtnOnClick()}"
-                android:src="@drawable/ic_more_vert_black"
+                android:src="@{toolbarViewModel.menuResID,default=@drawable/ic_more_vert_black}"
                 android:visibility="@{toolbarViewModel.showMenu?View.VISIBLE:View.GONE,default=gone}" />
 
             <TextView

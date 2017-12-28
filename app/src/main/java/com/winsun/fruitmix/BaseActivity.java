@@ -162,7 +162,7 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         Toast.makeText(this, String.format(getString(R.string.server_exception), text), Toast.LENGTH_SHORT).show();
     }
 
-    protected void initToolBar(ViewDataBinding binding,ToolbarLayoutBinding toolbarLayoutBinding,String title) {
+    protected ToolbarViewModel initToolBar(ViewDataBinding binding,ToolbarLayoutBinding toolbarLayoutBinding,String title) {
 
         Toolbar mToolbar = toolbarLayoutBinding.toolbar;
 
@@ -179,6 +179,8 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
 
         Util.setStatusBarColor(this, R.color.login_ui_blue);
+
+        return toolbarViewModel;
 
     }
 

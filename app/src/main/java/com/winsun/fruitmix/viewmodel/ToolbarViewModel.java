@@ -25,6 +25,8 @@ public class ToolbarViewModel {
 
     public final ObservableBoolean showMenu = new ObservableBoolean(false);
 
+    public final ObservableInt menuResID = new ObservableInt(R.drawable.ic_more_vert_black);
+
     public final ObservableBoolean showToolbar = new ObservableBoolean(true);
 
     private BaseView baseView;

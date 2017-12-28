@@ -313,13 +313,21 @@ public class HttpRequestFactory {
 
     }
 
-    private synchronized HttpRequest createHttpGetRequest(String httpPath, boolean isGetStream) {
+    public synchronized HttpRequest createHttpGetRequest(String httpPath,int port){
 
+        setDefaultFactoryState();
+
+        currentDefaultHttpRequestFactory.setPort(port);
+
+        return currentDefaultHttpRequestFactory.createHttpGetRequest(httpPath,false);
+
+    }
+
+    private synchronized HttpRequest createHttpGetRequest(String httpPath, boolean isGetStream) {
 
         setDefaultFactoryState();
 
         return currentDefaultHttpRequestFactory.createHttpGetRequest(httpPath, isGetStream);
-
 
     }
 
@@ -375,6 +383,26 @@ public class HttpRequestFactory {
         setDefaultFactoryState();
 
         return currentDefaultHttpRequestFactory.createHttpPatchRequest(httpPath, body);
+
+    }
+
+    public synchronized HttpRequest createHttpPatchRequest(String httpPath, String body,int port) {
+
+        setDefaultFactoryState();
+
+        currentDefaultHttpRequestFactory.setPort(port);
+
+        return currentDefaultHttpRequestFactory.createHttpPatchRequest(httpPath, body);
+
+    }
+
+    public synchronized HttpRequest createHttpPutRequest(String httpPath, String body,int port) {
+
+        setDefaultFactoryState();
+
+        currentDefaultHttpRequestFactory.setPort(port);
+
+        return currentDefaultHttpRequestFactory.createHttpPutRequest(httpPath, body);
 
     }
 

@@ -161,7 +161,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         mThreadManger = ThreadManagerImpl.getInstance();
 
-        Log.d(TAG, "onCreate: ");
+        Log.d(TAG, "refreshView: ");
     }
 
     @Override

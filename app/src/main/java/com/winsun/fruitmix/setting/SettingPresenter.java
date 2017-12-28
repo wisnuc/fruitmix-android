@@ -25,4 +25,6 @@ public interface SettingPresenter {
 
     void setDefaultOpenTorrentFileBehavior(Context context);
 
+    void gotoFirmwareActivity(Context context);
+
 }

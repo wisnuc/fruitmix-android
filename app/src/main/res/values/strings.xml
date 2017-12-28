@@ -522,6 +522,34 @@
     <string name="maintenance">Maintenance</string>
     <string name="nonsupport_explain">WISNUC OS you connected is under maintenance mode,  we have not yet supported this mode on Android client, please download WISNUC Windows or Mac client.</string>
 
+    <!-- firmware -->
+    <string name="firmware_update">Firmware Update</string>
+    <string name="firmware_install">Firmware Install</string>
+
+    <string name="no_firmware">There is no Appifi now</string>
+
+    <string name="current_firmware_version">Current firmware version:%1$s</string>
+    <string name="find_new_firmware_version">Find latest version:%1$s</string>
+    <string name="release_date">Release date:%1$s</string>
+    <string name="already_latest_version">It is latest version</string>
+
+    <string name="install">Install</string>
+
+    <string name="install_instruction">Install the firmware program for you with the version number %1$s</string>
+    <string name="install_instruction_two">Recommended to be used with the latest version of the client</string>
+
+    <string name="running">Running</string>
+    <string name="stopped">Stopped</string>
+
+    <string name="repacking">Repacking</string>
+    <string name="verifying">Verifying</string>
+
+    <string name="downloaded">Downloaded</string>
+
+    <string name="get_firmware_version">Get firmware version</string>
+
+    <string name="send_request">Send request</string>
+
     <!-- group -->
     <string name="group">Group</string>
 

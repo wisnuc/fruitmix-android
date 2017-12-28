@@ -250,13 +250,25 @@ public class StringUtilTest {
     }
 
     @Test
-    public void testFormatTime(){
+    public void testFormatTime() {
 
-        CharSequence time = DateFormat.format("yyyy.MM.dd",new Date(1513332835525L));
+        CharSequence time = DateFormat.format("yyyy.MM.dd", new Date(1513332835525L));
 
-        assertEquals("2017.12.15",time.toString());
+        assertEquals("2017.12.15", time.toString());
 
     }
 
+    @Test
+    public void testCalcProgress() {
+
+        long downloaded = 7771362L;
+        long length = 9550832L;
+
+
+        double result = ((double) downloaded / length) * 100;
+
+        assertEquals("81%",(int)result + "%");
+
+    }
 
 }

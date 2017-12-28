@@ -50,7 +50,7 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
 
     private long mTotalCacheSize = 0;
 
-    private BaseView baseView;
+    private SettingView mSettingView;
 
     private SettingActivity.SettingViewModel settingViewModel;
 
@@ -74,11 +74,11 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
 
     private int newBehavior;
 
-    public SettingPresenterImpl(BaseView baseView, SettingActivity.SettingViewModel settingViewModel, SystemSettingDataSource systemSettingDataSource,
+    public SettingPresenterImpl(SettingView settingView, SettingActivity.SettingViewModel settingViewModel, SystemSettingDataSource systemSettingDataSource,
                                 MediaDataSourceRepository mediaDataSourceRepository, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
                                 UploadMediaUseCase uploadMediaUseCase, String currentUserUUID, ThreadManager threadManager, PluginManageDataSource pluginManageDataSource,
                                 ActivitySettingBinding binding) {
-        this.baseView = baseView;
+        this.mSettingView = settingView;
         this.settingViewModel = settingViewModel;
         this.systemSettingDataSource = systemSettingDataSource;
         this.mediaDataSourceRepository = mediaDataSourceRepository;
@@ -118,27 +118,27 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
             @Override
             public void onGetUploadMediaCountFail(int httpErrorCode) {
                 if (httpErrorCode != -1)
-                    baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA + httpErrorCode);
+                    mSettingView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA + httpErrorCode);
             }
 
             @Override
             public void onUploadMediaFail(int httpErrorCode) {
                 if (httpErrorCode != -1)
-                    baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_UPLOAD_MEDIA + httpErrorCode);
+                    mSettingView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_UPLOAD_MEDIA + httpErrorCode);
             }
 
             @Override
             public void onCreateFolderFail(int httpErrorCode) {
 
                 if (httpErrorCode != -1)
-                    baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_CREATE_FOLDER + httpErrorCode);
+                    mSettingView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_CREATE_FOLDER + httpErrorCode);
             }
 
             @Override
             public void onGetFolderFail(int httpErrorCode) {
 
                 if (httpErrorCode != -1)
-                    baseView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
+                    mSettingView.showCustomErrorCode(Util.CUSTOM_ERROR_CODE_HEAD + Util.CUSTOM_ERROR_CODE_GET_FOLDER + httpErrorCode);
             }
         };
 
@@ -294,7 +294,7 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
 
                             systemSettingDataSource.setOpenTorrentFileDefaultBehavior(newBehavior);
 
-                            baseView.showToast(baseView.getString(R.string.success, baseView.getString(R.string.how_to_handle_bt_file)));
+                            mSettingView.showToast(mSettingView.getString(R.string.success, mSettingView.getString(R.string.how_to_handle_bt_file)));
 
                         }
 
@@ -304,14 +304,24 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
     }
 
     @Override
+    public void gotoFirmwareActivity(Context context) {
+
+        if (systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
+            mSettingView.showToast(context.getString(R.string.operation_not_support));
+        } else
+            mSettingView.gotoFirmwareActivity();
+
+    }
+
+    @Override
     public void onDestroy(Context context) {
 
-        baseView = null;
+        mSettingView = null;
 
     }
 
     @Override
     public boolean isActive() {
-        return baseView != null;
+        return mSettingView != null;
     }
 }

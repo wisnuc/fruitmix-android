@@ -218,7 +218,7 @@
     <string name="dlna_service">miniDLNA服务</string>
     <string name="bt_download_service">BT下载服务</string>
 
-    <string name="start">开启</string>
+    <string name="start">启动</string>
     <string name="stop">停止</string>
 
     <string name="bt_download_service_stopped">BT下载服务已停止</string>
@@ -495,6 +495,34 @@
     <string name="nonsupport_explain">您的WISNUC系统处于维护模式，安卓客户端暂不支持该功能，请下载WISNUC客户端软件对系统进行维护。</string>
 
     <string name="magnet_illegal">Magnet链接格式错误</string>
+
+    <!-- firmware -->
+    <string name="firmware_update">固件升级</string>
+    <string name="firmware_install">固件安装</string>
+
+    <string name="no_firmware">当前没有Appifi</string>
+
+    <string name="current_firmware_version">当前使用的固件版本:%1$s</string>
+    <string name="find_new_firmware_version">发现新版本:%1$s</string>
+    <string name="release_date">发布日期:%1$s</string>
+    <string name="already_latest_version">已是最新版本</string>
+
+    <string name="install">安装</string>
+
+    <string name="install_instruction">将要为您安装版本号为%1$s的固件程序</string>
+    <string name="install_instruction_two">建议配合最新客户端使用</string>
+
+    <string name="running">运行中</string>
+    <string name="stopped">已停止</string>
+
+    <string name="repacking">打包中</string>
+    <string name="verifying">验证中</string>
+
+    <string name="downloaded">已下载</string>
+
+    <string name="get_firmware_version">获取固件版本</string>
+
+    <string name="send_request">发送请求</string>
 
     <!-- group -->
     <string name="group">"私友群"</string>

@@ -30,4 +30,6 @@ public class NoContentViewModel {
         this.noContentImgResId = noContentImgResId;
     }
 
+    public final ObservableBoolean showNoContentImg = new ObservableBoolean(true);
+
 }
