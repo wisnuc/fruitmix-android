@@ -538,6 +538,7 @@
 
     <string name="send_request">发送请求</string>
 
+    <string name="check_update">检查更新</string>
 
     <!-- group -->
     <string name="group">"私友群"</string>

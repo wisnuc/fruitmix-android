@@ -564,6 +564,8 @@
 
     <string name="send_request">Send request</string>
 
+    <string name="check_update">CheckUpdate</string>
+
     <!-- group -->
     <string name="group">Group</string>
 

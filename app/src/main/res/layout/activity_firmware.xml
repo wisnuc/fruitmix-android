@@ -239,6 +239,21 @@
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/install_retry" />
 
+                <Button
+                    android:id="@+id/button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="72dp"
+                    android:layout_marginStart="72dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/next_step_item_bg"
+                    android:onClick="@{()->firmwarePresenter.checkUpdate(context)}"
+                    android:text="@string/check_update"
+                    android:textColor="@color/eighty_seven_percent_white"
+                    android:textSize="14dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/divide_two" />
+
             </android.support.constraint.ConstraintLayout>
 
             <include

@@ -920,14 +920,22 @@ public class Util {
 
         for (int i = 0; i < length; i++) {
 
-            int number1 = Integer.parseInt(currentVersionNumbers[i]);
-            int number2 = Integer.parseInt(newVersionNumbers[i]);
+            try {
+
+                int number1 = Integer.parseInt(currentVersionNumbers[i]);
+                int number2 = Integer.parseInt(newVersionNumbers[i]);
 
 
-            int result = number1 - number2;
+                int result = number1 - number2;
 
-            if (result != 0)
-                return result;
+                if (result != 0)
+                    return result;
+
+            }catch (NumberFormatException e){
+                e.printStackTrace();
+
+                break;
+            }
 
         }
 
