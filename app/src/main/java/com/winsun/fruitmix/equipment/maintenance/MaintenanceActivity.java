@@ -24,6 +24,7 @@ public class MaintenanceActivity extends BaseActivity {
         ActivityMaintenanceBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_maintenance);
 
         initToolBar(binding,binding.toolbarLayout,getString(R.string.maintenance));
+
     }
 
 

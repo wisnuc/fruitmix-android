@@ -386,6 +386,12 @@ public class NavPagerActivity extends BaseActivity
 //                leftDrawerHeadLayout.setBackground(drawable);
 //
 //                new AnimateColorMatrixUtil().startAnimation(drawable, 2000);
+
+                if (systemSettingDataSource.getLoginWithWechatCodeOrNot())
+                    binding.leftDrawerHeadLayout.cloud.setVisibility(View.VISIBLE);
+                else
+                    binding.leftDrawerHeadLayout.cloud.setVisibility(View.INVISIBLE);
+
             }
 
             @Override
@@ -805,6 +811,8 @@ public class NavPagerActivity extends BaseActivity
         Log.d(TAG, "refreshUserInNavigationView: user is null:" + (user == null ? "true" : "false"));
 
         refreshUserName(user);
+
+        userAvatar.setUnregisterListenerWhenDetachFromWindow(false);
 
         userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
 //        navPagerViewModel.userAvatarText.set(user.getDefaultAvatar());

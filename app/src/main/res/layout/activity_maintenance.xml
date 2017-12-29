@@ -7,6 +7,14 @@
             name="toolbarViewModel"
             type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
+        <variable
+            name="noContentViewModel"
+            type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
+
+        <variable
+            name="loadingViewModel"
+            type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
+
     </data>
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -32,6 +40,23 @@
             android:text="@string/nonsupport_explain"
             android:textColor="@color/eighty_seven_percent_black"
             android:textSize="16dp" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <include layout="@layout/new_no_content_layout"
+                app:noContentViewModel="@{noContentViewModel}" />
+
+            <include layout="@layout/new_loading_layout"
+                app:loadingViewModel="@{loadingViewModel}"/>
+
+        </FrameLayout>
 
     </RelativeLayout>
 

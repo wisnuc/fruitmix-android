@@ -77,6 +77,8 @@ public class NetworkImageView extends ImageView {
 
     private IImageLoadListener mImageLoadListener;
 
+    private boolean unregisterListenerWhenDetachFromWindow = true;
+
     public NetworkImageView(Context context) {
         this(context, null);
     }
@@ -137,6 +139,10 @@ public class NetworkImageView extends ImageView {
 
     public void unregisterImageLoadListener() {
         mImageLoadListener = null;
+    }
+
+    public void setUnregisterListenerWhenDetachFromWindow(boolean unregisterListenerWhenDetachFromWindow) {
+        this.unregisterListenerWhenDetachFromWindow = unregisterListenerWhenDetachFromWindow;
     }
 
     public int getOrientationNumber() {
@@ -342,7 +348,8 @@ public class NetworkImageView extends ImageView {
             cancelRequest = true;
         }
 
-        unregisterImageLoadListener();
+        if (unregisterListenerWhenDetachFromWindow)
+            unregisterImageLoadListener();
 
         super.onDetachedFromWindow();
     }

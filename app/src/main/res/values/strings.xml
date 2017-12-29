@@ -522,6 +522,20 @@
     <string name="maintenance">Maintenance</string>
     <string name="nonsupport_explain">WISNUC OS you connected is under maintenance mode,  we have not yet supported this mode on Android client, please download WISNUC Windows or Mac client.</string>
 
+    <string name="disk_title">Disk array %1$s</string>
+
+    <string name="automatic_detection">Automatic detection</string>
+
+    <string name="is_mounted">Mounted or not</string>
+    <string name="no_missing">Disk array is complete or not</string>
+    <string name="last_system">Is it a file system that was last started</string>
+    <string name="fruitmix_ok">There is a WISNUC system or not </string>
+    <string name="users_ok">User imformation is complete or not</string>
+
+    <string name="wisnuc_system_manage">WISNUC System Manage</string>
+    <string name="reinstall_wisnuc">Reinstall WISNUC</string>
+    <string name="force_start">Forced to start</string>
+
     <!-- firmware -->
     <string name="firmware_update">Firmware Update</string>
     <string name="firmware_install">Firmware Install</string>

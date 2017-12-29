@@ -182,6 +182,8 @@ public class FirmwareViewModel {
 
             newVersionState.set(context.getString(R.string.operating_title, context.getString(R.string.download)));
 
+            installOrRetryBtn.set(context.getString(R.string.install));
+
             if (downloaded != 0 && length != 0) {
 
                 showProgress.set(true);
@@ -200,13 +202,20 @@ public class FirmwareViewModel {
 
             switch (state) {
                 case IDLE:
-                    newVersionState.set(context.getString(R.string.fail));
+                    newVersionState.set(context.getString(R.string.stopped));
+
+                    installOrRetryBtn.set(context.getString(R.string.stopped));
                     break;
                 case REPACKING:
                     newVersionState.set(context.getString(R.string.repacking));
+
+                    installOrRetryBtn.set(context.getString(R.string.repacking));
                     break;
                 case VERIFYING:
                     newVersionState.set(context.getString(R.string.verifying));
+
+                    installOrRetryBtn.set(context.getString(R.string.verifying));
+
                     break;
             }
 

@@ -237,14 +237,14 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
 
-                refreshAllLoggedInUsers(true,context);
+                refreshAllLoggedInUsers(true, context);
 
             }
 
             @Override
             public void onFail(OperationResult result) {
 
-                refreshAllLoggedInUsers(false,context);
+                refreshAllLoggedInUsers(false, context);
 
             }
         });
@@ -281,6 +281,7 @@ public class MainPagePresenterImpl implements MainPagePresenter, ActiveView {
 
                     navPagerViewModel.equipmentNameVisibility.set(true);
                     navPagerViewModel.equipmentNameText.set(data.get(0).getFormatLabel(context));
+
                 }
 
                 @Override

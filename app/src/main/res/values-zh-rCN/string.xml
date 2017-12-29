@@ -483,6 +483,8 @@
     <string name="delete_task">删除任务</string>
     <string name="delete_file">删除已下载文件</string>
 
+    <string name="magnet_illegal">Magnet链接格式错误</string>
+
     <string name="upload_torrent_file_title">该文件是BT下载文件</string>
 
     <string name="upload_file_to_wisnuc">上传该文件到WISNUC</string>
@@ -494,7 +496,19 @@
     <string name="maintenance">维护模式</string>
     <string name="nonsupport_explain">您的WISNUC系统处于维护模式，安卓客户端暂不支持该功能，请下载WISNUC客户端软件对系统进行维护。</string>
 
-    <string name="magnet_illegal">Magnet链接格式错误</string>
+    <string name="disk_title">磁盘阵列%1$s</string>
+
+    <string name="automatic_detection">自动检测</string>
+    
+    <string name="is_mounted">是否挂机</string>
+    <string name="no_missing">磁盘阵列是否完整</string>
+    <string name="last_system">是否是上次启动的文件系统</string>
+    <string name="fruitmix_ok">是否存在WISNUC系统</string>
+    <string name="users_ok">用户信息是否完整</string>
+
+    <string name="wisnuc_system_manage">WISNUC系统管理</string>
+    <string name="reinstall_wisnuc">重新安装WISNUC</string>
+    <string name="force_start">强制启动</string>
 
     <!-- firmware -->
     <string name="firmware_update">固件升级</string>
@@ -523,6 +537,7 @@
     <string name="get_firmware_version">获取固件版本</string>
 
     <string name="send_request">发送请求</string>
+
 
     <!-- group -->
     <string name="group">"私友群"</string>

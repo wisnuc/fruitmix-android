@@ -37,6 +37,8 @@ public class UserAvatar extends FrameLayout {
 
     private String preUrl;
 
+    private boolean unregisterListenerWhenDetachFromWindow = true;
+
     public UserAvatar(@NonNull Context context) {
         super(context);
 
@@ -61,6 +63,10 @@ public class UserAvatar extends FrameLayout {
 
         avatarTextView = binding.avatarTextview;
         avatarImageView = binding.avatarImageview;
+    }
+
+    public void setUnregisterListenerWhenDetachFromWindow(boolean unregisterListenerWhenDetachFromWindow) {
+        this.unregisterListenerWhenDetachFromWindow = unregisterListenerWhenDetachFromWindow;
     }
 
     public void setUser(User user, ImageLoader imageLoader) {
@@ -106,6 +112,8 @@ public class UserAvatar extends FrameLayout {
 
                 }
             });
+
+            avatarImageView.setUnregisterListenerWhenDetachFromWindow(unregisterListenerWhenDetachFromWindow);
 
             MediaUtil.startLoadRemoteImageUrl(url, avatarImageView, imageLoader);
 
