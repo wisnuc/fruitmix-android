@@ -42,7 +42,7 @@ public class FirmwareActivity extends BaseActivity implements FirmwareView {
 
         firmwarePresenter = new FirmwarePresenter(toolbarViewModel,
                 loadingViewModel, noContentViewModel, firmwareViewModel, InjectFirmwareDataSource.provideInstance(this),
-                this);
+                this,binding);
 
         binding.setFirmwarePresenter(firmwarePresenter);
 

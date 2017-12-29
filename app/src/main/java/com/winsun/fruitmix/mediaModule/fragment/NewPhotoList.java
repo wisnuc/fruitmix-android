@@ -32,6 +32,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.toolbox.IImageLoadListener;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.BR;
@@ -62,6 +63,8 @@ import com.winsun.fruitmix.mediaModule.viewmodel.PhotoItemViewModel;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.util.MediaUtil;
@@ -163,6 +166,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private CheckMediaIsUploadStrategy mCheckMediaIsUploadStrategy;
 
+    private ThreadManager mThreadManager;
+
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
@@ -241,6 +246,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         mediaDataSourceRepository.registerCalcDigestCallback(calcMediaDigestCallback);
 
         mCheckMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
+
+        mThreadManager = ThreadManagerImpl.getInstance();
 
     }
 
@@ -546,7 +553,17 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             if (!mPreLoadPhoto) {
                 mPreLoadPhoto = true;
-                loadSmallThumbnail(medias);
+
+                mThreadManager.runOnCacheThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
+
+                        loadSmallThumbnail(medias);
+                    }
+                });
+
             }
 
         }
@@ -555,49 +572,43 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private void loadSmallThumbnail(final List<Media> medias) {
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        String url;
 
-                String url;
+        List<Media> preLoadMediaMiniThumbs = new ArrayList<>(medias);
+        Media media;
+        Iterator<Media> iterator = preLoadMediaMiniThumbs.iterator();
+        while (iterator.hasNext()) {
+            media = iterator.next();
+            if (media.isLocal())
+                iterator.remove();
+        }
 
-                List<Media> preLoadMediaMiniThumbs = new ArrayList<>(medias);
-                Media media;
-                Iterator<Media> iterator = preLoadMediaMiniThumbs.iterator();
-                while (iterator.hasNext()) {
-                    media = iterator.next();
-                    if (media.isLocal())
-                        iterator.remove();
-                }
+        Log.i(TAG, "pre load media size: " + preLoadMediaMiniThumbs.size());
 
-                Log.i(TAG, "pre load media size: " + preLoadMediaMiniThumbs.size());
+        int preLoadMediaMiniThumbSize = preLoadMediaMiniThumbs.size() > 100 ? 100 : preLoadMediaMiniThumbs.size();
 
-                for (int i = 0; i < preLoadMediaMiniThumbs.size(); i++) {
+        for (int i = 0; i < preLoadMediaMiniThumbSize; i++) {
 
-                    if (mCancelPreLoadPhoto)
-                        break;
+            if (mCancelPreLoadPhoto)
+                break;
 
-                    media = preLoadMediaMiniThumbs.get(i);
+            media = preLoadMediaMiniThumbs.get(i);
 
-                    if (media instanceof Video)
-                        continue;
+            if (media instanceof Video)
+                continue;
 
-                    HttpRequest httpRequest = media.getImageSmallThumbUrl(containerActivity);
+            HttpRequest httpRequest = media.getImageSmallThumbUrl(containerActivity);
 
-                    url = httpRequest.getUrl();
+            url = httpRequest.getUrl();
 
-                    ArrayMap<String, String> header = new ArrayMap<>();
-                    header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
+            ArrayMap<String, String> header = new ArrayMap<>();
+            header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
 
-                    mImageLoader.setHeaders(header);
+            mImageLoader.setHeaders(header);
 
-                    mImageLoader.preLoadMediaSmallThumb(url, mItemWidth, mItemWidth);
+            mImageLoader.preLoadMediaSmallThumb(url, mItemWidth, mItemWidth);
 
-                }
-
-            }
-        }).start();
+        }
 
     }
 
@@ -1311,6 +1322,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         private NewPhotoGridlayoutItemBinding binding;
 
+        private Media currentMedia;
+
         PhotoHolder(ViewDataBinding viewDataBinding) {
             super(viewDataBinding);
 
@@ -1326,7 +1339,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         public void refreshView(int position) {
 
-            final Media currentMedia = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
+            currentMedia = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
 
             if (currentMedia == null) return;
 

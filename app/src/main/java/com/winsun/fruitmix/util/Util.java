@@ -738,6 +738,16 @@ public class Util {
         context.startActivity(new Intent(context, target));
     }
 
+    public static void setTopMargin(View view, int top) {
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+
+            params.topMargin = top;
+
+            view.requestLayout();
+        }
+    }
+
     public static void setLeftMargin(View view, int left) {
         if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
@@ -898,6 +908,30 @@ public class Util {
     private static String formatHourMinSec(long time) {
 
         return time < 10 ? "0" + time : String.valueOf(time);
+
+    }
+
+    public static int compareVersion(String currentVersion, String newVersion) {
+
+        String[] currentVersionNumbers = currentVersion.split("\\.");
+        String[] newVersionNumbers = newVersion.split("\\.");
+
+        int length = currentVersionNumbers.length > newVersionNumbers.length ? newVersionNumbers.length : currentVersionNumbers.length;
+
+        for (int i = 0; i < length; i++) {
+
+            int number1 = Integer.parseInt(currentVersionNumbers[i]);
+            int number2 = Integer.parseInt(newVersionNumbers[i]);
+
+
+            int result = number1 - number2;
+
+            if (result != 0)
+                return result;
+
+        }
+
+        return 0;
 
     }
 

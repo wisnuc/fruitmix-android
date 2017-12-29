@@ -109,7 +109,7 @@
                     android:text="@{firmwareViewModel.startStopBtnStr}"
                     android:textColor="@color/eighty_seven_percent_white"
                     android:textSize="14dp"
-                    android:visibility="@{firmwareViewModel.showStartStopBtn?View.VISIBLE:View.GONE}"
+                    android:visibility="@{firmwareViewModel.showStartStopBtn?View.VISIBLE:View.GONE,default=gone}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/current_version_layout"
                     tools:text="停止" />
@@ -120,7 +120,7 @@
                     android:layout_height="1px"
                     android:layout_marginLeft="72dp"
                     android:layout_marginRight="16dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="8dp"
                     android:background="@color/divide_bg"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/start_stop" />
@@ -128,38 +128,37 @@
                 <android.support.constraint.ConstraintLayout
                     android:id="@+id/new_version_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="60dp"
                     android:layout_marginTop="8dp"
                     app:layout_constraintRight_toLeftOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/divide_one">
 
                     <ImageView
-                        android:id="@+id/imageView3"
+                        android:id="@+id/new_version_icon"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
                         android:layout_marginLeft="16dp"
                         android:layout_marginTop="8dp"
                         android:src="@{firmwareViewModel.newVersionIconResId,default=@drawable/new_releases}"
-                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="@+id/find_new_version" />
 
                     <TextView
-                        android:id="@+id/textView5"
+                        android:id="@+id/find_new_version"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="32dp"
                         android:layout_marginStart="32dp"
+                        android:layout_marginTop="8dp"
                         android:text="@{firmwareViewModel.findNewVersion}"
                         android:textColor="@color/eighty_seven_percent_black"
                         android:textSize="16dp"
-                        app:layout_constraintStart_toEndOf="@+id/imageView3"
-                        app:layout_constraintTop_toTopOf="@+id/imageView3"
+                        app:layout_constraintStart_toEndOf="@+id/new_version_icon"
+                        app:layout_constraintTop_toTopOf="parent"
                         tools:text="发现新版本:1.1.11" />
 
                     <TextView
-                        android:id="@+id/textView6"
+                        android:id="@+id/newVersionState"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="16dp"
@@ -167,7 +166,7 @@
                         android:text="@{firmwareViewModel.newVersionState}"
                         android:visibility="@{firmwareViewModel.showNewVersionState?View.VISIBLE:View.INVISIBLE}"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/textView5"
+                        app:layout_constraintTop_toTopOf="@+id/find_new_version"
                         tools:text="已下载" />
 
 
@@ -179,8 +178,8 @@
                         android:layout_marginStart="8dp"
                         android:text="@{firmwareViewModel.progress}"
                         android:visibility="@{firmwareViewModel.showProgress?View.VISIBLE:View.INVISIBLE}"
-                        app:layout_constraintStart_toEndOf="@+id/textView5"
-                        app:layout_constraintTop_toTopOf="@+id/textView6"
+                        app:layout_constraintStart_toEndOf="@+id/find_new_version"
+                        app:layout_constraintTop_toTopOf="@+id/newVersionState"
                         tools:text="35%" />
 
                     <ProgressBar
@@ -195,16 +194,16 @@
                         app:layout_constraintTop_toTopOf="@+id/textView7" />
 
                     <TextView
-                        android:id="@+id/textView9"
+                        android:id="@+id/release_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
                         android:text="@{firmwareViewModel.releaseDate}"
-                        android:textColor="@color/eighty_seven_percent_black"
-                        android:textSize="16dp"
+                        android:textColor="@color/fifty_four_percent_black"
+                        android:textSize="14dp"
                         android:visibility="@{firmwareViewModel.showReleaseDate?View.VISIBLE:View.GONE}"
-                        app:layout_constraintStart_toStartOf="@+id/textView5"
-                        app:layout_constraintTop_toBottomOf="@+id/textView5"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/find_new_version"
+                        app:layout_constraintTop_toBottomOf="@+id/find_new_version"
                         tools:text="发布日期：2017-12-27" />
 
 
@@ -218,17 +217,18 @@
                     android:layout_marginStart="72dp"
                     android:layout_marginTop="8dp"
                     android:background="@drawable/next_step_item_bg"
-                    android:enabled="@{firmwareViewModel.enableInstallOrRetryBtn}"
+                    android:enabled="@{firmwareViewModel.enableInstallOrRetryBtn,default=false}"
                     android:onClick="@{()->firmwarePresenter.installOrRetryOnClick(context)}"
-                    android:text="@{firmwareViewModel.installOrRetryBtn}"
+                    android:text="@{firmwareViewModel.installOrRetryBtn,default=@string/install}"
                     android:textColor="@color/eighty_seven_percent_white"
                     android:textSize="14dp"
-                    android:visibility="@{firmwareViewModel.showInstallOrRetryBtn?View.VISIBLE:View.GONE}"
+                    android:visibility="@{firmwareViewModel.showInstallOrRetryBtn?View.VISIBLE:View.GONE,default=visible}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/new_version_layout"
                     tools:text="安装" />
 
                 <View
+                    android:id="@+id/divide_two"
                     android:layout_width="match_parent"
                     android:layout_height="1px"
                     android:layout_marginBottom="8dp"

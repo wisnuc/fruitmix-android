@@ -15,6 +15,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackWrapper;
+import com.winsun.fruitmix.databinding.ActivityFirmwareBinding;
 import com.winsun.fruitmix.databinding.ConfirmInstallAppifiBinding;
 import com.winsun.fruitmix.firmware.data.FirmwareDataSource;
 import com.winsun.fruitmix.firmware.model.Firmware;
@@ -88,15 +89,18 @@ public class FirmwarePresenter implements ActiveView {
 
     private RefreshFirmwareHandler mRefreshFirmwareHandler;
 
+    private ActivityFirmwareBinding mActivityFirmwareBinding;
 
     FirmwarePresenter(ToolbarViewModel toolbarViewModel, LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel,
-                      FirmwareViewModel firmwareViewModel, FirmwareDataSource firmwareDataSource, FirmwareView firmwareView) {
+                      FirmwareViewModel firmwareViewModel, FirmwareDataSource firmwareDataSource, FirmwareView firmwareView,
+                      ActivityFirmwareBinding binding) {
         mToolbarViewModel = toolbarViewModel;
         mLoadingViewModel = loadingViewModel;
         mNoContentViewModel = noContentViewModel;
         mFirmwareViewModel = firmwareViewModel;
         mFirmwareDataSource = firmwareDataSource;
         mFirmwareView = firmwareView;
+        mActivityFirmwareBinding = binding;
 
         mRefreshFirmwareHandler = new RefreshFirmwareHandler(Looper.getMainLooper(), this);
     }
@@ -113,7 +117,7 @@ public class FirmwarePresenter implements ActiveView {
 
                         currentFirmware = data.get(0);
 
-                        mFirmwareViewModel.setData(currentFirmware, mFirmwareView.getContext());
+                        mFirmwareViewModel.setData(mActivityFirmwareBinding,currentFirmware, mFirmwareView.getContext());
 
                         handleGetFirmwareFinished();
 
@@ -202,10 +206,15 @@ public class FirmwarePresenter implements ActiveView {
     }
 
     private void installFirmware(String version, final Context context) {
+
+        mFirmwareView.showProgressDialog(context.getString(R.string.operating_title,context.getString(R.string.send_request)));
+
         mFirmwareDataSource.installFirmware(version, new BaseOperateDataCallbackWrapper<Void>(
                 new BaseOperateDataCallback<Void>() {
                     @Override
                     public void onSucceed(Void data, OperationResult result) {
+
+                        mFirmwareView.dismissDialog();
 
                         mFirmwareView.showToast(context.getString(R.string.success,context.getString(R.string.send_request)));
 
@@ -213,6 +222,8 @@ public class FirmwarePresenter implements ActiveView {
 
                     @Override
                     public void onFail(OperationResult operationResult) {
+
+                        mFirmwareView.dismissDialog();
 
                         mFirmwareView.showToast(context.getString(R.string.fail,context.getString(R.string.send_request)));
 
@@ -223,10 +234,14 @@ public class FirmwarePresenter implements ActiveView {
 
     private void reDownloadAppifi(String version,final Context context) {
 
+        mFirmwareView.showProgressDialog(context.getString(R.string.operating_title,context.getString(R.string.send_request)));
+
         mFirmwareDataSource.updateDownloadFirmwareState(version, "Ready", new BaseOperateDataCallbackWrapper<Void>(
                 new BaseOperateDataCallback<Void>() {
                     @Override
                     public void onSucceed(Void data, OperationResult result) {
+
+                        mFirmwareView.dismissDialog();
 
                         mFirmwareView.showToast(context.getString(R.string.success,context.getString(R.string.send_request)));
 
@@ -234,6 +249,8 @@ public class FirmwarePresenter implements ActiveView {
 
                     @Override
                     public void onFail(OperationResult operationResult) {
+
+                        mFirmwareView.dismissDialog();
 
                         mFirmwareView.showToast(context.getString(R.string.fail,context.getString(R.string.send_request)));
 

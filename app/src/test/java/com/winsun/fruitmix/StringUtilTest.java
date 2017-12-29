@@ -267,7 +267,27 @@ public class StringUtilTest {
 
         double result = ((double) downloaded / length) * 100;
 
-        assertEquals("81%",(int)result + "%");
+        assertEquals("81%", (int) result + "%");
+
+    }
+
+    @Test
+    public void testCompareStr() {
+
+        String a = "1.0.6";
+        String b = "1.0.14";
+
+        assertTrue(Util.compareVersion(a, b) < 0);
+
+        String a2 = "1.0.6";
+        String b2 = "0.9.4";
+
+        assertTrue(Util.compareVersion(a2, b2) > 0);
+
+        String a3 = "1.0.14";
+        String b3 = "1.0.14";
+
+        assertTrue(Util.compareVersion(a3, b3) == 0);
 
     }
 

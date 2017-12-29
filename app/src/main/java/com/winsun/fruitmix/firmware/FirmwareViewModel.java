@@ -4,12 +4,15 @@ import android.content.Context;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
+import android.view.View;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.databinding.ActivityFirmwareBinding;
 import com.winsun.fruitmix.firmware.model.CheckUpdateState;
 import com.winsun.fruitmix.firmware.model.Firmware;
 import com.winsun.fruitmix.firmware.model.FirmwareState;
 import com.winsun.fruitmix.firmware.model.NewFirmwareState;
+import com.winsun.fruitmix.util.Util;
 
 /**
  * Created by Administrator on 2017/12/27.
@@ -17,13 +20,13 @@ import com.winsun.fruitmix.firmware.model.NewFirmwareState;
 
 public class FirmwareViewModel {
 
-    public void setData(Firmware firmware, Context context) {
+    public void setData(ActivityFirmwareBinding binding, Firmware firmware, Context context) {
 
         setCurrentFirmwareVersion(firmware, context);
 
         setCurrentFirmwareState(firmware.getFirmwareState(), context);
 
-        setFindNewVersion(firmware.getCurrentFirmwareVersion(), firmware.getNewFirmwareVersion(), context);
+        setFindNewVersion(binding, firmware.getCurrentFirmwareVersion(), firmware.getNewFirmwareVersion(), context);
 
         setNewVersionState(firmware.getNewFirmwareState(), firmware.getDownloaded(), firmware.getLength(), context);
 
@@ -117,27 +120,35 @@ public class FirmwareViewModel {
 
     public final ObservableBoolean showReleaseDate = new ObservableBoolean();
 
-    private void setFindNewVersion(String currentVersion, String newVersion, Context context) {
+    private void setFindNewVersion(ActivityFirmwareBinding binding, String currentVersion, String newVersion, Context context) {
 
-        if (currentVersion.equals(newVersion)) {
+        if (Util.compareVersion(currentVersion, newVersion) >= 0) {
 
-            findNewVersion.set(context.getString(R.string.already_latest_version));
+            binding.findNewVersion.setText(context.getString(R.string.already_latest_version));
 
-            showNewVersionState.set(false);
-            showInstallOrRetryBtn.set(false);
-            showReleaseDate.set(false);
+            binding.newVersionState.setVisibility(View.GONE);
 
-            newVersionIconResId.set(R.drawable.firmware_done);
+            binding.installRetry.setVisibility(View.GONE);
+
+            binding.releaseDate.setVisibility(View.GONE);
+
+            binding.newVersionIcon.setImageResource(R.drawable.firmware_done);
+
+            Util.setTopMargin(binding.divideTwo,Util.dip2px(context,8));
 
         } else {
 
-            findNewVersion.set(context.getString(R.string.find_new_firmware_version, newVersion));
+            binding.findNewVersion.setText(context.getString(R.string.find_new_firmware_version, newVersion));
 
-            showNewVersionState.set(true);
-            showInstallOrRetryBtn.set(true);
-            showReleaseDate.set(true);
+            binding.newVersionState.setVisibility(View.VISIBLE);
 
-            newVersionIconResId.set(R.drawable.new_releases);
+            binding.installRetry.setVisibility(View.VISIBLE);
+
+            binding.releaseDate.setVisibility(View.VISIBLE);
+
+            binding.newVersionIcon.setImageResource(R.drawable.new_releases);
+
+            Util.setTopMargin(binding.divideTwo,Util.dip2px(context,16));
 
         }
 
