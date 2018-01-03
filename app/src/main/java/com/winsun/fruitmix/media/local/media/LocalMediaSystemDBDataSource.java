@@ -101,13 +101,16 @@ public class LocalMediaSystemDBDataSource {
         String selection = queryData + " not like ? and " + queryData + " not like ? and " + queryData + " not like ? and " + queryData + " not like ?";
         String[] selectionArgs = {miniThumbnailFolderPath + "%", oldThumbnailFolderPath + "%", thumbnailFolderPath + "%", originalPhotoFolderPath + "%"};*/
 
-        String photoInCameraPath = "Camera";
+        String photoInCameraPath = "DCIM";
 
         String screenShotsPath = "Screenshots";
 
-        selection = queryData + " like ? or " + queryData + " like ?";
+        String weixinPath = "weixin";
+        String wechatPath = "wechat";
 
-        selectionArgs = new String[]{"%" + photoInCameraPath + "%", "%" + screenShotsPath + "%"};
+        selection = queryData + " like ? or " + queryData + " like ? or " + queryData + " like ? or " + queryData + " like ?";
+
+        selectionArgs = new String[]{"%" + photoInCameraPath + "%", "%" + screenShotsPath + "%", "%" + weixinPath + "%", "%" + wechatPath + "%"};
 
         cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, fields, selection, selectionArgs, null);
 
@@ -213,11 +216,14 @@ public class LocalMediaSystemDBDataSource {
         String querySize = MediaStore.Video.Media.SIZE;
         String queryType = MediaStore.Video.Media.MIME_TYPE;
 
-        String videoInCameraPath = "Camera";
+        String videoInCameraPath = "DCIM";
 
-        String selection = queryPath + " like ? ";
+        String weixinPath = "weixin";
+        String wechatPath = "wechat";
 
-        String[] selectionArgs = new String[]{"%" + videoInCameraPath + "%"};
+        String selection = queryPath + " like ? or " + queryPath + " like ? or " + queryPath + " like ?";
+
+        String[] selectionArgs = new String[]{"%" + videoInCameraPath + "%", "%" + weixinPath + "%", "%" + wechatPath + "%"};
 
         Cursor cursor = contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                 new String[]{queryName, queryPath, queryTitle, queryAlbum, queryArtist, queryTakeDate, queryDescription, queryDuration,

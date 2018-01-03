@@ -199,7 +199,6 @@ public class MaintenanceActivity extends BaseActivity implements MaintenanceView
 
                     bindingViewHolder = new MaintenanceDiskViewHolder(binding);
 
-
                     break;
                 default:
                     bindingViewHolder = null;

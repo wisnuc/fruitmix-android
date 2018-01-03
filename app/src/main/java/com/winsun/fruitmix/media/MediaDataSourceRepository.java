@@ -27,6 +27,8 @@ public interface MediaDataSourceRepository {
 
     void getLocalMedia(BaseLoadDataCallback<Media> callback);
 
+    void getLocalMediaWithoutThreadChange(BaseLoadDataCallback<Media> callback);
+
     void getStationMediaForceRefresh(BaseLoadDataCallback<Media> callback);
 
     boolean clearAllStationMediasInDB();

@@ -18,6 +18,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.model.operationResult.OperationSuccessWithFile;
 import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
@@ -223,7 +224,7 @@ public class UploadMediaUseCase {
 
         notifyGetUploadMediaCountStart();
 
-        mediaDataSourceRepository.getLocalMedia(new BaseLoadDataCallback<Media>() {
+        mediaDataSourceRepository.getLocalMediaWithoutThreadChange(new BaseLoadDataCallback<Media>() {
             @Override
             public void onSucceed(List<Media> data, OperationResult operationResult) {
 
@@ -277,28 +278,26 @@ public class UploadMediaUseCase {
 
         Log.i(TAG, "start check folder exist");
 
-        stationFileRepository.getFile(rootUUID, dirUUID, new BaseLoadDataCallback<AbstractRemoteFile>() {
-            @Override
-            public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
-                callback.onSucceed(data, operationResult);
-            }
+        OperationResult operationResult = stationFileRepository.getFileWithoutCreateNewThread(rootUUID,dirUUID);
 
-            @Override
-            public void onFail(OperationResult operationResult) {
+        if(operationResult.getOperationResultType() == OperationResultType.SUCCEED){
 
-                if (operationResult instanceof OperationNetworkException) {
-                    notifyGetFolderFail(((OperationNetworkException) operationResult).getHttpResponseCode());
-                } else
-                    notifyGetFolderFail(-1);
+            callback.onSucceed(((OperationSuccessWithFile) operationResult).getList(), operationResult);
 
-                Log.d(TAG, "onFail: get folder fail,stop upload and send retry");
+        }else {
 
-                stopUploadMedia();
+            if (operationResult instanceof OperationNetworkException) {
+                notifyGetFolderFail(((OperationNetworkException) operationResult).getHttpResponseCode());
+            } else
+                notifyGetFolderFail(-1);
 
-                sendRetryUploadMessage();
+            Log.d(TAG, "onFail: get folder fail,stop upload and send retry");
 
-            }
-        });
+            stopUploadMedia();
+
+            sendRetryUploadMessage();
+
+        }
 
     }
 
@@ -363,40 +362,37 @@ public class UploadMediaUseCase {
 
         Log.i(TAG, "start getUploadedMediaHashList");
 
-        stationFileRepository.getFile(currentUserHome, uploadFolderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
-            @Override
-            public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
-                super.onSucceed(data, operationResult);
+        OperationResult operationResult = stationFileRepository.getFileWithoutCreateNewThread(currentUserHome,uploadFolderUUID);
 
-                uploadedMediaHashs = new ArrayList<>();
+        if(operationResult instanceof OperationSuccessWithFile){
 
-                for (AbstractRemoteFile file : data) {
-                    if (file instanceof RemoteFile)
-                        uploadedMediaHashs.add(((RemoteFile) file).getFileHash());
-                }
+            List<AbstractRemoteFile> data = ((OperationSuccessWithFile)operationResult).getList();
 
-                Log.i(TAG, "getUploadedMediaHashList uploadedMediaHashs size: " + uploadedMediaHashs.size());
+            uploadedMediaHashs = new ArrayList<>();
 
-                checkMediaIsUploadStrategy.setUploadedMediaHashs(uploadedMediaHashs);
-
-                calcAlreadyUploadedMediaCount();
-
-                startPrepareAutoUpload();
-
+            for (AbstractRemoteFile file : data) {
+                if (file instanceof RemoteFile)
+                    uploadedMediaHashs.add(((RemoteFile) file).getFileHash());
             }
 
-            @Override
-            public void onFail(OperationResult operationResult) {
-                super.onFail(operationResult);
+            Log.i(TAG, "getUploadedMediaHashList uploadedMediaHashs size: " + uploadedMediaHashs.size());
 
-                if (operationResult instanceof OperationNetworkException) {
-                    notifyGetUploadMediaCountFail(((OperationNetworkException) operationResult).getHttpResponseCode());
-                } else
-                    notifyGetUploadMediaCountFail(-1);
+            checkMediaIsUploadStrategy.setUploadedMediaHashs(uploadedMediaHashs);
 
-                startPrepareAutoUploadWithNoFolder();
-            }
-        });
+            calcAlreadyUploadedMediaCount();
+
+            startPrepareAutoUpload();
+
+        }else {
+
+            if (operationResult instanceof OperationNetworkException) {
+                notifyGetUploadMediaCountFail(((OperationNetworkException) operationResult).getHttpResponseCode());
+            } else
+                notifyGetUploadMediaCountFail(-1);
+
+            startPrepareAutoUploadWithNoFolder();
+
+        }
 
     }
 
@@ -563,7 +559,8 @@ public class UploadMediaUseCase {
     }
 
     private void createFolder(String folderName, String rootUUID, String dirUUID, final BaseOperateDataCallback<HttpResponse> callback) {
-        stationFileRepository.createFolder(folderName, rootUUID, dirUUID, new BaseOperateDataCallback<HttpResponse>() {
+
+        stationFileRepository.createFolderWithoutCreateNewThread(folderName, rootUUID, dirUUID, new BaseOperateDataCallback<HttpResponse>() {
             @Override
             public void onSucceed(HttpResponse data, OperationResult result) {
                 callback.onSucceed(data, result);
@@ -602,11 +599,19 @@ public class UploadMediaUseCase {
         return "";
     }
 
-    private void calcNeedUploadMediaAndUpload(List<Media> medias) {
+    private void calcNeedUploadMediaAndUpload(final List<Media> medias) {
 
-        List<Media> needUploadedMedias = calcNeedUploadedMedias(medias);
+        threadManager.runOnUploadMediaThread(new Runnable() {
+            @Override
+            public void run() {
 
-        uploadMedia(needUploadedMedias);
+                List<Media> needUploadedMedias = calcNeedUploadedMedias(medias);
+
+                uploadMedia(needUploadedMedias);
+
+            }
+        });
+
     }
 
     @NonNull
@@ -633,12 +638,8 @@ public class UploadMediaUseCase {
 //
 //        }
 
-        threadManager.runOnUploadMediaThread(new Runnable() {
-            @Override
-            public void run() {
-                uploadMediaInThread(needUploadedMedias, uploadFolderUUID);
-            }
-        });
+
+        uploadMediaInThread(needUploadedMedias, uploadFolderUUID);
 
     }
 
@@ -746,7 +747,7 @@ public class UploadMediaUseCase {
 
                         int result = uploadOneMedia(needUploadedMedias, uploadFolderUUID);
 
-                        if(result == 200){
+                        if (result == 200) {
                             mediaDataSourceRepository.updateMedia(media);
                         }
 

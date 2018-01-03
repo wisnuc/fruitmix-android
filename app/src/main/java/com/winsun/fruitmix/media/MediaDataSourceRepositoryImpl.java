@@ -112,6 +112,18 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
     }
 
     @Override
+    public void getLocalMediaWithoutThreadChange(BaseLoadDataCallback<Media> callback) {
+
+        Log.d(TAG, "getLocalMediaWithoutThreadChange: size:" + localMedias.size());
+
+        if (getLocalMediaCallbackReturn)
+            callback.onSucceed(localMedias, new OperationSuccess());
+        else
+            callback.onFail(new OperationFail("get local media callback is not return"));
+
+    }
+
+    @Override
     public void getMedia(final BaseLoadDataCallback<Media> callback) {
 
         final BaseLoadDataCallback<Media> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
