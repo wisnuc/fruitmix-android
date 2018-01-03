@@ -39,7 +39,6 @@ import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
-import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -208,7 +207,6 @@ public class EquipmentPresenter implements ActiveView {
             equipmentSearchViewModel.showEquipmentViewPager.set(true);
             equipmentSearchViewModel.showEquipmentViewPagerIndicator.set(true);
 
-
             adapter.setEquipments(mUserLoadedEquipments);
 
             adapter.notifyDataSetChanged();
@@ -312,6 +310,19 @@ public class EquipmentPresenter implements ActiveView {
         getEquipmentInfo(equipment);
     }
 
+    public void refreshEquipmentUsers(int position) {
+
+        if (mUserLoadedEquipments.size() <= position)
+            return;
+
+        currentEquipment = mUserLoadedEquipments.get(position);
+
+        currentEquipment.setState(EquipmentDataSource.EQUIPMENT_READY);
+
+        getUserInThread(currentEquipment);
+
+    }
+
     public void refreshEquipment(int position) {
 
         if (mUserLoadedEquipments.size() <= position)
@@ -369,6 +380,9 @@ public class EquipmentPresenter implements ActiveView {
                 equipmentSearchViewModel.equipmentState.set(equipmentSearchView.getContext().getString(R.string.maintenance));
 
                 equipmentSearchViewModel.equipmentStateIcon.set(R.drawable.maintenance_enter_icon);
+
+                equipmentSearchViewModel.setIp(currentEquipment.getHosts().get(0));
+                equipmentSearchViewModel.setEquipmentName(currentEquipment.getEquipmentName());
 
             }
 
@@ -522,7 +536,7 @@ public class EquipmentPresenter implements ActiveView {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                handleRetrieveEquipmentInfoFail(equipment);
+                handleRetrieveUsersFail(equipment);
 
             }
         });
@@ -541,18 +555,19 @@ public class EquipmentPresenter implements ActiveView {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                handleRetrieveEquipmentInfoFail(equipment);
+                handleRetrieveUsersFail(equipment);
             }
         }, this));
     }
 
-    private void handleRetrieveEquipmentInfoFail(Equipment equipment) {
+    private void handleRetrieveUsersFail(Equipment equipment) {
 
         removeAlreadyFoundEquipmentIp(equipment);
 
         equipment.setState(EquipmentDataSource.EQUIPMENT_SYSTEM_ERROR);
 
-        mUserLoadedEquipments.add(equipment);
+        if (!mUserLoadedEquipments.contains(equipment))
+            mUserLoadedEquipments.add(equipment);
 
         sendUpdateListMessage();
 
@@ -563,7 +578,6 @@ public class EquipmentPresenter implements ActiveView {
 
     }
 
-
     private void handleRetrieveUsersSucceed(List<User> data, Equipment equipment) {
         if (data.isEmpty()) {
 
@@ -571,7 +585,8 @@ public class EquipmentPresenter implements ActiveView {
 
             equipment.setState(EquipmentDataSource.EQUIPMENT_MAINTENANCE);
 
-            mUserLoadedEquipments.add(equipment);
+            if (!mUserLoadedEquipments.contains(equipment))
+                mUserLoadedEquipments.add(equipment);
 
             sendUpdateListMessage();
 
@@ -579,7 +594,9 @@ public class EquipmentPresenter implements ActiveView {
 
         }
 
-        mUserLoadedEquipments.add(equipment);
+        if (!mUserLoadedEquipments.contains(equipment))
+            mUserLoadedEquipments.add(equipment);
+
         mMapKeyIsIpValueIsUsers.put(equipment.getHosts().get(0), data);
 
         Log.d(TAG, "EquipmentSearch: " + mMapKeyIsIpValueIsUsers.toString());
@@ -1044,7 +1061,6 @@ public class EquipmentPresenter implements ActiveView {
 
         Toast.makeText(equipmentSearchView.getContext(), result.getResultMessage(equipmentSearchView.getContext()), Toast.LENGTH_SHORT).show();
     }
-
 
 
 }

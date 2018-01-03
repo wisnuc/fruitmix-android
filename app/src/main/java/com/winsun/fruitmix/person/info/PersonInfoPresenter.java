@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
  * Created by Administrator on 2017/10/19.
  */
 
-public class PersonInfoPresenter extends BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetWeChatCodeCallback {
+public class PersonInfoPresenter extends BindWeChatUserPresenter {
 
     public static final String TAG = PersonInfoPresenter.class.getSimpleName();
 

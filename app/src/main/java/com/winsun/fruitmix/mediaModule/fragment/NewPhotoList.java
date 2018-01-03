@@ -946,7 +946,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 }
                 case VIEW_TYPE_VIDEO: {
 
-
                     VideoItemBinding binding = VideoItemBinding.inflate(LayoutInflater.from(containerActivity), parent, false);
 
                     return new VideoViewHolder(binding);
@@ -1312,7 +1311,52 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     }
 
-    private class PhotoHolder extends BindingViewHolder {
+    private class BaseMediaHolder extends BindingViewHolder{
+
+        public BaseMediaHolder(ViewDataBinding viewDataBinding) {
+            super(viewDataBinding);
+        }
+
+        void checkMediaSelected(Media currentMedia){
+
+            if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey()))
+                currentMedia.setSelected(true);
+
+        }
+
+        PhotoItemViewModel refreshPhotoItemViewModel(Media currentMedia,PhotoItemViewModel prePhotoItemViewModel){
+
+            final PhotoItemViewModel photoItemViewModel;
+
+            if (prePhotoItemViewModel != null) {
+
+                photoItemViewModel = prePhotoItemViewModel;
+
+            } else {
+                photoItemViewModel = new PhotoItemViewModel();
+                photoItemViewModel.showPhotoSelectImg.set(currentMedia.isSelected());
+
+            }
+
+            photoItemViewModel.showGifCorner.set(MediaUtil.checkMediaIsGif(currentMedia));
+
+            if (currentMedia.isLocal()) {
+
+                if (mCheckMediaIsUploadStrategy.isMediaUploaded(currentMedia)) {
+                    photoItemViewModel.showCloudOff.set(false);
+                } else {
+                    photoItemViewModel.showCloudOff.set(true);
+                }
+
+            } else
+                photoItemViewModel.showCloudOff.set(false);
+
+            return photoItemViewModel;
+        }
+
+    }
+
+    private class PhotoHolder extends BaseMediaHolder {
 
         NetworkImageView mPhotoIv;
 
@@ -1345,35 +1389,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             Log.d(TAG, "PhotoHolder refreshView: media key: " + currentMedia.getKey());
 
-            if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey()))
-                currentMedia.setSelected(true);
+            checkMediaSelected(currentMedia);
 
             PhotoItemViewModel prePhotoItemViewModel = binding.getPhotoItemViewModel();
 
-            final PhotoItemViewModel photoItemViewModel;
-
-            if (prePhotoItemViewModel != null) {
-
-                photoItemViewModel = prePhotoItemViewModel;
-
-            } else {
-                photoItemViewModel = new PhotoItemViewModel();
-                photoItemViewModel.showPhotoSelectImg.set(currentMedia.isSelected());
-
-            }
-
-            photoItemViewModel.showGifCorner.set(MediaUtil.checkMediaIsGif(currentMedia));
-
-            if (currentMedia.isLocal()) {
-
-                if (mCheckMediaIsUploadStrategy.isMediaUploaded(currentMedia)) {
-                    photoItemViewModel.showCloudOff.set(false);
-                } else {
-                    photoItemViewModel.showCloudOff.set(true);
-                }
-
-            } else
-                photoItemViewModel.showCloudOff.set(false);
+            final PhotoItemViewModel photoItemViewModel = refreshPhotoItemViewModel(currentMedia,prePhotoItemViewModel);
 
             binding.setPhotoItemViewModel(photoItemViewModel);
 
@@ -1476,7 +1496,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         return initialPhotoPosition;
     }
 
-    private class VideoViewHolder extends BindingViewHolder {
+    private class VideoViewHolder extends BaseMediaHolder {
 
         VideoItemBinding binding;
 
@@ -1502,25 +1522,17 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             final Video video = (Video) mMapKeyIsPhotoPositionValueIsPhoto.get(position);
 
-            if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(video.getKey()))
-                video.setSelected(true);
+            checkMediaSelected(video);
 
-            ObservableBoolean preShowPhotoSelectImg = binding.getShowPhotoSelectImg();
+            PhotoItemViewModel prePhotoItemViewModel = binding.getPhotoItemViewModel();
 
-            final ObservableBoolean showPhotoSelectImg;
+            final PhotoItemViewModel photoItemViewModel = refreshPhotoItemViewModel(video,prePhotoItemViewModel);
 
-            if (preShowPhotoSelectImg != null) {
-
-                showPhotoSelectImg = preShowPhotoSelectImg;
-            } else {
-                showPhotoSelectImg = new ObservableBoolean(video.isSelected());
-
-                binding.setShowPhotoSelectImg(showPhotoSelectImg);
-            }
+            binding.setPhotoItemViewModel(photoItemViewModel);
 
             binding.setVideo(video);
 
-            setMediaSelectImg(networkImageView, video, showPhotoSelectImg);
+            setMediaSelectImg(networkImageView, video, photoItemViewModel.showPhotoSelectImg);
 
             List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(video.getDate());
 
@@ -1565,7 +1577,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                     if (mSelectMode) {
 
-                        handleMediaOnClickWhenSelectMode(video, networkImageView, showPhotoSelectImg);
+                        handleMediaOnClickWhenSelectMode(video, networkImageView, photoItemViewModel.showPhotoSelectImg);
 
                     } else {
 
@@ -1589,7 +1601,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             viewGroup.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    return handleMediaOnLongClick(video, networkImageView, showPhotoSelectImg);
+                    return handleMediaOnLongClick(video, networkImageView, photoItemViewModel.showPhotoSelectImg);
                 }
             });
 

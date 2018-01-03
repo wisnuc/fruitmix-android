@@ -10,7 +10,6 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -257,6 +256,19 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
 
             String ip = data.getStringExtra(Util.KEY_MANUAL_INPUT_IP);
             equipmentPresenter.handleInputIpbyByUser(ip);
+        } else if (requestCode == MaintenanceActivity.REQUEST_CODE) {
+
+            if (resultCode == MaintenanceActivity.RESULT_INITIAL_EQUIPMENT) {
+
+                setResult(RESULT_OK);
+                handleStartActivityAfterLoginSucceed();
+
+            } else if (resultCode == MaintenanceActivity.RESULT_START_SYSTEM) {
+
+                equipmentPresenter.refreshEquipmentUsers(equipmentViewPager.getCurrentItem());
+
+            }
+
         }
 
     }
@@ -343,14 +355,14 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
 
         if (equipmentSearchViewModel.getEquipmentStateCode() == EquipmentDataSource.EQUIPMENT_UNINITIALIZED) {
 
-            Intent intent = new Intent(this, InitialEquipmentActivity.class);
-            intent.putExtra(InitialEquipmentActivity.EQUIPMENT_IP_KEY, equipmentSearchViewModel.getIp());
-            intent.putExtra(InitialEquipmentActivity.EQUIPMENT_NAME_KEY, equipmentSearchViewModel.getEquipmentName());
+            Intent intent = InitialEquipmentActivity.getIntentForStart(equipmentSearchViewModel.getIp(), equipmentSearchViewModel.getEquipmentName(),
+                    getString(R.string.initial_title), this);
+
             startActivityForResult(intent, InitialEquipmentActivity.REQUEST_CODE);
 
         } else if (equipmentSearchViewModel.getEquipmentStateCode() == EquipmentDataSource.EQUIPMENT_MAINTENANCE) {
 
-            Util.startActivity(this, MaintenanceActivity.class);
+            MaintenanceActivity.startActivity(equipmentSearchViewModel.getIp(), equipmentSearchViewModel.getEquipmentName(), this);
 
         }
 

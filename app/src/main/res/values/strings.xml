@@ -536,6 +536,8 @@
     <string name="reinstall_wisnuc">Reinstall WISNUC</string>
     <string name="force_start">Forced to start</string>
 
+    <string name="reinstall_title">Reinstall Wizard</string>
+
     <!-- firmware -->
     <string name="firmware_update">Firmware Update</string>
     <string name="firmware_install">Firmware Install</string>

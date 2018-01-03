@@ -39,22 +39,26 @@
             android:paddingRight="16dp"
             android:text="@string/nonsupport_explain"
             android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="16dp" />
+            android:textSize="16dp"
+            android:visibility="gone" />
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone">
+            android:layout_below="@id/toolbar_layout">
 
             <android.support.v7.widget.RecyclerView
+                android:id="@+id/disk_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
-            <include layout="@layout/new_no_content_layout"
+            <include
+                layout="@layout/new_no_content_layout"
                 app:noContentViewModel="@{noContentViewModel}" />
 
-            <include layout="@layout/new_loading_layout"
-                app:loadingViewModel="@{loadingViewModel}"/>
+            <include
+                layout="@layout/new_loading_layout"
+                app:loadingViewModel="@{loadingViewModel}" />
 
         </FrameLayout>
 

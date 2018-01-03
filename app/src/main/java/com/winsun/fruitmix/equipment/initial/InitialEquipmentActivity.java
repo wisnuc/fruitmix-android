@@ -1,6 +1,8 @@
 package com.winsun.fruitmix.equipment.initial;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
@@ -51,6 +53,8 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
     public static final String EQUIPMENT_IP_KEY = "ip_key";
     public static final String EQUIPMENT_NAME_KEY = "name_key";
 
+    public static final String INITIAL_EQUIPMENT_TITLE_KEY = "initial_equipment_title_key";
+
     private String ip;
     private String equipmentName;
 
@@ -77,6 +81,15 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
     private BindWeChatUserPresenter mBindWeChatUserPresenter;
     private LoginUseCase mLoginUseCase;
 
+    public static Intent getIntentForStart(String ip, String equipmentName, String title, Activity activity) {
+        Intent intent = new Intent(activity, InitialEquipmentActivity.class);
+        intent.putExtra(InitialEquipmentActivity.EQUIPMENT_IP_KEY, ip);
+        intent.putExtra(InitialEquipmentActivity.EQUIPMENT_NAME_KEY, equipmentName);
+        intent.putExtra(INITIAL_EQUIPMENT_TITLE_KEY, title);
+
+        return intent;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,7 +103,12 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(this),
                 this, InjectPersonInfoDataSource.provideInstance(this), InjectTokenRemoteDataSource.provideTokenDataSource(this));
 
-        initToolbar(binding);
+        String title = getIntent().getStringExtra(INITIAL_EQUIPMENT_TITLE_KEY);
+
+        if (title == null || title.isEmpty())
+            title = getString(R.string.initial_title);
+
+        initToolBar(binding, binding.toolbarLayout, title);
 
         ip = getIntent().getStringExtra(EQUIPMENT_IP_KEY);
         equipmentName = getIntent().getStringExtra(EQUIPMENT_NAME_KEY);
@@ -166,7 +184,7 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
     private SteppersItem createFirstSteppersItem() {
 
-        SteppersItem steppersItem = new SteppersItem();
+        final SteppersItem steppersItem = new SteppersItem();
         steppersItem.setLabel(getString(R.string.create_disk_title));
         steppersItem.setLabelTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_black));
         steppersItem.setSubLabel(getString(R.string.create_disk_subtitle));
@@ -183,10 +201,16 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
             @Override
             public void onClick() {
 
-                if (mFirstInitialFragment.getCurrentSelectDiskMode() != 0)
+                if (mFirstInitialFragment.getCurrentSelectDiskMode() != 0) {
+
                     steppersView.nextStep();
 
-                saveFirstFragmentData();
+                    steppersItem.setPositiveButtonEnable(false);
+
+                    saveFirstFragmentData();
+
+                }
+
 
             }
         });
@@ -214,7 +238,7 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
     private SteppersItem createSecondSteppersItem() {
 
-        SteppersItem steppersItem = new SteppersItem();
+        final SteppersItem steppersItem = new SteppersItem();
 
         steppersItem.setLabel(getString(R.string.create_first_user_title));
         steppersItem.setLabelTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_black));
@@ -239,6 +263,8 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
                     steppersView.nextStep();
 
+                    steppersItem.setPositiveButtonEnable(false);
+
                 }
 
             }
@@ -252,7 +278,6 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
             }
         });
-
 
         return steppersItem;
 
@@ -394,6 +419,8 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
         steppersItem.setPreStepable(false);
 
+        steppersItem.setNextBtnText(getString(R.string.bind));
+
         steppersItem.setOnClickContinue(new OnClickContinue() {
             @Override
             public void onClick() {
@@ -422,10 +449,13 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
     @Override
     public void handleBindSucceed() {
 
-        steppersItems.get(steppersItems.size() - 1).setPreStepable(false);
+        SteppersItem steppersItem = steppersItems.get(steppersItems.size() - 1);
+
+        steppersItem.setPreStepable(false);
 
         steppersView.nextStep();
 
+        steppersItem.setPositiveButtonEnable(false);
     }
 
     private SteppersItem createFifthSteppersItem() {

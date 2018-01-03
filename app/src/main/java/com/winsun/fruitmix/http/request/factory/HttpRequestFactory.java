@@ -367,7 +367,6 @@ public class HttpRequestFactory {
 
         return currentDefaultHttpRequestFactory.createHttpPostRequest(httpPath, body, isPostStream);
 
-
     }
 
     public synchronized HttpRequest createPatchRequestByPathWithoutToken(String httpPath, String body) {

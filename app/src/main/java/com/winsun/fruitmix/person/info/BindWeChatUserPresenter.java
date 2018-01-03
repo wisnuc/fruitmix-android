@@ -111,7 +111,8 @@ public class BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetWeChat
 
                 personInfoView.dismissDialog();
 
-                Toast.makeText(personInfoView.getContext(), operationResult.getResultMessage(personInfoView.getContext()), Toast.LENGTH_SHORT).show();
+                personInfoView.showToast(operationResult.getResultMessage(personInfoView.getContext()));
+
             }
         }, this));
 
@@ -150,7 +151,7 @@ public class BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetWeChat
 
         Log.d(TAG, "fail: get wechat code");
 
-        Toast.makeText(personInfoView.getContext(), personInfoView.getString(R.string.fail,personInfoView.getString(resID)), Toast.LENGTH_SHORT).show();
+        personInfoView.showToast(personInfoView.getString(resID));
 
     }
 
