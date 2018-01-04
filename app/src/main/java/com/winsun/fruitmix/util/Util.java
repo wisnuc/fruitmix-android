@@ -847,14 +847,22 @@ public class Util {
     }
 
     public static String formatDate(long time) {
+        return new SimpleDateFormat("yyyy-MM-dd", Locale.CHINA).format(new Date(time));
+    }
 
-        return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(time));
-
+    public static String formatTime(long time) {
+        return new SimpleDateFormat("hh:mm:ss", Locale.CHINA).format(new Date(time));
     }
 
     public static String getCurrentFormatTime() {
 
-        return formatDate(System.currentTimeMillis());
+        return formatDateAndTime(System.currentTimeMillis());
+
+    }
+
+    private static String formatDateAndTime(long time) {
+
+        return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(time));
 
     }
 
@@ -931,7 +939,7 @@ public class Util {
                 if (result != 0)
                     return result;
 
-            }catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 e.printStackTrace();
 
                 break;

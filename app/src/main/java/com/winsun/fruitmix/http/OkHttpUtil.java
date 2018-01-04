@@ -1,24 +1,18 @@
 package com.winsun.fruitmix.http;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.android.volley.toolbox.ImageRequest;
 import com.winsun.fruitmix.exception.NetworkException;
-import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -107,7 +101,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         HttpResponse httpResponse = getHttpResponse(response);
 
-        Log.d(TAG, "remoteCallMethod: after read response body" + Util.formatDate(System.currentTimeMillis()));
+        Log.d(TAG, "remoteCallMethod: after read response body" + Util.getCurrentFormatTime());
 
         return httpResponse;
 
@@ -118,7 +112,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
     }
 
     private Response executeRequest(Request request) throws MalformedURLException, IOException, SocketTimeoutException {
-        Log.d(TAG, "remoteCallMethod: before execute" + Util.formatDate(System.currentTimeMillis()));
+        Log.d(TAG, "remoteCallMethod: before execute" + Util.getCurrentFormatTime());
 
         try {
 
@@ -126,7 +120,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
             Response response = call.execute();
 
-            Log.d(TAG, "remoteCallMethod: after execute " + Util.formatDate(System.currentTimeMillis()));
+            Log.d(TAG, "remoteCallMethod: after execute " + Util.getCurrentFormatTime());
 
             return response;
 
@@ -211,7 +205,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
 
         HttpResponse httpResponse = getHttpResponse(response);
 
-        Log.d(TAG, "remoteCallRequest: after read response body" + Util.formatDate(System.currentTimeMillis()));
+        Log.d(TAG, "remoteCallRequest: after read response body" + Util.getCurrentFormatTime());
 
         return httpResponse;
     }

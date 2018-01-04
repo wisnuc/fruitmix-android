@@ -2,9 +2,6 @@ package com.winsun.fruitmix.file.data.model;
 
 import com.winsun.fruitmix.util.Util;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  * Created by Administrator on 2017/8/9.
  */
@@ -43,9 +40,19 @@ public abstract class AbstractFile {
         this.time = time;
     }
 
-    public String getTimeDateText() {
+    public String getDateText() {
 
         return Util.formatDate(Long.parseLong(getTime()));
+
     }
+
+    public String getTimeText(){
+
+        return Util.formatTime(Long.parseLong(getTime()));
+
+    }
+
+
+
 
 }

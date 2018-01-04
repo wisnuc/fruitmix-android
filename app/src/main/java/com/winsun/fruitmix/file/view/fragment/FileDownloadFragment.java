@@ -660,6 +660,8 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
             }
 
+            binding.executePendingBindings();
+
             binding.downloadingFileItemMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

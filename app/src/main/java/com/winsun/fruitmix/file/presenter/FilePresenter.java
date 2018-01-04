@@ -272,7 +272,6 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                         }).setNegativeButton(activity.getString(R.string.cancel), null)
                         .setCancelable(false).create().show();
 
-
             } else {
 
                 MacroCommand macroCommand = createDownloadFileMarcoCommand(abstractRemoteFile);
@@ -485,7 +484,11 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
             fileRecyclerViewAdapter.notifyDataSetChanged();
 
-            fileListSelectModeListener.onFileSelectOperationAvailable();
+            if (canEnterSelectMode())
+                fileListSelectModeListener.onFileSelectOperationAvailable();
+            else
+                fileListSelectModeListener.onFileSelectOperationUnavailable();
+
         }
     }
 
@@ -1206,7 +1209,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                             bottomMenuItems.add(new BottomMenuItem(R.drawable.download, activity.getString(R.string.re_download_the_item), new ReDownloadCommand(abstractRemoteFile)));
 
-                            menuItem = new BottomMenuItem(R.drawable.file_icon, activity.getString(R.string.open_the_item), new OpenFileCommand(activity, abstractRemoteFile.getName()));
+                            menuItem = new BottomMenuItem(abstractRemoteFile.getFileTypeResID(), activity.getString(R.string.open_the_item), new OpenFileCommand(activity, abstractRemoteFile.getName()));
 
                         } else {
                             AbstractCommand macroCommand = new MacroCommand();

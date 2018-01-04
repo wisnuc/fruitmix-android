@@ -25,7 +25,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/wisnuc_system_manage"
                 android:textColor="@color/fifty_four_percent_black"
-                android:textSize="14dp" />
+                android:textSize="12dp" />
 
         </LinearLayout>
 

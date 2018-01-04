@@ -10,28 +10,35 @@
 
     </data>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="48dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/file_download_group_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
-            android:text="@{fileDownloadGroupItemViewModel.groupTitle}"
-            android:textColor="@color/eighty_seven_percent_black"
-            android:textSize="18dp"
-            tools:text="@string/downloading" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:gravity="center_vertical"
+            android:layout_height="48dp">
+
+            <TextView
+                android:id="@+id/file_download_group_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:text="@{fileDownloadGroupItemViewModel.groupTitle}"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="18dp"
+                tools:text="@string/downloading" />
+
+        </LinearLayout>
 
         <View
             android:layout_width="match_parent"
+            android:layout_marginBottom="8dp"
             android:layout_height="1px"
-            android:layout_alignParentBottom="true"
-            android:background="@color/eighty_seven_percent_black" />
+            android:background="@color/divide_bg" />
 
 
-    </RelativeLayout>
+    </LinearLayout>
 
 </layout>

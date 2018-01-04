@@ -28,7 +28,7 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/info_icon"
             android:orientation="vertical">
@@ -38,6 +38,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="@{equipmentInfoViewModel.infoValue}"
+                android:layout_marginTop="12dp"
                 android:textColor="@color/eighty_seven_percent_black"
                 android:textSize="16dp"
                 tools:text="我的盒子" />
@@ -47,6 +48,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="@{equipmentInfoViewModel.infoKey}"
+                android:layout_marginTop="4dp"
                 android:textColor="@color/fifty_four_percent_black"
                 android:textSize="12dp"
                 tools:text="设备名称" />

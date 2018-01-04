@@ -38,7 +38,6 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.NewPhotoLayoutBinding;
@@ -1311,20 +1310,20 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     }
 
-    private class BaseMediaHolder extends BindingViewHolder{
+    private class BaseMediaHolder extends BindingViewHolder {
 
         public BaseMediaHolder(ViewDataBinding viewDataBinding) {
             super(viewDataBinding);
         }
 
-        void checkMediaSelected(Media currentMedia){
+        void checkMediaSelected(Media currentMedia) {
 
             if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey()))
                 currentMedia.setSelected(true);
 
         }
 
-        PhotoItemViewModel refreshPhotoItemViewModel(Media currentMedia,PhotoItemViewModel prePhotoItemViewModel){
+        PhotoItemViewModel getPhotoItemViewModel(PhotoItemViewModel prePhotoItemViewModel) {
 
             final PhotoItemViewModel photoItemViewModel;
 
@@ -1334,9 +1333,28 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             } else {
                 photoItemViewModel = new PhotoItemViewModel();
-                photoItemViewModel.showPhotoSelectImg.set(currentMedia.isSelected());
 
             }
+
+            return photoItemViewModel;
+
+        }
+
+        void refreshPhotoSelectImg(Media currentMedia, PhotoItemViewModel photoItemViewModel) {
+
+            photoItemViewModel.showPhotoSelectImg.set(currentMedia.isSelected());
+
+        }
+
+        void resetGIFAndCloudOffIcon(PhotoItemViewModel photoItemViewModel) {
+
+            photoItemViewModel.showGifCorner.set(false);
+
+            photoItemViewModel.showCloudOff.set(false);
+
+        }
+
+        void refreshGIFAndCloudOffIcon(PhotoItemViewModel photoItemViewModel, Media currentMedia) {
 
             photoItemViewModel.showGifCorner.set(MediaUtil.checkMediaIsGif(currentMedia));
 
@@ -1351,8 +1369,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             } else
                 photoItemViewModel.showCloudOff.set(false);
 
-            return photoItemViewModel;
         }
+
 
     }
 
@@ -1393,9 +1411,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             PhotoItemViewModel prePhotoItemViewModel = binding.getPhotoItemViewModel();
 
-            final PhotoItemViewModel photoItemViewModel = refreshPhotoItemViewModel(currentMedia,prePhotoItemViewModel);
+            final PhotoItemViewModel photoItemViewModel = getPhotoItemViewModel(prePhotoItemViewModel);
+
+            refreshPhotoSelectImg(currentMedia, photoItemViewModel);
 
             binding.setPhotoItemViewModel(photoItemViewModel);
+
+            binding.executePendingBindings();
 
             mImageLoader.setTag(position);
 
@@ -1410,6 +1432,20 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 httpRequest = currentMedia.getImageSmallThumbUrl(containerActivity);
 
             }
+
+            mPhotoIv.registerImageLoadListener(new IImageLoadListener() {
+                @Override
+                public void onImageLoadFinish(String url, View view) {
+
+                    refreshGIFAndCloudOffIcon(photoItemViewModel, currentMedia);
+
+                }
+
+                @Override
+                public void onImageLoadFail(String url, View view) {
+
+                }
+            });
 
             MediaUtil.setMediaImageUrl(currentMedia, mPhotoIv, httpRequest, mImageLoader);
 
@@ -1526,9 +1562,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             PhotoItemViewModel prePhotoItemViewModel = binding.getPhotoItemViewModel();
 
-            final PhotoItemViewModel photoItemViewModel = refreshPhotoItemViewModel(video,prePhotoItemViewModel);
+            final PhotoItemViewModel photoItemViewModel = getPhotoItemViewModel(prePhotoItemViewModel);
+
+            refreshPhotoSelectImg(video, photoItemViewModel);
 
             binding.setPhotoItemViewModel(photoItemViewModel);
+
+            binding.executePendingBindings();
 
             binding.setVideo(video);
 
@@ -1568,6 +1608,19 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 httpRequest = video.getImageSmallThumbUrl(containerActivity);
 
             }
+
+            networkImageView.registerImageLoadListener(new IImageLoadListener() {
+                @Override
+                public void onImageLoadFinish(String url, View view) {
+                    refreshGIFAndCloudOffIcon(photoItemViewModel, video);
+                }
+
+                @Override
+                public void onImageLoadFail(String url, View view) {
+
+                }
+            });
+
 
             MediaUtil.setMediaImageUrl(video, networkImageView, httpRequest, mImageLoader);
 

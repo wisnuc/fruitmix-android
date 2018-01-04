@@ -59,7 +59,6 @@
                 android:layout_height="match_parent"
                 android:layout_above="@id/version_name"
                 android:layout_below="@id/left_drawer_head_layout"
-                android:paddingLeft="16dp"
                 android:paddingTop="8dp" />
 
         </RelativeLayout>

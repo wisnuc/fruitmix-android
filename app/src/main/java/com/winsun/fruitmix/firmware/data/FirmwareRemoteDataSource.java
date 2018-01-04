@@ -25,7 +25,7 @@ public class FirmwareRemoteDataSource extends BaseRemoteDataSourceImpl implement
 
     public static final String FATCH = "fetch";
 
-    public static final String RELEASES = "/releases/";
+    public static final String RELEASES = "releases/";
 
     public static final int PORT = 3001;
 
