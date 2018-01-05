@@ -12,7 +12,7 @@ public class RemoteBuiltInDrive extends RemoteFolder {
 
         super();
 
-        setFileTypeResID(R.drawable.shared_drive);
+        setFileTypeResID(R.drawable.public_disk);
 
         setTime("");
 

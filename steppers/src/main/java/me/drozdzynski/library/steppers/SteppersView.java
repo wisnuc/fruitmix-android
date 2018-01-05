@@ -77,6 +77,10 @@ public class SteppersView extends LinearLayout {
         steppersAdapter.nextStep();
     }
 
+    public int getCurrentStep() {
+        return steppersAdapter.getCurrentStep();
+    }
+
     public void build() {
         if (config != null) {
             setOrientation(LinearLayout.HORIZONTAL);

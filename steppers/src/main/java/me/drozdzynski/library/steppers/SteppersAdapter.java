@@ -64,6 +64,10 @@ public class SteppersAdapter extends RecyclerView.Adapter<SteppersViewHolder> {
         return (position == currentStep ? VIEW_EXPANDED : VIEW_COLLAPSED);
     }
 
+    int getCurrentStep() {
+        return currentStep;
+    }
+
     @Override
     public SteppersViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = null;

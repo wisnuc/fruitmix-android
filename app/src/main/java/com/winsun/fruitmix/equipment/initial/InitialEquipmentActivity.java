@@ -201,11 +201,9 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
             @Override
             public void onClick() {
 
-                if (mFirstInitialFragment.getCurrentSelectDiskMode() != 0) {
+                if (steppersView.getCurrentStep() == 0 && mFirstInitialFragment.getCurrentSelectDiskMode() != 0) {
 
                     steppersView.nextStep();
-
-                    steppersItem.setPositiveButtonEnable(false);
 
                     saveFirstFragmentData();
 
@@ -255,6 +253,9 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
             @Override
             public void onClick() {
 
+                if(steppersView.getCurrentStep() != 1)
+                    return;
+
                 Util.hideSoftInput(InitialEquipmentActivity.this);
 
                 if (mSecondInitialFragment.checkUserNameAndPassword()) {
@@ -262,8 +263,6 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
                     refreshThirdFragment();
 
                     steppersView.nextStep();
-
-                    steppersItem.setPositiveButtonEnable(false);
 
                 }
 
@@ -425,6 +424,9 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
             @Override
             public void onClick() {
 
+                if(steppersView.getCurrentStep() != 3)
+                    return;
+
                 mBindWeChatUserPresenter.bindWeChatUser();
 
             }
@@ -455,7 +457,6 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
         steppersView.nextStep();
 
-        steppersItem.setPositiveButtonEnable(false);
     }
 
     private SteppersItem createFifthSteppersItem() {
