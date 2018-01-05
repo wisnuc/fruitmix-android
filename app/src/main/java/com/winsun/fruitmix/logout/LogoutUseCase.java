@@ -9,6 +9,7 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
 import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
@@ -41,16 +42,18 @@ public class LogoutUseCase {
 
     private StationFileRepository mStationFileRepository;
 
+    private UserDataRepository mUserDataRepository;
+
     private FileTaskManager mFileTaskManager;
 
     public static LogoutUseCase getInstance(SystemSettingDataSource systemSettingDataSource,
                                             LoggedInUserDataSource loggedInUserDataSource, UploadMediaUseCase uploadMediaUseCase,
                                             WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory, String temporaryUploadFolderParentFolderPath, FileTool fileTool,
-                                            StationFileRepository stationFileRepository, FileTaskManager fileTaskManager) {
+                                            StationFileRepository stationFileRepository, UserDataRepository userDataRepository, FileTaskManager fileTaskManager) {
         if (ourInstance == null)
             ourInstance = new LogoutUseCase(systemSettingDataSource, loggedInUserDataSource,
                     uploadMediaUseCase, weChatUserDataSource, httpRequestFactory, temporaryUploadFolderParentFolderPath,
-                    fileTool, stationFileRepository, fileTaskManager);
+                    fileTool, stationFileRepository, userDataRepository, fileTaskManager);
         return ourInstance;
     }
 
@@ -64,7 +67,8 @@ public class LogoutUseCase {
                           LoggedInUserDataSource loggedInUserDataSource, UploadMediaUseCase uploadMediaUseCase,
                           WeChatUserDataSource weChatUserDataSource, HttpRequestFactory httpRequestFactory,
                           String temporaryUploadFolderParentFolderPath, FileTool fileTool,
-                          StationFileRepository stationFileRepository, FileTaskManager fileTaskManager) {
+                          StationFileRepository stationFileRepository,
+                          UserDataRepository userDataRepository, FileTaskManager fileTaskManager) {
 
         this.systemSettingDataSource = systemSettingDataSource;
         this.loggedInUserDataSource = loggedInUserDataSource;
@@ -74,6 +78,7 @@ public class LogoutUseCase {
         this.temporaryUploadFolderParentFolderPath = temporaryUploadFolderParentFolderPath;
         mFileTool = fileTool;
         mStationFileRepository = stationFileRepository;
+        mUserDataRepository = userDataRepository;
         mFileTaskManager = fileTaskManager;
     }
 
@@ -129,6 +134,10 @@ public class LogoutUseCase {
         stopUploadTask();
 
         deleteTemporaryUploadFile();
+
+        mUserDataRepository.clearAllUsersInCache();
+
+        mUserDataRepository.clearAllUsersInDB();
 
     }
 

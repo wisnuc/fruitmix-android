@@ -14,6 +14,8 @@ public interface UserDataRepository extends UserRemoteDataSource{
 
     boolean clearAllUsersInDB();
 
+    void clearAllUsersInCache();
+
     User getUserByUUID(String userUUID);
 
     void insertUsers(Collection<User> users);

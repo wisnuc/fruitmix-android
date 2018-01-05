@@ -27,6 +27,8 @@ import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaCountChangeListener;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
+import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
@@ -70,6 +72,8 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
 
     private PluginManageDataSource mPluginManageDataSource;
 
+    private UserDataRepository mUserDataRepository;
+
     private ActivitySettingBinding mActivitySettingBinding;
 
     private int newBehavior;
@@ -77,7 +81,7 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
     public SettingPresenterImpl(SettingView settingView, SettingActivity.SettingViewModel settingViewModel, SystemSettingDataSource systemSettingDataSource,
                                 MediaDataSourceRepository mediaDataSourceRepository, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
                                 UploadMediaUseCase uploadMediaUseCase, String currentUserUUID, ThreadManager threadManager, PluginManageDataSource pluginManageDataSource,
-                                ActivitySettingBinding binding) {
+                                UserDataRepository userDataRepository, ActivitySettingBinding binding) {
         this.mSettingView = settingView;
         this.settingViewModel = settingViewModel;
         this.systemSettingDataSource = systemSettingDataSource;
@@ -87,6 +91,7 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
         this.currentUserUUID = currentUserUUID;
         this.threadManager = threadManager;
         mPluginManageDataSource = pluginManageDataSource;
+        mUserDataRepository = userDataRepository;
         mActivitySettingBinding = binding;
     }
 
@@ -98,6 +103,10 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
 
         mOnlyUploadOrDownloadWithWIFI = systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi();
         settingViewModel.onlyAutoUploadWhenConnectedWithWifi.set(mOnlyUploadOrDownloadWithWIFI);
+
+        User user = mUserDataRepository.getUserByUUID(currentUserUUID);
+
+        settingViewModel.showFirmwareActivity.set(user.isAdmin());
 
         uploadMediaCountChangeListener = new UploadMediaCountChangeListener() {
 

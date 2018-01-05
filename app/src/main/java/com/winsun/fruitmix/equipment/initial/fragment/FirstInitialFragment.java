@@ -61,6 +61,8 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
 
     private List<DiskVolumeViewModel> selectedDiskVolumeViewModels;
 
+    private int preSelectedMode = -1;
+
     private DiskRecyclerViewAdapter diskRecyclerViewAdapter;
 
     public FirstInitialFragment() {
@@ -76,6 +78,10 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
 
     public void setSelectedDiskVolumeViewModels(List<DiskVolumeViewModel> selectedDiskVolumeViewModels) {
         this.selectedDiskVolumeViewModels = selectedDiskVolumeViewModels;
+    }
+
+    public void setPreSelectedMode(int preSelectedMode) {
+        this.preSelectedMode = preSelectedMode;
     }
 
     @Override
@@ -293,10 +299,20 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
 
         } else {
 
-            mFirstInitialFragmentViewModel.installDiskMode.set(getString(R.string.not_set_disk_mode));
+            if (preSelectedMode > 0) {
 
-            //fix bug:choose two disk but not set mode,user still can enter next step
-            currentSelectDiskMode = 0;
+                currentSelectDiskMode = preSelectedMode;
+
+                setInstallDiskModelText();
+
+            } else {
+
+                mFirstInitialFragmentViewModel.installDiskMode.set(getString(R.string.not_set_disk_mode));
+
+                //fix bug:choose two disk but not set mode,user still can enter next step
+                currentSelectDiskMode = 0;
+
+            }
 
             selectDiskModeIV.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -327,7 +343,7 @@ public class FirstInitialFragment extends Fragment implements ShowFirstInitialEq
 
         new AlertDialog.Builder(getContext())
                 .setTitle(getString(R.string.select_disk_mode))
-                .setSingleChoiceItems(modes, -1, new DialogInterface.OnClickListener() {
+                .setSingleChoiceItems(modes, currentSelectDiskMode - 1, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         temporarySelectMode = which + 1;

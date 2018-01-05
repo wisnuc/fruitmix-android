@@ -69,6 +69,7 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
             runOnMainThreadCallback.onSucceed(new ArrayList<>(cacheUsers.values()), new OperationSuccess());
 
             return;
+
         }
 
         mThreadManager.runOnCacheThread(new Runnable() {
@@ -98,11 +99,13 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
                                     userDBDataSource.updateUser(user);
 
                                     cacheUsers.put(user.getUuid(), user);
+
                                 } else {
 
                                     userDBDataSource.insertUser(Collections.singletonList(user));
 
                                     cacheUsers.putIfAbsent(user.getUuid(), user);
+
                                 }
 
                             }
@@ -201,6 +204,10 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
 
     }
 
+    @Override
+    public void clearAllUsersInCache() {
+        cacheUsers.clear();
+    }
 
     @Override
     public boolean clearAllUsersInDB() {
@@ -230,7 +237,6 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
         });
 
     }
-
 
     @Override
     public void insertUsers(Collection<User> users) {
@@ -361,7 +367,7 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                userRemoteDataSource.modifyUserEnableState(userUUID, newIsAdminState, new BaseOperateDataCallback<User>() {
+                userRemoteDataSource.modifyUserIsAdminState(userUUID, newIsAdminState, new BaseOperateDataCallback<User>() {
                     @Override
                     public void onSucceed(User data, OperationResult result) {
 

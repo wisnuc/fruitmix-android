@@ -410,6 +410,7 @@ public class LoginUseCase extends BaseDataRepository {
                 httpRequestFactory.setCurrentData(mToken, mGateway);
 
                 userDataRepository.clearAllUsersInDB();
+                userDataRepository.clearAllUsersInCache();
 
                 getUsers(loadTokenParam, token, mBooleanLoginNewUserCallbackWrapper);
 
@@ -545,6 +546,7 @@ public class LoginUseCase extends BaseDataRepository {
         httpRequestFactory.setCurrentData(mToken, mGateway);
 
         userDataRepository.clearAllUsersInDB();
+        userDataRepository.clearAllUsersInCache();
 
         getUsers(currentLoggedInUser.getUser().getUuid(), new BaseOperateDataCallback<Boolean>() {
             @Override

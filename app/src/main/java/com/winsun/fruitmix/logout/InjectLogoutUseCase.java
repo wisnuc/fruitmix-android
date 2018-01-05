@@ -9,6 +9,7 @@ import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
+import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.wechat.user.InjectWeChatUserDataSource;
@@ -25,7 +26,7 @@ public class InjectLogoutUseCase {
                 InjectUploadMediaUseCase.provideUploadMediaUseCase(context), InjectWeChatUserDataSource.provideWeChatUserDataSource(context),
                 InjectHttp.provideHttpRequestFactory(context), FileUtil.getTemporaryDataFolderParentFolderPath(context),
                 FileTool.getInstance(), InjectStationFileRepository.provideStationFileRepository(context),
-                FileTaskManager.getInstance());
+                InjectUser.provideRepository(context), FileTaskManager.getInstance());
 
     }
 

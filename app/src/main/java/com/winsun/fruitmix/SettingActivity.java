@@ -18,6 +18,7 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
+import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
@@ -41,7 +42,7 @@ public class SettingActivity extends BaseActivity implements SettingView {
                 InjectMedia.provideMediaDataSourceRepository(this), CheckMediaIsUploadStrategy.getInstance(),
                 InjectUploadMediaUseCase.provideUploadMediaUseCase(this), systemSettingDataSource.getCurrentLoginUserUUID(),
                 ThreadManagerImpl.getInstance(), InjectPluginManageDataSource.provideInstance(this),
-                binding);
+                InjectUser.provideRepository(this),binding);
 
         binding.setSettingPresenter(settingPresenter);
 
@@ -105,6 +106,9 @@ public class SettingActivity extends BaseActivity implements SettingView {
         public final ObservableBoolean onlyAutoUploadWhenConnectedWithWifi = new ObservableBoolean(true);
         public final ObservableField<String> alreadyUploadMediaCountText = new ObservableField<>();
         public final ObservableField<String> cacheSizeText = new ObservableField<>();
+
+        public final ObservableBoolean showFirmwareActivity = new ObservableBoolean();
+
     }
 
 }

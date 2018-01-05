@@ -72,6 +72,9 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
     private String userName;
     private String userPwd;
     private String mMode;
+
+    private int preSelectedMode = -1;
+
     private List<DiskVolumeViewModel> mDiskVolumeViewModels;
 
     private OperateUserViewModel mOperateUserViewModel;
@@ -209,7 +212,6 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
                 }
 
-
             }
         });
 
@@ -221,6 +223,8 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
         mDiskVolumeViewModels = mFirstInitialFragment.getSelectDisk();
 
         int mode = mFirstInitialFragment.getCurrentSelectDiskMode();
+
+        preSelectedMode = mode;
 
         mMode = convertMode(mode);
     }
@@ -275,6 +279,8 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
                 mFirstInitialFragment.setSelectedDiskVolumeViewModels(mDiskVolumeViewModels);
 
+                mFirstInitialFragment.setPreSelectedMode(preSelectedMode);
+
             }
         });
 
@@ -305,7 +311,6 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
             }
         });
-
 
         steppersItem.setOnCancelAction(new OnCancelAction() {
             @Override

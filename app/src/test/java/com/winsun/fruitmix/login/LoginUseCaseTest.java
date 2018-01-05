@@ -339,6 +339,8 @@ public class LoginUseCaseTest {
 
         verify(userDataRepository, never()).clearAllUsersInDB();
 
+        verify(userDataRepository,never()).clearAllUsersInCache();
+
         verify(mediaDataSourceRepository, never()).clearAllStationMediasInDB();
 
     }
@@ -425,6 +427,8 @@ public class LoginUseCaseTest {
         verify(httpRequestFactory).setCurrentData(anyString(), anyString());
 
         verify(userDataRepository).clearAllUsersInDB();
+
+        verify(userDataRepository).clearAllUsersInCache();
 
         verify(systemSettingDataSource).setLoginWithWechatCodeOrNot(false);
 
@@ -535,6 +539,8 @@ public class LoginUseCaseTest {
         verify(httpRequestFactory).setCurrentData(testToken, testGateway);
 
         verify(userDataRepository).clearAllUsersInDB();
+
+        verify(userDataRepository).clearAllUsersInCache();
 
         verifyGetUsers(user);
 

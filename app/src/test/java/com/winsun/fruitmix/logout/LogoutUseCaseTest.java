@@ -10,6 +10,7 @@ import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
 import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
@@ -57,6 +58,9 @@ public class LogoutUseCaseTest {
     private StationFileRepository mStationFileRepository;
 
     @Mock
+    private UserDataRepository mUserDataRepository;
+
+    @Mock
     private FileTaskManager mFileTaskManager;
 
     private String testToken = "testToken";
@@ -70,7 +74,7 @@ public class LogoutUseCaseTest {
 
         logoutUseCase = LogoutUseCase.getInstance(systemSettingDataSource, loggedInUserDataSource,
                 uploadMediaUseCase, weChatUserDataSource, httpRequestFactory, "", mFileTool,
-                mStationFileRepository, mFileTaskManager);
+                mStationFileRepository, mUserDataRepository, mFileTaskManager);
 
         when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn("");
 
@@ -174,6 +178,10 @@ public class LogoutUseCaseTest {
         verify(mFileTool).getTemporaryUploadFolderPath(anyString(), anyString());
 
         verify(mFileTool).deleteDir(anyString());
+
+        verify(mUserDataRepository).clearAllUsersInDB();
+
+        verify(mUserDataRepository).clearAllUsersInCache();
 
     }
 

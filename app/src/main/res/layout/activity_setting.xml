@@ -247,7 +247,8 @@
                 android:layout_height="56dp"
                 android:gravity="center_vertical"
                 android:onClick="@{()->settingPresenter.gotoFirmwareActivity(context)}"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="@{setting.showFirmwareActivity?View.VISIBLE:View.GONE}">
 
                 <TextView
                     android:layout_width="wrap_content"
