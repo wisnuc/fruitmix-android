@@ -175,8 +175,6 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
     private BaseView mBaseView;
 
-    private String mTorrentFilePath;
-
     private CreateTorrentDownloadTaskViewInDialogBinding mCreateTorrentDownloadTaskViewInDialogBinding;
 
     private static final int REFRESH_VIEW = 0x1001;
@@ -223,8 +221,7 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
     public TorrentDownloadManagePresenter(TorrentDataRepository torrentDataRepository, PluginManageDataSource pluginManageDataSource,
                                           ActivityTorrentDownloadManageBinding binding,
-                                          LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel, BaseView baseView,
-                                          String torrentFilePath) {
+                                          LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel, BaseView baseView) {
         mTorrentDataRepository = torrentDataRepository;
         mPluginManageDataSource = pluginManageDataSource;
         mBinding = binding;
@@ -240,8 +237,6 @@ public class TorrentDownloadManagePresenter implements ActiveView {
         mBinding.torrentDownloadRecyclerview.setAdapter(mTorrentDownloadItemAdapter);
 
         mRefreshViewTimelyHandler = new RefreshViewTimelyHandler(Looper.getMainLooper(), this);
-
-        mTorrentFilePath = torrentFilePath;
 
     }
 
@@ -266,10 +261,6 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
                         refreshView();
 
-                        if (mTorrentFilePath != null && mTorrentFilePath.length() > 0) {
-                            startTorrentFileDownloadTask(context, mTorrentFilePath);
-                        }
-
                     }
 
                     @Override
@@ -277,30 +268,6 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
                         refreshView();
 
-                        if (mTorrentFilePath != null && mTorrentFilePath.length() > 0) {
-                            startTorrentFileDownloadTask(context, mTorrentFilePath);
-                        }
-
-                    }
-                }, this
-        ));
-
-    }
-
-    private void startTorrentFileDownloadTask(final Context context, String torrentFilePath) {
-
-        mTorrentDataRepository.postTorrentDownloadTask(new File(torrentFilePath), new BaseOperateDataCallbackWrapper<>(
-                new BaseOperateDataCallback<TorrentRequestParam>() {
-                    @Override
-                    public void onSucceed(TorrentRequestParam data, OperationResult result) {
-
-                        mBaseView.showToast(context.getString(R.string.success, context.getString(R.string.create_new_download_task)));
-
-                    }
-
-                    @Override
-                    public void onFail(OperationResult operationResult) {
-                        mBaseView.showToast(operationResult.getResultMessage(context));
                     }
                 }, this
         ));

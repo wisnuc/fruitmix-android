@@ -14,8 +14,6 @@ import com.winsun.fruitmix.databinding.ActivityEquipmentManageBinding;
 import com.winsun.fruitmix.equipment.manage.viewmodel.EquipmentManageViewModel;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.manage.UserManageActivity;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -26,6 +24,10 @@ public class EquipmentManageActivity extends BaseActivity implements View.OnClic
 
     private SystemSettingDataSource systemSettingDataSource;
 
+    public static final int REQUEST_SHUTDOWN_EQUIPMENT = 0x2001;
+
+    public static final int RESULT_SHUTDOWN_EQUIPMENT = 0x1003;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +36,7 @@ public class EquipmentManageActivity extends BaseActivity implements View.OnClic
 
         Toolbar mToolbar = binding.toolbarLayout.toolbar;
 
-        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this,R.color.eighty_seven_percent_white));
+        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
 
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
         toolbarViewModel.setBaseView(this);
@@ -80,27 +82,27 @@ public class EquipmentManageActivity extends BaseActivity implements View.OnClic
                 break;
             case R.id.equipment_layout:
 
-                if (checkIsSupported()){
-                    Intent intent =new Intent(this,EquipmentInfoActivity.class);
-                    intent.putExtra(EquipmentInfoActivity.INFO_TYPE_KEY,EquipmentInfoActivity.EQUIPMENT_INFO);
+                if (checkIsSupported()) {
+                    Intent intent = new Intent(this, EquipmentInfoActivity.class);
+                    intent.putExtra(EquipmentInfoActivity.INFO_TYPE_KEY, EquipmentInfoActivity.EQUIPMENT_INFO);
                     startActivity(intent);
                 }
 
                 break;
             case R.id.network_layout:
 
-                if (checkIsSupported()){
-                    Intent intent =new Intent(this,EquipmentInfoActivity.class);
-                    intent.putExtra(EquipmentInfoActivity.INFO_TYPE_KEY,EquipmentInfoActivity.NETWORK_INFO);
+                if (checkIsSupported()) {
+                    Intent intent = new Intent(this, EquipmentInfoActivity.class);
+                    intent.putExtra(EquipmentInfoActivity.INFO_TYPE_KEY, EquipmentInfoActivity.NETWORK_INFO);
                     startActivity(intent);
                 }
 
                 break;
             case R.id.time_layout:
 
-                if (checkIsSupported()){
-                    Intent intent =new Intent(this,EquipmentInfoActivity.class);
-                    intent.putExtra(EquipmentInfoActivity.INFO_TYPE_KEY,EquipmentInfoActivity.TIME_INFO);
+                if (checkIsSupported()) {
+                    Intent intent = new Intent(this, EquipmentInfoActivity.class);
+                    intent.putExtra(EquipmentInfoActivity.INFO_TYPE_KEY, EquipmentInfoActivity.TIME_INFO);
                     startActivity(intent);
                 }
 
@@ -108,7 +110,7 @@ public class EquipmentManageActivity extends BaseActivity implements View.OnClic
             case R.id.reboot_shutdown_layout:
 
                 if (checkIsSupported())
-                    Util.startActivity(this, ShutDownEquipmentActivity.class);
+                    startActivityForResult(new Intent(this, ShutDownEquipmentActivity.class), REQUEST_SHUTDOWN_EQUIPMENT);
 
                 break;
             default:
@@ -123,5 +125,21 @@ public class EquipmentManageActivity extends BaseActivity implements View.OnClic
             return false;
         } else
             return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        Log.d(TAG, "onActivityResult: requestCode == REQUEST_SHUTDOWN_EQUIPMENT: " + (requestCode == REQUEST_SHUTDOWN_EQUIPMENT)
+                + " resultCode == RESULT_ENTER_EQUIPMENT_SEARCH_ACTIVITY: " + (resultCode == ShutDownEquipmentActivity.RESULT_ENTER_EQUIPMENT_SEARCH_ACTIVITY));
+
+        if (requestCode == REQUEST_SHUTDOWN_EQUIPMENT && resultCode == ShutDownEquipmentActivity.RESULT_ENTER_EQUIPMENT_SEARCH_ACTIVITY) {
+
+            setResult(RESULT_SHUTDOWN_EQUIPMENT);
+
+            finish();
+
+        }
+
     }
 }

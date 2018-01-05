@@ -33,6 +33,7 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
 import com.winsun.fruitmix.equipment.manage.EquipmentManageActivity;
+import com.winsun.fruitmix.equipment.manage.ShutDownEquipmentActivity;
 import com.winsun.fruitmix.equipment.search.data.InjectEquipment;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
@@ -97,6 +98,8 @@ public class NavPagerActivity extends BaseActivity
 
     public static final String TAG = NavPagerActivity.class.getSimpleName();
 
+    public static final int REQUEST_EQUIPMENT_MANAGE = 0x1011;
+
     UserAvatar userAvatar;
 
     DrawerLayout mDrawerLayout;
@@ -110,7 +113,9 @@ public class NavPagerActivity extends BaseActivity
 
     @Override
     public void gotoEquipmentManageActivity() {
-        Util.startActivity(mContext, EquipmentManageActivity.class);
+
+        startActivityForResult(new Intent(mContext, EquipmentManageActivity.class), REQUEST_EQUIPMENT_MANAGE);
+
     }
 
     @Override
@@ -979,6 +984,12 @@ public class NavPagerActivity extends BaseActivity
             } else if (resultCode == RESULT_FINISH_ACTIVITY) {
                 finish();
             }
+
+        } else if (requestCode == REQUEST_EQUIPMENT_MANAGE && resultCode == EquipmentManageActivity.RESULT_SHUTDOWN_EQUIPMENT) {
+
+            Log.d(TAG, "onActivityResult: logout when reboot equipment and enter maintenance");
+
+            handleLogoutOnClick();
 
         } else {
 

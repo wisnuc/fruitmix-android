@@ -111,6 +111,8 @@ public class EquipmentPresenter implements ActiveView {
 
     private boolean hasRefreshFirstEquipmentUsers = false;
 
+    private int needRefreshEquipmentUsersPositionForStartFromMaintenance = -1;
+
     private class CustomHandler extends Handler {
 
         WeakReference<EquipmentPresenter> weakReference = null;
@@ -219,6 +221,15 @@ public class EquipmentPresenter implements ActiveView {
 
             }
 
+            if (needRefreshEquipmentUsersPositionForStartFromMaintenance >= 0) {
+
+                if (mUserLoadedEquipments.get(needRefreshEquipmentUsersPositionForStartFromMaintenance).getState() == EquipmentDataSource.EQUIPMENT_READY)
+                    refreshEquipment(needRefreshEquipmentUsersPositionForStartFromMaintenance);
+
+                needRefreshEquipmentUsersPositionForStartFromMaintenance = -1;
+
+            }
+
         }
     }
 
@@ -317,9 +328,9 @@ public class EquipmentPresenter implements ActiveView {
 
         currentEquipment = mUserLoadedEquipments.get(position);
 
-        currentEquipment.setState(EquipmentDataSource.EQUIPMENT_READY);
+        getEquipmentInfoInThread(currentEquipment);
 
-        getUserInThread(currentEquipment);
+        needRefreshEquipmentUsersPositionForStartFromMaintenance = position;
 
     }
 
@@ -373,7 +384,11 @@ public class EquipmentPresenter implements ActiveView {
                 equipmentSearchViewModel.equipmentStateIcon.set(R.drawable.initial_equipment);
 
                 equipmentSearchViewModel.setIp(currentEquipment.getHosts().get(0));
-                equipmentSearchViewModel.setEquipmentName(currentEquipment.getEquipmentName());
+
+                if (currentEquipment.getEquipmentTypeInfo() != null) {
+                    equipmentSearchViewModel.setEquipmentName(currentEquipment.getEquipmentTypeInfo().getFormatLabel(equipmentSearchView.getContext()));
+                } else
+                    equipmentSearchViewModel.setEquipmentName(currentEquipment.getEquipmentName());
 
             } else if (state == EquipmentDataSource.EQUIPMENT_MAINTENANCE) {
 
@@ -382,7 +397,11 @@ public class EquipmentPresenter implements ActiveView {
                 equipmentSearchViewModel.equipmentStateIcon.set(R.drawable.maintenance_enter_icon);
 
                 equipmentSearchViewModel.setIp(currentEquipment.getHosts().get(0));
-                equipmentSearchViewModel.setEquipmentName(currentEquipment.getEquipmentName());
+
+                if (currentEquipment.getEquipmentTypeInfo() != null) {
+                    equipmentSearchViewModel.setEquipmentName(currentEquipment.getEquipmentTypeInfo().getFormatLabel(equipmentSearchView.getContext()));
+                } else
+                    equipmentSearchViewModel.setEquipmentName(currentEquipment.getEquipmentName());
 
             }
 

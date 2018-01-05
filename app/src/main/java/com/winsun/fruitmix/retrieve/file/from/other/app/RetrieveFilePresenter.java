@@ -7,17 +7,27 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.HandleTorrentDialogViewBinding;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.upload.InjectUploadFileCase;
 import com.winsun.fruitmix.file.view.FileDownloadActivity;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.torrent.data.InjectTorrentDataRepository;
+import com.winsun.fruitmix.torrent.data.TorrentDataRepository;
+import com.winsun.fruitmix.torrent.data.TorrentDataSource;
+import com.winsun.fruitmix.torrent.data.TorrentRequestParam;
 import com.winsun.fruitmix.torrent.view.TorrentDownloadManageActivity;
 import com.winsun.fruitmix.util.FileUtil;
+
+import java.io.File;
 
 /**
  * Created by Administrator on 2017/12/21.
@@ -38,15 +48,15 @@ public class RetrieveFilePresenter {
             int behavior = mSystemSettingDataSource.getOpenTorrentFileBehavior();
 
             if (behavior == SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_CREATE_DOWNLOAD_TASK) {
-                startTorrentDownloadManageActivity(uploadFilePath,context);
+                startTorrentDownloadManageActivity(uploadFilePath, context);
             } else if (behavior == SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_UPLOAD_FILE) {
-                startTaskManageActivity(uploadFilePath,context);
+                startTaskManageActivity(uploadFilePath, context);
             } else
-                showHandleTorrentDialog(mSystemSettingDataSource,context, uploadFilePath);
+                showHandleTorrentDialog(mSystemSettingDataSource, context, uploadFilePath);
 
         } else {
 
-            startTaskManageActivity(uploadFilePath,context);
+            startTaskManageActivity(uploadFilePath, context);
 
         }
 
@@ -59,6 +69,7 @@ public class RetrieveFilePresenter {
 
         new AlertDialog.Builder(context).setTitle(context.getString(R.string.upload_torrent_file_title))
                 .setView(binding.getRoot())
+                .setCancelable(false)
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -70,17 +81,16 @@ public class RetrieveFilePresenter {
                             if (isAlways)
                                 systemSettingDataSource.setOpenTorrentFileDefaultBehavior(SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_CREATE_DOWNLOAD_TASK);
 
-                            startTorrentDownloadManageActivity(uploadFilePath,context);
+                            startTorrentDownloadManageActivity(uploadFilePath, context);
 
                         } else if (binding.uploadFile.isChecked()) {
 
                             if (isAlways)
                                 systemSettingDataSource.setOpenTorrentFileDefaultBehavior(SystemSettingDataSource.OPEN_TORRENT_FILE_BEHAVIOR_UPLOAD_FILE);
 
-                            startTaskManageActivity(uploadFilePath,context);
+                            startTaskManageActivity(uploadFilePath, context);
 
                         }
-
 
                     }
                 }).create().show();
@@ -98,12 +108,46 @@ public class RetrieveFilePresenter {
     private void startTorrentDownloadTask(String uploadFilePath, Context context) {
 
         Intent intent = new Intent(context, TorrentDownloadManageActivity.class);
-        intent.putExtra(TorrentDownloadManageActivity.KEY_TORRENT_FILE_PATH, uploadFilePath);
+
         context.startActivity(intent);
+
+        startTask(uploadFilePath, context.getApplicationContext());
 
     }
 
-    private void startTaskManageActivity(String uploadFilePath,Activity activity) {
+    private void startTask(String mTorrentFilePath, Context context) {
+        if (mTorrentFilePath != null && mTorrentFilePath.length() > 0) {
+            startTorrentFileDownloadTask(context, mTorrentFilePath);
+        }
+    }
+
+    private void startTorrentFileDownloadTask(final Context context, String torrentFilePath) {
+
+        TorrentDataRepository mTorrentDataRepository = InjectTorrentDataRepository.provideInstance(context);
+
+        mTorrentDataRepository.postTorrentDownloadTask(new File(torrentFilePath),
+                new BaseOperateDataCallback<TorrentRequestParam>() {
+                    @Override
+                    public void onSucceed(TorrentRequestParam data, OperationResult result) {
+
+                        Toast.makeText(context, context.getString(R.string.success, context.getString(R.string.create_new_download_task)), Toast.LENGTH_SHORT).show();
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        Toast.makeText(context, operationResult.getResultMessage(context), Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+
+        );
+
+    }
+
+
+    private void startTaskManageActivity(String uploadFilePath, Activity activity) {
 
         Log.d(TAG, "startTaskManageActivity: uploadFilePath: " + uploadFilePath);
 

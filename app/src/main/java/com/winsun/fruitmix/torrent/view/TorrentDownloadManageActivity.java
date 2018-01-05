@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.torrent.view;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
@@ -47,10 +48,8 @@ public class TorrentDownloadManageActivity extends BaseActivity implements BaseV
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        String torrentFilePath = getIntent().getStringExtra(KEY_TORRENT_FILE_PATH);
-
         presenter = new TorrentDownloadManagePresenter(InjectTorrentDataRepository.provideInstance(this),
-                InjectPluginManageDataSource.provideInstance(this),binding, loadingViewModel,noContentViewModel, this,torrentFilePath);
+                InjectPluginManageDataSource.provideInstance(this),binding, loadingViewModel,noContentViewModel, this);
 
         binding.setPresenter(presenter);
 
