@@ -9,7 +9,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import com.winsun.fruitmix.TranslucentActivity;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
 import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
@@ -22,11 +25,19 @@ import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.executor.UploadMediaTask;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.upload.UploadFileUseCase;
+import com.winsun.fruitmix.firmware.FirmwareActivity;
+import com.winsun.fruitmix.firmware.data.FirmwareDataSource;
+import com.winsun.fruitmix.firmware.data.InjectFirmwareDataSource;
+import com.winsun.fruitmix.firmware.model.CheckUpdateState;
+import com.winsun.fruitmix.firmware.model.Firmware;
 import com.winsun.fruitmix.generate.media.GenerateMediaThumbUseCase;
 import com.winsun.fruitmix.generate.media.InjectGenerateMediaThumbUseCase;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
 import com.winsun.fruitmix.invitation.data.InjectInvitationDataSource;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
+import com.winsun.fruitmix.login.InjectLoginUseCase;
+import com.winsun.fruitmix.login.LoginNewUserCallbackWrapper;
+import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.logout.InjectLogoutUseCase;
 import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
@@ -65,7 +76,13 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
     private static final int RETRIEVE_REMOTE_TICKETS = 0x1003;
 
-    private TimingRetrieveTicketsTask task;
+    public static final int RETRIEVE_FIRMWARE_STATE = 0x1004;
+
+    public static final int RETRIEVE_FIRMWARE_INTERVAL = 5 * 1000;
+
+    public static final String RETRIEVE_NEW_FIRMWARE_VERSION = "retrieve_new_firmware_version";
+
+    private TimingTask task;
 
     private boolean mCalcNewLocalMediaDigestFinished = false;
     private boolean mRetrieveRemoteMediaFinished = false;
@@ -87,6 +104,10 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
     private static List<UploadMediaCountChangeListener> uploadMediaCountChangeListeners = new ArrayList<>();
 
+    private LoginUseCase mLoginUseCase;
+
+    private FirmwareDataSource mFirmwareDataSource;
+
     public static void startButlerService(Context context) {
         Intent intent = new Intent(context, ButlerService.class);
         context.startService(intent);
@@ -104,7 +125,15 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
         EventBus.getDefault().register(this);
 
-        task = new TimingRetrieveTicketsTask(this, getMainLooper());
+        initInstance();
+
+        alreadyStart = true;
+
+    }
+
+    private void initInstance() {
+
+        task = new TimingTask(this, getMainLooper());
 
         //TODO: commit this for consider get ticket when login with wechat token,api is not exist
 //        task.sendEmptyMessageDelayed(RETRIEVE_REMOTE_TICKETS, Util.refreshTicketsDelayTime);
@@ -131,13 +160,6 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
             }
         };
 
-        initInstance();
-
-        alreadyStart = true;
-
-    }
-
-    private void initInstance() {
         MediaDataSourceRepository mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(this);
 
         mediaDataSourceRepository.registerCalcDigestCallback(calcMediaDigestCallback);
@@ -147,8 +169,48 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
         initInvitationRemoteDataSource();
 
+        mLoginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
+
+        mLoginUseCase.registerNewUserCallback(new LoginNewUserCallbackWrapper.LoginNewUserCallback() {
+            @Override
+            public void onSucceed() {
+
+                SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(ButlerService.this);
+
+                if (systemSettingDataSource.getAskIfNewFirmwareVersionOccur())
+                    checkFirmwareUpdate();
+
+            }
+        });
+
 //        uploadMediaUseCase.registerUploadMediaCountChangeListener(this);
 
+    }
+
+    private void checkFirmwareUpdate() {
+
+        mFirmwareDataSource = InjectFirmwareDataSource.provideInstance(this);
+
+        mFirmwareDataSource.checkFirmwareUpdate(new BaseOperateDataCallback<Void>() {
+            @Override
+            public void onSucceed(Void data, OperationResult result) {
+
+                sendRetrieveFirmwareMessage(task);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+            }
+        });
+
+
+    }
+
+
+    private void sendRetrieveFirmwareMessage(TimingTask timingTask) {
+        timingTask.sendEmptyMessageDelayed(RETRIEVE_FIRMWARE_STATE, RETRIEVE_FIRMWARE_INTERVAL);
     }
 
     public static void registerUploadMediaCountChangeListener(UploadMediaCountChangeListener uploadMediaCountChangeListener) {
@@ -289,6 +351,7 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
         stopRetrieveTicketTaskForever();
 
         task.removeMessages(RETRIEVE_REMOTE_TICKETS);
+        task.removeMessages(RETRIEVE_FIRMWARE_STATE);
 
         task = null;
 
@@ -303,15 +366,17 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
 
         mediaDataSourceRepository.unregisterCalcDigestCallback(calcMediaDigestCallback);
 
+        mLoginUseCase.unregisterNewUserCallback();
+
         super.onDestroy();
 
     }
 
-    private class TimingRetrieveTicketsTask extends Handler {
+    private class TimingTask extends Handler {
 
         WeakReference<ButlerService> weakReference = null;
 
-        TimingRetrieveTicketsTask(ButlerService butlerService, Looper looper) {
+        TimingTask(ButlerService butlerService, Looper looper) {
             super(looper);
             weakReference = new WeakReference<>(butlerService);
         }
@@ -320,10 +385,13 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
+            ButlerService butlerService = weakReference.get();
+
+            if (butlerService == null)
+                return;
+
             switch (msg.what) {
                 case RETRIEVE_REMOTE_TICKETS:
-
-                    ButlerService butlerService = weakReference.get();
 
                     Log.d(TAG, "start RetrieveTicketTask :" + startRetrieveTicketTask);
 
@@ -365,8 +433,55 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
                     });
 
                     break;
+
+                case RETRIEVE_FIRMWARE_STATE:
+
+                    getFirmwareState(butlerService);
+
+                    break;
+
             }
         }
+    }
+
+    private void getFirmwareState(final ButlerService butlerService) {
+
+        butlerService.mFirmwareDataSource.getFirmware(new BaseLoadDataCallback<Firmware>() {
+            @Override
+            public void onSucceed(List<Firmware> data, OperationResult operationResult) {
+
+                Firmware firmware = data.get(0);
+
+                CheckUpdateState checkUpdateState = firmware.getCheckUpdateState();
+
+                if (checkUpdateState == CheckUpdateState.PENDING) {
+
+                    if (butlerService.mLoginUseCase.isAlreadyLogin() &&
+                            Util.compareVersion(firmware.getCurrentFirmwareVersion(), firmware.getNewFirmwareVersion()) < 0) {
+
+                        Intent intent = new Intent(butlerService, TranslucentActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+
+//                        EventBus.getDefault().post(new OperationEvent(RETRIEVE_NEW_FIRMWARE_VERSION,new OperationSuccess()));
+
+                    }
+
+
+                } else if (checkUpdateState == CheckUpdateState.WORKING) {
+
+                    sendRetrieveFirmwareMessage(butlerService.task);
+
+                }
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+            }
+        });
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

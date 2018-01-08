@@ -13,6 +13,7 @@ import com.winsun.fruitmix.setting.SettingPresenter;
 import com.winsun.fruitmix.setting.SettingPresenterImpl;
 import com.winsun.fruitmix.plugin.data.InjectPluginManageDataSource;
 import com.winsun.fruitmix.setting.SettingView;
+import com.winsun.fruitmix.setting.SettingViewModel;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
@@ -96,18 +97,6 @@ public class SettingActivity extends BaseActivity implements SettingView {
 
 
         Util.startActivity(this, FirmwareActivity.class);
-
-    }
-
-    public class SettingViewModel {
-
-        public final ObservableBoolean autoUploadOrNot = new ObservableBoolean(false);
-        public final ObservableBoolean alreadyUploadMediaCountTextViewVisibility = new ObservableBoolean(false);
-        public final ObservableBoolean onlyAutoUploadWhenConnectedWithWifi = new ObservableBoolean(true);
-        public final ObservableField<String> alreadyUploadMediaCountText = new ObservableField<>();
-        public final ObservableField<String> cacheSizeText = new ObservableField<>();
-
-        public final ObservableBoolean showFirmwareActivity = new ObservableBoolean();
 
     }
 

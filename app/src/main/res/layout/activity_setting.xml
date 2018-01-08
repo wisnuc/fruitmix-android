@@ -10,7 +10,7 @@
 
         <variable
             name="setting"
-            type="com.winsun.fruitmix.SettingActivity.SettingViewModel" />
+            type="com.winsun.fruitmix.setting.SettingViewModel" />
 
         <variable
             name="settingPresenter"
@@ -62,211 +62,244 @@
 
             </android.support.v7.widget.Toolbar>-->
 
-        <LinearLayout
+        <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:orientation="vertical"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:gravity="center">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/setting_text"
-                    android:textColor="@color/fifty_four_percent_black" />
-
-            </LinearLayout>
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="56dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:text="@string/photo_auto_upload_setting_text"
-                    android:textColor="@color/eighty_seven_percent_black"
-                    android:textSize="16dp" />
-
-                <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/auto_upload_photos_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:checked="@{setting.autoUploadOrNot}"
-                    android:onCheckedChanged="@{(buttonView,isChecked) -> settingPresenter.onCheckedChanged(buttonView, isChecked)}" />
-
-            </RelativeLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/light_gray"
-                android:visibility="gone" />
-
-            <RelativeLayout
-                android:id="@+id/already_upload_media_count_layout"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:text="@string/already_upload_media_count_hint"
-                    android:textColor="@color/eighty_seven_percent_black"
-                    android:textSize="16dp" />
-
-                <TextView
-                    android:id="@+id/already_upload_media_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:text="@{setting.alreadyUploadMediaCountText}"
-                    android:textColor="@color/fifty_four_percent_black"
-                    android:textSize="14dp"
-                    android:visibility="@{setting.alreadyUploadMediaCountTextViewVisibility?View.VISIBLE:View.GONE}"
-                    tools:text="558/14666" />
-
-            </RelativeLayout>
-
-            <View
-                android:id="@+id/already_upload_media_count_divide"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/light_gray"
-                android:visibility="gone" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:visibility="visible">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:text="@string/only_auto_upload_when_connect_with_wifi"
-                    android:textColor="@color/eighty_seven_percent_black"
-                    android:textSize="16dp" />
-
-                <android.support.v7.widget.SwitchCompat
-                    android:id="@+id/only_upload_with_wifi_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:checked="@{setting.onlyAutoUploadWhenConnectedWithWifi}"
-                    android:onCheckedChanged="@{(buttonView,isChecked) -> settingPresenter.onCheckedChanged(buttonView, isChecked)}" />
-
-            </RelativeLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/light_gray"
-                android:visibility="gone" />
-
-            <RelativeLayout
-                android:id="@+id/clear_cache_layout"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:clickable="true"
-                android:onClick="@{() -> settingPresenter.clearCache(context,setting)}">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:text="@string/clear_cache"
-                    android:textColor="@color/eighty_seven_percent_black"
-                    android:textSize="16dp" />
-
-                <TextView
-                    android:id="@+id/cache_size"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:text="@{setting.cacheSizeText}"
-                    android:textColor="@color/fifty_four_percent_black"
-                    android:textSize="14dp"
-                    tools:text="132.95K" />
-
-            </RelativeLayout>
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:gravity="center_vertical"
-                android:onClick="@{()->settingPresenter.setDefaultOpenTorrentFileBehavior(context)}"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:orientation="vertical"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp">
 
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/how_to_handle_bt_file"
-                    android:textColor="@color/eighty_seven_percent_black"
-                    android:textSize="16dp" />
+                    android:layout_height="40dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/setting_text"
+                        android:textColor="@color/fifty_four_percent_black" />
+
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/photo_auto_upload_setting_text"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textSize="16dp" />
+
+                    <android.support.v7.widget.SwitchCompat
+                        android:id="@+id/auto_upload_photos_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:checked="@{setting.autoUploadOrNot}"
+                        android:onCheckedChanged="@{(buttonView,isChecked) -> settingPresenter.onCheckedChanged(buttonView, isChecked)}" />
+
+                </RelativeLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/light_gray"
+                    android:visibility="gone" />
+
+                <RelativeLayout
+                    android:id="@+id/already_upload_media_count_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/already_upload_media_count_hint"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textSize="16dp" />
+
+                    <TextView
+                        android:id="@+id/already_upload_media_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:text="@{setting.alreadyUploadMediaCountText}"
+                        android:textColor="@color/fifty_four_percent_black"
+                        android:textSize="14dp"
+                        android:visibility="@{setting.alreadyUploadMediaCountTextViewVisibility?View.VISIBLE:View.GONE}"
+                        tools:text="558/14666" />
+
+                </RelativeLayout>
+
+                <View
+                    android:id="@+id/already_upload_media_count_divide"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/light_gray"
+                    android:visibility="gone" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/only_auto_upload_when_connect_with_wifi"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textSize="16dp" />
+
+                    <android.support.v7.widget.SwitchCompat
+                        android:id="@+id/only_upload_with_wifi_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:checked="@{setting.onlyAutoUploadWhenConnectedWithWifi}"
+                        android:onCheckedChanged="@{(buttonView,isChecked) -> settingPresenter.onCheckedChanged(buttonView, isChecked)}" />
+
+                </RelativeLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/light_gray"
+                    android:visibility="gone" />
+
+                <RelativeLayout
+                    android:id="@+id/clear_cache_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:clickable="true"
+                    android:onClick="@{() -> settingPresenter.clearCache(context,setting)}">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/clear_cache"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textSize="16dp" />
+
+                    <TextView
+                        android:id="@+id/cache_size"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:text="@{setting.cacheSizeText}"
+                        android:textColor="@color/fifty_four_percent_black"
+                        android:textSize="14dp"
+                        tools:text="132.95K" />
+
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:gravity="center_vertical"
+                    android:onClick="@{()->settingPresenter.setDefaultOpenTorrentFileBehavior(context)}"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/how_to_handle_bt_file"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textSize="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:gravity="center_vertical"
+                    android:onClick="@{()->settingView.gotoPluginManageActivity()}"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/service_manage"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textSize="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:gravity="center_vertical"
+                    android:onClick="@{()->settingPresenter.gotoFirmwareActivity(context)}"
+                    android:orientation="horizontal"
+                    android:visibility="@{setting.showFirmwareActivity?View.VISIBLE:View.GONE}">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/firmware_update"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textSize="16dp" />
+
+                </LinearLayout>
+
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp">
+
+                    <TextView
+                        android:id="@+id/textView8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ask_if_new_firmware_version_occur"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textSize="16dp"
+                        bind:layout_constraintBottom_toBottomOf="parent"
+                        bind:layout_constraintStart_toStartOf="parent"
+                        bind:layout_constraintTop_toTopOf="parent" />
+
+                    <android.support.v7.widget.SwitchCompat
+                        android:layout_width="wrap_content"
+                        android:id="@+id/ask_new_firmware_version"
+                        android:layout_height="wrap_content"
+                        bind:layout_constraintBottom_toBottomOf="parent"
+                        bind:layout_constraintEnd_toEndOf="parent"
+                        bind:layout_constraintRight_toRightOf="parent"
+                        android:checked="@{setting.askIfNewFirmwareVersionOccur}"
+                        android:onCheckedChanged="@{(buttonView,isChecked) -> settingPresenter.onCheckedChanged(buttonView, isChecked)}"
+                        bind:layout_constraintTop_toTopOf="parent" />
+
+                </android.support.constraint.ConstraintLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/light_gray"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:gravity="center_vertical"
-                android:onClick="@{()->settingView.gotoPluginManageActivity()}"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/service_manage"
-                    android:textColor="@color/eighty_seven_percent_black"
-                    android:textSize="16dp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:gravity="center_vertical"
-                android:onClick="@{()->settingPresenter.gotoFirmwareActivity(context)}"
-                android:orientation="horizontal"
-                android:visibility="@{setting.showFirmwareActivity?View.VISIBLE:View.GONE}">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/firmware_update"
-                    android:textColor="@color/eighty_seven_percent_black"
-                    android:textSize="16dp" />
-
-            </LinearLayout>
-
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/light_gray"
-                android:visibility="gone" />
-
-        </LinearLayout>
+        </android.support.v4.widget.NestedScrollView>
 
 
     </LinearLayout>

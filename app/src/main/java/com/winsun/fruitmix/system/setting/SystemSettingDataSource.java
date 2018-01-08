@@ -18,25 +18,27 @@ public class SystemSettingDataSource {
 
     private String showAutoUploadDialogKey = "showAutoUploadDialog";
 
-    public static final String CURRENT_UPLOAD_USER_UUID = "current_upload_user_uuid";
+    private static final String CURRENT_UPLOAD_USER_UUID = "current_upload_user_uuid";
 
-    public static final String CURRENT_LOGIN_USER_UUID = "current_login_user_uuid";
+    private static final String CURRENT_LOGIN_USER_UUID = "current_login_user_uuid";
 
-    public static final String CURRENT_LOGIN_TOKEN = "current_login_token";
+    private static final String CURRENT_LOGIN_TOKEN = "current_login_token";
 
-    public static final String CURRENT_WA_TOKEN = "current_wa_token";
+    private static final String CURRENT_WA_TOKEN = "current_wa_token";
 
-    public static final String CURRENT_LOGIN_USER_GUID = "current_login_user_guid";
+    private static final String CURRENT_LOGIN_USER_GUID = "current_login_user_guid";
 
-    public static final String CURRENT_LOGIN_STATION_ID = "current_login_station_id";
+    private static final String CURRENT_LOGIN_STATION_ID = "current_login_station_id";
 
-    public static final String CURRENT_EQUIPMENT_IP = "current_equipment_ip";
+    private static final String CURRENT_EQUIPMENT_IP = "current_equipment_ip";
 
-    public static final String ONLY_AUTO_UPLOAD_WHEN_CONNECTED_WITH_WIFI = "only_auto_upload_when_connected_with_wifi";
+    private static final String ONLY_AUTO_UPLOAD_WHEN_CONNECTED_WITH_WIFI = "only_auto_upload_when_connected_with_wifi";
 
-    public static final String LOGIN_WITH_WECHAT_CODE_OR_NOT = "login_with_wechat_code_or_not";
+    private static final String LOGIN_WITH_WECHAT_CODE_OR_NOT = "login_with_wechat_code_or_not";
 
-    public static final String OPEN_TORRENT_FILE_DEFAULT_BEHAVIOR = "open_torrent_file_default_behavior";
+    private static final String OPEN_TORRENT_FILE_DEFAULT_BEHAVIOR = "open_torrent_file_default_behavior";
+
+    private static final String ASK_IF_NEW_FIRMWARE_VERSION_OCCUR = "ask_if_new_firmware_version_occur";
 
     public static final int OPEN_TORRENT_FILE_BEHAVIOR_CREATE_DOWNLOAD_TASK = 1;
     public static final int OPEN_TORRENT_FILE_BEHAVIOR_UPLOAD_FILE = 2;
@@ -252,4 +254,19 @@ public class SystemSettingDataSource {
         editor.apply();
 
     }
+
+    public void setAskIfNewFirmwareVersionOccur(boolean askIfNewFirmwareVersionOccur) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putBoolean(ASK_IF_NEW_FIRMWARE_VERSION_OCCUR, askIfNewFirmwareVersionOccur);
+        editor.apply();
+
+    }
+
+    public boolean getAskIfNewFirmwareVersionOccur() {
+        return sharedPreferences.getBoolean(ASK_IF_NEW_FIRMWARE_VERSION_OCCUR, true);
+    }
+
 }

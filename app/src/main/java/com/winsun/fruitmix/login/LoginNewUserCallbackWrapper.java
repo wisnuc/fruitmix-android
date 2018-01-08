@@ -19,6 +19,14 @@ public class LoginNewUserCallbackWrapper<T> extends LoginWithExistUserCallbackWr
 
     private LogoutUseCase mLogoutUseCase;
 
+    public interface LoginNewUserCallback {
+
+        void onSucceed();
+
+    }
+
+    private LoginNewUserCallback mLoginNewUserCallback;
+
     public LoginNewUserCallbackWrapper(String temporaryUploadFolderParentFolderPath, FileTool fileTool,
                                        UploadFileUseCase uploadFileUseCase, NetworkStateManager networkStateManager,
                                        FileTaskManager fileTaskManager, SystemSettingDataSource systemSettingDataSource,
@@ -29,6 +37,14 @@ public class LoginNewUserCallbackWrapper<T> extends LoginWithExistUserCallbackWr
 
         mLogoutUseCase = logoutUseCase;
 
+    }
+
+    public void registerNewUserCallback(LoginNewUserCallback loginNewUserCallback) {
+        mLoginNewUserCallback = loginNewUserCallback;
+    }
+
+    public void unregisterNewUserCallback() {
+        mLoginNewUserCallback = null;
     }
 
     @Override
@@ -43,5 +59,10 @@ public class LoginNewUserCallbackWrapper<T> extends LoginWithExistUserCallbackWr
 
         super.onSucceed(data, result);
 
+        if (mLoginNewUserCallback != null)
+            mLoginNewUserCallback.onSucceed();
+
     }
+
+
 }

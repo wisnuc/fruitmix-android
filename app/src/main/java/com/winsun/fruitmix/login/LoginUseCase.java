@@ -153,6 +153,14 @@ public class LoginUseCase extends BaseDataRepository {
         return alreadyLogin;
     }
 
+    public void registerNewUserCallback(LoginNewUserCallbackWrapper.LoginNewUserCallback loginNewUserCallback) {
+        mBooleanLoginNewUserCallbackWrapper.registerNewUserCallback(loginNewUserCallback);
+    }
+
+    public void unregisterNewUserCallback() {
+        mBooleanLoginNewUserCallbackWrapper.unregisterNewUserCallback();
+    }
+
     public void loginWithNoParam(final BaseOperateDataCallback<Boolean> callback) {
 
         String waToken = systemSettingDataSource.getCurrentWAToken();

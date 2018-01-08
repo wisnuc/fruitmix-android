@@ -189,6 +189,11 @@
         <activity
             android:name=".firmware.FirmwareActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".TranslucentActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/TranslucentTheme" />
+
     </application>
 
 </manifest>

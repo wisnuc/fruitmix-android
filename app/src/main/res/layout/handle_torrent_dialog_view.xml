@@ -42,6 +42,8 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
             android:checked="false"
+            android:textColor="@color/eighty_seven_percent_black"
+            android:textSize="14dp"
             android:text="@string/always"
             app:layout_constraintStart_toStartOf="@+id/radioGroup"
             app:layout_constraintTop_toBottomOf="@+id/radioGroup" />

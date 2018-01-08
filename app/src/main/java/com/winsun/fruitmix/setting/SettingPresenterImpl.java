@@ -54,7 +54,7 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
 
     private SettingView mSettingView;
 
-    private SettingActivity.SettingViewModel settingViewModel;
+    private SettingViewModel settingViewModel;
 
     private SystemSettingDataSource systemSettingDataSource;
 
@@ -78,7 +78,7 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
 
     private int newBehavior;
 
-    public SettingPresenterImpl(SettingView settingView, SettingActivity.SettingViewModel settingViewModel, SystemSettingDataSource systemSettingDataSource,
+    public SettingPresenterImpl(SettingView settingView, SettingViewModel settingViewModel, SystemSettingDataSource systemSettingDataSource,
                                 MediaDataSourceRepository mediaDataSourceRepository, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy,
                                 UploadMediaUseCase uploadMediaUseCase, String currentUserUUID, ThreadManager threadManager, PluginManageDataSource pluginManageDataSource,
                                 UserDataRepository userDataRepository, ActivitySettingBinding binding) {
@@ -103,6 +103,8 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
 
         mOnlyUploadOrDownloadWithWIFI = systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi();
         settingViewModel.onlyAutoUploadWhenConnectedWithWifi.set(mOnlyUploadOrDownloadWithWIFI);
+
+        settingViewModel.askIfNewFirmwareVersionOccur.set(systemSettingDataSource.getAskIfNewFirmwareVersionOccur());
 
         User user = mUserDataRepository.getUserByUUID(currentUserUUID);
 
@@ -169,7 +171,7 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
     }
 
     @Override
-    public void clearCache(final Context context, final SettingActivity.SettingViewModel settingViewModel) {
+    public void clearCache(final Context context, final SettingViewModel settingViewModel) {
 
         if (mTotalCacheSize == 0)
             return;
@@ -234,6 +236,9 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
             case R.id.only_upload_with_wifi_switch:
                 handleOnlyUploadOrDownloadWithWIFI(isChecked);
                 break;
+            case R.id.ask_new_firmware_version:
+                handleAskIfNewFirmwareVersionOccur(isChecked);
+                break;
 
         }
 
@@ -272,6 +277,18 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
             }
 
             EventBus.getDefault().post(new OperationEvent(Util.ONLY_UPLOAD_OR_DOWNLOAD_WITH_WIFI_SETTING_CHANGED, new OperationSuccess()));
+
+        }
+
+    }
+
+    private void handleAskIfNewFirmwareVersionOccur(boolean isChecked) {
+
+        boolean preValue = systemSettingDataSource.getAskIfNewFirmwareVersionOccur();
+
+        if (preValue != isChecked) {
+
+            systemSettingDataSource.setAskIfNewFirmwareVersionOccur(isChecked);
 
         }
 

@@ -467,21 +467,6 @@ public class LocalCache {
         editor.apply();
     }
 
-    public static String getCurrentUploadDeviceID(Context context) {
-        SharedPreferences sp;
-        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        return sp.getString(SystemSettingDataSource.CURRENT_UPLOAD_USER_UUID, "");
-    }
-
-    public static void setCurrentUploadDeviceID(Context context, String currentUploadDeviceID) {
-        SharedPreferences sp;
-        SharedPreferences.Editor editor;
-        sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        editor = sp.edit();
-        editor.putString(SystemSettingDataSource.CURRENT_UPLOAD_USER_UUID, currentUploadDeviceID);
-        editor.apply();
-    }
-
     public static boolean getAutoUploadOrNot(Context context) {
         SharedPreferences sp;
         sp = context.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);

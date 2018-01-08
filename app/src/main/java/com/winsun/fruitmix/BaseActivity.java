@@ -14,18 +14,22 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.databinding.ActivityMaintenanceBinding;
+import com.winsun.fruitmix.databinding.NewFirmwareVersionPromptBinding;
 import com.winsun.fruitmix.databinding.ToolbarLayoutBinding;
 import com.winsun.fruitmix.dialog.DialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.firmware.FirmwareActivity;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.logout.InjectLogoutUseCase;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.network.NetworkReceiver;
 import com.winsun.fruitmix.network.NetworkState;
+import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.util.FNAS;
@@ -49,6 +53,8 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     private ProgressDialog mDialog;
 
     private NetworkReceiver networkReceiver;
+
+    private AlertDialog mAlertDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -105,6 +111,9 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
             unregisterReceiver(networkReceiver);
         }
 
+        if (mAlertDialog != null && mAlertDialog.isShowing())
+            mAlertDialog.dismiss();
+
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -112,27 +121,77 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
 
         action = operationEvent.getAction();
 
-        if (action.equals(Util.TOKEN_INVALID)) {
-            FNAS.handleLogout();
-            InjectLogoutUseCase.provideLogoutUseCase(this).logout();
+        switch (action) {
+            case Util.TOKEN_INVALID:
+                FNAS.handleLogout();
+                InjectLogoutUseCase.provideLogoutUseCase(this).logout();
 
-            InjectLoginUseCase.provideLoginUseCase(this).setAlreadyLogin(false);
+                InjectLoginUseCase.provideLoginUseCase(this).setAlreadyLogin(false);
 
-            showToast("token失效");
+                showToast("token失效");
 
-            EquipmentSearchActivity.gotoEquipmentActivity(this, true);
+                EquipmentSearchActivity.gotoEquipmentActivity(this, true);
 
-        } else if (action.equals(Util.NETWORK_CHANGED)) {
+                break;
+            case Util.NETWORK_CHANGED:
 
 //            checkShowAutoUploadWhenConnectedWithMobileNetwork();
 
-        } else if (action.equals(Util.KEY_STOP_CURRENT_ACTIVITY)) {
+                break;
+            case Util.KEY_STOP_CURRENT_ACTIVITY:
 
-            Log.d(TAG, "handleOperationEvent: call onBackPressed in current activity " + this);
+                Log.d(TAG, "handleOperationEvent: call onBackPressed in current activity " + this);
+
+                break;
 
         }
 
     }
+
+    public void handleNewFirmwareVersion() {
+
+        final NewFirmwareVersionPromptBinding binding = NewFirmwareVersionPromptBinding.inflate(LayoutInflater.from(this),
+                null, false);
+
+        mAlertDialog = new AlertDialog.Builder(this)
+                .setView(binding.getRoot())
+                .setCancelable(false)
+                .setPositiveButton(R.string.to_upgrade, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        handleToUpgrade(binding.newFirmwareVersionPromptCheckbox.isChecked());
+
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        finish();
+
+                    }
+                }).create();
+
+        mAlertDialog.show();
+
+    }
+
+    private void handleToUpgrade(boolean noLongerPrompt) {
+
+        InjectSystemSettingDataSource.provideSystemSettingDataSource(this).setAskIfNewFirmwareVersionOccur(noLongerPrompt);
+
+        if (!(this instanceof FirmwareActivity)) {
+
+            Intent intent = new Intent(this, FirmwareActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+            startActivity(intent);
+        }
+
+    }
+
 
     @Override
     public void finishView() {
@@ -162,7 +221,7 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         Toast.makeText(this, String.format(getString(R.string.server_exception), text), Toast.LENGTH_SHORT).show();
     }
 
-    protected ToolbarViewModel initToolBar(ViewDataBinding binding,ToolbarLayoutBinding toolbarLayoutBinding,String title) {
+    protected ToolbarViewModel initToolBar(ViewDataBinding binding, ToolbarLayoutBinding toolbarLayoutBinding, String title) {
 
         Toolbar mToolbar = toolbarLayoutBinding.toolbar;
 
@@ -174,7 +233,7 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
         toolbarViewModel.titleText.set(title);
 
-        binding.setVariable(BR.toolbarViewModel,toolbarViewModel);
+        binding.setVariable(BR.toolbarViewModel, toolbarViewModel);
 
         mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
 

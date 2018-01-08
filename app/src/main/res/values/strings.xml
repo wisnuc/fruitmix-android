@@ -236,6 +236,14 @@
 
     <string name="service_manage">Service Manage</string>
 
+    <string name="ask_if_new_firmware_version_occur">Ask if there is a new version of firmware</string>
+
+    <string name="new_firmware_version_dialog_title">A new version of the device system can be upgraded</string>
+
+    <string name="no_longer_prompt">No longer prompt</string>
+
+    <string name="to_upgrade">To upgrade</string>
+
     <!-- plugin -->
     <string name="samba_service">Samba</string>
     <string name="dlna_service">miniDLNA</string>

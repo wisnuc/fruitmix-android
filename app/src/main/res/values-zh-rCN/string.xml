@@ -213,6 +213,14 @@
 
     <string name="service_manage">服务管理</string>
 
+    <string name="ask_if_new_firmware_version_occur">当有新固件版本时每次都询问</string>
+
+    <string name="new_firmware_version_dialog_title">设备系统有新版本可以升级</string>
+
+    <string name="no_longer_prompt">不再提示</string>
+    
+    <string name="to_upgrade">去升级</string>
+
     <!-- 插件 -->
     <string name="samba_service">Samba服务</string>
     <string name="dlna_service">miniDLNA服务</string>
@@ -499,7 +507,7 @@
     <string name="disk_title">磁盘阵列%1$s</string>
 
     <string name="automatic_detection">自动检测</string>
-    
+
     <string name="is_mounted">是否挂机</string>
     <string name="no_missing">磁盘阵列是否完整</string>
     <string name="last_system">是否是上次启动的文件系统</string>

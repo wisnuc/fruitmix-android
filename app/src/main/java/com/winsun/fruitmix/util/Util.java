@@ -933,7 +933,6 @@ public class Util {
                 int number1 = Integer.parseInt(currentVersionNumbers[i]);
                 int number2 = Integer.parseInt(newVersionNumbers[i]);
 
-
                 int result = number1 - number2;
 
                 if (result != 0)
