@@ -33,14 +33,6 @@ public class ModifyUserNameActivity extends BaseActivity implements ModifyUserVi
 
         mContext = this;
 
-        Toolbar mToolbar = binding.toolbarLayout.toolbar;
-
-        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
-
-        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
-
-        Util.setStatusBarColor(this, R.color.login_ui_blue);
-
         final OperateUserViewModel operateUserViewModel = new OperateUserViewModel();
 
         final String userName = getIntent().getStringExtra(USER_NAME_KEY);
@@ -51,13 +43,7 @@ public class ModifyUserNameActivity extends BaseActivity implements ModifyUserVi
 
         final String userUUID = getIntent().getStringExtra(USER_UUID_KEY);
 
-        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-
-        toolbarViewModel.titleText.set(getString(R.string.modify_user_name));
-
-        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
-
-        toolbarViewModel.setBaseView(this);
+        ToolbarViewModel toolbarViewModel = initToolBar(binding,binding.toolbarLayout,getString(R.string.modify_user_name));
 
         toolbarViewModel.showSelect.set(true);
 
@@ -73,8 +59,6 @@ public class ModifyUserNameActivity extends BaseActivity implements ModifyUserVi
 
             }
         });
-
-        binding.setToolbarViewModel(toolbarViewModel);
 
         modifyUserPresenter = new ModifyUserPresenter(InjectUser.provideRepository(mContext),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(mContext), this);

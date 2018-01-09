@@ -39,11 +39,7 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
             mToolbar.setElevation(0f);
         }
 
-        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.white));
-
-        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
-
-        Util.setStatusBarColor(this, R.color.login_ui_blue);
+        initToolBar(binding,binding.toolbarLayout,getString(R.string.create_user));
 
         OperateUserViewModel operateUserViewModel = new OperateUserViewModel();
 
@@ -53,16 +49,6 @@ public class CreateUserActivity extends BaseActivity implements CreateUserView {
         binding.setCreateUserViewModel(operateUserViewModel);
 
         binding.setCreateUserPresenter(createUserPresenter);
-
-        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-
-        toolbarViewModel.titleText.set(getString(R.string.create_user));
-
-        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
-
-        toolbarViewModel.setBaseView(this);
-
-        binding.setToolbarViewModel(toolbarViewModel);
 
     }
 

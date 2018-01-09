@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import com.winsun.fruitmix.databinding.NewFirmwareVersionPromptBinding;
 import com.winsun.fruitmix.firmware.FirmwareActivity;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
-import com.winsun.fruitmix.util.Util;
 
 public class TranslucentActivity extends AppCompatActivity {
 
@@ -39,7 +38,7 @@ public class TranslucentActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        finish();
+                        saveSelectAndFinish(binding.newFirmwareVersionPromptCheckbox.isChecked());
 
                     }
                 }).create();
@@ -50,9 +49,7 @@ public class TranslucentActivity extends AppCompatActivity {
 
     private void handleToUpgrade(boolean noLongerPrompt) {
 
-        InjectSystemSettingDataSource.provideSystemSettingDataSource(this).setAskIfNewFirmwareVersionOccur(!noLongerPrompt);
-
-        finish();
+        saveSelectAndFinish(noLongerPrompt);
 
         Intent intent = new Intent(this, FirmwareActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -60,6 +57,13 @@ public class TranslucentActivity extends AppCompatActivity {
 
         startActivity(intent);
 
+    }
+
+    private void saveSelectAndFinish(boolean noLongerPrompt) {
+
+        InjectSystemSettingDataSource.provideSystemSettingDataSource(this).setAskIfNewFirmwareVersionOccur(!noLongerPrompt);
+
+        finish();
     }
 
     @Override

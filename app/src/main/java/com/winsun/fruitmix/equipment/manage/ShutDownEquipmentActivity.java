@@ -99,21 +99,7 @@ public class ShutDownEquipmentActivity extends BaseActivity implements ManageEqu
         super.onCreate(savedInstanceState);
         ActivityShutDownEquipmentBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_shut_down_equipment);
 
-        Toolbar mToolbar = binding.toolbarLayout.toolbar;
-
-        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
-
-        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-        toolbarViewModel.setBaseView(this);
-
-        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
-        toolbarViewModel.titleText.set(getString(R.string.reboot_shutdown));
-
-        binding.setToolbarViewModel(toolbarViewModel);
-
-        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
-
-        Util.setStatusBarColor(this, R.color.login_ui_blue);
+        initToolBar(binding, binding.toolbarLayout, getString(R.string.reboot_shutdown));
 
         binding.setManageEquipmentPresenter(this);
 

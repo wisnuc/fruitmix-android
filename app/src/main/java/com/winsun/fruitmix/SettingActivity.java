@@ -43,7 +43,7 @@ public class SettingActivity extends BaseActivity implements SettingView {
                 InjectMedia.provideMediaDataSourceRepository(this), CheckMediaIsUploadStrategy.getInstance(),
                 InjectUploadMediaUseCase.provideUploadMediaUseCase(this), systemSettingDataSource.getCurrentLoginUserUUID(),
                 ThreadManagerImpl.getInstance(), InjectPluginManageDataSource.provideInstance(this),
-                InjectUser.provideRepository(this),binding);
+                InjectUser.provideRepository(this), binding);
 
         binding.setSettingPresenter(settingPresenter);
 

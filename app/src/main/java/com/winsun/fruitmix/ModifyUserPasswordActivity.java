@@ -35,23 +35,9 @@ public class ModifyUserPasswordActivity extends BaseActivity implements ModifyUs
 
         final String userUUID = getIntent().getStringExtra(USER_UUID_KEY);
 
-        Toolbar mToolbar = binding.toolbarLayout.toolbar;
-
-        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.white));
-
-        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
-
-        Util.setStatusBarColor(this, R.color.login_ui_blue);
-
         final ModifyUserPasswordViewModel modifyUserPasswordViewModel = new ModifyUserPasswordViewModel();
 
-        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-
-        toolbarViewModel.titleText.set(getString(R.string.modify_password));
-
-        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
-
-        toolbarViewModel.setBaseView(this);
+        ToolbarViewModel toolbarViewModel = initToolBar(binding,binding.toolbarLayout,getString(R.string.modify_password));
 
         toolbarViewModel.showSelect.set(true);
 
@@ -67,8 +53,6 @@ public class ModifyUserPasswordActivity extends BaseActivity implements ModifyUs
 
             }
         });
-
-        binding.setToolbarViewModel(toolbarViewModel);
 
         binding.setModifyUserPasswordViewModel(modifyUserPasswordViewModel);
 

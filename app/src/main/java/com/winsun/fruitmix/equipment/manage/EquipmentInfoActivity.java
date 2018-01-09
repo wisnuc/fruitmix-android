@@ -51,14 +51,6 @@ public class EquipmentInfoActivity extends BaseActivity implements EquipmentInfo
         super.onCreate(savedInstanceState);
         ActivityEquipmentInfoBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_equipment_info);
 
-        Toolbar mToolbar = binding.toolbarLayout.toolbar;
-
-        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
-
-        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
-
-        Util.setStatusBarColor(this, R.color.login_ui_blue);
-
         LoadingViewModel loadingViewModel = new LoadingViewModel();
 
         binding.setLoadingViewModel(loadingViewModel);
@@ -106,13 +98,7 @@ public class EquipmentInfoActivity extends BaseActivity implements EquipmentInfo
                 Log.d(TAG, "refreshView: should not enter default case");
         }
 
-        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-        toolbarViewModel.setBaseView(this);
-
-        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
-        toolbarViewModel.titleText.set(title);
-
-        binding.setToolbarViewModel(toolbarViewModel);
+        initToolBar(binding,binding.toolbarLayout,title);
 
         equipmentInfoRecyclerView = binding.equipmentInfoRecyclerview;
 

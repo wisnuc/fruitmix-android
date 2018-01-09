@@ -2,8 +2,11 @@ package com.winsun.fruitmix.group.view;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 
 import com.winsun.fruitmix.BaseActivity;
+import com.winsun.fruitmix.BaseToolbarActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.databinding.ActivityCreateGroupBinding;
@@ -21,33 +24,40 @@ import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.util.Collections;
 
-public class CreateGroupActivity extends BaseActivity implements CreateGroupPresenter {
+public class CreateGroupActivity extends BaseToolbarActivity implements CreateGroupPresenter {
 
     private GroupRepository groupRepository;
 
     private User currentUser;
 
+    private ActivityCreateGroupBinding mActivityCreateGroupBinding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityCreateGroupBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_create_group);
 
         groupRepository = InjectGroupDataSource.provideGroupRepository();
 
         currentUser = InjectUser.provideRepository(this).getUserByUUID(InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginUserUUID());
 
-        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-
-        toolbarViewModel.titleText.set("创建群");
-
-        toolbarViewModel.setBaseView(this);
-
-        binding.setToolbarViewModel(toolbarViewModel);
-
         CreateGroupViewModel createGroupViewModel = new CreateGroupViewModel();
 
-        binding.setCreateGroupViewModel(createGroupViewModel);
+        mActivityCreateGroupBinding.setCreateGroupViewModel(createGroupViewModel);
 
+    }
+
+    @Override
+    protected View generateContent() {
+
+        mActivityCreateGroupBinding = ActivityCreateGroupBinding.inflate(LayoutInflater.from(this),
+                null,false);
+
+        return mActivityCreateGroupBinding.getRoot();
+    }
+
+    @Override
+    protected String getToolbarTitle() {
+        return "创建群";
     }
 
 

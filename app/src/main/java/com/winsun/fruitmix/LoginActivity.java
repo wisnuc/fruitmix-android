@@ -54,21 +54,7 @@ public class LoginActivity extends BaseActivity implements LoginPresenter {
             mToolbar.setElevation(0f);
         }
 
-        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-        toolbarViewModel.setToolbarNavigationOnClickListener(new ToolbarViewModel.ToolbarNavigationOnClickListener() {
-            @Override
-            public void onClick() {
-                finish();
-            }
-        });
-
-        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
-
-        binding.setToolbarViewModel(toolbarViewModel);
-
-        mToolbar.setBackgroundColor(ContextCompat.getColor(mContext, R.color.login_ui_blue));
-
-        Util.setStatusBarColor(this, R.color.login_ui_blue);
+        initToolBar(binding, binding.toolbarLayout, "");
 
         setSupportActionBar(mToolbar);
 
@@ -165,7 +151,7 @@ public class LoginActivity extends BaseActivity implements LoginPresenter {
 
         String mPwd = loginViewModel.getPassword();
 
-        showProgressDialog(getString(R.string.operating_title,getString(R.string.login)));
+        showProgressDialog(getString(R.string.operating_title, getString(R.string.login)));
 
         final LoadTokenParam loadTokenParam = new LoadTokenParam(mGateway, mUserUUid, mPwd, mEquipmentGroupName);
 

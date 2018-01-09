@@ -474,28 +474,33 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         final NewPhotoListDataLoader loader = NewPhotoListDataLoader.getInstance();
 
-        if (operationResult.getOperationResultType() == OperationResultType.MEDIA_DATA_CHANGED)
+        boolean dataChanged = operationResult.getOperationResultType() == OperationResultType.MEDIA_DATA_CHANGED;
+
+        if (dataChanged)
             loader.setNeedRefreshData(true);
 
-        loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
-            @Override
-            public void onDataLoadFinished() {
+        if (!mIsLoaded || dataChanged) {
 
-                Log.d(TAG, "onDataLoadFinished: ");
+            loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
+                @Override
+                public void onDataLoadFinished() {
 
-                doAfterReloadData(loader);
+                    Log.d(TAG, "onDataLoadFinished: ");
 
-                mIsLoaded = true;
-            }
-        }, data);
+                    doAfterReloadData(loader);
+
+                }
+            }, data);
+
+        }
 
     }
 
     public boolean isLoaded() {
 
         return mIsLoaded;
-    }
 
+    }
 
     private void doAfterReloadData(NewPhotoListDataLoader loader) {
 
@@ -506,7 +511,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         List<String> mPhotoDateGroups = new ArrayList<>(loader.getPhotoDateGroups());
         mMapKeyIsDateValueIsPhotoList = new HashMap<>(loader.getMapKeyIsDateValueIsPhotoList());
         mMapKeyIsPhotoPositionValueIsPhotoDate = new HashMap<>(loader.getMapKeyIsPhotoPositionValueIsPhotoDate());
-        mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto().clone();
+        mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
         medias = new ArrayList<>(loader.getMedias());
 
         clearSelectedPhoto();
@@ -536,7 +541,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
+
                             mPhotoRecycleAdapter.notifyDataSetChanged();
+
+                            mIsLoaded = true;
                         }
                     });
 
@@ -755,7 +763,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         return selectedMedias;
     }
 
-    public void clearSelectedPhoto() {
+    private void clearSelectedPhoto() {
 
         if (mMapKeyIsPhotoPositionValueIsPhoto == null || mMapKeyIsPhotoPositionValueIsPhoto.size() == 0)
             return;

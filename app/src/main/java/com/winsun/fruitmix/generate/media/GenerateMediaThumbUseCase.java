@@ -9,7 +9,6 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.FileUtil;
 
 import java.io.File;
@@ -87,7 +86,7 @@ public class GenerateMediaThumbUseCase {
 
     private void getMedia(BaseLoadDataCallback<Media> callback) {
 
-        mediaDataSourceRepository.getLocalMedia(callback);
+        mediaDataSourceRepository.getLocalMediaWithoutThreadChange(callback);
 
     }
 

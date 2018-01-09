@@ -48,11 +48,7 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
             mToolbar.setElevation(0f);
         }
 
-        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.white));
-
-        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
-
-        Util.setStatusBarColor(this, R.color.login_ui_blue);
+        initToolBar(binding, binding.toolbarLayout, getString(R.string.user_manage));
 
         UserManageViewModel userManageViewModel = new UserManageViewModel();
 
@@ -75,16 +71,6 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
 
         binding.setUserPresenter(userMangePresenter);
 
-        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-
-        toolbarViewModel.titleText.set(getString(R.string.user_manage));
-
-        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
-
-        toolbarViewModel.setBaseView(this);
-
-        binding.setToolbarViewModel(toolbarViewModel);
-
         mUserListView.setAdapter(userMangePresenter.getAdapter());
 
         userMangePresenter.refreshView();
@@ -95,8 +81,8 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
         super.onDestroy();
 
         userMangePresenter.onDestroy();
-    }
 
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -104,7 +90,7 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
 
         if (requestCode == Util.KEY_CREATE_USER_REQUEST_CODE && resultCode == RESULT_OK) {
             userMangePresenter.refreshView();
-        }else if(requestCode == MODIFY_USER_STATE_REQUEST_CODE){
+        } else if (requestCode == MODIFY_USER_STATE_REQUEST_CODE) {
             userMangePresenter.refreshUserFromCache();
         }
 
@@ -122,7 +108,7 @@ public class UserManageActivity extends BaseActivity implements UserManageView {
         Intent intent = new Intent(this, ModifyUserStateActivity.class);
         intent.putExtra(ModifyUserStateActivity.MODIFY_USER_UUID_KEY, user.getUuid());
 
-        startActivityForResult(intent,MODIFY_USER_STATE_REQUEST_CODE);
+        startActivityForResult(intent, MODIFY_USER_STATE_REQUEST_CODE);
 
     }
 

@@ -22,13 +22,10 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:background="@color/white"
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:context="com.winsun.fruitmix.group.view.CreateGroupActivity">
-
-        <include
-            layout="@layout/toolbar_layout"
-            app:toolbarViewModel="@{toolbarViewModel}" />
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/group_name_layout"

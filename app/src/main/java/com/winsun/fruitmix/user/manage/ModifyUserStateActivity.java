@@ -27,21 +27,7 @@ public class ModifyUserStateActivity extends BaseActivity implements BaseView {
         super.onCreate(savedInstanceState);
         ActivityModifyUserStateBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_modify_user_state);
 
-        Toolbar mToolbar = binding.toolbarLayout.toolbar;
-
-        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
-
-        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-        toolbarViewModel.setBaseView(this);
-
-        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
-        toolbarViewModel.titleText.set(getString(R.string.modify_user_info));
-
-        binding.setToolbarViewModel(toolbarViewModel);
-
-        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
-
-        Util.setStatusBarColor(this, R.color.login_ui_blue);
+        initToolBar(binding, binding.toolbarLayout, getString(R.string.modify_user_info));
 
         String modifyUserUUID = getIntent().getStringExtra(MODIFY_USER_UUID_KEY);
 

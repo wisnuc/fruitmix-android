@@ -25,21 +25,7 @@ public class PluginManageActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         ActivityPluginManageBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_plugin_manage);
 
-        Toolbar mToolbar = binding.toolbarLayout.toolbar;
-
-        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
-
-        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
-        toolbarViewModel.setBaseView(this);
-
-        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
-        toolbarViewModel.titleText.set(getString(R.string.modify_user_info));
-
-        binding.setToolbarViewModel(toolbarViewModel);
-
-        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
-
-        Util.setStatusBarColor(this, R.color.login_ui_blue);
+        initToolBar(binding, binding.toolbarLayout, getString(R.string.service_manage));
 
         PluginViewModel pluginViewModel = new PluginViewModel();
 

@@ -18,7 +18,7 @@ public abstract class BaseToolbarActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         ActivityBaseToolbarBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_base_toolbar);
 
-        binding.container.addView(generateContent());
+        binding.rootLayout.addView(generateContent());
 
         initToolbar(binding);
 

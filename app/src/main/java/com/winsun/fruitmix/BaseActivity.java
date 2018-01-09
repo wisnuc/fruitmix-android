@@ -44,7 +44,7 @@ import org.greenrobot.eventbus.ThreadMode;
  * Created by Administrator on 2017/3/7.
  */
 
-public class BaseActivity extends AppCompatActivity implements BaseView {
+public abstract class BaseActivity extends AppCompatActivity implements BaseView {
 
     public static final String TAG = BaseActivity.class.getSimpleName();
 
@@ -53,8 +53,6 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
     private ProgressDialog mDialog;
 
     private NetworkReceiver networkReceiver;
-
-    private AlertDialog mAlertDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -111,9 +109,6 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
             unregisterReceiver(networkReceiver);
         }
 
-        if (mAlertDialog != null && mAlertDialog.isShowing())
-            mAlertDialog.dismiss();
-
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -147,51 +142,6 @@ public class BaseActivity extends AppCompatActivity implements BaseView {
         }
 
     }
-
-    public void handleNewFirmwareVersion() {
-
-        final NewFirmwareVersionPromptBinding binding = NewFirmwareVersionPromptBinding.inflate(LayoutInflater.from(this),
-                null, false);
-
-        mAlertDialog = new AlertDialog.Builder(this)
-                .setView(binding.getRoot())
-                .setCancelable(false)
-                .setPositiveButton(R.string.to_upgrade, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        handleToUpgrade(binding.newFirmwareVersionPromptCheckbox.isChecked());
-
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        finish();
-
-                    }
-                }).create();
-
-        mAlertDialog.show();
-
-    }
-
-    private void handleToUpgrade(boolean noLongerPrompt) {
-
-        InjectSystemSettingDataSource.provideSystemSettingDataSource(this).setAskIfNewFirmwareVersionOccur(noLongerPrompt);
-
-        if (!(this instanceof FirmwareActivity)) {
-
-            Intent intent = new Intent(this, FirmwareActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-            startActivity(intent);
-        }
-
-    }
-
 
     @Override
     public void finishView() {
