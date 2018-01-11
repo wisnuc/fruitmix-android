@@ -12,10 +12,11 @@
     </data>
 
     <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <FrameLayout
+            android:id="@+id/avatar_text_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible">
@@ -41,8 +42,8 @@
 
         <com.winsun.fruitmix.component.CircleImageView
             android:id="@+id/avatar_imageview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:background="@color/default_place_holder"
             android:scaleType="centerCrop"
             app:civ_border_width="0dp" />

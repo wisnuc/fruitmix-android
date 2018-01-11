@@ -161,6 +161,10 @@ public class NetworkImageView extends ImageView {
         this.loaded = loaded;
     }
 
+    public String getCurrentUrl() {
+        return mUrl;
+    }
+
     /**
      * Loads the image for the view if it isn't already loaded.
      *

@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -396,7 +397,7 @@ public class NavPagerActivity extends BaseActivity
                     binding.leftDrawerHeadLayout.cloud.setVisibility(View.VISIBLE);
                 else
                     binding.leftDrawerHeadLayout.cloud.setVisibility(View.INVISIBLE);
-
+                
             }
 
             @Override
@@ -422,12 +423,29 @@ public class NavPagerActivity extends BaseActivity
 
         checkShowAutoUploadDialog();
 
-        refreshUserInNavigationView();
-
         uploadMediaUseCase = InjectUploadMediaUseCase.provideUploadMediaUseCase(this);
 
         uploadMediaUseCase.registerUploadMediaCountChangeListener(this);
 //        ButlerService.registerUploadMediaCountChangeListener(this);
+
+        final ViewTreeObserver observer = userAvatar.getViewTreeObserver();
+
+        observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+
+                if (observer.isAlive()) {
+
+                    observer.removeOnPreDrawListener(this);
+
+                }
+
+                refreshUserInNavigationView();
+
+                return true;
+
+            }
+        });
 
     }
 

@@ -88,11 +88,19 @@ public class InitSystem {
             Log.i(TAG, "onCreate: Create local photo mini thumbnail folder failed");
         }
 
+        result = FileUtil.createLocalPhotoMiniThumbnailNoMediaFile(context);
+
+        Log.d(TAG, "initSystem: create local photo mini thumb no media file result:" + result);
+
         result = FileUtil.createLocalPhotoThumbnailFolder();
 
         if (!result) {
             Log.i(TAG, "onCreate: Create local photo thumbnail folder failed");
         }
+
+        result = FileUtil.createLocalPhotoThumbnailNoMediaFile(context);
+
+        Log.d(TAG, "initSystem: create local photo thumb no media file result:" + result);
 
         result = FileUtil.createOriginalPhotoFolder();
 

@@ -193,7 +193,6 @@
             android:name=".TranslucentActivity"
             android:screenOrientation="portrait"
             android:theme="@style/TranslucentTheme" />
-
     </application>
 
 </manifest>

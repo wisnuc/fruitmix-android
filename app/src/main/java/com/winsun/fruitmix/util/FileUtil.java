@@ -117,35 +117,42 @@ public class FileUtil {
         return createFolder(getLocalPhotoMiniThumbnailFolderPath());
     }
 
-    public static boolean createLocalPhotoMiniThumbnailFolderNoMedia() {
-        return createFolder(getLocalPhotoMiniThumbnailFolderPath() + File.separator + NO_MEDIA);
+    public static boolean createLocalPhotoMiniThumbnailNoMediaFile(Context context) {
+
+        String path = getLocalPhotoMiniThumbnailFolderPath() + File.separator + NO_MEDIA;
+
+        boolean result = createFile(path);
+
+        if (result)
+            scanMediaStore(context, new File(path));
+
+        return result;
     }
 
     public static boolean createLocalPhotoThumbnailFolder() {
         return createFolder(getLocalPhotoThumbnailFolderPath());
     }
 
-    public static boolean createLocalPhotoThumbnailFolderNoMedia() {
-        return createFolder(getLocalPhotoThumbnailFolderPath() + File.separator + NO_MEDIA);
+    public static boolean createLocalPhotoThumbnailNoMediaFile(Context context) {
+        String path  =  getLocalPhotoThumbnailFolderPath() + File.separator + NO_MEDIA;
+
+        boolean result = createFile(path);
+
+        if (result)
+            scanMediaStore(context, new File(path));
+
+        return result;
     }
 
     public static boolean createOriginalPhotoFolder() {
         return createFolder(getOriginalPhotoFolderPath());
     }
 
-    public static boolean createOriginalPhotoFolderNoMedia() {
-        return createFolder(getOriginalPhotoFolderPath() + File.separator + NO_MEDIA);
-    }
-
-    public static boolean createOldLocalPhotoThumbnailFolderNoMedia() {
-        return createFolder(getOldLocalPhotoThumbnailFolderPath() + File.separator + NO_MEDIA);
-    }
-
     public static boolean createAudioRecordFolder() {
         return createFolder(getAudioRecordFolderPath());
     }
 
-    public static boolean createFolderIfNotExist(String filePath) {
+    static boolean createFolderIfNotExist(String filePath) {
 
         File file = new File(filePath);
 
@@ -167,6 +174,50 @@ public class FileUtil {
 
         return folder.mkdirs() || folder.isDirectory();
     }
+
+    private static boolean createFile(String path) {
+
+        if (!checkExternalStorageState()) {
+            Log.i(TAG, "create file: External storage not mounted");
+            return false;
+        }
+
+        File file = new File(path);
+
+        try {
+            return file.createNewFile();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            return false;
+        }
+
+    }
+
+    private static void scanMediaStore(Context context, File file) {
+
+        Intent mediaScanIntent = new Intent(
+                Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri contentUri = Uri.fromFile(file);
+        mediaScanIntent.setData(contentUri);
+        context.sendBroadcast(mediaScanIntent);
+
+/*        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Intent mediaScanIntent = new Intent(
+                    Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            Uri contentUri = Uri.fromFile(file);
+            mediaScanIntent.setData(contentUri);
+            context.sendBroadcast(mediaScanIntent);
+        } else {
+            context.sendBroadcast(new Intent(
+                    Intent.ACTION_MEDIA_MOUNTED,
+                    Uri.parse("file://"
+                            + Environment.getExternalStorageDirectory())));
+        }*/
+
+    }
+
 
     public static String getDownloadFileStoreFolderPath() {
         return getExternalDirectoryPathForDownload() + File.separator + WISNUC_FOLDER_NAME + File.separator;
@@ -1085,10 +1136,9 @@ public class FileUtil {
 
     }
 
-    public static boolean checkFileIsTorrent(String filePath){
+    public static boolean checkFileIsTorrent(String filePath) {
         return filePath.endsWith("torrent");
     }
-
 
 
 }

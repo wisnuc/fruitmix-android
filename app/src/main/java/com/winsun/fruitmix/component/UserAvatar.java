@@ -10,6 +10,7 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -30,7 +31,7 @@ public class UserAvatar extends FrameLayout {
 
     public static final String TAG = UserAvatar.class.getSimpleName();
 
-    private TextView avatarTextView;
+    private ViewGroup avatarTextLayout;
     private NetworkImageView avatarImageView;
 
     private UserAvatarBinding binding;
@@ -43,6 +44,7 @@ public class UserAvatar extends FrameLayout {
         super(context);
 
         init(context);
+
     }
 
     public UserAvatar(@NonNull Context context, @Nullable AttributeSet attrs) {
@@ -61,7 +63,7 @@ public class UserAvatar extends FrameLayout {
     private void init(@NonNull Context context) {
         binding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.user_avatar, this, true);
 
-        avatarTextView = binding.avatarTextview;
+        avatarTextLayout = binding.avatarTextLayout;
         avatarImageView = binding.avatarImageview;
     }
 
@@ -75,7 +77,7 @@ public class UserAvatar extends FrameLayout {
 
         if (url.equals(User.DEFAULT_AVATAR) || !Patterns.WEB_URL.matcher(url).matches()) {
 
-            avatarTextView.setVisibility(VISIBLE);
+            avatarTextLayout.setVisibility(VISIBLE);
             avatarImageView.setVisibility(GONE);
 
             binding.setUser(user);
@@ -93,8 +95,11 @@ public class UserAvatar extends FrameLayout {
                 return;
             }*/
 
+            if (avatarImageView.getCurrentUrl() != null && url.equals(avatarImageView.getCurrentUrl()))
+                return;
+
             avatarImageView.setVisibility(GONE);
-            avatarTextView.setVisibility(VISIBLE);
+            avatarTextLayout.setVisibility(VISIBLE);
 
             binding.setUser(user);
 
@@ -102,13 +107,17 @@ public class UserAvatar extends FrameLayout {
                 @Override
                 public void onImageLoadFinish(String url, View view) {
 
-                    avatarTextView.setVisibility(GONE);
+                    Log.d(TAG, "onImageLoadFinish: " + url);
+
+                    avatarTextLayout.setVisibility(GONE);
                     avatarImageView.setVisibility(VISIBLE);
 
                 }
 
                 @Override
                 public void onImageLoadFail(String url, View view) {
+
+                    Log.d(TAG, "onImageLoadFail: " + url);
 
                 }
             });
