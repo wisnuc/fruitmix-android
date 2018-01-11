@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.file.data.model;
 
+import com.winsun.fruitmix.R;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -8,6 +10,12 @@ import java.util.Date;
  */
 
 public class LocalFolder extends AbstractLocalFile {
+
+    public LocalFolder() {
+
+        setFileTypeResID(R.drawable.folder_icon);
+    }
+
     @Override
     public boolean isFolder() {
         return true;

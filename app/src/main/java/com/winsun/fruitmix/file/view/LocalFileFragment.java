@@ -127,14 +127,16 @@ public class LocalFileFragment {
                 AbstractLocalFile abstractLocalFile;
                 if (file.isDirectory()) {
                     abstractLocalFile = new LocalFolder();
+
                 } else {
                     abstractLocalFile = new LocalFile();
+
+                    abstractLocalFile.setFileTypeResID(FileUtil.getFileTypeResID(file.getName()));
                 }
 
                 abstractLocalFile.setName(file.getName());
                 abstractLocalFile.setPath(file.getAbsolutePath());
                 abstractLocalFile.setTime(String.valueOf(file.lastModified()));
-                abstractLocalFile.setFileTypeResID(FileUtil.getFileTypeResID(file.getName()));
 
                 if (alreadySelectedFileArrayList != null && alreadySelectedFileArrayList.contains(abstractLocalFile.getName()))
                     selectedFiles.add(abstractLocalFile);

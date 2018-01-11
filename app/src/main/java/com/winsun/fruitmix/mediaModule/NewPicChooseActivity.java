@@ -354,12 +354,19 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
     @NonNull
     private UserComment createFileComment() {
         UserComment userComment;
-        List<AbstractFile> files = localFileFragment.getSelectFiles().subList(0, 6);
+
+        List<AbstractFile> files = localFileFragment.getSelectFiles();
+
+        List<AbstractFile> selectFiles;
+        if (files.size() > 6) {
+            selectFiles = files.subList(0, 6);
+        } else
+            selectFiles = files;
 
         if (files.size() == 1) {
-            userComment = new SingleFileComment(currentUser, System.currentTimeMillis(), files.get(0));
+            userComment = new SingleFileComment(currentUser, System.currentTimeMillis(), selectFiles.get(0));
         } else {
-            userComment = new MultiFileComment(currentUser, System.currentTimeMillis(), files);
+            userComment = new MultiFileComment(currentUser, System.currentTimeMillis(), selectFiles);
         }
         return userComment;
     }
@@ -367,12 +374,19 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
     @NonNull
     private UserComment createMediaComment() {
         UserComment userComment;
-        List<Media> medias = mNewPhotoList.getSelectedMedias().subList(0, 6);
+
+        List<Media> medias = mNewPhotoList.getSelectedMedias();
+
+        List<Media> selectMedias;
+        if (medias.size() > 6) {
+            selectMedias = medias.subList(0, 6);
+        } else
+            selectMedias = medias;
 
         if (medias.size() == 1) {
-            userComment = new SinglePhotoComment(currentUser, System.currentTimeMillis(), medias.get(0));
+            userComment = new SinglePhotoComment(currentUser, System.currentTimeMillis(), selectMedias.get(0));
         } else {
-            userComment = new MultiPhotoComment(currentUser, System.currentTimeMillis(), medias);
+            userComment = new MultiPhotoComment(currentUser, System.currentTimeMillis(), selectMedias);
         }
         return userComment;
     }

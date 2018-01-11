@@ -111,6 +111,8 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
     @Override
     public void onDestroy() {
         groupListPresenter.onDestroyView();
+
+        containerActivity = null;
     }
 
     @Override

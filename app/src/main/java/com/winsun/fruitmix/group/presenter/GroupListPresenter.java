@@ -36,8 +36,6 @@ public class GroupListPresenter implements ActiveView {
 
     private GroupListAdapter groupListAdapter;
 
-    private ThreadManager threadManager;
-
     private LoadingViewModel loadingViewModel;
     private NoContentViewModel noContentViewModel;
     private GroupListViewModel groupListViewModel;
@@ -53,8 +51,6 @@ public class GroupListPresenter implements ActiveView {
         this.groupListPageView = groupListPageView;
 
         groupListAdapter = new GroupListAdapter();
-
-        threadManager = ThreadManagerImpl.getInstance();
 
     }
 
@@ -76,7 +72,7 @@ public class GroupListPresenter implements ActiveView {
                 noContentViewModel.showNoContent.set(false);
 
                 groupListViewModel.showRecyclerView.set(true);
-                groupListViewModel.showAddFriendsFAB.set(true);
+                groupListViewModel.showAddFriendsFAB.set(false);
 
                 groupListAdapter.setPrivateGroups(data);
                 groupListAdapter.notifyDataSetChanged();
@@ -92,11 +88,11 @@ public class GroupListPresenter implements ActiveView {
                 noContentViewModel.showNoContent.set(true);
 
                 groupListViewModel.showRecyclerView.set(false);
-                groupListViewModel.showAddFriendsFAB.set(true);
+                groupListViewModel.showAddFriendsFAB.set(false);
 
 
             }
-        },this));
+        }, this));
 
     }
 

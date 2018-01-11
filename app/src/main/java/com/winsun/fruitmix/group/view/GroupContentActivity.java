@@ -151,6 +151,13 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         toolbarViewModel.titleText.set(groupName);
 
+        toolbarViewModel.setToolbarMenuBtnOnClickListener(new ToolbarViewModel.ToolbarMenuBtnOnClickListener() {
+            @Override
+            public void onClick() {
+
+            }
+        });
+
         binding.setToolbarViewModel(toolbarViewModel);
     }
 

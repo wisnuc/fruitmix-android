@@ -104,9 +104,9 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private ProgressDialog mDialog;
 
-    //    private static final int PAGE_GROUP = 0;
-    private static final int PAGE_PHOTO = 0;
-    private static final int PAGE_FILE = 1;
+        private static final int PAGE_GROUP = 0;
+    private static final int PAGE_PHOTO = 1;
+    private static final int PAGE_FILE = 2;
 
     private boolean sInChooseMode = false;
 
@@ -475,15 +475,15 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 String eventId = "";
 
                 switch (item.getItemId()) {
-/*                    case R.id.group:
+                    case R.id.group:
 
                         eventId = Util.SWITCH_MEDIA_SHARE_MODULE_UMENG_EVENT_ID;
 
                         viewPager.setCurrentItem(PAGE_GROUP);
 
-//                        ViewPagerTranslation.INSTANCE.animatePagerTransition(false, viewPager, 200, viewPager.getCurrentItem() - PAGE_GROUP);
+//                       ViewPagerTranslation.INSTANCE.animatePagerTransition(false, viewPager, 200, viewPager.getCurrentItem() - PAGE_GROUP);
 
-                        break;*/
+                        break;
                     case R.id.photo:
 
                         eventId = Util.SWITCH_MEDIA_MODULE_UMENG_EVENT_ID;
@@ -529,11 +529,11 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     }
 
     private void initPageList() {
-//        groupListPage = new GroupListPage(getActivity());
+        groupListPage = new GroupListPage(getActivity());
         photoList = new NewPhotoList(getActivity());
         fileFragment = new FileFragment(getActivity(), this, this);
         pageList = new ArrayList<>();
-//        pageList.add(groupListPage);
+        pageList.add(groupListPage);
         pageList.add(photoList);
         pageList.add(fileFragment);
     }
@@ -552,7 +552,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     public void refreshAllViewsForce() {
 
-//        groupListPage.refreshView();
+        groupListPage.refreshView();
 
         photoList.refreshViewForce();
         fileFragment.refreshViewForce();
@@ -1330,23 +1330,24 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         }
 
         switch (position) {
-//            case PAGE_GROUP:
-//
-//                setCurrentItem(groupListPage);
-//
-//                toolbarViewModel.titleText.set(getString(R.string.group));
-//                toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
-//                toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
-//
-//                fab.setVisibility(View.GONE);
-//                systemShareBtn.setVisibility(View.GONE);
-//
-//                toolbarViewModel.showSelect.set(false);
-//                toolbarViewModel.showMenu.set(false);
-//
-//                mListener.unlockDrawer();
-//
-//                break;
+            case PAGE_GROUP:
+
+                setCurrentItem(groupListPage);
+
+                toolbarViewModel.titleText.set(getString(R.string.group));
+                toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
+                toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
+
+                fab.setVisibility(View.GONE);
+                systemShareBtn.setVisibility(View.GONE);
+                downloadFileBtn.setVisibility(View.GONE);
+
+                toolbarViewModel.showSelect.set(false);
+                toolbarViewModel.showMenu.set(false);
+
+                mListener.unlockDrawer();
+
+                break;
             case PAGE_PHOTO:
 
                 setCurrentItem(photoList);
@@ -1416,7 +1417,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         @Override
         public int getCount() {
-            return 2;
+            return pageList.size();
         }
 
         @Override

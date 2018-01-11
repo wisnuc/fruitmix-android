@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.file.data.model;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.util.Util;
 
 import java.text.SimpleDateFormat;
@@ -13,6 +14,12 @@ public class LocalFile extends AbstractLocalFile {
 
     private String fileHash;
     private String size;
+
+    public LocalFile() {
+
+        setFileTypeResID(R.drawable.file_icon);
+
+    }
 
     public String getFileHash() {
         return fileHash;
