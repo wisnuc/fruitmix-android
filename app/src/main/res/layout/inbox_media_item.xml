@@ -1,64 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <FrameLayout
-        android:id="@+id/viewpager_layout"
+    <data>
+
+        <variable
+            name="groupUserComment"
+            type="com.winsun.fruitmix.inbox.data.model.GroupUserComment" />
+
+    </data>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="166dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <android.support.v4.view.ViewPager
+        <include
+            android:id="@+id/inbox_comment_title"
+            layout="@layout/inbox_comment_title"
+            app:groupUserComment="@{groupUserComment}" />
+
+        <FrameLayout
+            android:id="@+id/viewpager_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="166dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right|top"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="8dp"
-            android:text="1/4"
-            android:textColor="@color/eighty_seven_percent_black" />
+            <android.support.v4.view.ViewPager
+                android:id="@+id/media_viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
-    </FrameLayout>
+            <TextView
+                android:id="@+id/media_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|top"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="8dp"
+                android:text="1/4"
+                android:textColor="@color/eighty_seven_percent_black" />
 
-    <android.support.constraint.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="40dp">
+        </FrameLayout>
 
-        <me.relex.circleindicator.CircleIndicator
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:ci_drawable="@drawable/viewpager_indicator_select_item_bg"
-            app:ci_drawable_unselected="@drawable/viewpager_indicator_unselect_item_bg"
-            app:ci_height="5dp"
-            app:ci_margin="8dp"
-            app:ci_width="5dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="18dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginTop="8dp"
-            android:textColor="#03a9f4"
-            android:textSize="12dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="显示全部" />
+            <me.relex.circleindicator.CircleIndicator
+                android:id="@+id/circle_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:ci_drawable="@drawable/viewpager_indicator_select_item_bg"
+                app:ci_drawable_unselected="@drawable/viewpager_indicator_unselect_item_bg"
+                app:ci_height="5dp"
+                app:ci_margin="8dp"
+                app:ci_width="5dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="18dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/show_all"
+                android:textColor="#03a9f4"
+                android:textSize="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
 
-    </android.support.constraint.ConstraintLayout>
+        </android.support.constraint.ConstraintLayout>
 
 
-</LinearLayout>
+    </LinearLayout>
+
+</layout>

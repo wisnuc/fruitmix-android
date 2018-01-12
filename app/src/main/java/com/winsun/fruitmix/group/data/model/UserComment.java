@@ -33,15 +33,15 @@ public class UserComment {
 
     public String getDate(Context context) {
 
-        return formatTime(context,time);
+        return formatTime(context, time);
 
     }
 
-    private String formatTime(Context context,long time) {
+    private String formatTime(Context context, long time) {
 
         if (date == null) {
 
-            date = Util.formatTime(context,time);
+            date = Util.formatTime(context, time);
 
             return date;
         } else

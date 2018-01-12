@@ -1,12 +1,14 @@
 package com.winsun.fruitmix.inbox.view;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.InboxListPageBinding;
+import com.winsun.fruitmix.inbox.presenter.InboxListPresenter;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
@@ -19,11 +21,13 @@ import java.util.Map;
  * Created by Administrator on 2018/1/10.
  */
 
-public class InboxListPage implements Page, IShowHideFragmentListener {
+public class InboxListPage implements Page, IShowHideFragmentListener, InboxView {
 
     private Activity mActivity;
 
     private View mView;
+
+    private InboxListPresenter mInboxListPresenter;
 
     public InboxListPage(Activity activity) {
 
@@ -74,6 +78,8 @@ public class InboxListPage implements Page, IShowHideFragmentListener {
     @Override
     public void onDestroy() {
 
+        mInboxListPresenter.onDestroy();
+
         mActivity = null;
 
     }
@@ -92,5 +98,20 @@ public class InboxListPage implements Page, IShowHideFragmentListener {
     @Override
     public void hide() {
 
+    }
+
+    @Override
+    public Context getContext() {
+        return mActivity;
+    }
+
+    @Override
+    public String getString(int resID) {
+        return mActivity.getString(resID);
+    }
+
+    @Override
+    public String getString(int resID, Object... formatArgs) {
+        return mActivity.getString(resID, formatArgs);
     }
 }

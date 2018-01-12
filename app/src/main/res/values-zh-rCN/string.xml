@@ -218,7 +218,7 @@
     <string name="new_firmware_version_dialog_title">设备系统有新版本可以升级</string>
 
     <string name="no_longer_prompt">不再提示</string>
-    
+
     <string name="to_upgrade">去升级</string>
 
     <!-- 插件 -->
@@ -552,6 +552,13 @@
 
     <!-- group -->
     <string name="group">"私友群"</string>
+
+    <!-- inbox -->
+    <string name="group_come_from">来自 "%1$s" 群</string>
+    <string name="show_all">显示全部</string>
+    <string name="user_application">用户申请</string>
+
+    <string name="slash">%1$d/%2$d</string>
 
 
 </resources>

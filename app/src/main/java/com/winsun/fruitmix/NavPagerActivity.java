@@ -397,7 +397,7 @@ public class NavPagerActivity extends BaseActivity
                     binding.leftDrawerHeadLayout.cloud.setVisibility(View.VISIBLE);
                 else
                     binding.leftDrawerHeadLayout.cloud.setVisibility(View.INVISIBLE);
-                
+
             }
 
             @Override
