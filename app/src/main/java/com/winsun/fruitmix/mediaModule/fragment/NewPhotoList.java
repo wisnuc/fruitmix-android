@@ -428,7 +428,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private void getMediaInThread() {
 
-        if (mPhotoListListener != null)
+        if (loadingViewModel.showLoading.get() && mPhotoListListener != null)
             mPhotoListListener.onNoPhotoItem(true);
 
         mediaDataSourceRepository.getMedia(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {

@@ -12,4 +12,7 @@ public interface InboxView extends BaseView{
 
     Context getContext();
 
+    String getQuantityString(int resID,int quantity);
+
+    String getQuantityString(int resID,int quantity,Object...formatArgs);
 }

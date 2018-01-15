@@ -33,7 +33,7 @@ import java.util.Map;
  * Created by Administrator on 2018/1/10.
  */
 
-public class InboxListPage implements Page, IShowHideFragmentListener,InboxView{
+public class InboxListPage implements Page, IShowHideFragmentListener, InboxView {
 
     private BaseActivity mActivity;
 
@@ -171,6 +171,16 @@ public class InboxListPage implements Page, IShowHideFragmentListener,InboxView{
     }
 
     @Override
+    public String getQuantityString(int resID, int quantity) {
+        return mActivity.getResources().getQuantityString(resID,quantity);
+    }
+
+    @Override
+    public String getQuantityString(int resID, int quantity, Object... formatArgs) {
+        return mActivity.getResources().getQuantityString(resID,quantity,formatArgs);
+    }
+
+    @Override
     public String getString(int resID) {
         return mActivity.getString(resID);
     }
@@ -179,4 +189,6 @@ public class InboxListPage implements Page, IShowHideFragmentListener,InboxView{
     public String getString(int resID, Object... formatArgs) {
         return mActivity.getString(resID, formatArgs);
     }
+
+
 }

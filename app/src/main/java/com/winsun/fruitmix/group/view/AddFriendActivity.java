@@ -52,7 +52,7 @@ public class AddFriendActivity extends BaseToolbarActivity {
 
     @Override
     protected String getToolbarTitle() {
-        return "添加好友";
+        return getString(R.string.add_friend);
     }
 
 

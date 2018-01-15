@@ -18,14 +18,14 @@
 
     <plurals name="photo">
 
-        <item quantity="one">Photo</item>
-        <item quantity="other">Photos</item>
+        <item quantity="one">%1$d Photo</item>
+        <item quantity="other">%1$d Photos</item>
 
     </plurals>
 
     <string name="android_ellipsize">…</string>
 
-    <string name="android_no_write_external_storage_permission">Writen permission denied in SDCard.</string>
+    <string name="android_no_write_external_storage_permission">Written permission denied in SDCard.</string>
 
     <!-- android end -->
 
@@ -579,12 +579,20 @@
     <!-- group -->
     <string name="group">Group</string>
 
+    <string name="create_group">Create group</string>
+    <string name="group_name">Group name</string>
+    <string name="add_friend">Add friend</string>
+
     <!-- inbox -->
     <string name="inbox">Inbox</string>
-    <string name="group_come_from">From "%1$s" group</string>
+    <string name="group_come_from">From \"%1$s\" group,</string>
+    <string name="share_something">Share %1$s</string>
+
     <string name="show_all">Show All</string>
     <string name="user_application">User Application</string>
     <string name="slash">%1$d/%2$d</string>
+    
+    <string name="application_for_wisnuc">Application for \"WISNUC\"</string>
 
 
 </resources>

@@ -57,7 +57,7 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
 
     @Override
     protected String getToolbarTitle() {
-        return "创建群";
+        return getString(R.string.create_group);
     }
 
 
@@ -65,7 +65,7 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
     public void createGroup(CreateGroupViewModel createGroupViewModel) {
         PrivateGroup group = new PrivateGroup(Util.createLocalUUid(), createGroupViewModel.getGroupName(), Collections.singletonList(currentUser));
 
-        showProgressDialog("正在创建群");
+        showProgressDialog(getString(R.string.operating_title,getString(R.string.create_group)));
 
         groupRepository.addGroup(group, new BaseOperateDataCallback<Boolean>() {
             @Override
@@ -81,7 +81,7 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
             public void onFail(OperationResult result) {
                 dismissDialog();
 
-                showToast("创建失败");
+                showToast(result.getResultMessage(CreateGroupActivity.this));
             }
         });
 

@@ -3,12 +3,15 @@ package com.winsun.fruitmix.inbox.data.source;
 import android.support.annotation.NonNull;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.group.data.model.MultiFileComment;
 import com.winsun.fruitmix.group.data.model.MultiPhotoComment;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.SingleFileComment;
 import com.winsun.fruitmix.group.data.model.SinglePhotoComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
+import com.winsun.fruitmix.inbox.data.model.GroupFileComment;
 import com.winsun.fruitmix.inbox.data.model.GroupMediaComment;
 import com.winsun.fruitmix.inbox.data.model.GroupUserComment;
 import com.winsun.fruitmix.inbox.data.source.InboxDataSource;
@@ -84,6 +87,16 @@ public class InboxDataRepository implements InboxDataSource {
 
                         groupUserComments.add(new GroupMediaComment(userComment, group.getUUID(), group.getName(),
                                 ((MultiPhotoComment) userComment).getMedias()));
+
+                    } else if (userComment instanceof SingleFileComment) {
+
+                        groupUserComments.add(new GroupFileComment(userComment, group.getUUID(), group.getName(),
+                                Collections.singletonList(((SingleFileComment) userComment).getFile())));
+
+                    } else if (userComment instanceof MultiFileComment) {
+
+                        groupUserComments.add(new GroupFileComment(userComment, group.getUUID(), group.getName(),
+                                ((MultiFileComment) userComment).getFiles()));
 
                     }
 

@@ -19,7 +19,7 @@
 
     <plurals name="photo">
 
-        <item quantity="other">张</item>
+        <item quantity="other">%1$d张照片</item>
 
     </plurals>
 
@@ -551,14 +551,21 @@
     <string name="check_update">检查更新</string>
 
     <!-- group -->
-    <string name="group">"私友群"</string>
+    <string name="group">私友群</string>
+
+    <string name="create_group">创建群</string>
+    <string name="group_name">群名</string>
+    <string name="add_friend">添加好友</string>
 
     <!-- inbox -->
     <string name="inbox">收件箱</string>
-    <string name="group_come_from">来自 "%1$s" 群</string>
+    <string name="group_come_from">来自 \"%1$s\" 群,</string>
+    <string name="share_something">分享了 %1$s</string>
+
     <string name="show_all">显示全部</string>
     <string name="user_application">用户申请</string>
     <string name="slash">%1$d/%2$d</string>
 
+    <string name="application_for_wisnuc">申请\"WISNUC\"用户</string>
 
 </resources>

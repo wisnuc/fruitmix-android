@@ -7,7 +7,7 @@
 
         <variable
             name="groupUserComment"
-            type="com.winsun.fruitmix.inbox.data.model.GroupUserComment"/>
+            type="com.winsun.fruitmix.inbox.data.model.GroupUserComment" />
 
     </data>
 
@@ -45,10 +45,9 @@
             android:id="@+id/group_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TextView"
             android:textColor="@color/fifty_four_percent_black"
             android:textSize="12dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/share_text"
             app:layout_constraintStart_toStartOf="@+id/textView16"
             app:layout_constraintTop_toBottomOf="@id/textView16"
             tools:text="来自工作群" />
@@ -66,6 +65,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="1小时前" />
+
+        <TextView
+            android:id="@+id/share_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/fifty_four_percent_black"
+            android:textSize="14dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/group_info"
+            app:layout_constraintTop_toBottomOf="@+id/group_info"
+            tools:text="分享了text" />
 
     </android.support.constraint.ConstraintLayout>
 

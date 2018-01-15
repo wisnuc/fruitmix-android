@@ -2,7 +2,9 @@ package com.winsun.fruitmix.inbox.presenter;
 
 import android.databinding.ViewDataBinding;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -13,7 +15,10 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.InboxCommentTitleBinding;
 import com.winsun.fruitmix.databinding.InboxMediaItemBinding;
 import com.winsun.fruitmix.databinding.InboxUserInvitationBinding;
+import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.inbox.data.model.GroupFileComment;
 import com.winsun.fruitmix.inbox.data.model.GroupMediaComment;
 import com.winsun.fruitmix.inbox.data.model.GroupUserComment;
 import com.winsun.fruitmix.inbox.data.source.InboxDataSource;
@@ -113,7 +118,7 @@ public class InboxListPresenter implements ActiveView {
 
     private void getInboxComment(final List<ConfirmInviteUser> confirmInviteUsers) {
 
-        mInboxDataSource.getAllGroupInfoAboutUser(currentUser.getUuid(), new BaseLoadDataCallbackWrapper<GroupUserComment>(
+        mInboxDataSource.getAllGroupInfoAboutUser(currentUser.getUuid(), new BaseLoadDataCallbackWrapper<>(
                 new BaseLoadDataCallback<GroupUserComment>() {
                     @Override
                     public void onSucceed(List<GroupUserComment> data, OperationResult operationResult) {
@@ -167,6 +172,12 @@ public class InboxListPresenter implements ActiveView {
                 MediaItem mediaItem = new MediaItem((GroupMediaComment) groupUserComment);
 
                 viewItems.add(mediaItem);
+            } else if (groupUserComment instanceof GroupFileComment) {
+
+                FileItem fileItem = new FileItem((GroupFileComment) groupUserComment);
+
+                viewItems.add(fileItem);
+
             }
 
         }
@@ -187,8 +198,11 @@ public class InboxListPresenter implements ActiveView {
 
     }
 
-    public static final int VIEW_MEDIA = 1;
-    public static final int VIEW_USER_INVITATION = 2;
+    private static final int VIEW_MEDIA = 1;
+    private static final int VIEW_USER_INVITATION = 2;
+    private static final int VIEW_FILE = 3;
+
+    public static final String TAG = InboxListAdapter.class.getSimpleName();
 
     private class InboxListAdapter extends RecyclerView.Adapter<BindingViewHolder> {
 
@@ -215,7 +229,7 @@ public class InboxListPresenter implements ActiveView {
                 case VIEW_MEDIA:
 
                     InboxMediaItemBinding binding = InboxMediaItemBinding.inflate(LayoutInflater.from(parent.getContext()),
-                            null, false);
+                            parent, false);
 
                     bindingViewHolder = new InboxMediaViewHolder(binding);
 
@@ -223,14 +237,24 @@ public class InboxListPresenter implements ActiveView {
                 case VIEW_USER_INVITATION:
 
                     InboxUserInvitationBinding inboxUserInvitationBinding = InboxUserInvitationBinding
-                            .inflate(LayoutInflater.from(parent.getContext()), null, false);
+                            .inflate(LayoutInflater.from(parent.getContext()), parent, false);
 
                     bindingViewHolder = new InboxUserInvitationViewHolder(inboxUserInvitationBinding);
 
                     break;
 
+                case VIEW_FILE:
+
+                    InboxCommentTitleBinding inboxCommentTitleBinding = InboxCommentTitleBinding
+                            .inflate(LayoutInflater.from(parent.getContext()), parent, false);
+
+                    bindingViewHolder = new InboxFileViewHolder(inboxCommentTitleBinding);
+
+                    break;
+
                 default:
                     bindingViewHolder = null;
+                    Log.e(TAG, "onCreateViewHolder: bindingViewHolder is null,error");
 
             }
 
@@ -258,8 +282,13 @@ public class InboxListPresenter implements ActiveView {
 
                 inboxUserInvitationViewHolder.refreshView(((UserInvitationItem) viewItem).getConfirmInviteUsers());
 
-            }
+            } else if (viewItem instanceof FileItem) {
 
+                InboxFileViewHolder viewHolder = (InboxFileViewHolder) holder;
+
+                viewHolder.refreshView(((FileItem) viewItem).getGroupFileComment());
+
+            }
 
         }
 
@@ -310,6 +339,24 @@ public class InboxListPresenter implements ActiveView {
         }
     }
 
+    private class FileItem implements ViewItem {
+
+        private GroupFileComment mGroupFileComment;
+
+        public FileItem(GroupFileComment groupFileComment) {
+            mGroupFileComment = groupFileComment;
+        }
+
+        public GroupFileComment getGroupFileComment() {
+            return mGroupFileComment;
+        }
+
+        @Override
+        public int getType() {
+            return VIEW_FILE;
+        }
+    }
+
 
     private class InboxMediaViewHolder extends BindingViewHolder {
 
@@ -329,21 +376,70 @@ public class InboxListPresenter implements ActiveView {
 
         }
 
-        private void refreshTitle(GroupUserComment groupUserComment, InboxMediaItemBinding binding) {
-            binding.setGroupUserComment(groupUserComment);
+        private void refreshTitle(GroupMediaComment groupMediaComment, InboxMediaItemBinding binding) {
 
             InboxCommentTitleBinding inboxCommentTitleBinding = binding.inboxCommentTitle;
 
-            inboxCommentTitleBinding.userAvatar.setUser(groupUserComment.getUserComment().getCreator(),
-                    mImageLoader);
+            String from = mInboxView.getString(R.string.group_come_from, groupMediaComment.getGroupName());
 
-            inboxCommentTitleBinding.groupInfo.setText(mInboxView.getString(R.string.group_come_from, groupUserComment.getGroupName()));
+            int mediaSize = groupMediaComment.getMedias().size();
 
-            inboxCommentTitleBinding.time.setText(groupUserComment.getUserComment().getDate(mInboxView.getContext()));
+            String share = mInboxView.getString(R.string.share_something,
+                    mInboxView.getQuantityString(R.plurals.photo, mediaSize, mediaSize));
+
+            String text = from + share;
+
+            inboxCommentTitleBinding.shareText.setVisibility(View.GONE);
+
+            refreshCommentTitle(groupMediaComment, inboxCommentTitleBinding, text);
+
         }
 
+    }
+
+    private class InboxFileViewHolder extends BindingViewHolder {
+
+        public InboxFileViewHolder(ViewDataBinding viewDataBinding) {
+            super(viewDataBinding);
+        }
+
+        void refreshView(GroupFileComment groupFileComment) {
+
+            InboxCommentTitleBinding binding = (InboxCommentTitleBinding) getViewDataBinding();
+
+            AbstractFile file = groupFileComment.getAbstractFiles().get(0);
+
+            String from = mInboxView.getString(R.string.group_come_from, groupFileComment.getGroupName());
+
+            refreshCommentTitle(groupFileComment, binding, from);
+
+            binding.shareText.setVisibility(View.VISIBLE);
+
+            String shareText = mInboxView.getString(R.string.share_something,
+                    file.getName());
+
+            binding.shareText.setText(shareText);
+
+        }
 
     }
+
+    private void refreshCommentTitle(GroupUserComment groupUserComment, InboxCommentTitleBinding binding,
+                                     String groupInfoText) {
+
+        binding.setGroupUserComment(groupUserComment);
+
+        UserComment userComment = groupUserComment.getUserComment();
+
+        binding.userAvatar.setUser(userComment.getCreator(),
+                mImageLoader);
+
+        binding.groupInfo.setText(groupInfoText);
+
+        binding.time.setText(userComment.getDate(mInboxView.getContext()));
+
+    }
+
 
     private class InboxUserInvitationViewHolder extends BindingViewHolder {
 
@@ -356,7 +452,7 @@ public class InboxListPresenter implements ActiveView {
 
             InboxUserInvitationBinding binding = (InboxUserInvitationBinding) getViewDataBinding();
 
-            new InboxUserInvitationPresenter(binding, confirmInviteUsers, mInvitationDataSource,mImageLoader,mInboxView);
+            new InboxUserInvitationPresenter(binding, confirmInviteUsers, mInvitationDataSource, mImageLoader, mInboxView);
 
         }
 

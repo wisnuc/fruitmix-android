@@ -47,8 +47,8 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/inbox_user_invitation_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="372dp"
-            android:layout_marginBottom="8dp"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
             android:layout_marginLeft="12dp" />
 
 

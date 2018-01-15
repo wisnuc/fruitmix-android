@@ -15,7 +15,9 @@ import com.winsun.fruitmix.databinding.InboxPhotoItemBinding;
 import com.winsun.fruitmix.inbox.data.model.GroupMediaComment;
 import com.winsun.fruitmix.inbox.data.model.GroupUserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.util.MediaUtil;
+import com.winsun.fruitmix.video.PlayVideoFragment;
 
 import java.util.List;
 
@@ -66,7 +68,9 @@ public class InboxMediaPresenter {
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
 
-                setCount(position);
+                setCount(position + 1);
+
+
 
             }
         });
@@ -90,17 +94,38 @@ public class InboxMediaPresenter {
 
         @NonNull
         @Override
-        public Object instantiateItem(@NonNull ViewGroup container, int position) {
+        public Object instantiateItem(@NonNull final ViewGroup container, int position) {
 
-            InboxPhotoItemBinding binding = InboxPhotoItemBinding.inflate(LayoutInflater.from(container.getContext()), container, false);
+            final Media media = mMedias.get(position);
 
-            View view = binding.getRoot();
+            View view;
+
+            if(media instanceof Video){
+
+                final PlayVideoFragment playVideoFragment = new PlayVideoFragment(container.getContext());
+
+                view = playVideoFragment.getView();
+
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        playVideoFragment.startPlayVideo((Video) media,container.getContext());
+
+                    }
+                });
+
+            }else {
+
+                InboxPhotoItemBinding binding = InboxPhotoItemBinding.inflate(LayoutInflater.from(container.getContext()), container, false);
+
+                view = binding.getRoot();
+
+                MediaUtil.setMediaImageUrl(media, binding.photoNetworkImageview, media.getImageThumbUrl(view.getContext()), mImageLoader);
+
+            }
 
             container.addView(view);
-
-            Media media = mMedias.get(position);
-
-            MediaUtil.setMediaImageUrl(media, binding.photoNetworkImageview, media.getImageThumbUrl(view.getContext()), mImageLoader);
 
             return view;
 
@@ -120,11 +145,12 @@ public class InboxMediaPresenter {
             return mMedias.size();
         }
 
-
         @Override
         public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
             return view == object;
         }
+
+
     }
 
 

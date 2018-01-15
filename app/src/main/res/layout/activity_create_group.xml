@@ -22,8 +22,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:background="@color/white"
         android:layout_height="match_parent"
+        android:background="@color/white"
         android:orientation="vertical"
         tools:context="com.winsun.fruitmix.group.view.CreateGroupActivity">
 
@@ -41,7 +41,7 @@
                 android:id="@+id/group_name_edittext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="群名"
+                android:hint="@string/group_name"
                 android:inputType="text"
                 android:maxLength="20"
                 android:text="@={createGroupViewModel.groupName}"
@@ -57,7 +57,7 @@
             android:layout_marginTop="40dp"
             android:background="@drawable/rect_login"
             android:onClick="@{()-> createGroupPresenter.createGroup(createGroupViewModel)}"
-            android:text="创建群"
+            android:text="@string/create_group"
             android:textColor="@color/eighty_seven_percent_white"
             android:textSize="16dp" />
 
