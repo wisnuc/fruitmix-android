@@ -63,7 +63,7 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         view = binding.getRoot();
 
-        GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository();
+        GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository(containerActivity);
 
         String currentLoginUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(containerActivity).getCurrentLoginUserUUID();
 

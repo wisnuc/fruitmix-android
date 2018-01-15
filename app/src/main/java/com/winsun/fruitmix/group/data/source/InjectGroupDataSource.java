@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.group.data.source;
 
+import android.content.Context;
+
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
 /**
@@ -8,7 +10,7 @@ import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 
 public class InjectGroupDataSource {
 
-    public static GroupRepository provideGroupRepository() {
+    public static GroupRepository provideGroupRepository(Context context) {
 
         GroupDataSource fakeGroupDataSource = FakeGroupDataSource.getInstance();
 

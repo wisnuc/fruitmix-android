@@ -2,8 +2,8 @@ package com.winsun.fruitmix.inbox.presenter;
 
 import android.databinding.ViewDataBinding;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.R;
@@ -19,14 +19,16 @@ import com.winsun.fruitmix.inbox.data.model.GroupUserComment;
 import com.winsun.fruitmix.inbox.data.source.InboxDataSource;
 import com.winsun.fruitmix.inbox.view.InboxView;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
-import com.winsun.fruitmix.model.ViewItemType;
+import com.winsun.fruitmix.invitation.data.InvitationDataSource;
+import com.winsun.fruitmix.model.ViewItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.viewholder.BaseBindingViewHolder;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -46,9 +48,17 @@ public class InboxListPresenter implements ActiveView {
 
     private InboxView mInboxView;
 
-    public InboxListPresenter(InboxDataSource inboxDataSource, LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel,
+    private InvitationDataSource mInvitationDataSource;
+
+    private InboxListAdapter mInboxListAdapter;
+
+    private List<ViewItem> mViewItems;
+
+    public InboxListPresenter(InboxDataSource inboxDataSource, InvitationDataSource invitationDataSource,
+                              LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel,
                               User currentUser, InboxView inboxView) {
         mInboxDataSource = inboxDataSource;
+        mInvitationDataSource = invitationDataSource;
         mLoadingViewModel = loadingViewModel;
         mNoContentViewModel = noContentViewModel;
 
@@ -57,9 +67,51 @@ public class InboxListPresenter implements ActiveView {
         mInboxView = inboxView;
 
         mImageLoader = InjectHttp.provideImageGifLoaderInstance(inboxView.getContext()).getImageLoader(inboxView.getContext());
+
+        mInboxListAdapter = new InboxListAdapter();
+
+    }
+
+    public InboxListAdapter getInboxListAdapter() {
+        return mInboxListAdapter;
     }
 
     public void refreshView() {
+
+        mInvitationDataSource.getInvitation(new BaseLoadDataCallback<ConfirmInviteUser>() {
+            @Override
+            public void onSucceed(List<ConfirmInviteUser> data, OperationResult operationResult) {
+
+                getInboxComment(filterConfirmInviteUsers(data));
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                getInboxComment(Collections.<ConfirmInviteUser>emptyList());
+
+            }
+        });
+
+    }
+
+    private List<ConfirmInviteUser> filterConfirmInviteUsers(List<ConfirmInviteUser> data) {
+
+        List<ConfirmInviteUser> confirmInviteUsers = new ArrayList<>();
+
+        for (ConfirmInviteUser confirmInviteUser : data) {
+
+            if (confirmInviteUser.getOperateType() == ConfirmInviteUser.OPERATE_TYPE_PENDING)
+                confirmInviteUsers.add(confirmInviteUser);
+
+        }
+
+        return confirmInviteUsers;
+
+    }
+
+    private void getInboxComment(final List<ConfirmInviteUser> confirmInviteUsers) {
 
         mInboxDataSource.getAllGroupInfoAboutUser(currentUser.getUuid(), new BaseLoadDataCallbackWrapper<GroupUserComment>(
                 new BaseLoadDataCallback<GroupUserComment>() {
@@ -69,7 +121,21 @@ public class InboxListPresenter implements ActiveView {
                         if (mLoadingViewModel.showLoading.get())
                             mLoadingViewModel.showLoading.set(false);
 
-                        mNoContentViewModel.showNoContent.set(false);
+                        mViewItems = createViewItem(confirmInviteUsers, data);
+
+                        if (mViewItems.size() == 0) {
+
+                            mNoContentViewModel.showNoContent.set(true);
+
+                        } else {
+
+                            mNoContentViewModel.showNoContent.set(false);
+
+                            mInboxListAdapter.setViewItems(mViewItems);
+                            mInboxListAdapter.notifyDataSetChanged();
+
+                        }
+
                     }
 
                     @Override
@@ -87,6 +153,29 @@ public class InboxListPresenter implements ActiveView {
 
     }
 
+    private List<ViewItem> createViewItem(List<ConfirmInviteUser> confirmInviteUsers, List<GroupUserComment> groupUserComments) {
+
+        List<ViewItem> viewItems = new ArrayList<>();
+
+        if (confirmInviteUsers.size() > 0)
+            viewItems.add(new UserInvitationItem(confirmInviteUsers));
+
+        for (GroupUserComment groupUserComment : groupUserComments) {
+
+            if (groupUserComment instanceof GroupMediaComment) {
+
+                MediaItem mediaItem = new MediaItem((GroupMediaComment) groupUserComment);
+
+                viewItems.add(mediaItem);
+            }
+
+        }
+
+        return viewItems;
+
+    }
+
+
     @Override
     public boolean isActive() {
         return true;
@@ -103,34 +192,98 @@ public class InboxListPresenter implements ActiveView {
 
     private class InboxListAdapter extends RecyclerView.Adapter<BindingViewHolder> {
 
+        private List<ViewItem> mViewItems;
+
+        public InboxListAdapter() {
+            mViewItems = new ArrayList<>();
+        }
+
+        public void setViewItems(List<ViewItem> viewItems) {
+
+            mViewItems.clear();
+            mViewItems.addAll(viewItems);
+
+        }
 
         @Override
         public BindingViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return null;
+
+            BindingViewHolder bindingViewHolder;
+
+            switch (viewType) {
+
+                case VIEW_MEDIA:
+
+                    InboxMediaItemBinding binding = InboxMediaItemBinding.inflate(LayoutInflater.from(parent.getContext()),
+                            null, false);
+
+                    bindingViewHolder = new InboxMediaViewHolder(binding);
+
+                    break;
+                case VIEW_USER_INVITATION:
+
+                    InboxUserInvitationBinding inboxUserInvitationBinding = InboxUserInvitationBinding
+                            .inflate(LayoutInflater.from(parent.getContext()), null, false);
+
+                    bindingViewHolder = new InboxUserInvitationViewHolder(inboxUserInvitationBinding);
+
+                    break;
+
+                default:
+                    bindingViewHolder = null;
+
+            }
+
+            return bindingViewHolder;
         }
 
 
         @Override
         public void onBindViewHolder(BindingViewHolder holder, int position) {
 
+            if (holder == null)
+                return;
+
+            ViewItem viewItem = mViewItems.get(position);
+
+            if (viewItem instanceof MediaItem) {
+
+                InboxMediaViewHolder inboxMediaViewHolder = (InboxMediaViewHolder) holder;
+                inboxMediaViewHolder.refreshView(((MediaItem) viewItem).getGroupMediaComment());
+
+
+            } else if (viewItem instanceof UserInvitationItem) {
+
+                InboxUserInvitationViewHolder inboxUserInvitationViewHolder = (InboxUserInvitationViewHolder) holder;
+
+                inboxUserInvitationViewHolder.refreshView(((UserInvitationItem) viewItem).getConfirmInviteUsers());
+
+            }
+
+
         }
 
         @Override
         public int getItemCount() {
-            return 0;
+            return mViewItems.size();
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return mViewItems.get(position).getType();
         }
     }
 
-    private class MediaItem implements ViewItemType {
+    private class MediaItem implements ViewItem {
 
-        private GroupUserComment mGroupUserComment;
+        private GroupMediaComment mGroupMediaComment;
 
-        public MediaItem(GroupUserComment groupUserComment) {
-            mGroupUserComment = groupUserComment;
+        public MediaItem(GroupMediaComment groupMediaComment) {
+            mGroupMediaComment = groupMediaComment;
         }
 
-        public GroupUserComment getGroupUserComment() {
-            return mGroupUserComment;
+        public GroupMediaComment getGroupMediaComment() {
+            return mGroupMediaComment;
         }
 
         @Override
@@ -139,7 +292,7 @@ public class InboxListPresenter implements ActiveView {
         }
     }
 
-    private class UserInvitationItem implements ViewItemType {
+    private class UserInvitationItem implements ViewItem {
 
         private List<ConfirmInviteUser> mConfirmInviteUsers;
 
@@ -165,13 +318,13 @@ public class InboxListPresenter implements ActiveView {
             super(viewDataBinding);
         }
 
-        void refreshView(GroupUserComment groupUserComment) {
+        void refreshView(GroupMediaComment groupMediaComment) {
 
             InboxMediaItemBinding binding = (InboxMediaItemBinding) getViewDataBinding();
 
-            refreshTitle(groupUserComment, binding);
+            refreshTitle(groupMediaComment, binding);
 
-            new InboxMediaPresenter(binding, (GroupMediaComment) groupUserComment,mImageLoader);
+            new InboxMediaPresenter(binding, groupMediaComment, mImageLoader);
 
 
         }
@@ -199,15 +352,13 @@ public class InboxListPresenter implements ActiveView {
             super(viewDataBinding);
         }
 
-        void refreshView(List<ConfirmInviteUser> confirmInviteUsers){
+        void refreshView(List<ConfirmInviteUser> confirmInviteUsers) {
 
             InboxUserInvitationBinding binding = (InboxUserInvitationBinding) getViewDataBinding();
 
-
-
+            new InboxUserInvitationPresenter(binding, confirmInviteUsers, mInvitationDataSource,mImageLoader,mInboxView);
 
         }
-
 
     }
 

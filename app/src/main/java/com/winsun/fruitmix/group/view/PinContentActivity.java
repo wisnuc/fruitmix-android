@@ -61,8 +61,9 @@ public class PinContentActivity extends BaseToolbarActivity implements PinConten
         pinContentRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         pinContentRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        pinContentPresenter = new PinContentPresenter(groupUUID, pinUUID, InjectGroupDataSource.provideGroupRepository(), loadingViewModel, noContentViewModel,
-                toolbarViewModel, this, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
+        pinContentPresenter = new PinContentPresenter(groupUUID, pinUUID, InjectGroupDataSource.provideGroupRepository(this),
+                loadingViewModel, noContentViewModel, toolbarViewModel, this,
+                InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this));
 
         pinContentRecyclerView.setAdapter(pinContentPresenter.getPinContentAdapter());
 

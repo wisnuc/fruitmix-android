@@ -58,13 +58,13 @@ public class InvitationRemoteDataSource extends BaseRemoteDataSourceImpl impleme
      * WISNUC API:POST TICKET
      */
     @Override
-    public void confirmInvitation(final ConfirmInviteUser confirmInviteUser, final BaseOperateDataCallback<String> callback) {
+    public void confirmInvitation(final ConfirmInviteUser confirmInviteUser,boolean isAccepted, final BaseOperateDataCallback<String> callback) {
 
         String path = CONFIRM_TICKET_PARAMETER + confirmInviteUser.getTicketUUID();
 
         boolean state;
 
-        state = confirmInviteUser.getOperateType() == ConfirmInviteUser.OPERATE_TYPE_ACCEPT;
+        state = isAccepted;
 
         JSONObject jsonObject = new JSONObject();
 

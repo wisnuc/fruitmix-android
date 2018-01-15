@@ -580,6 +580,7 @@
     <string name="group">Group</string>
 
     <!-- inbox -->
+    <string name="inbox">Inbox</string>
     <string name="group_come_from">From "%1$s" group</string>
     <string name="show_all">Show All</string>
     <string name="user_application">User Application</string>

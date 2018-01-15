@@ -554,10 +554,10 @@
     <string name="group">"私友群"</string>
 
     <!-- inbox -->
+    <string name="inbox">收件箱</string>
     <string name="group_come_from">来自 "%1$s" 群</string>
     <string name="show_all">显示全部</string>
     <string name="user_application">用户申请</string>
-
     <string name="slash">%1$d/%2$d</string>
 
 

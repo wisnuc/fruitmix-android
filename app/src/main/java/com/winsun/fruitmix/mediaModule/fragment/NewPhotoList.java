@@ -392,7 +392,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     @Override
     public void refreshView() {
 
-        if (mSelectMode && mIsLoaded)
+        if (mSelectMode && !(loadingViewModel.showLoading.get()))
             return;
 
         if (!mIsLoading)

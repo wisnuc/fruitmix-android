@@ -36,7 +36,7 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        groupRepository = InjectGroupDataSource.provideGroupRepository();
+        groupRepository = InjectGroupDataSource.provideGroupRepository(this);
 
         currentUser = InjectUser.provideRepository(this).getUserByUUID(InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginUserUUID());
 

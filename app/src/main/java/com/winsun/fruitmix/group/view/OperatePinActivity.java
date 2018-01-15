@@ -55,7 +55,7 @@ public class OperatePinActivity extends BaseToolbarActivity implements CreatePin
 
         groupUUID = getIntent().getStringExtra(Util.KEY_GROUP_UUID);
 
-        groupRepository = InjectGroupDataSource.provideGroupRepository();
+        groupRepository = InjectGroupDataSource.provideGroupRepository(this);
 
         OperatePinViewModel operatePinViewModel = new OperatePinViewModel();
 

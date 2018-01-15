@@ -14,6 +14,6 @@ public interface InvitationDataSource {
 
     void getInvitation(final BaseLoadDataCallback<ConfirmInviteUser> callback);
 
-    void confirmInvitation(final ConfirmInviteUser confirmInviteUser, final BaseOperateDataCallback<String> callback);
+    void confirmInvitation(final ConfirmInviteUser confirmInviteUser,boolean isAccepted, final BaseOperateDataCallback<String> callback);
 
 }

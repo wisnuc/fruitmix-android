@@ -258,8 +258,6 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         Log.d(TAG, "acceptInviteUser: " + confirmInviteUser.getUserName());
 
-        confirmInviteUser.setOperateType(ConfirmInviteUser.OPERATE_TYPE_ACCEPT);
-
         postOperation(confirmInviteUser, true, R.string.accept_invitation);
 
     }
@@ -268,8 +266,6 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
     public void refuseInviteUser(final ConfirmInviteUser confirmInviteUser) {
 
         Log.d(TAG, "refuseInviteUser: " + confirmInviteUser.getUserName());
-
-        confirmInviteUser.setOperateType(ConfirmInviteUser.OPERATE_TYPE_REFUSE);
 
         postOperation(confirmInviteUser, false, R.string.refuse_invitation);
 
@@ -280,7 +276,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
         confirmInviteUserView.showProgressDialog(String.format(confirmInviteUserView.getString(R.string.operating_title),
                 confirmInviteUserView.getString(R.string.invitation)));
 
-        mInvitationDataSource.confirmInvitation(confirmInviteUser, new BaseOperateDataCallback<String>() {
+        mInvitationDataSource.confirmInvitation(confirmInviteUser, isAccepted,new BaseOperateDataCallback<String>() {
             @Override
             public void onSucceed(final String data, OperationResult result) {
 
@@ -550,16 +546,7 @@ public class ConfirmInviteUserPresenterImpl implements ConfirmInviteUserPresente
 
         public void refreshView(final ConfirmInviteUser confirmInviteUser) {
 
-            User user = new User();
-            user.setUserName(confirmInviteUser.getUserName());
-            user.setAvatar(confirmInviteUser.getUserAvatar());
-
-            user.setDefaultAvatar(Util.getUserNameForAvatar(user.getUserName()));
-            user.setDefaultAvatarBgColor(random.nextInt(3) + 1);
-
-            Log.d(TAG, "refreshView: user avatar:" + user.getAvatar());
-
-            userAvatar.setUser(user, imageLoader);
+            userAvatar.setUser(confirmInviteUser.generateUser(random), imageLoader);
 
         }
 

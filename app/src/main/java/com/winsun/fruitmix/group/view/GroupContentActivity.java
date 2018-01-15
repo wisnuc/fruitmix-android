@@ -162,7 +162,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
     }
 
     private void initPresenter(String groupUUID, GroupContentViewModel groupContentViewModel) {
-        GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository();
+        GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository(this);
 
         UserDataRepository userDataRepository = InjectUser.provideRepository(this);
 

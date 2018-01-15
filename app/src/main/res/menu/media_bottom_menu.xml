@@ -2,10 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/inbox"
+        android:icon="@drawable/ic_share"
+        android:title="@string/inbox" />
+
+    <item
         android:id="@+id/group"
         android:icon="@drawable/ic_share"
-        android:title="@string/group"
-        />
+        android:title="@string/group" />
 
     <item
         android:id="@+id/photo"

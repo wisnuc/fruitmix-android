@@ -47,13 +47,13 @@ public class InvitationDataRepository extends BaseDataRepository implements Invi
     }
 
     @Override
-    public void confirmInvitation(final ConfirmInviteUser confirmInviteUser, final BaseOperateDataCallback<String> callback) {
+    public void confirmInvitation(final ConfirmInviteUser confirmInviteUser, final boolean isAccepted, final BaseOperateDataCallback<String> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
 
-                invitationRemoteDataSource.confirmInvitation(confirmInviteUser, createOperateCallbackRunOnMainThread(callback));
+                invitationRemoteDataSource.confirmInvitation(confirmInviteUser,isAccepted, createOperateCallbackRunOnMainThread(callback));
 
             }
         });

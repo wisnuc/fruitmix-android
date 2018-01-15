@@ -1,15 +1,23 @@
 package com.winsun.fruitmix.inbox.data.source;
 
+import android.support.annotation.NonNull;
+
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.group.data.model.MultiPhotoComment;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.SinglePhotoComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
+import com.winsun.fruitmix.group.data.source.GroupRepository;
+import com.winsun.fruitmix.inbox.data.model.GroupMediaComment;
 import com.winsun.fruitmix.inbox.data.model.GroupUserComment;
 import com.winsun.fruitmix.inbox.data.source.InboxDataSource;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.user.User;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -18,17 +26,37 @@ import java.util.List;
 
 public class InboxDataRepository implements InboxDataSource {
 
-    private GroupDataSource mGroupDataSource;
+    private GroupRepository mGroupDataSource;
 
-    public InboxDataRepository(GroupDataSource groupDataSource) {
+    public InboxDataRepository(GroupRepository groupDataSource) {
         mGroupDataSource = groupDataSource;
     }
 
     @Override
-    public void getAllGroupInfoAboutUser(String userUUID, BaseLoadDataCallback<GroupUserComment> callback) {
+    public void getAllGroupInfoAboutUser(final String userUUID, final BaseLoadDataCallback<GroupUserComment> callback) {
 
-        List<PrivateGroup> groups = mGroupDataSource.getAllGroups();
+        mGroupDataSource.getGroupList(new BaseLoadDataCallback<PrivateGroup>() {
+            @Override
+            public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
 
+                List<GroupUserComment> groupUserComments = getGroupUserComments(userUUID, data);
+
+                callback.onSucceed(groupUserComments, new OperationSuccess());
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                callback.onFail(operationResult);
+
+            }
+        });
+
+
+    }
+
+    @NonNull
+    private List<GroupUserComment> getGroupUserComments(String userUUID, List<PrivateGroup> groups) {
         List<GroupUserComment> groupUserComments = new ArrayList<>();
 
         for (PrivateGroup group : groups) {
@@ -46,13 +74,23 @@ public class InboxDataRepository implements InboxDataSource {
             if (find) {
 
                 for (UserComment userComment : group.getUserComments()) {
-                    groupUserComments.add(new GroupUserComment(userComment, group.getUUID(), group.getName()));
+
+                    if (userComment instanceof SinglePhotoComment) {
+
+                        groupUserComments.add(new GroupMediaComment(userComment, group.getUUID(), group.getName(),
+                                Collections.singletonList(((SinglePhotoComment) userComment).getMedia())));
+
+                    } else if (userComment instanceof MultiPhotoComment) {
+
+                        groupUserComments.add(new GroupMediaComment(userComment, group.getUUID(), group.getName(),
+                                ((MultiPhotoComment) userComment).getMedias()));
+
+                    }
+
                 }
 
             }
         }
-
-        callback.onSucceed(groupUserComments, new OperationSuccess());
-
+        return groupUserComments;
     }
 }

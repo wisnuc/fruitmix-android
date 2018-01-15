@@ -63,8 +63,6 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
 
         InvitationDataSource invitationDataSource = InjectInvitationDataSource.provideInvitationDataSource(this);
 
-//        InvitationDataSource invitationDataSource = new FakeInvitationDataSource();
-
         ImageLoader imageLoader = InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this);
 
         confirmInviteUserPresenter = new ConfirmInviteUserPresenterImpl(this, invitationDataSource, imageLoader, loadingViewModel, noContentViewModel);
@@ -109,23 +107,5 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
         inviteUserFab.setVisibility(visibility);
     }
 
-    private class FakeInvitationDataSource implements InvitationDataSource {
-
-        @Override
-        public void createInvitation(BaseOperateDataCallback<String> callback) {
-
-        }
-
-        @Override
-        public void getInvitation(BaseLoadDataCallback<ConfirmInviteUser> callback) {
-            callback.onSucceed(Collections.<ConfirmInviteUser>emptyList(), new OperationSuccess());
-        }
-
-        @Override
-        public void confirmInvitation(ConfirmInviteUser confirmInviteUser, BaseOperateDataCallback<String> callback) {
-            callback.onSucceed("", new OperationSuccess());
-        }
-
-    }
 
 }

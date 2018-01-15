@@ -165,8 +165,9 @@ public class Util {
     public static final String CURRENT_MEDIA_KEY = "current_media_key";
     public static final String CURRENT_MEDIASHARE_TIME = "current_mediashare_time";
 
-    public static final String SWITCH_ALBUM_MODULE_UMENG_EVENT_ID = "switch_album_module";
-    public static final String SWITCH_MEDIA_SHARE_MODULE_UMENG_EVENT_ID = "switch_media_share_module";
+    public static final String SWITCH_INBOX_MODULE_UMENG_EVENT_ID = "switch_inbox_module";
+    public static final String SWITCH_FILE_MODULE_UMENG_EVENT_ID = "switch_file_module";
+    public static final String SWITCH_GROUP_MODULE_UMENG_EVENT_ID = "switch_group_module";
     public static final String SWITCH_MEDIA_MODULE_UMENG_EVENT_ID = "switch_media_module";
     public static final String SWITCH_ORIGINAL_MEDIA_UMENG_EVENT_ID = "switch_original_media";
 

@@ -19,6 +19,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.UserAvatarBinding;
+import com.winsun.fruitmix.invitation.ConfirmInviteUser;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;

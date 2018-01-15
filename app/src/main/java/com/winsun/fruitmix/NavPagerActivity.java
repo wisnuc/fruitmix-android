@@ -428,17 +428,11 @@ public class NavPagerActivity extends BaseActivity
         uploadMediaUseCase.registerUploadMediaCountChangeListener(this);
 //        ButlerService.registerUploadMediaCountChangeListener(this);
 
-        final ViewTreeObserver observer = userAvatar.getViewTreeObserver();
-
-        observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+        userAvatar.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
 
-                if (observer.isAlive()) {
-
-                    observer.removeOnPreDrawListener(this);
-
-                }
+                userAvatar.getViewTreeObserver().removeOnPreDrawListener(this);
 
                 refreshUserInNavigationView();
 

@@ -1,10 +1,19 @@
 package com.winsun.fruitmix.invitation;
 
+import android.util.Log;
+
+import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.util.Util;
+
+import java.util.Random;
+
 /**
  * Created by Andy on 2017/7/12.
  */
 
 public class ConfirmInviteUser {
+
+    public static final String TAG = ConfirmInviteUser.class.getSimpleName();
 
     public static final int OPERATE_TYPE_ACCEPT = 1;
     public static final int OPERATE_TYPE_REFUSE = 2;
@@ -100,6 +109,22 @@ public class ConfirmInviteUser {
         }
 
     }
+
+    public User generateUser(Random random){
+
+        User user = new User();
+        user.setUserName(getUserName());
+        user.setAvatar(getUserAvatar());
+
+        user.setDefaultAvatar(Util.getUserNameForAvatar(user.getUserName()));
+        user.setDefaultAvatarBgColor(random.nextInt(3) + 1);
+
+        Log.d(TAG, "refreshView: user avatar:" + user.getAvatar());
+
+        return user;
+
+    }
+
 
 
 }

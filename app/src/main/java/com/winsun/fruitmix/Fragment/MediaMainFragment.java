@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.SharpCurveInterpolator;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
@@ -42,6 +43,7 @@ import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
 import com.winsun.fruitmix.group.view.GroupListPage;
+import com.winsun.fruitmix.inbox.view.InboxListPage;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.OnMainFragmentInteractionListener;
@@ -98,15 +100,18 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     private NewPhotoList photoList;
     private GroupListPage groupListPage;
 
+    private InboxListPage mInboxListPage;
+
     private boolean sMenuUnfolding = false;
 
     private Context mContext;
 
     private ProgressDialog mDialog;
 
-        private static final int PAGE_GROUP = 0;
-    private static final int PAGE_PHOTO = 1;
-    private static final int PAGE_FILE = 2;
+    private static final int PAGE_INBOX = 0;
+    private static final int PAGE_GROUP = 1;
+    private static final int PAGE_PHOTO = 2;
+    private static final int PAGE_FILE = 3;
 
     private boolean sInChooseMode = false;
 
@@ -161,7 +166,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         mThreadManger = ThreadManagerImpl.getInstance();
 
-        Log.d(TAG, "refreshView: ");
+        Log.d(TAG, "onCreate: ");
     }
 
     @Override
@@ -475,9 +480,16 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 String eventId = "";
 
                 switch (item.getItemId()) {
+                    case R.id.inbox:
+
+                        eventId = Util.SWITCH_INBOX_MODULE_UMENG_EVENT_ID;
+
+                        viewPager.setCurrentItem(PAGE_INBOX);
+
+                        break;
                     case R.id.group:
 
-                        eventId = Util.SWITCH_MEDIA_SHARE_MODULE_UMENG_EVENT_ID;
+                        eventId = Util.SWITCH_GROUP_MODULE_UMENG_EVENT_ID;
 
                         viewPager.setCurrentItem(PAGE_GROUP);
 
@@ -499,7 +511,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                         break;
                     case R.id.file:
 
-                        eventId = Util.SWITCH_ALBUM_MODULE_UMENG_EVENT_ID;
+                        eventId = Util.SWITCH_FILE_MODULE_UMENG_EVENT_ID;
 
                         viewPager.setCurrentItem(PAGE_FILE);
 
@@ -529,13 +541,19 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     }
 
     private void initPageList() {
+
+        mInboxListPage = new InboxListPage((BaseActivity) getActivity());
         groupListPage = new GroupListPage(getActivity());
         photoList = new NewPhotoList(getActivity());
         fileFragment = new FileFragment(getActivity(), this, this);
+
         pageList = new ArrayList<>();
+
+        pageList.add(mInboxListPage);
         pageList.add(groupListPage);
         pageList.add(photoList);
         pageList.add(fileFragment);
+
     }
 
     public void refreshUser() {
@@ -552,10 +570,12 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     public void refreshAllViewsForce() {
 
-        groupListPage.refreshView();
+        groupListPage.refreshViewForce();
 
         photoList.refreshViewForce();
         fileFragment.refreshViewForce();
+
+        mInboxListPage.refreshViewForce();
 
     }
 
@@ -1289,7 +1309,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         Log.d(TAG, "onFileSelectOperationAvailable: ");
 
         Context context = getContext();
-        if(context == null)
+        if (context == null)
             return;
 
         int currentItem = viewPager.getCurrentItem();
@@ -1305,7 +1325,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         Log.d(TAG, "onFileSelectOperationUnavailable: ");
 
         Context context = getContext();
-        if(context == null)
+        if (context == null)
             return;
 
         if (viewPager.getCurrentItem() == PAGE_FILE)
@@ -1346,6 +1366,26 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 toolbarViewModel.showMenu.set(false);
 
                 mListener.unlockDrawer();
+
+                break;
+            case PAGE_INBOX:
+
+                setCurrentItem(mInboxListPage);
+
+                toolbarViewModel.titleText.set(getString(R.string.inbox));
+                toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
+                toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
+
+                fab.setVisibility(View.GONE);
+                systemShareBtn.setVisibility(View.GONE);
+                downloadFileBtn.setVisibility(View.GONE);
+
+                toolbarViewModel.showSelect.set(false);
+                toolbarViewModel.showMenu.set(false);
+
+                mListener.unlockDrawer();
+
+                mInboxListPage.refreshView();
 
                 break;
             case PAGE_PHOTO:

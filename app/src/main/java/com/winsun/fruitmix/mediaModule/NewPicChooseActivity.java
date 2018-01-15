@@ -99,7 +99,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         binding.setRevealToolbarViewModel(viewModel);
 
-        groupDataSource = InjectGroupDataSource.provideGroupRepository();
+        groupDataSource = InjectGroupDataSource.provideGroupRepository(this);
 
         currentUser = InjectUser.provideRepository(this).getUserByUUID(InjectSystemSettingDataSource.provideSystemSettingDataSource(this)
                 .getCurrentLoginUserUUID());
