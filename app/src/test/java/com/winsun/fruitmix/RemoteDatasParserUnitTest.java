@@ -89,7 +89,7 @@ public class RemoteDatasParserUnitTest {
         assertEquals("91e4ff515f445c16f2b5697040c79b980396248c057ea7e04ad761e635cae062", media.getUuid());
         assertEquals("5203", media.getWidth());
         assertEquals("3451", media.getHeight());
-        assertEquals("2016-09-25 17:54:53", media.getTime());
+        assertEquals("2016-09-25 17:54:53", media.getFormattedTime());
 
     }
 
@@ -144,7 +144,7 @@ public class RemoteDatasParserUnitTest {
         }
 
         AbstractRemoteFile abstractRemoteFile = abstractRemoteFiles.get(0);
-        assertEquals("1502960620288", abstractRemoteFile.getTime());
+        assertEquals(1502960620288L, abstractRemoteFile.getTime());
         assertEquals("1ed05292-5e98-4fb4-9307-e4e561411af1", abstractRemoteFile.getUuid());
         assertEquals("e9ccf83b68ff0a2e4664.hot-update.json", abstractRemoteFile.getName());
         assertEquals("43", abstractRemoteFile.getSize());

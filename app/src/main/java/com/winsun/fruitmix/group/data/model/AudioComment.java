@@ -6,7 +6,7 @@ import com.winsun.fruitmix.user.User;
  * Created by Administrator on 2017/8/14.
  */
 
-public class AudioComment extends UserComment {
+public class AudioComment extends TextComment {
 
     private String audioRecordFilePath;
     private long audioRecordTime;

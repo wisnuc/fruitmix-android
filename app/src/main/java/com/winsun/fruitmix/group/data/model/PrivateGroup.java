@@ -21,13 +21,19 @@ public class PrivateGroup {
 
     private List<User> users;
 
+    private String ownerUUID;
+
     private List<UserComment> userComments;
 
     private List<Pin> pins;
 
-    public PrivateGroup(String uuid, String name, List<User> users) {
+    private String createTime;
+    private String modifyTime;
+
+    public PrivateGroup(String uuid, String name, String ownerUUID, List<User> users) {
         this.uuid = uuid;
         this.name = name;
+        this.ownerUUID = ownerUUID;
         this.users = users;
 
         userComments = new ArrayList<>();
@@ -45,6 +51,10 @@ public class PrivateGroup {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getOwnerUUID() {
+        return ownerUUID;
     }
 
     public List<User> getUsers() {
@@ -120,7 +130,7 @@ public class PrivateGroup {
 
     public PrivateGroup cloneSelf() {
 
-        PrivateGroup privateGroup = new PrivateGroup(getUUID(), getName(), new ArrayList<>(getUsers()));
+        PrivateGroup privateGroup = new PrivateGroup(getUUID(), getName(),getOwnerUUID(), new ArrayList<>(getUsers()));
 
         privateGroup.addUserComments(getUserComments());
 

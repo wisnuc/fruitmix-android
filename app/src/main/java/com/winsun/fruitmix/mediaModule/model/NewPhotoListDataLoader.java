@@ -1,28 +1,19 @@
 package com.winsun.fruitmix.mediaModule.model;
 
-import android.media.ExifInterface;
-import android.os.AsyncTask;
-import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 /**
@@ -166,10 +157,10 @@ public class NewPhotoListDataLoader {
 
         for (Media media : medias) {
 
-            if (media.getTime().length() > 10) {
-                date = media.getTime().substring(0, 10);
+            if (media.getFormattedTime().length() > 10) {
+                date = media.getFormattedTime().substring(0, 10);
             } else
-                date = media.getTime();
+                date = media.getFormattedTime();
 
             if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
                 mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
@@ -179,7 +170,7 @@ public class NewPhotoListDataLoader {
                 mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
             }
 
-            media.setDate(date);
+            media.setDateWithoutHourMinSec(date);
             media.setSelected(false);
 
             mediaList.add(media);
@@ -222,7 +213,7 @@ public class NewPhotoListDataLoader {
             Collections.sort(mediaList, new Comparator<Media>() {
                 @Override
                 public int compare(Media lhs, Media rhs) {
-                    return -lhs.getTime().compareTo(rhs.getTime());
+                    return -lhs.getFormattedTime().compareTo(rhs.getFormattedTime());
                 }
             });
 

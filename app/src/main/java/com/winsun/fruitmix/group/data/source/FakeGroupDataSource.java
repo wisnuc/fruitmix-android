@@ -121,7 +121,7 @@ public class FakeGroupDataSource implements GroupDataSource {
 
         String groupName1 = "大学同学";
 
-        PrivateGroup privateGroup1 = new PrivateGroup("1", groupName1, new ArrayList<>(users));
+        PrivateGroup privateGroup1 = new PrivateGroup("1", groupName1, myself.getUuid(), new ArrayList<>(users));
 
         privateGroup1.addPins(pins);
 
@@ -131,14 +131,14 @@ public class FakeGroupDataSource implements GroupDataSource {
 
         String groupName2 = "外卖小分队";
 
-        PrivateGroup privateGroup2 = new PrivateGroup("2", groupName2, new ArrayList<>(users));
+        PrivateGroup privateGroup2 = new PrivateGroup("2", groupName2, myself.getUuid(), new ArrayList<>(users));
         privateGroup2.addUserComments(userComments);
 
         mPrivateGroups.add(privateGroup2);
 
         String groupName3 = "软件学院同学会";
 
-        PrivateGroup privateGroup3 = new PrivateGroup("3", groupName3, new ArrayList<>(users));
+        PrivateGroup privateGroup3 = new PrivateGroup("3", groupName3, myself.getUuid(), new ArrayList<>(users));
         privateGroup3.addUserComments(userComments);
 
         mPrivateGroups.add(privateGroup3);
@@ -146,21 +146,21 @@ public class FakeGroupDataSource implements GroupDataSource {
         String groupUuid4 = "4";
         String groupName4 = "吃货群";
 
-        PrivateGroup privateGroup4 = new PrivateGroup(groupUuid4, groupName4, new ArrayList<>(users));
+        PrivateGroup privateGroup4 = new PrivateGroup(groupUuid4, groupName4, myself.getUuid(), new ArrayList<>(users));
         privateGroup4.addUserComments(userComments);
 
         mPrivateGroups.add(privateGroup4);
 
         String groupName5 = "校广播站";
 
-        PrivateGroup privateGroup5 = new PrivateGroup("5", groupName5, new ArrayList<>(users));
+        PrivateGroup privateGroup5 = new PrivateGroup("5", groupName5, myself.getUuid(), new ArrayList<>(users));
         privateGroup5.addUserComments(userComments);
 
         mPrivateGroups.add(privateGroup5);
 
         String groupName6 = "211宿舍派对";
 
-        PrivateGroup privateGroup6 = new PrivateGroup("6", groupName6, new ArrayList<>(users));
+        PrivateGroup privateGroup6 = new PrivateGroup("6", groupName6, myself.getUuid(), new ArrayList<>(users));
         privateGroup6.addUserComments(userComments);
 
         mPrivateGroups.add(privateGroup6);

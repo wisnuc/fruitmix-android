@@ -10,9 +10,8 @@ import com.winsun.fruitmix.databinding.MultiFileCommentBinding;
 import com.winsun.fruitmix.databinding.SingleFileBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
-import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
-import com.winsun.fruitmix.group.data.model.MultiPhotoComment;
-import com.winsun.fruitmix.group.data.model.MultiFileComment;
+import com.winsun.fruitmix.group.data.model.PhotoComment;
+import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -49,9 +48,9 @@ public class MultiFileCommentView extends UserCommentView {
 
         int size;
 
-        if (data instanceof MultiPhotoComment) {
+        if (data instanceof PhotoComment) {
 
-            MultiPhotoComment comment = (MultiPhotoComment) data;
+            PhotoComment comment = (PhotoComment) data;
 
             List<Media> medias = comment.getMedias();
 
@@ -67,15 +66,17 @@ public class MultiFileCommentView extends UserCommentView {
 
                 SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), null, false);
 
+                frameLayouts[i].removeAllViews();
+
                 frameLayouts[i].addView(singlePhotoBinding.getRoot());
 
                 MediaUtil.setMediaImageUrl(media,singlePhotoBinding.coverImg, httpRequest, imageLoader);
 
             }
 
-        } else if (data instanceof MultiFileComment) {
+        } else if (data instanceof FileComment) {
 
-            MultiFileComment comment = (MultiFileComment) data;
+            FileComment comment = (FileComment) data;
 
             List<AbstractFile> files = comment.getFiles();
 
@@ -90,6 +91,8 @@ public class MultiFileCommentView extends UserCommentView {
                 SingleFileBinding singleFileBinding = SingleFileBinding.inflate(LayoutInflater.from(context), null, false);
 
                 singleFileBinding.setFile(file);
+
+                frameLayouts[i].removeAllViews();
 
                 frameLayouts[i].addView(singleFileBinding.getRoot());
 

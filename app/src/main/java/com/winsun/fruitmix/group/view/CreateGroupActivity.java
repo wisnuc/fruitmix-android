@@ -63,7 +63,7 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
 
     @Override
     public void createGroup(CreateGroupViewModel createGroupViewModel) {
-        PrivateGroup group = new PrivateGroup(Util.createLocalUUid(), createGroupViewModel.getGroupName(), Collections.singletonList(currentUser));
+        PrivateGroup group = new PrivateGroup(Util.createLocalUUid(), createGroupViewModel.getGroupName(),currentUser.getUuid(), Collections.singletonList(currentUser));
 
         showProgressDialog(getString(R.string.operating_title,getString(R.string.create_group)));
 

@@ -16,16 +16,13 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.eventbus.DeleteDownloadedRequestEvent;
 import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
-import com.winsun.fruitmix.eventbus.MediaRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
 import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
-import com.winsun.fruitmix.executor.UploadMediaTask;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.upload.UploadFileUseCase;
-import com.winsun.fruitmix.firmware.FirmwareActivity;
 import com.winsun.fruitmix.firmware.data.FirmwareDataSource;
 import com.winsun.fruitmix.firmware.data.InjectFirmwareDataSource;
 import com.winsun.fruitmix.firmware.model.CheckUpdateState;
@@ -578,12 +575,6 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
         switch (targetType) {
 
             case REMOTE_MEDIA:
-
-                media = ((MediaRequestEvent) requestEvent).getMedia();
-
-                instance = ExecutorServiceInstance.SINGLE_INSTANCE;
-                UploadMediaTask task = new UploadMediaTask(DBUtils.getInstance(this), media, mStopUpload);
-                instance.doOneTaskInUploadMediaThreadPool(task);
 
                 break;
 

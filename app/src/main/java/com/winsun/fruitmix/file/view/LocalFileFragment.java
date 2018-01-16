@@ -136,7 +136,7 @@ public class LocalFileFragment {
 
                 abstractLocalFile.setName(file.getName());
                 abstractLocalFile.setPath(file.getAbsolutePath());
-                abstractLocalFile.setTime(String.valueOf(file.lastModified()));
+                abstractLocalFile.setTime(file.lastModified());
 
                 if (alreadySelectedFileArrayList != null && alreadySelectedFileArrayList.contains(abstractLocalFile.getName()))
                     selectedFiles.add(abstractLocalFile);

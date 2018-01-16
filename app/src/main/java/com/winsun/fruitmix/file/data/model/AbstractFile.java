@@ -10,7 +10,7 @@ public abstract class AbstractFile {
 
     private String name;
 
-    private String time;
+    private long time;
 
     private int fileTypeResID;
 
@@ -32,27 +32,25 @@ public abstract class AbstractFile {
         this.name = name;
     }
 
-    public String getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(long time) {
         this.time = time;
     }
 
     public String getDateText() {
 
-        return Util.formatDate(Long.parseLong(getTime()));
+        return Util.formatDate(getTime());
 
     }
 
-    public String getTimeText(){
+    public String getTimeText() {
 
-        return Util.formatTime(Long.parseLong(getTime()));
+        return Util.formatTime(getTime());
 
     }
-
-
 
 
 }

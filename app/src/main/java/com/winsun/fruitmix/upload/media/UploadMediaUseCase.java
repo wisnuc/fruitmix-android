@@ -278,13 +278,13 @@ public class UploadMediaUseCase {
 
         Log.i(TAG, "start check folder exist");
 
-        OperationResult operationResult = stationFileRepository.getFileWithoutCreateNewThread(rootUUID,dirUUID);
+        OperationResult operationResult = stationFileRepository.getFileWithoutCreateNewThread(rootUUID, dirUUID);
 
-        if(operationResult.getOperationResultType() == OperationResultType.SUCCEED){
+        if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
 
             callback.onSucceed(((OperationSuccessWithFile) operationResult).getList(), operationResult);
 
-        }else {
+        } else {
 
             if (operationResult instanceof OperationNetworkException) {
                 notifyGetFolderFail(((OperationNetworkException) operationResult).getHttpResponseCode());
@@ -362,11 +362,11 @@ public class UploadMediaUseCase {
 
         Log.i(TAG, "start getUploadedMediaHashList");
 
-        OperationResult operationResult = stationFileRepository.getFileWithoutCreateNewThread(currentUserHome,uploadFolderUUID);
+        OperationResult operationResult = stationFileRepository.getFileWithoutCreateNewThread(currentUserHome, uploadFolderUUID);
 
-        if(operationResult instanceof OperationSuccessWithFile){
+        if (operationResult instanceof OperationSuccessWithFile) {
 
-            List<AbstractRemoteFile> data = ((OperationSuccessWithFile)operationResult).getList();
+            List<AbstractRemoteFile> data = ((OperationSuccessWithFile) operationResult).getList();
 
             uploadedMediaHashs = new ArrayList<>();
 
@@ -383,14 +383,18 @@ public class UploadMediaUseCase {
 
             startPrepareAutoUpload();
 
-        }else {
+        } else {
 
             if (operationResult instanceof OperationNetworkException) {
                 notifyGetUploadMediaCountFail(((OperationNetworkException) operationResult).getHttpResponseCode());
             } else
                 notifyGetUploadMediaCountFail(-1);
 
-            startPrepareAutoUploadWithNoFolder();
+            Log.d(TAG, "getUploadedMediaHashList onFail: get uploaded media hash fail,stop upload and send retry");
+
+            stopUploadMedia();
+
+            sendRetryUploadMessage();
 
         }
 

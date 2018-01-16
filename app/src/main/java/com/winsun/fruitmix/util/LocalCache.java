@@ -12,7 +12,6 @@ import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
-import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 
 import java.io.File;
@@ -229,7 +228,7 @@ public class LocalCache {
 
             f = new File(originalPhotoPath);
             date.setTimeInMillis(f.lastModified());
-            media.setTime(df.format(date.getTime()));
+            media.setFormattedTime(df.format(date.getTime()));
             media.setSelected(false);
             media.setLoaded(false);
 

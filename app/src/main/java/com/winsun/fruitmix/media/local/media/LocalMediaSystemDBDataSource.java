@@ -3,17 +3,13 @@ package com.winsun.fruitmix.media.local.media;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.text.format.Formatter;
 import android.util.Log;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.util.MediaUtil;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -142,7 +138,7 @@ public class LocalMediaSystemDBDataSource {
 
             f = new File(originalPhotoPath);
             date.setTimeInMillis(f.lastModified());
-            media.setTime(df.format(date.getTime()));
+            media.setFormattedTime(df.format(date.getTime()));
             media.setSelected(false);
             media.setLoaded(false);
 
@@ -250,7 +246,7 @@ public class LocalMediaSystemDBDataSource {
             video.setOriginalPhotoPath(path);
 
             date.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(queryTakeDate)));
-            video.setTime(df.format(date.getTime()));
+            video.setFormattedTime(df.format(date.getTime()));
 
             long duration = cursor.getLong(cursor.getColumnIndex(queryDuration));
 

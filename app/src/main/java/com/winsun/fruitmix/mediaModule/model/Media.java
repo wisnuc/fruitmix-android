@@ -1,15 +1,8 @@
 package com.winsun.fruitmix.mediaModule.model;
 
 import android.content.Context;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.support.v4.util.ArrayMap;
 import android.util.Log;
 
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
-import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
@@ -18,7 +11,7 @@ import com.winsun.fruitmix.util.Util;
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class Media implements Parcelable {
+public class Media {
 
     private static final String TAG = Media.class.getSimpleName();
 
@@ -28,12 +21,12 @@ public class Media implements Parcelable {
 
     private String uuid;
     private String thumb;
-    private String time;
+    private String formattedTime;
     private String width;
     private String height;
     private boolean selected;
     private boolean local;
-    private String date;
+    private String dateWithoutHourMinSec;
     private boolean loaded;
     private String belongingMediaShareUUID;
     private String uploadedUserUUIDs;
@@ -56,7 +49,7 @@ public class Media implements Parcelable {
         height = "";
         thumb = "";
         type = "JPEG";
-        date = "";
+        dateWithoutHourMinSec = "";
         local = false;
         miniThumbPath = "";
         originalPhotoPath = "";
@@ -64,58 +57,6 @@ public class Media implements Parcelable {
         longitude = "";
         latitude = "";
     }
-
-    protected Media(Parcel in) {
-        uuid = in.readString();
-        thumb = in.readString();
-        time = in.readString();
-        width = in.readString();
-        height = in.readString();
-        selected = in.readByte() != 0;
-        local = in.readByte() != 0;
-        date = in.readString();
-        loaded = in.readByte() != 0;
-        belongingMediaShareUUID = in.readString();
-        uploadedUserUUIDs = in.readString();
-        orientationNumber = in.readInt();
-        type = in.readString();
-        miniThumbPath = in.readString();
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(uuid);
-        dest.writeString(thumb);
-        dest.writeString(time);
-        dest.writeString(width);
-        dest.writeString(height);
-        dest.writeByte((byte) (selected ? 1 : 0));
-        dest.writeByte((byte) (local ? 1 : 0));
-        dest.writeString(date);
-        dest.writeByte((byte) (loaded ? 1 : 0));
-        dest.writeString(belongingMediaShareUUID);
-        dest.writeString(uploadedUserUUIDs);
-        dest.writeInt(orientationNumber);
-        dest.writeString(type);
-        dest.writeString(miniThumbPath);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<Media> CREATOR = new Creator<Media>() {
-        @Override
-        public Media createFromParcel(Parcel in) {
-            return new Media(in);
-        }
-
-        @Override
-        public Media[] newArray(int size) {
-            return new Media[size];
-        }
-    };
 
     public String getUuid() {
         return uuid == null ? "" : uuid;
@@ -125,12 +66,12 @@ public class Media implements Parcelable {
         this.uuid = uuid;
     }
 
-    public String getTime() {
-        return time == null ? "" : time;
+    public String getFormattedTime() {
+        return formattedTime == null ? "" : formattedTime;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setFormattedTime(String formattedTime) {
+        this.formattedTime = formattedTime;
     }
 
     public String getWidth() {
@@ -165,12 +106,12 @@ public class Media implements Parcelable {
         this.local = local;
     }
 
-    public String getDate() {
-        return date == null ? "" : date;
+    public String getDateWithoutHourMinSec() {
+        return dateWithoutHourMinSec == null ? "" : dateWithoutHourMinSec;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setDateWithoutHourMinSec(String date) {
+        this.dateWithoutHourMinSec = date;
     }
 
     public String getThumb() {
@@ -274,42 +215,6 @@ public class Media implements Parcelable {
         this.address = address;
     }
 
-    public synchronized boolean uploadIfNotDone(DBUtils dbUtils) {
-
-/*        boolean uploaded;
-
-        if (LocalCache.RemoteMediaMapKeyIsUUID.containsKey(getUuid())) {
-
-            Log.d(TAG, "upload file is already uploaded");
-            uploaded = true;
-
-        } else {
-
-            Log.i(TAG, "original path: " + getOriginalPhotoPath() + "hash:" + getUuid());
-
-            String url = getRemoteMediaThumbUrl();
-
-            Log.i(TAG, "uploadIfNotDone: url: " + url);
-
-            HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_POST_METHOD);
-            httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + FNAS.JWT);
-
-            uploaded = OkHttpUtil.getInstance().uploadFile(httpRequest, this);
-
-        }
-
-        if (!uploaded) return false;
-
-        if (getUploadedUserUUIDs().isEmpty()) {
-            setUploadedUserUUIDs(LocalCache.DeviceID);
-        } else if (!getUploadedUserUUIDs().contains(LocalCache.DeviceID)) {
-            setUploadedUserUUIDs(getUploadedUserUUIDs() + "," + LocalCache.DeviceID);
-        }
-        dbUtils.updateLocalMedia(this);*/
-
-        return true;
-    }
-
     public HttpRequest getImageSmallThumbUrl(Context context) {
 
         String imageUrl;
@@ -335,9 +240,7 @@ public class Media implements Parcelable {
 
             httpRequest = getRemoteMediaThumbUrl(context, 64, 64);
 
-
             Log.d(TAG, "media uuid: " + getUuid() + " getImageSmallThumbUrl: " + httpRequest.getUrl());
-
 
         }
         return httpRequest;
@@ -451,6 +354,6 @@ public class Media implements Parcelable {
     @Override
     public String toString() {
         return "uuid: " + getUuid() + " path: " + getOriginalPhotoPath() + " width: " + getWidth()
-                + " height: " + getHeight() + " time: " + getTime() + " orientationNumber: " + getOrientationNumber();
+                + " height: " + getHeight() + " formattedTime: " + getFormattedTime() + " orientationNumber: " + getOrientationNumber();
     }
 }

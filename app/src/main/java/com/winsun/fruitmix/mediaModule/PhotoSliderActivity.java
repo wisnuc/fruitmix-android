@@ -692,7 +692,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             Media media = mediaList.get(position);
 
-            String title = media.getTime();
+            String title = media.getFormattedTime();
             if (title == null || title.contains(Util.DEFAULT_DATE)) {
 
                 photoSliderViewModel.titleText.set(getString(R.string.unknown_time));

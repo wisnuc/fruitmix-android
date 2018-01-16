@@ -326,7 +326,7 @@ public class DBUtils {
 
     private void bindMediaWhenCreate(SQLiteStatement sqLiteStatement, Media media) {
         sqLiteStatement.bindString(1, media.getUuid());
-        sqLiteStatement.bindString(2, media.getTime());
+        sqLiteStatement.bindString(2, media.getFormattedTime());
         sqLiteStatement.bindString(3, media.getWidth());
         sqLiteStatement.bindString(4, media.getHeight());
         sqLiteStatement.bindString(5, media.getThumb());
@@ -848,7 +848,7 @@ public class DBUtils {
     private ContentValues createMediaContentValues(Media media) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.MEDIA_KEY_UUID, media.getUuid());
-        contentValues.put(DBHelper.MEDIA_KEY_TIME, media.getTime());
+        contentValues.put(DBHelper.MEDIA_KEY_TIME, media.getFormattedTime());
         contentValues.put(DBHelper.MEDIA_KEY_WIDTH, media.getWidth());
         contentValues.put(DBHelper.MEDIA_KEY_HEIGHT, media.getHeight());
         contentValues.put(DBHelper.MEDIA_KEY_THUMB, media.getThumb());

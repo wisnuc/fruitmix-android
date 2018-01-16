@@ -14,7 +14,7 @@ public class RemoteBuiltInDrive extends RemoteFolder {
 
         setFileTypeResID(R.drawable.public_disk);
 
-        setTime("");
+        setTime(0);
 
     }
 }

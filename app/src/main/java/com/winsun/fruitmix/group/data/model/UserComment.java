@@ -12,6 +12,10 @@ import com.winsun.fruitmix.util.Util;
 
 public class UserComment {
 
+    private String uuid;
+
+    private long index;
+
     private User creator;
 
     private long time;
@@ -19,8 +23,21 @@ public class UserComment {
     private String date;
 
     public UserComment(User creator, long time) {
+
         this.creator = creator;
         this.time = time;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setIndex(long index) {
+        this.index = index;
+    }
+
+    public long getIndex() {
+        return index;
     }
 
     public long getTime() {

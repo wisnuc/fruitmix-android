@@ -1026,7 +1026,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 if (media == null) {
                     title = Util.DEFAULT_DATE;
                 } else
-                    title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDate();
+                    title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDateWithoutHourMinSec();
 
             }
 
@@ -1457,13 +1457,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             MediaUtil.setMediaImageUrl(currentMedia, mPhotoIv, httpRequest, mImageLoader);
 
-            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
+            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDateWithoutHourMinSec());
 
             int temporaryPosition = 0;
 
             if (mediaList == null) {
 
-                Log.d(TAG, "refreshView: media list is null,currentMedia getDate:" + currentMedia.getDate());
+                Log.d(TAG, "refreshView: media list is null,currentMedia getDateWithoutHourMinSec:" + currentMedia.getDateWithoutHourMinSec());
 
             } else {
 
@@ -1582,13 +1582,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             setMediaSelectImg(networkImageView, video, photoItemViewModel.showPhotoSelectImg);
 
-            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(video.getDate());
+            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(video.getDateWithoutHourMinSec());
 
             int temporaryPosition = 0;
 
             if (mediaList == null) {
 
-                Log.d(TAG, "refreshView: media list is null,currentVideo getDate:" + video.getDate());
+                Log.d(TAG, "refreshView: media list is null,currentVideo getDateWithoutHourMinSec:" + video.getDateWithoutHourMinSec());
 
             } else {
 

@@ -13,7 +13,7 @@ public class RemotePrivateDrive extends RemoteFolder {
 
         setFileTypeResID(R.drawable.folder_icon);
 
-        setTime("");
+        setTime(0);
     }
 
 }

@@ -18,10 +18,12 @@ import com.winsun.fruitmix.databinding.InboxUserInvitationBinding;
 import com.winsun.fruitmix.databinding.InboxUserInvitationItemBinding;
 import com.winsun.fruitmix.inbox.view.InboxView;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
+import com.winsun.fruitmix.invitation.ConfirmInviteUserActivity;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import org.json.JSONException;
@@ -76,11 +78,19 @@ public class InboxUserInvitationPresenter implements ActiveView {
         mInboxUserInvitationRecyclerViewAdapter.setConfirmInviteUsers(confirmInviteUsers);
         mInboxUserInvitationRecyclerViewAdapter.notifyDataSetChanged();
 
+        mInboxUserInvitationBinding.setInboxUserInvitationPresenter(this);
+
     }
 
     @Override
     public boolean isActive() {
         return mInboxView != null;
+    }
+
+    public void enterInvitationActivity(Context context){
+
+        Util.startActivity(context, ConfirmInviteUserActivity.class);
+
     }
 
 

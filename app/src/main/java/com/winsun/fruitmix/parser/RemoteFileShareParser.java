@@ -60,7 +60,7 @@ public class RemoteFileShareParser implements RemoteDatasParser<AbstractRemoteFi
                 abstractRemoteFile.addReadList(writerArray.getString(j));
             }
 
-            String time = jsonObject.optString("mtime");
+            long time = jsonObject.optLong("mtime");
             abstractRemoteFile.setTime(time);
 
             abstractRemoteFiles.add(abstractRemoteFile);

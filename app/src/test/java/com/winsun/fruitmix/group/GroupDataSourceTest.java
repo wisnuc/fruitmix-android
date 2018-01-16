@@ -36,7 +36,7 @@ public class GroupDataSourceTest {
     @Test
     public void testAddGroup() {
 
-        PrivateGroup privateGroup = new PrivateGroup(testGroupUuid, testGroupName1, Collections.<User>emptyList());
+        PrivateGroup privateGroup = new PrivateGroup(testGroupUuid, testGroupName1,"testOwnerUUID", Collections.<User>emptyList());
 
         groupDataSource.addGroup(Collections.singleton(privateGroup));
 

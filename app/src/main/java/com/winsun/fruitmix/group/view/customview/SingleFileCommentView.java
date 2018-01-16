@@ -11,8 +11,8 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.databinding.SingleFileBinding;
 import com.winsun.fruitmix.databinding.SingleFileCommentBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
-import com.winsun.fruitmix.group.data.model.SingleFileComment;
-import com.winsun.fruitmix.group.data.model.SinglePhotoComment;
+import com.winsun.fruitmix.group.data.model.FileComment;
+import com.winsun.fruitmix.group.data.model.PhotoComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -47,11 +47,13 @@ public class SingleFileCommentView extends UserCommentView {
 
         FrameLayout frameLayout = binding.singleFileFramelayout;
 
-        if (data instanceof SinglePhotoComment) {
+        if (data instanceof PhotoComment) {
 
-            SinglePhotoComment comment = (SinglePhotoComment) data;
+            PhotoComment comment = (PhotoComment) data;
 
             SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), null, false);
+
+            frameLayout.removeAllViews();
 
             frameLayout.addView(singlePhotoBinding.getRoot());
 
@@ -59,24 +61,25 @@ public class SingleFileCommentView extends UserCommentView {
 
             NetworkImageView networkImageView = singlePhotoBinding.coverImg;
 
-            Media media = comment.getMedia();
+            Media media = comment.getMedias().get(0);
 
             HttpRequest httpRequest = media.getImageThumbUrl(context);
 
             MediaUtil.setMediaImageUrl(media,networkImageView, httpRequest, imageLoader);
 
-        } else if (data instanceof SingleFileComment) {
+        } else if (data instanceof FileComment) {
 
-            SingleFileComment singleFileComment = (SingleFileComment) data;
+            FileComment fileComment = (FileComment) data;
 
             SingleFileBinding singleFileBinding = SingleFileBinding.inflate(LayoutInflater.from(context), null, false);
+
+            frameLayout.removeAllViews();
 
             frameLayout.addView(singleFileBinding.getRoot());
 
             Util.setHeight(singleFileBinding.container,Util.dip2px(context, 250));
 
-            singleFileBinding.setFile(singleFileComment.getFile());
-
+            singleFileBinding.setFile(fileComment.getFiles().get(0));
 
         }
 

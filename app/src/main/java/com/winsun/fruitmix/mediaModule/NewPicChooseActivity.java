@@ -17,10 +17,8 @@ import com.winsun.fruitmix.databinding.NewActivityAlbumPicChooseBinding;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.view.LocalFileFragment;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
-import com.winsun.fruitmix.group.data.model.MultiFileComment;
-import com.winsun.fruitmix.group.data.model.MultiPhotoComment;
-import com.winsun.fruitmix.group.data.model.SingleFileComment;
-import com.winsun.fruitmix.group.data.model.SinglePhotoComment;
+import com.winsun.fruitmix.group.data.model.FileComment;
+import com.winsun.fruitmix.group.data.model.PhotoComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
@@ -363,11 +361,14 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
         } else
             selectFiles = files;
 
-        if (files.size() == 1) {
-            userComment = new SingleFileComment(currentUser, System.currentTimeMillis(), selectFiles.get(0));
-        } else {
-            userComment = new MultiFileComment(currentUser, System.currentTimeMillis(), selectFiles);
-        }
+//        if (files.size() == 1) {
+//            userComment = new SingleFileComment(currentUser, System.currentTimeMillis(), selectFiles.get(0));
+//        } else {
+//            userComment = new MultiFileComment(currentUser, System.currentTimeMillis(), selectFiles);
+//        }
+
+        userComment = new FileComment(currentUser, System.currentTimeMillis(), selectFiles);
+
         return userComment;
     }
 
@@ -383,11 +384,14 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
         } else
             selectMedias = medias;
 
-        if (medias.size() == 1) {
-            userComment = new SinglePhotoComment(currentUser, System.currentTimeMillis(), selectMedias.get(0));
-        } else {
-            userComment = new MultiPhotoComment(currentUser, System.currentTimeMillis(), selectMedias);
-        }
+//        if (medias.size() == 1) {
+//            userComment = new SinglePhotoComment(currentUser, System.currentTimeMillis(), selectMedias.get(0));
+//        } else {
+//            userComment = new MultiPhotoComment(currentUser, System.currentTimeMillis(), selectMedias);
+//        }
+
+        userComment = new PhotoComment(currentUser, System.currentTimeMillis(), selectMedias);
+
         return userComment;
     }
 

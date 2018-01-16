@@ -13,7 +13,7 @@ public class RemotePublicDrive extends RemoteFolder {
 
         setFileTypeResID(R.drawable.specified_shared_disk);
 
-        setTime("");
+        setTime(0);
     }
 
 }

@@ -76,14 +76,14 @@ public class RemoteMediaParser extends BaseRemoteDataParser implements RemoteDat
             }
 
             if (dateTime.equals("") || dateTime.length() < 10) {
-                media.setTime(Util.DEFAULT_DATE);
+                media.setFormattedTime(Util.DEFAULT_DATE);
             } else {
 
                 //TODO:性能瓶颈：处理dateTime耗费大量时间
 
                 dateTime = dateTime.substring(0, 10).replace(":", "-") + dateTime.substring(10);
 
-                media.setTime(dateTime);
+                media.setFormattedTime(dateTime);
 
   /*              try {
 
@@ -102,11 +102,11 @@ public class RemoteMediaParser extends BaseRemoteDataParser implements RemoteDat
                     if (!Util.isNumeric(day))
                         throw new NumberFormatException(day + " is not number");
 
-                    media.setTime(year + "-" + month + "-" + day + dateTime.substring(10));
+                    media.setFormattedTime(year + "-" + month + "-" + day + dateTime.substring(10));
 
                 } catch (NumberFormatException e) {
 
-                    media.setTime(Util.DEFAULT_DATE);
+                    media.setFormattedTime(Util.DEFAULT_DATE);
                 }*/
             }
 

@@ -147,12 +147,12 @@ public class RemoteMediaStreamParser implements RemoteDataStreamParser<Media> {
             }
 
             if (time.equals("") || time.length() < 10) {
-                media.setTime(Util.DEFAULT_DATE);
+                media.setFormattedTime(Util.DEFAULT_DATE);
             } else {
 
                 time = time.substring(0, 10).replace(":", "-") + time.substring(10);
 
-                media.setTime(time);
+                media.setFormattedTime(time);
 
             }
 

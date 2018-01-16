@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -50,37 +49,37 @@ public class RecommendAlbumStrategyTest {
 
         for (int i = 0; i < 5; i++) {
             Media media = new Media();
-            media.setTime("2016-12-16");
+            media.setFormattedTime("2016-12-16");
             medias.add(media);
         }
 
         for (int i = 0; i < 2; i++) {
             Media media = new Media();
-            media.setTime("2016-12-18");
+            media.setFormattedTime("2016-12-18");
             medias.add(media);
         }
 
         for (int i = 0; i < 14; i++) {
             Media media = new Media();
-            media.setTime("2016-12-19");
+            media.setFormattedTime("2016-12-19");
             medias.add(media);
         }
 
         for (int i = 0; i < 10; i++) {
             Media media = new Media();
-            media.setTime("2016-12-30"); //1483027200
+            media.setFormattedTime("2016-12-30"); //1483027200
             medias.add(media);
         }
 
         for (int i = 0; i < 6; i++) {
             Media media = new Media();
-            media.setTime("2017-01-01"); //1483200000
+            media.setFormattedTime("2017-01-01"); //1483200000
             medias.add(media);
         }
 
         for (int i = 0; i < 5; i++) {
             Media media = new Media();
-            media.setTime("2017-01-16");
+            media.setFormattedTime("2017-01-16");
             medias.add(media);
         }
 
@@ -137,7 +136,7 @@ public class RecommendAlbumStrategyTest {
 
         for (Media media : allLocalMedias) {
 
-            String time = media.getTime();
+            String time = media.getFormattedTime();
 
             long timeStamp = 0;
 

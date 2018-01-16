@@ -359,7 +359,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
             if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsKey(position))
                 title = mMapKeyIsPhotoPositionValueIsPhotoDate.get(position);
             else {
-                title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDate();
+                title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDateWithoutHourMinSec();
             }
 
             if (title.contains(Util.DEFAULT_DATE)) {
@@ -406,7 +406,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
             MediaUtil.setMediaImageUrl(currentMedia,mPhotoIv,httpRequest,mImageLoader);
 
 
-            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDate());
+            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDateWithoutHourMinSec());
             int mediaInListPosition = getPosition(mediaList, currentMedia);
 
             setPhotoItemMargin(mediaInListPosition);

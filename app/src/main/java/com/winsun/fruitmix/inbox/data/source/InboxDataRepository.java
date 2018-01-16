@@ -3,24 +3,19 @@ package com.winsun.fruitmix.inbox.data.source;
 import android.support.annotation.NonNull;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.group.data.model.MultiFileComment;
-import com.winsun.fruitmix.group.data.model.MultiPhotoComment;
+import com.winsun.fruitmix.group.data.model.FileComment;
+import com.winsun.fruitmix.group.data.model.PhotoComment;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
-import com.winsun.fruitmix.group.data.model.SingleFileComment;
-import com.winsun.fruitmix.group.data.model.SinglePhotoComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
-import com.winsun.fruitmix.group.data.source.GroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.inbox.data.model.GroupFileComment;
 import com.winsun.fruitmix.inbox.data.model.GroupMediaComment;
 import com.winsun.fruitmix.inbox.data.model.GroupUserComment;
-import com.winsun.fruitmix.inbox.data.source.InboxDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.user.User;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -78,25 +73,15 @@ public class InboxDataRepository implements InboxDataSource {
 
                 for (UserComment userComment : group.getUserComments()) {
 
-                    if (userComment instanceof SinglePhotoComment) {
+                    if (userComment instanceof PhotoComment) {
 
                         groupUserComments.add(new GroupMediaComment(userComment, group.getUUID(), group.getName(),
-                                Collections.singletonList(((SinglePhotoComment) userComment).getMedia())));
+                                ((PhotoComment) userComment).getMedias()));
 
-                    } else if (userComment instanceof MultiPhotoComment) {
-
-                        groupUserComments.add(new GroupMediaComment(userComment, group.getUUID(), group.getName(),
-                                ((MultiPhotoComment) userComment).getMedias()));
-
-                    } else if (userComment instanceof SingleFileComment) {
+                    } else if (userComment instanceof FileComment) {
 
                         groupUserComments.add(new GroupFileComment(userComment, group.getUUID(), group.getName(),
-                                Collections.singletonList(((SingleFileComment) userComment).getFile())));
-
-                    } else if (userComment instanceof MultiFileComment) {
-
-                        groupUserComments.add(new GroupFileComment(userComment, group.getUUID(), group.getName(),
-                                ((MultiFileComment) userComment).getFiles()));
+                                ((FileComment) userComment).getFiles()));
 
                     }
 

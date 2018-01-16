@@ -3,6 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="inboxUserInvitationPresenter"
+            type="com.winsun.fruitmix.inbox.presenter.InboxUserInvitationPresenter"/>
+
+    </data>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,6 +44,7 @@
                 android:layout_marginRight="16dp"
                 android:layout_marginTop="8dp"
                 android:text="@string/show_all"
+                android:onClick="@{()->inboxUserInvitationPresenter.enterInvitationActivity(context)}"
                 android:textColor="#03a9f4"
                 android:textSize="12dp"
                 app:layout_constraintBottom_toBottomOf="parent"

@@ -20,7 +20,7 @@ public class RemoteFolder extends AbstractRemoteFile {
 
     @Override
     public String getDateText() {
-        if (getTime().equals(""))
+        if (getTime() == 0)
             return "";
         else {
             return super.getDateText();
@@ -29,7 +29,7 @@ public class RemoteFolder extends AbstractRemoteFile {
 
     @Override
     public String getTimeText() {
-        if (getTime().equals(""))
+        if (getTime() == 0)
             return "";
         else {
             return super.getTimeText();

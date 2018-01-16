@@ -1,12 +1,16 @@
 package com.winsun.fruitmix.group.data.model;
 
 import com.android.volley.toolbox.ImageLoader;
+import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.usecase.PlayAudioUseCase;
 import com.winsun.fruitmix.group.view.customview.AudioCommentView;
 import com.winsun.fruitmix.group.view.customview.MultiFileCommentView;
 import com.winsun.fruitmix.group.view.customview.SingleFileCommentView;
 import com.winsun.fruitmix.group.view.customview.TextCommentView;
 import com.winsun.fruitmix.group.view.customview.UserCommentView;
+import com.winsun.fruitmix.mediaModule.model.Media;
+
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/7/24.
@@ -20,15 +24,15 @@ public class UserCommentViewFactory {
 
     private PlayAudioUseCase playAudioUseCase;
 
-    private UserCommentViewFactory(ImageLoader imageLoader,PlayAudioUseCase playAudioUseCase) {
+    private UserCommentViewFactory(ImageLoader imageLoader, PlayAudioUseCase playAudioUseCase) {
         this.imageLoader = imageLoader;
         this.playAudioUseCase = playAudioUseCase;
     }
 
-    public static UserCommentViewFactory getInstance(ImageLoader imageLoader,PlayAudioUseCase playAudioUseCase) {
+    public static UserCommentViewFactory getInstance(ImageLoader imageLoader, PlayAudioUseCase playAudioUseCase) {
 
         if (instance == null)
-            instance = new UserCommentViewFactory(imageLoader,playAudioUseCase);
+            instance = new UserCommentViewFactory(imageLoader, playAudioUseCase);
 
         return instance;
     }
@@ -42,14 +46,28 @@ public class UserCommentViewFactory {
 
     public int getUserCommentViewType(UserComment userComment) {
 
-        if (userComment instanceof TextComment)
-            return TYPE_TEXT;
-        else if(userComment instanceof AudioComment)
+        if (userComment instanceof AudioComment)
             return TYPE_VOICE;
-        else if (userComment instanceof MultiPhotoComment || userComment instanceof MultiFileComment)
-            return TYPE_MULTIPLE_FILE;
-        else if (userComment instanceof SinglePhotoComment || userComment instanceof SingleFileComment)
-            return TYPE_SINGLE_FILE;
+        else if (userComment instanceof PhotoComment) {
+
+            List<Media> medias = ((PhotoComment) userComment).getMedias();
+
+            if (medias.size() > 1)
+                return TYPE_MULTIPLE_FILE;
+            else
+                return TYPE_SINGLE_FILE;
+
+        } else if (userComment instanceof FileComment) {
+
+            List<AbstractFile> files = ((FileComment) userComment).getFiles();
+
+            if (files.size() > 1)
+                return TYPE_MULTIPLE_FILE;
+            else
+                return TYPE_SINGLE_FILE;
+
+        } else if (userComment instanceof TextComment)
+            return TYPE_TEXT;
         else
             return TYPE_OTHER;
 
@@ -59,7 +77,7 @@ public class UserCommentViewFactory {
 
         if (type == TYPE_TEXT)
             return new TextCommentView();
-        else if(type == TYPE_VOICE)
+        else if (type == TYPE_VOICE)
             return new AudioCommentView(playAudioUseCase);
         else if (type == TYPE_MULTIPLE_FILE)
             return new MultiFileCommentView(imageLoader);

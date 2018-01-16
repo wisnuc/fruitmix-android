@@ -509,8 +509,8 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
             @Override
             public int compare(AbstractRemoteFile lhs, AbstractRemoteFile rhs) {
 
-                long lhsTime = Long.parseLong(lhs.getTime());
-                long rhsTime = Long.parseLong(rhs.getTime());
+                long lhsTime = lhs.getTime();
+                long rhsTime = rhs.getTime();
 
                 if (lhsTime > rhsTime)
                     return 1;
