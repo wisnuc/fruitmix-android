@@ -5,6 +5,7 @@ import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.mock.MockThreadManager;
+import com.winsun.fruitmix.util.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class GroupRepositoryTest {
     @Test
     public void testInsert() {
 
-        groupRepository.insertUserComment("", new UserComment(null, 0), new BaseOperateDataCallbackImpl<UserComment>());
+        groupRepository.insertUserComment("", new UserComment(Util.createLocalUUid(),null, 0), new BaseOperateDataCallbackImpl<UserComment>());
 
         verify(groupDataSource).insertUserComment(anyString(), any(UserComment.class));
 

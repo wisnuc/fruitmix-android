@@ -139,8 +139,6 @@ public class LocalMediaSystemDBDataSource {
             f = new File(originalPhotoPath);
             date.setTimeInMillis(f.lastModified());
             media.setFormattedTime(df.format(date.getTime()));
-            media.setSelected(false);
-            media.setLoaded(false);
 
             int orientation = cursor.getInt(cursor.getColumnIndexOrThrow(queryOrientation));
             setMediaOrientationNumber(orientation, media);
@@ -256,8 +254,6 @@ public class LocalMediaSystemDBDataSource {
 
             video.setSize(size);
 
-            video.setSelected(false);
-            video.setLoaded(false);
 
             video.setLocal(true);
             video.setUuid("");

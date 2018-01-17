@@ -64,9 +64,9 @@ public class MultiFileCommentView extends UserCommentView {
 
                 HttpRequest httpRequest = media.getImageThumbUrl(context);
 
-                SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), null, false);
-
                 frameLayouts[i].removeAllViews();
+
+                SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayouts[i], false);
 
                 frameLayouts[i].addView(singlePhotoBinding.getRoot());
 
@@ -86,15 +86,15 @@ public class MultiFileCommentView extends UserCommentView {
 
             for (int i = 0; i < files.size(); i++) {
 
-                AbstractFile file = files.get(i);
-
-                SingleFileBinding singleFileBinding = SingleFileBinding.inflate(LayoutInflater.from(context), null, false);
-
-                singleFileBinding.setFile(file);
-
                 frameLayouts[i].removeAllViews();
 
+                AbstractFile file = files.get(i);
+
+                SingleFileBinding singleFileBinding = SingleFileBinding.inflate(LayoutInflater.from(context), frameLayouts[i], false);
+
                 frameLayouts[i].addView(singleFileBinding.getRoot());
+
+                singleFileBinding.setFile(file);
 
             }
 

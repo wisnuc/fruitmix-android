@@ -229,8 +229,6 @@ public class LocalCache {
             f = new File(originalPhotoPath);
             date.setTimeInMillis(f.lastModified());
             media.setFormattedTime(df.format(date.getTime()));
-            media.setSelected(false);
-            media.setLoaded(false);
 
             int orientation = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.ORIENTATION));
 

@@ -23,6 +23,7 @@ import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
+import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
@@ -58,12 +59,12 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
     private int mItemWidth;
 
-    private Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
+    private Map<String, List<MediaViewModel>> mMapKeyIsDateValueIsPhotoList;
 
     //TODO use SparseArray or ArrayMap to optimize memory use effect
 
     private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
-    private SparseArray<Media> mMapKeyIsPhotoPositionValueIsPhoto;
+    private SparseArray<MediaViewModel> mMapKeyIsPhotoPositionValueIsPhoto;
 
     private List<Media> medias;
 
@@ -136,13 +137,14 @@ public class TestPhotoListActivity extends AppCompatActivity {
     private void doAfterReloadData(NewPhotoListDataLoader loader) {
 
         List<String> mPhotoDateGroups = loader.getPhotoDateGroups();
-        mMapKeyIsDateValueIsPhotoList = loader.getMapKeyIsDateValueIsPhotoList();
+        mMapKeyIsDateValueIsPhotoList = loader.getMapKeyIsDateList();
         mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getMapKeyIsPhotoPositionValueIsPhotoDate();
-        mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
+        mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPosition();
         medias = new ArrayList<>();
 
-        for (Media media : loader.getMedias()) {
+        for (MediaViewModel mediaViewModel : loader.getMediaViewModels()) {
 
+            Media media = mediaViewModel.getMedia();
             if (media.isLocal())
                 medias.add(media);
 
@@ -359,7 +361,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
             if (mMapKeyIsPhotoPositionValueIsPhotoDate.containsKey(position))
                 title = mMapKeyIsPhotoPositionValueIsPhotoDate.get(position);
             else {
-                title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDateWithoutHourMinSec();
+                title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getMedia().getDateWithoutHourMinSec();
             }
 
             if (title.contains(Util.DEFAULT_DATE)) {
@@ -403,11 +405,11 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
             }
 
-            MediaUtil.setMediaImageUrl(currentMedia,mPhotoIv,httpRequest,mImageLoader);
+            MediaUtil.setMediaImageUrl(currentMedia, mPhotoIv, httpRequest, mImageLoader);
 
 
-            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDateWithoutHourMinSec());
-            int mediaInListPosition = getPosition(mediaList, currentMedia);
+            List<MediaViewModel> mediaViewModels = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDateWithoutHourMinSec());
+            int mediaInListPosition = getPosition(mediaViewModels, currentMedia);
 
             setPhotoItemMargin(mediaInListPosition);
 
@@ -438,13 +440,13 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
         }
 
-        private int getPosition(List<Media> mediaList, Media media) {
+        private int getPosition(List<MediaViewModel> mediaViewModels, Media media) {
 
             int position = 0;
-            int size = mediaList.size();
+            int size = mediaViewModels.size();
 
             for (int i = 0; i < size; i++) {
-                Media media1 = mediaList.get(i);
+                Media media1 = mediaViewModels.get(i).getMedia();
 
                 if (media.getKey().equals(media1.getKey())) {
                     position = i;

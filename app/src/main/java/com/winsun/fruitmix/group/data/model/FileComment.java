@@ -14,8 +14,8 @@ public class FileComment extends TextComment {
 
     private List<AbstractFile> files;
 
-    public FileComment(User creator, long time, List<AbstractFile> files) {
-        super(creator, time);
+    public FileComment(String uuid,User creator, long time, List<AbstractFile> files) {
+        super(uuid,creator, time);
         this.files = files;
     }
 

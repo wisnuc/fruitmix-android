@@ -3,6 +3,7 @@ package com.winsun.fruitmix.mediaModule.model;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.Util;
 
@@ -26,13 +27,13 @@ public class NewPhotoListDataLoader {
 
     private List<String> mPhotoDateGroups;
 
-    private HashMap<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
+    private HashMap<String, List<MediaViewModel>> mMapKeyIsDateList;
 
     private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
 
-    private SparseArray<Media> mMapKeyIsPhotoPositionValueIsPhoto;
+    private SparseArray<MediaViewModel> mMapKeyIsPhotoPosition;
 
-    private List<Media> medias;
+    private List<MediaViewModel> mMediaViewModels;
 
     private int mAdapterItemTotalCount = 0;
 
@@ -45,12 +46,12 @@ public class NewPhotoListDataLoader {
     private NewPhotoListDataLoader() {
 
         mPhotoDateGroups = new ArrayList<>();
-        mMapKeyIsDateValueIsPhotoList = new HashMap<>();
+        mMapKeyIsDateList = new HashMap<>();
 
         mMapKeyIsPhotoPositionValueIsPhotoDate = new HashMap<>();
-        mMapKeyIsPhotoPositionValueIsPhoto = new SparseArray<>();
+        mMapKeyIsPhotoPosition = new SparseArray<>();
 
-        medias = new ArrayList<>();
+        mMediaViewModels = new ArrayList<>();
     }
 
     public static NewPhotoListDataLoader getInstance() {
@@ -72,9 +73,9 @@ public class NewPhotoListDataLoader {
         return Collections.unmodifiableList(mPhotoDateGroups);
     }
 
-    public Map<String, List<Media>> getMapKeyIsDateValueIsPhotoList() {
+    public Map<String, List<MediaViewModel>> getMapKeyIsDateList() {
 
-        return Collections.unmodifiableMap(mMapKeyIsDateValueIsPhotoList);
+        return Collections.unmodifiableMap(mMapKeyIsDateList);
     }
 
     public Map<Integer, String> getMapKeyIsPhotoPositionValueIsPhotoDate() {
@@ -83,13 +84,13 @@ public class NewPhotoListDataLoader {
 
     }
 
-    public SparseArray<Media> getMapKeyIsPhotoPositionValueIsPhoto() {
+    public SparseArray<MediaViewModel> getMapKeyIsPhotoPosition() {
 
-        return mMapKeyIsPhotoPositionValueIsPhoto.clone();
+        return mMapKeyIsPhotoPosition.clone();
     }
 
-    public List<Media> getMedias() {
-        return medias;
+    public List<MediaViewModel> getMediaViewModels() {
+        return mMediaViewModels;
     }
 
     public int getAdapterItemTotalCount() {
@@ -145,13 +146,13 @@ public class NewPhotoListDataLoader {
     private void reloadData(List<Media> medias) {
 
         String date;
-        List<Media> mediaList;
+        List<MediaViewModel> mediaViewModels;
 
         mPhotoDateGroups.clear();
-        mMapKeyIsDateValueIsPhotoList.clear();
+        mMapKeyIsDateList.clear();
 
         mMapKeyIsPhotoPositionValueIsPhotoDate.clear();
-        mMapKeyIsPhotoPositionValueIsPhoto.clear();
+        mMapKeyIsPhotoPosition.clear();
 
         Log.i(TAG, "reloadData: before load list :" + Util.getCurrentFormatTime());
 
@@ -162,18 +163,20 @@ public class NewPhotoListDataLoader {
             } else
                 date = media.getFormattedTime();
 
-            if (mMapKeyIsDateValueIsPhotoList.containsKey(date)) {
-                mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
+            if (mMapKeyIsDateList.containsKey(date)) {
+                mediaViewModels = mMapKeyIsDateList.get(date);
             } else {
                 mPhotoDateGroups.add(date);
-                mediaList = new ArrayList<>();
-                mMapKeyIsDateValueIsPhotoList.put(date, mediaList);
+                mediaViewModels = new ArrayList<>();
+                mMapKeyIsDateList.put(date, mediaViewModels);
             }
 
             media.setDateWithoutHourMinSec(date);
-            media.setSelected(false);
 
-            mediaList.add(media);
+            MediaViewModel mediaViewModel = new MediaViewModel(media);
+            mediaViewModel.setSelected(false);
+
+            mediaViewModels.add(mediaViewModel);
 
         }
 
@@ -199,29 +202,29 @@ public class NewPhotoListDataLoader {
         int photoListSize;
         mAdapterItemTotalCount = 0;
 
-        medias.clear();
+        mMediaViewModels.clear();
 
         for (String title : mPhotoDateGroups) {
             mMapKeyIsPhotoPositionValueIsPhotoDate.put(titlePosition, title);
 
             mAdapterItemTotalCount++;
 
-            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(title);
-            photoListSize = mediaList.size();
+            List<MediaViewModel> mediaViewModels = mMapKeyIsDateList.get(title);
+            photoListSize = mediaViewModels.size();
             mAdapterItemTotalCount += photoListSize;
 
-            Collections.sort(mediaList, new Comparator<Media>() {
+            Collections.sort(mediaViewModels, new Comparator<MediaViewModel>() {
                 @Override
-                public int compare(Media lhs, Media rhs) {
-                    return -lhs.getFormattedTime().compareTo(rhs.getFormattedTime());
+                public int compare(MediaViewModel lhs, MediaViewModel rhs) {
+                    return -lhs.getMedia().getFormattedTime().compareTo(rhs.getMedia().getFormattedTime());
                 }
             });
 
             for (int i = 0; i < photoListSize; i++) {
-                mMapKeyIsPhotoPositionValueIsPhoto.put(titlePosition + 1 + i, mediaList.get(i));
+                mMapKeyIsPhotoPosition.put(titlePosition + 1 + i, mediaViewModels.get(i));
             }
 
-            medias.addAll(mediaList);
+            mMediaViewModels.addAll(mediaViewModels);
 
             titlePosition = mAdapterItemTotalCount;
         }

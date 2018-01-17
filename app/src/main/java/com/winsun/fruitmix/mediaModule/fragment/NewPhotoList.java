@@ -58,6 +58,7 @@ import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListViewModel;
 import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
 import com.winsun.fruitmix.mediaModule.viewmodel.PhotoItemViewModel;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
@@ -107,13 +108,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private int mItemWidth;
 
-    private Map<String, List<Media>> mMapKeyIsDateValueIsPhotoList;
+    private Map<String, List<MediaViewModel>> mMapKeyIsDate;
 
     private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
 
-    private SparseArray<Media> mMapKeyIsPhotoPositionValueIsPhoto;
+    private SparseArray<MediaViewModel> mMapKeyIsPhotoPosition;
 
-    private List<Media> medias;
+    private List<MediaViewModel> mMediaViewModels;
 
     private int mScreenWidth;
 
@@ -170,13 +171,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
-        medias = Collections.emptyList();
+        mMediaViewModels = Collections.emptyList();
 
-        mMapKeyIsDateValueIsPhotoList = Collections.emptyMap();
+        mMapKeyIsDate = Collections.emptyMap();
 
         mMapKeyIsPhotoPositionValueIsPhotoDate = Collections.emptyMap();
 
-        mMapKeyIsPhotoPositionValueIsPhoto = new SparseArray<>();
+        mMapKeyIsPhotoPosition = new SparseArray<>();
 
         NewPhotoLayoutBinding binding = NewPhotoLayoutBinding.inflate(LayoutInflater.from(containerActivity.getApplicationContext()), null, false);
 
@@ -290,7 +291,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     @Override
     public boolean canEnterSelectMode() {
-        return medias.size() > 0;
+        return mMediaViewModels.size() > 0;
     }
 
     public void setSelectMode(boolean selectMode) {
@@ -366,7 +367,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         if (mIsLoaded) {
 
-            if (medias.size() < totalLocalMediaCount) {
+            if (mMediaViewModels.size() < totalLocalMediaCount) {
 
                 mediaDataSourceRepository.getLocalMedia(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
                     @Override
@@ -509,10 +510,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         //fix crash:java.lang.IndexOutOfBoundsException: Inconsistency detected. Invalid item position 10(offset:10).state:611 at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5202)
 
         List<String> mPhotoDateGroups = new ArrayList<>(loader.getPhotoDateGroups());
-        mMapKeyIsDateValueIsPhotoList = new HashMap<>(loader.getMapKeyIsDateValueIsPhotoList());
+        mMapKeyIsDate = new HashMap<>(loader.getMapKeyIsDateList());
         mMapKeyIsPhotoPositionValueIsPhotoDate = new HashMap<>(loader.getMapKeyIsPhotoPositionValueIsPhotoDate());
-        mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPositionValueIsPhoto();
-        medias = new ArrayList<>(loader.getMedias());
+        mMapKeyIsPhotoPosition = loader.getMapKeyIsPhotoPosition();
+        mMediaViewModels = new ArrayList<>(loader.getMediaViewModels());
 
         clearSelectedPhoto();
 
@@ -567,7 +568,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                         Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
 
-                        loadSmallThumbnail(medias);
+                        loadSmallThumbnail(mMediaViewModels);
                     }
                 });
 
@@ -577,20 +578,20 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     }
 
-    private void loadSmallThumbnail(final List<Media> medias) {
+    private void loadSmallThumbnail(final List<MediaViewModel> mediaViewModels) {
 
         String url;
 
-        List<Media> preLoadMediaMiniThumbs = new ArrayList<>(medias);
-        Media media;
-        Iterator<Media> iterator = preLoadMediaMiniThumbs.iterator();
+        List<MediaViewModel> preLoadMediaMiniThumbs = new ArrayList<>(mediaViewModels);
+        MediaViewModel mediaViewModel;
+        Iterator<MediaViewModel> iterator = preLoadMediaMiniThumbs.iterator();
         while (iterator.hasNext()) {
-            media = iterator.next();
-            if (media.isLocal())
+            mediaViewModel = iterator.next();
+            if (mediaViewModel.getMedia().isLocal())
                 iterator.remove();
         }
 
-        Log.i(TAG, "pre load media size: " + preLoadMediaMiniThumbs.size());
+        Log.i(TAG, "pre load mediaViewModel size: " + preLoadMediaMiniThumbs.size());
 
         int preLoadMediaMiniThumbSize = preLoadMediaMiniThumbs.size() > 100 ? 100 : preLoadMediaMiniThumbs.size();
 
@@ -599,7 +600,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             if (mCancelPreLoadPhoto)
                 break;
 
-            media = preLoadMediaMiniThumbs.get(i);
+            mediaViewModel = preLoadMediaMiniThumbs.get(i);
+
+            Media media = mediaViewModel.getMedia();
 
             if (media instanceof Video)
                 continue;
@@ -745,9 +748,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         List<Media> selectedMedias = new ArrayList<>();
 
-        for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
-            for (Media media : mediaList) {
-                if (media.isSelected()) {
+        for (List<MediaViewModel> mediaList : mMapKeyIsDate.values()) {
+            for (MediaViewModel mediaViewModel : mediaList) {
+                if (mediaViewModel.isSelected()) {
+
+                    Media media = mediaViewModel.getMedia();
 
                     String mediaUUID = media.getUuid();
                     if (mediaUUID.isEmpty()) {
@@ -765,17 +770,17 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private void clearSelectedPhoto() {
 
-        if (mMapKeyIsPhotoPositionValueIsPhoto == null || mMapKeyIsPhotoPositionValueIsPhoto.size() == 0)
+        if (mMapKeyIsPhotoPosition == null || mMapKeyIsPhotoPosition.size() == 0)
             return;
 
-        Media media;
+        MediaViewModel mediaViewModel;
 
-        for (int i = 0; i < mMapKeyIsPhotoPositionValueIsPhoto.size(); i++) {
+        for (int i = 0; i < mMapKeyIsPhotoPosition.size(); i++) {
 
-            media = mMapKeyIsPhotoPositionValueIsPhoto.get(mMapKeyIsPhotoPositionValueIsPhoto.keyAt(i));
+            mediaViewModel = mMapKeyIsPhotoPosition.get(mMapKeyIsPhotoPosition.keyAt(i));
 
-            if (media != null)
-                media.setSelected(false);
+            if (mediaViewModel != null)
+                mediaViewModel.setSelected(false);
         }
 
     }
@@ -784,9 +789,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         int selectCount = 0;
 
-        for (List<Media> mediaList : mMapKeyIsDateValueIsPhotoList.values()) {
-            for (Media media : mediaList) {
-                if (media.isSelected())
+        for (List<MediaViewModel> mediaViewModels : mMapKeyIsDate.values()) {
+            for (MediaViewModel mediaViewModel : mediaViewModels) {
+                if (mediaViewModel.isSelected())
                     selectCount++;
             }
         }
@@ -808,10 +813,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 Media media;
                 Media currentMedia = null;
 
-                int size = mMapKeyIsPhotoPositionValueIsPhoto.size();
+                int size = mMapKeyIsPhotoPosition.size();
 
                 for (int i = 0; i < size; i++) {
-                    media = mMapKeyIsPhotoPositionValueIsPhoto.valueAt(i);
+                    media = mMapKeyIsPhotoPosition.valueAt(i).getMedia();
                     if (media.getKey().equals(currentMediaKey))
                         currentMedia = media;
                 }
@@ -866,12 +871,12 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             Media media;
 
-            int size = mMapKeyIsPhotoPositionValueIsPhoto.size();
+            int size = mMapKeyIsPhotoPosition.size();
 
             for (int i = 0; i < size; i++) {
-                media = mMapKeyIsPhotoPositionValueIsPhoto.valueAt(i);
+                media = mMapKeyIsPhotoPosition.valueAt(i).getMedia();
                 if (media.getKey().equals(currentMediaKey))
-                    scrollToPosition = mMapKeyIsPhotoPositionValueIsPhoto.keyAt(i);
+                    scrollToPosition = mMapKeyIsPhotoPosition.keyAt(i);
             }
 
             mRecyclerView.smoothScrollToPosition(scrollToPosition);
@@ -896,12 +901,25 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     public void refreshVideo(Video video) {
 
-        int index = mMapKeyIsPhotoPositionValueIsPhoto.indexOfValue(video);
+        int index = -1;
+
+        for (int i = 0; i < mMapKeyIsPhotoPosition.size(); i++) {
+
+            MediaViewModel mediaViewModel = mMapKeyIsPhotoPosition.valueAt(i);
+
+            if (mediaViewModel.getMedia().equals(video)) {
+
+                index = i;
+                break;
+
+            }
+
+        }
 
         if (index == -1)
             return;
 
-        int key = mMapKeyIsPhotoPositionValueIsPhoto.keyAt(index);
+        int key = mMapKeyIsPhotoPosition.keyAt(index);
 
         mPhotoRecycleAdapter.notifyItemChanged(key);
 
@@ -980,11 +998,18 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 return VIEW_TYPE_HEAD;
             else {
 
-                Media media = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
+                MediaViewModel mediaViewModel = mMapKeyIsPhotoPosition.get(position);
 
-                if (media instanceof Video)
-                    return VIEW_TYPE_VIDEO;
-                else
+                if (mediaViewModel != null) {
+
+                    Media media = mediaViewModel.getMedia();
+
+                    if (media instanceof Video)
+                        return VIEW_TYPE_VIDEO;
+                    else
+                        return VIEW_TYPE_CONTENT;
+
+                } else
                     return VIEW_TYPE_CONTENT;
 
             }
@@ -1021,12 +1046,20 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 title = mMapKeyIsPhotoPositionValueIsPhotoDate.get(position);
             else {
 
-                Media media = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
+                MediaViewModel mediaViewModel = mMapKeyIsPhotoPosition.get(position);
 
-                if (media == null) {
+                if (mediaViewModel == null) {
                     title = Util.DEFAULT_DATE;
-                } else
-                    title = mMapKeyIsPhotoPositionValueIsPhoto.get(position).getDateWithoutHourMinSec();
+                } else {
+
+                    Media media = mediaViewModel.getMedia();
+
+                    if (media == null)
+                        title = Util.DEFAULT_DATE;
+                    else
+                        title = media.getDateWithoutHourMinSec();
+
+                }
 
             }
 
@@ -1078,14 +1111,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             if (mSelectMode) {
 
-                List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
+                List<MediaViewModel> mediaViewModels = mMapKeyIsDate.get(date);
 
                 boolean selected = newPhotoGroupViewModel.photoTitleSelect.get();
 
                 int unSelectNumInList = 0;
 
-                for (Media media : mediaList) {
-                    if (!media.isSelected())
+                for (MediaViewModel mediaViewModel : mediaViewModels) {
+                    if (!mediaViewModel.isSelected())
                         unSelectNumInList++;
                 }
 
@@ -1098,10 +1131,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                     int newSelectItemTotalCount = Util.MAX_PHOTO_SIZE - mSelectCount;
                     if (newSelectItemTotalCount != 0) {
 
-                        for (Media media : mediaList) {
+                        for (MediaViewModel mediaViewModel : mediaViewModels) {
 
-                            if (!media.isSelected()) {
-                                media.setSelected(true);
+                            if (!mediaViewModel.isSelected()) {
+                                mediaViewModel.setSelected(true);
                                 newSelectItemCount++;
                                 if (newSelectItemCount == newSelectItemTotalCount)
                                     break;
@@ -1114,8 +1147,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                     newPhotoGroupViewModel.photoTitleSelect.set(!selected);
 
-                    for (Media media : mediaList)
-                        media.setSelected(!selected);
+                    for (MediaViewModel mediaViewModel : mediaViewModels)
+                        mediaViewModel.setSelected(!selected);
                 }
 
                 mPhotoRecycleAdapter.notifyDataSetChanged();
@@ -1185,17 +1218,17 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                         showPhotoTitleSelectImg();
                 }
 
-                List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(date);
+                List<MediaViewModel> mediaViewModels = mMapKeyIsDate.get(date);
                 int selectNum = 0;
-                for (Media media : mediaList) {
+                for (MediaViewModel mediaViewModel : mediaViewModels) {
 
-                    if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(media.getKey()))
-                        media.setSelected(true);
+                    if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(mediaViewModel.getMedia().getKey()))
+                        mediaViewModel.setSelected(true);
 
-                    if (media.isSelected())
+                    if (mediaViewModel.isSelected())
                         selectNum++;
                 }
-                if (selectNum == mediaList.size())
+                if (selectNum == mediaViewModels.size())
                     newPhotoGroupViewModel.photoTitleSelect.set(true);
                 else
                     newPhotoGroupViewModel.photoTitleSelect.set(false);
@@ -1324,10 +1357,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             super(viewDataBinding);
         }
 
-        void checkMediaSelected(Media currentMedia) {
+        void checkMediaSelected(MediaViewModel mediaViewModel) {
 
-            if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey()))
-                currentMedia.setSelected(true);
+            if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(mediaViewModel.getMedia().getKey()))
+                mediaViewModel.setSelected(true);
 
         }
 
@@ -1348,9 +1381,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         }
 
-        void refreshPhotoSelectImg(Media currentMedia, PhotoItemViewModel photoItemViewModel) {
+        void refreshPhotoSelectImg(MediaViewModel mediaViewModel, PhotoItemViewModel photoItemViewModel) {
 
-            photoItemViewModel.showPhotoSelectImg.set(currentMedia.isSelected());
+            photoItemViewModel.showPhotoSelectImg.set(mediaViewModel.isSelected());
 
         }
 
@@ -1409,19 +1442,21 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         public void refreshView(int position) {
 
-            currentMedia = mMapKeyIsPhotoPositionValueIsPhoto.get(position);
+            final MediaViewModel mediaViewModel = mMapKeyIsPhotoPosition.get(position);
 
-            if (currentMedia == null) return;
+            if (mediaViewModel == null) return;
+
+            currentMedia = mediaViewModel.getMedia();
 
             Log.d(TAG, "PhotoHolder refreshView: media key: " + currentMedia.getKey());
 
-            checkMediaSelected(currentMedia);
+            checkMediaSelected(mediaViewModel);
 
             PhotoItemViewModel prePhotoItemViewModel = binding.getPhotoItemViewModel();
 
             final PhotoItemViewModel photoItemViewModel = getPhotoItemViewModel(prePhotoItemViewModel);
 
-            refreshPhotoSelectImg(currentMedia, photoItemViewModel);
+            refreshPhotoSelectImg(mediaViewModel, photoItemViewModel);
 
             binding.setPhotoItemViewModel(photoItemViewModel);
 
@@ -1457,17 +1492,17 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             MediaUtil.setMediaImageUrl(currentMedia, mPhotoIv, httpRequest, mImageLoader);
 
-            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(currentMedia.getDateWithoutHourMinSec());
+            List<MediaViewModel> mediaViewModels = mMapKeyIsDate.get(currentMedia.getDateWithoutHourMinSec());
 
             int temporaryPosition = 0;
 
-            if (mediaList == null) {
+            if (mediaViewModels == null) {
 
                 Log.d(TAG, "refreshView: media list is null,currentMedia getDateWithoutHourMinSec:" + currentMedia.getDateWithoutHourMinSec());
 
             } else {
 
-                temporaryPosition = getMediaPosition(mediaList, currentMedia);
+                temporaryPosition = getMediaPosition(mediaViewModels, currentMedia);
 
             }
 
@@ -1475,7 +1510,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             final int mediaInListPosition = temporaryPosition;
 
-            setMediaSelectImg(mPhotoIv, currentMedia, photoItemViewModel.showPhotoSelectImg);
+            setMediaSelectImg(mPhotoIv, mediaViewModel, photoItemViewModel.showPhotoSelectImg);
 
 //            getViewDataBinding().setVariable(BR.showPhotoSelectImg, showPhotoSelectImg);
 //            getViewDataBinding().executePendingBindings();
@@ -1485,7 +1520,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 public void onClick(View v) {
                     if (mSelectMode) {
 
-                        handleMediaOnClickWhenSelectMode(currentMedia, mPhotoIv, photoItemViewModel.showPhotoSelectImg);
+                        handleMediaOnClickWhenSelectMode(mediaViewModel, mPhotoIv, photoItemViewModel.showPhotoSelectImg);
 
                     } else {
 
@@ -1499,7 +1534,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                        PhotoSliderActivity.startPhotoSliderActivity(mPhotoListListener.getToolbar(), containerActivity, medias, intent, mediaInListPosition, mSpanCount, mPhotoIv, currentMedia);
+                        PhotoSliderActivity.startPhotoSliderActivity(mPhotoListListener.getToolbar(), containerActivity, mMediaViewModels, intent, mediaInListPosition, mSpanCount, mPhotoIv, currentMedia);
 
                         mEnteringPhotoSlider = true;
 
@@ -1513,7 +1548,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 @Override
                 public boolean onLongClick(View v) {
 
-                    return handleMediaOnLongClick(currentMedia, mPhotoIv, photoItemViewModel.showPhotoSelectImg);
+                    return handleMediaOnLongClick(mediaViewModel, mPhotoIv, photoItemViewModel.showPhotoSelectImg);
 
                 }
             });
@@ -1525,11 +1560,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     private int getInitialPhotoPosition(Media currentMedia) {
         int initialPhotoPosition;
 
-        int size = medias.size();
+        int size = mMediaViewModels.size();
 
         for (initialPhotoPosition = 0; initialPhotoPosition < size; initialPhotoPosition++) {
 
-            Media media = medias.get(initialPhotoPosition);
+            Media media = mMediaViewModels.get(initialPhotoPosition).getMedia();
 
             if (media.getKey().equals(currentMedia.getKey()))
                 break;
@@ -1564,15 +1599,19 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             durationTv.setTypeface(mTypeface);
 
-            final Video video = (Video) mMapKeyIsPhotoPositionValueIsPhoto.get(position);
+            final MediaViewModel mediaViewModel = mMapKeyIsPhotoPosition.get(position);
 
-            checkMediaSelected(video);
+            if (mediaViewModel == null) return;
+
+            final Video video = (Video) mediaViewModel.getMedia();
+
+            checkMediaSelected(mediaViewModel);
 
             PhotoItemViewModel prePhotoItemViewModel = binding.getPhotoItemViewModel();
 
             final PhotoItemViewModel photoItemViewModel = getPhotoItemViewModel(prePhotoItemViewModel);
 
-            refreshPhotoSelectImg(video, photoItemViewModel);
+            refreshPhotoSelectImg(mediaViewModel, photoItemViewModel);
 
             binding.setPhotoItemViewModel(photoItemViewModel);
 
@@ -1580,19 +1619,19 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             binding.setVideo(video);
 
-            setMediaSelectImg(networkImageView, video, photoItemViewModel.showPhotoSelectImg);
+            setMediaSelectImg(networkImageView, mediaViewModel, photoItemViewModel.showPhotoSelectImg);
 
-            List<Media> mediaList = mMapKeyIsDateValueIsPhotoList.get(video.getDateWithoutHourMinSec());
+            List<MediaViewModel> mediaViewModels = mMapKeyIsDate.get(video.getDateWithoutHourMinSec());
 
             int temporaryPosition = 0;
 
-            if (mediaList == null) {
+            if (mediaViewModels == null) {
 
                 Log.d(TAG, "refreshView: media list is null,currentVideo getDateWithoutHourMinSec:" + video.getDateWithoutHourMinSec());
 
             } else {
 
-                temporaryPosition = getMediaPosition(mediaList, video);
+                temporaryPosition = getMediaPosition(mediaViewModels, video);
 
             }
 
@@ -1638,7 +1677,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                     if (mSelectMode) {
 
-                        handleMediaOnClickWhenSelectMode(video, networkImageView, photoItemViewModel.showPhotoSelectImg);
+                        handleMediaOnClickWhenSelectMode(mediaViewModel, networkImageView, photoItemViewModel.showPhotoSelectImg);
 
                     } else {
 
@@ -1651,18 +1690,17 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, medias, intent);
+                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, mMediaViewModels, intent);
 
                     }
 
                 }
             });
 
-
             viewGroup.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    return handleMediaOnLongClick(video, networkImageView, photoItemViewModel.showPhotoSelectImg);
+                    return handleMediaOnLongClick(mediaViewModel, networkImageView, photoItemViewModel.showPhotoSelectImg);
                 }
             });
 
@@ -1671,15 +1709,15 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     }
 
 
-    private void handleMediaOnClickWhenSelectMode(Media currentMedia, View view, ObservableBoolean showPhotoSelectImg) {
-        if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(currentMedia.getKey())) {
+    private void handleMediaOnClickWhenSelectMode(MediaViewModel mediaViewModel, View view, ObservableBoolean showPhotoSelectImg) {
+        if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(mediaViewModel.getMedia().getKey())) {
             Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
             return;
         }
 
         calcSelectedPhoto();
 
-        boolean selected = currentMedia.isSelected();
+        boolean selected = mediaViewModel.isSelected();
 
         if (!selected && mSelectCount >= Util.MAX_PHOTO_SIZE) {
 
@@ -1702,7 +1740,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         }
 
-        currentMedia.setSelected(selected);
+        mediaViewModel.setSelected(selected);
 
         mPhotoRecycleAdapter.notifyDataSetChanged();
 
@@ -1712,14 +1750,14 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     }
 
-    private boolean handleMediaOnLongClick(Media media, View view, ObservableBoolean showPhotoSelectImg) {
+    private boolean handleMediaOnLongClick(MediaViewModel mediaViewModel, View view, ObservableBoolean showPhotoSelectImg) {
         if (mSelectMode)
             return true;
 
         if (mPhotoListListener != null)
             mPhotoListListener.onPhotoItemLongClick();
 
-        media.setSelected(true);
+        mediaViewModel.setSelected(true);
 
         mSelectCount = 1;
 
@@ -1730,10 +1768,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         return true;
     }
 
-    private void setMediaSelectImg(View view, Media currentMedia, ObservableBoolean showPhotoSelectImg) {
+    private void setMediaSelectImg(View view, MediaViewModel mediaViewModel, ObservableBoolean showPhotoSelectImg) {
 
         if (mSelectMode) {
-            boolean selected = currentMedia.isSelected();
+            boolean selected = mediaViewModel.isSelected();
             if (selected && view.getScaleX() == 1) {
                 scalePhoto(view, true);
 
@@ -1750,7 +1788,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             }
         } else {
 
-            currentMedia.setSelected(false);
+            mediaViewModel.setSelected(false);
 
             if (view.getScaleX() != 1) {
                 restorePhoto(view, true);
@@ -1812,13 +1850,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     }
 
-    private int getMediaPosition(List<Media> mediaList, Media media) {
+    private int getMediaPosition(List<MediaViewModel> mediaViewModels, Media media) {
 
         int position = 0;
-        int size = mediaList.size();
+        int size = mediaViewModels.size();
 
         for (int i = 0; i < size; i++) {
-            Media media1 = mediaList.get(i);
+            Media media1 = mediaViewModels.get(i).getMedia();
 
             if (media.getKey().equals(media1.getKey())) {
                 position = i;

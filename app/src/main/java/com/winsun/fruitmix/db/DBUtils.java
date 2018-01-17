@@ -262,7 +262,7 @@ public class DBUtils {
 
         return "insert into " + DBName + "(" +
                 DBHelper.MEDIA_KEY_UUID + "," +
-                DBHelper.MEDIA_KEY_TIME + "," +
+                DBHelper.MEDIA_KEY_FORMATTED_TIME + "," +
                 DBHelper.MEDIA_KEY_WIDTH + "," +
                 DBHelper.MEDIA_KEY_HEIGHT + "," +
                 DBHelper.MEDIA_KEY_THUMB + "," +
@@ -345,7 +345,7 @@ public class DBUtils {
     private String createInsertMediaSql(String dbName) {
         return "insert into " + dbName + "(" +
                 DBHelper.MEDIA_KEY_UUID + "," +
-                DBHelper.MEDIA_KEY_TIME + "," +
+                DBHelper.MEDIA_KEY_FORMATTED_TIME + "," +
                 DBHelper.MEDIA_KEY_WIDTH + "," +
                 DBHelper.MEDIA_KEY_HEIGHT + "," +
                 DBHelper.MEDIA_KEY_THUMB + "," +
@@ -848,7 +848,7 @@ public class DBUtils {
     private ContentValues createMediaContentValues(Media media) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.MEDIA_KEY_UUID, media.getUuid());
-        contentValues.put(DBHelper.MEDIA_KEY_TIME, media.getFormattedTime());
+        contentValues.put(DBHelper.MEDIA_KEY_FORMATTED_TIME, media.getFormattedTime());
         contentValues.put(DBHelper.MEDIA_KEY_WIDTH, media.getWidth());
         contentValues.put(DBHelper.MEDIA_KEY_HEIGHT, media.getHeight());
         contentValues.put(DBHelper.MEDIA_KEY_THUMB, media.getThumb());

@@ -36,7 +36,7 @@ public class LocalMediaParser implements LocalDataParser<Media> {
     void setMediaValue(Cursor cursor, String path, Media media) {
         media.setUuid(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_UUID)));
 
-        media.setFormattedTime(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_TIME)));
+        media.setFormattedTime(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_FORMATTED_TIME)));
         media.setWidth(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_WIDTH)));
         media.setHeight(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_HEIGHT)));
         media.setThumb(cursor.getString(cursor.getColumnIndex(DBHelper.MEDIA_KEY_THUMB)));

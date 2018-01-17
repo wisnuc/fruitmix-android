@@ -29,6 +29,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 
 import java.util.ArrayList;
@@ -238,7 +239,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void sendTxt(String text) {
 
-        TextComment textComment = new TextComment(currentLoggedInUser, System.currentTimeMillis(), text);
+        TextComment textComment = new TextComment(Util.createLocalUUid(),currentLoggedInUser, System.currentTimeMillis(), text);
 
         insertUserComment(textComment);
 
@@ -246,7 +247,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void sendAudio(String filePath, long audioRecordTime) {
 
-        AudioComment audioComment = new AudioComment(currentLoggedInUser, System.currentTimeMillis(), filePath, audioRecordTime);
+        AudioComment audioComment = new AudioComment(Util.createLocalUUid(),currentLoggedInUser, System.currentTimeMillis(), filePath, audioRecordTime);
 
         insertUserComment(audioComment);
 

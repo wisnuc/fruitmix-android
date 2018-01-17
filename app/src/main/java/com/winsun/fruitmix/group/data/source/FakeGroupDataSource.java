@@ -7,6 +7,7 @@ import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,34 +72,34 @@ public class FakeGroupDataSource implements GroupDataSource {
 
         List<UserComment> userComments = new ArrayList<>();
 
-        UserComment userComment = new TextComment(aimi, 1494475200, "照片扔进毕业十年聚,请务必放进毕业十年聚，别忘啦");
+        UserComment userComment = new TextComment(Util.createLocalUUid(), aimi, 1494475200, "照片扔进毕业十年聚,请务必放进毕业十年聚，别忘啦");
         userComments.add(userComment);
 
-        userComment = new TextComment(naomi, 1494820800, "务必放进毕业十年聚");
+        userComment = new TextComment(Util.createLocalUUid(), naomi, 1494820800, "务必放进毕业十年聚");
         userComments.add(userComment);
 
-        userComment = new TextComment(myself, 1497067200, "同学们速度快点");
+        userComment = new TextComment(Util.createLocalUUid(), myself, 1497067200, "同学们速度快点");
         userComments.add(userComment);
 
-        userComment = new TextComment(aimi, 1500189121, "快点");
+        userComment = new TextComment(Util.createLocalUUid(), aimi, 1500189121, "快点");
         userComments.add(userComment);
 
-        userComment = new TextComment(naomi, 1500189301, "来了");
+        userComment = new TextComment(Util.createLocalUUid(), naomi, 1500189301, "来了");
         userComments.add(userComment);
 
-        userComment = new TextComment(aimi, 1500189361, "ok");
+        userComment = new TextComment(Util.createLocalUUid(), aimi, 1500189361, "ok");
         userComments.add(userComment);
 
-        userComment = new TextComment(myself, 1500189421, "come on");
+        userComment = new TextComment(Util.createLocalUUid(), myself, 1500189421, "come on");
         userComments.add(userComment);
 
-        userComment = new TextComment(naomi, 1500189481, "coming");
+        userComment = new TextComment(Util.createLocalUUid(), naomi, 1500189481, "coming");
         userComments.add(userComment);
 
-        userComment = new TextComment(aimi, 1500189541, "waiting");
+        userComment = new TextComment(Util.createLocalUUid(), aimi, 1500189541, "waiting");
         userComments.add(userComment);
 
-        userComment = new TextComment(naomi, 1500189601, "here");
+        userComment = new TextComment(Util.createLocalUUid(), naomi, 1500189601, "here");
         userComments.add(userComment);
 
         List<Pin> pins = new ArrayList<>();

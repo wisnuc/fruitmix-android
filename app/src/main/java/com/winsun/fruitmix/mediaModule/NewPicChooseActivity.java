@@ -367,7 +367,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //            userComment = new MultiFileComment(currentUser, System.currentTimeMillis(), selectFiles);
 //        }
 
-        userComment = new FileComment(currentUser, System.currentTimeMillis(), selectFiles);
+        userComment = new FileComment(Util.createLocalUUid(),currentUser, System.currentTimeMillis(), selectFiles);
 
         return userComment;
     }
@@ -390,7 +390,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //            userComment = new MultiPhotoComment(currentUser, System.currentTimeMillis(), selectMedias);
 //        }
 
-        userComment = new PhotoComment(currentUser, System.currentTimeMillis(), selectMedias);
+        userComment = new PhotoComment(Util.createLocalUUid(),currentUser, System.currentTimeMillis(), selectMedias);
 
         return userComment;
     }

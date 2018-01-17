@@ -43,7 +43,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final String MEDIA_KEY_ID = "id";
     public static final String MEDIA_KEY_UUID = "media_uuid";
-    public static final String MEDIA_KEY_TIME = "media_time";
+    public static final String MEDIA_KEY_FORMATTED_TIME = "media_time";
     public static final String MEDIA_KEY_WIDTH = "media_width";
     public static final String MEDIA_KEY_HEIGHT = "media_height";
     public static final String MEDIA_KEY_THUMB = "media_thumb";
@@ -125,7 +125,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String COMMA = ",";
 
     private static final String DATABASE_MEDIA_CREATE = BEGIN_SQL + MEDIA_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT
-            + MEDIA_KEY_UUID + TEXT_NOT_NULL + MEDIA_KEY_TIME + TEXT_NOT_NULL + MEDIA_KEY_WIDTH + TEXT_NOT_NULL
+            + MEDIA_KEY_UUID + TEXT_NOT_NULL + MEDIA_KEY_FORMATTED_TIME + TEXT_NOT_NULL + MEDIA_KEY_WIDTH + TEXT_NOT_NULL
             + MEDIA_KEY_HEIGHT + TEXT_NOT_NULL + MEDIA_KEY_THUMB + TEXT + MEDIA_KEY_LOCAL + INTEGER_NOT_NULL
             + MEDIA_KEY_UPLOADED_USER_UUID + TEXT + MEDIA_KEY_SHARING + INTEGER_NOT_NULL
             + MEDIA_KEY_ORIENTATION_NUMBER + " integer," + MEDIA_KEY_TYPE + TEXT

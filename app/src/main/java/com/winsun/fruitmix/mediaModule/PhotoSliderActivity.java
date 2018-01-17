@@ -64,6 +64,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -117,12 +118,12 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private PhotoSliderViewModel photoSliderViewModel;
 
-    private static List<Media> mediaList;
+    private static List<MediaViewModel> mediaViewModels;
 
     private int initialPhotoPosition = 0;
     private int currentPhotoPosition = 0;
 
-    private List<Media> mediaAlreadyLoadedList;
+    private List<MediaViewModel> mediaViewModelsAlreadyLoaded;
 
     private boolean sInEdit = true;
 
@@ -156,7 +157,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             if (willReturn) {
 
-                Media media = mediaList.get(currentPhotoPosition);
+                Media media = mediaViewModels.get(currentPhotoPosition).getMedia();
 
                 if (media instanceof Video)
                     return;
@@ -204,9 +205,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
     };
 
-    public static void startPhotoSliderActivity(View toolbar, Activity activity, List<Media> transitionMedias, Intent intent, int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
+    public static void startPhotoSliderActivity(View toolbar, Activity activity, List<MediaViewModel> transitionMediaViewModels, Intent intent, int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
-        setMediaList(transitionMedias);
+        setMediaViewModels(transitionMediaViewModels);
 
         if (transitionView == null || transitionView.isLoaded()) {
 
@@ -236,9 +237,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     }
 
-    public static void startPhotoSliderActivity(Activity activity, List<Media> transitionMedias, Intent intent) {
+    public static void startPhotoSliderActivity(Activity activity, List<MediaViewModel> transitionMediaViewModels, Intent intent) {
 
-        setMediaList(transitionMedias);
+        setMediaViewModels(transitionMediaViewModels);
 
         intent.putExtra(Util.KEY_NEED_TRANSITION, false);
         activity.startActivity(intent);
@@ -296,7 +297,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         boolean mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
-        mediaAlreadyLoadedList = new ArrayList<>();
+        mediaViewModelsAlreadyLoaded = new ArrayList<>();
 
         transitionMediaNeedShowThumb = getIntent().getBooleanExtra(Util.KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB, true);
 
@@ -375,7 +376,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         commentImg.setImageResource(R.drawable.comment);
 
-//        Media media = mediaList.get(currentPhotoPosition);
+//        Media media = mediaViewModels.get(currentPhotoPosition);
 //
 //        LinearLayout cloudOff = (LinearLayout) mViewPager.findViewWithTag(media.getKey() + currentPhotoPosition);
 //
@@ -419,9 +420,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         finishActivity();
     }
 
-    public static void setMediaList(List<Media> medias) {
+    public static void setMediaViewModels(List<MediaViewModel> mediaViewModels) {
 
-        mediaList = new ArrayList<>(medias);
+        PhotoSliderActivity.mediaViewModels = new ArrayList<>(mediaViewModels);
 
     }
 
@@ -451,11 +452,11 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 @Override
                 public void onClick(View v) {
 
-                    if (mediaList.size() > currentPhotoPosition) {
+                    if (mediaViewModels.size() > currentPhotoPosition) {
 
                         Toast.makeText(mContext, mContext.getString(R.string.coming_soon), Toast.LENGTH_SHORT).show();
 
-/*                        String imageUUID = mediaList.get(currentPhotoPosition).getUuid();
+/*                        String imageUUID = mediaViewModels.get(currentPhotoPosition).getUuid();
 
                         Intent intent = new Intent();
                         intent.setClass(PhotoSliderActivity.this, MediaShareCommentActivity.class);
@@ -516,7 +517,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             return;
         }
 
-        final Media media = mediaList.get(currentPhotoPosition);
+        final Media media = mediaViewModels.get(currentPhotoPosition).getMedia();
 
         String mediaUUID = media.getUuid();
         if (mediaUUID.isEmpty()) {
@@ -599,7 +600,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         dismissDialog();
 
-        String originalPhotoPath = mediaList.get(currentPhotoPosition).getOriginalPhotoPath();
+        String originalPhotoPath = mediaViewModels.get(currentPhotoPosition).getMedia().getOriginalPhotoPath();
 
         if (originalPhotoPath.isEmpty()) {
             Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
@@ -642,8 +643,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     }
 
     private void resetMediaLoadedState() {
-        for (Media media : mediaAlreadyLoadedList) {
-            media.setLoaded(false);
+        for (MediaViewModel mediaViewModel : mediaViewModelsAlreadyLoaded) {
+            mediaViewModel.setLoaded(false);
         }
     }
 
@@ -655,11 +656,11 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
         intent.putExtra(Util.CURRENT_PHOTO_POSITION, currentPhotoPosition);
 
-        if (mediaList != null) {
-            Media media = mediaList.get(currentPhotoPosition);
+        if (mediaViewModels != null) {
+            Media media = mediaViewModels.get(currentPhotoPosition).getMedia();
 
             if (media != null)
-                intent.putExtra(Util.CURRENT_MEDIA_KEY, mediaList.get(currentPhotoPosition).getKey());
+                intent.putExtra(Util.CURRENT_MEDIA_KEY, media.getKey());
 
         }
 
@@ -688,9 +689,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         currentPhotoPosition = position;
 
-        if (mediaList.size() > position && position > -1) {
+        if (mediaViewModels.size() > position && position > -1) {
 
-            Media media = mediaList.get(position);
+            Media media = mediaViewModels.get(position).getMedia();
 
             String title = media.getFormattedTime();
             if (title == null || title.contains(Util.DEFAULT_DATE)) {
@@ -730,7 +731,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             PlayVideoFragment currentPlayVideoFragment = playVideoFragments.get(currentItem);
 
-            currentPlayVideoFragment.startPlayVideo((Video) mediaList.get(currentItem), mContext);
+            currentPlayVideoFragment.startPlayVideo((Video) mediaViewModels.get(currentItem).getMedia(), mContext);
 
         }
 
@@ -738,7 +739,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private void stopPlayVideo(PlayVideoFragment playVideoFragment) {
         playVideoFragment.stopPlayVideo();
-
     }
 
     private void toggleFullScreenState() {
@@ -752,9 +752,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         if (url == null)
             return;
 
-        Media media = ((GifTouchNetworkImageView) view).getCurrentMedia();
+        MediaViewModel mediaViewModel = ((GifTouchNetworkImageView) view).getCurrentMediaViewModel();
 
-        handleMediaLoaded(url, view, media);
+        handleMediaLoaded(url, view, mediaViewModel);
 
     }
 
@@ -764,27 +764,30 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         if (url == null)
             return;
 
-        Media media = ((GifTouchNetworkImageView) view).getCurrentMedia();
+        MediaViewModel mediaViewModel = ((GifTouchNetworkImageView) view).getCurrentMediaViewModel();
 
-        if (isImageThumb(url, media)) {
+        if (isImageThumb(url, mediaViewModel.getMedia())) {
             ((GifTouchNetworkImageView) view).setDefaultColor();
         }
 
     }
 
-    private void handleMediaLoaded(String url, View view, Media media) {
-        if (isImageThumb(url, media)) {
+    private void handleMediaLoaded(String url, View view, MediaViewModel mediaViewModel) {
+        if (isImageThumb(url, mediaViewModel.getMedia())) {
 
-            handleThumbLoaded(view, media);
+            handleThumbLoaded(view, mediaViewModel.getMedia());
 
         } else {
 
-            handleOriginalMediaLoaded(view, media);
+            handleOriginalMediaLoaded(view, mediaViewModel);
 
         }
     }
 
-    private void handleOriginalMediaLoaded(View view, Media media) {
+    private void handleOriginalMediaLoaded(View view, MediaViewModel mediaViewModel) {
+
+        Media media = mediaViewModel.getMedia();
+
         if (!transitionMediaNeedShowThumb && needTransition) {
 
             Log.d(TAG, "handleOriginalMediaLoaded: start postponed enter transition");
@@ -795,10 +798,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             scheduleStartPostponedTransition(view);
         }
 
-        if (!media.isLoaded()) {
-            media.setLoaded(true);
+        if (!mediaViewModel.isLoaded()) {
+            mediaViewModel.setLoaded(true);
 
-            mediaAlreadyLoadedList.add(media);
+            mediaViewModelsAlreadyLoaded.add(mediaViewModel);
         }
 
     }
@@ -940,14 +943,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private class MyAdapter extends PagerAdapter {
 
-        private List<Media> medias;
+        private List<MediaViewModel> mMediaViewModels;
 
         public MyAdapter() {
 
-            if (mediaList != null) {
-                medias = new ArrayList<>(mediaList);
+            if (mediaViewModels != null) {
+                mMediaViewModels = new ArrayList<>(mediaViewModels);
             } else {
-                medias = new ArrayList<>();
+                mMediaViewModels = new ArrayList<>();
             }
 
         }
@@ -962,7 +965,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             View view;
 
-            final Media media = medias.get(position);
+            MediaViewModel mediaViewModel = mMediaViewModels.get(position);
+
+            final Media media = mediaViewModel.getMedia();
 
 //                setMainPicScreenWidthHeight(mainPic, media);
 
@@ -998,7 +1003,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 }
 
             } else
-                view = getViewForMedia(position, media);
+                view = getViewForMedia(position, mediaViewModel);
 
             container.addView(view);
 
@@ -1009,11 +1014,13 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
 
         @NonNull
-        private View getViewForMedia(int position, Media media) {
+        private View getViewForMedia(int position, MediaViewModel mediaViewModel) {
             View view;
             view = LayoutInflater.from(mContext).inflate(R.layout.photo_slider_cell, null);
 
             GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
+
+            Media media = mediaViewModel.getMedia();
 
             Log.d(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
 
@@ -1024,7 +1031,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             mImageLoader.setShouldCache(!media.isLocal());
 
-            mainPic.setCurrentMedia(media);
+            mainPic.setCurrentMediaViewModel(mediaViewModel);
 
             HttpRequest httpRequest = media.getImageThumbUrl(mContext);
 
@@ -1278,10 +1285,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         @Override
         public int getCount() {
 
-            if (medias == null || medias.size() == 0) {
+            if (mMediaViewModels == null || mMediaViewModels.size() == 0) {
                 return 0;
             } else {
-                return medias.size();
+                return mMediaViewModels.size();
             }
         }
 

@@ -22,8 +22,9 @@ public class UserComment {
 
     private String date;
 
-    public UserComment(User creator, long time) {
+    public UserComment(String uuid,User creator, long time) {
 
+        this.uuid = uuid;
         this.creator = creator;
         this.time = time;
     }

@@ -6,6 +6,7 @@ import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.util.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +70,7 @@ public class GroupDataSourceTest {
 
         testAddGroup();
 
-        UserComment userComment = new TextComment(new User(), time, testText);
+        UserComment userComment = new TextComment(Util.createLocalUUid(),new User(), time, testText);
 
         groupDataSource.insertUserComment(testGroupUuid, userComment);
 

@@ -3,6 +3,8 @@ package com.winsun.fruitmix.mediaModule.model;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
@@ -11,7 +13,7 @@ import com.winsun.fruitmix.util.Util;
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class Media {
+public class Media extends AbstractFile{
 
     private static final String TAG = Media.class.getSimpleName();
 
@@ -24,10 +26,8 @@ public class Media {
     private String formattedTime;
     private String width;
     private String height;
-    private boolean selected;
     private boolean local;
     private String dateWithoutHourMinSec;
-    private boolean loaded;
     private String belongingMediaShareUUID;
     private String uploadedUserUUIDs;
     private boolean sharing;
@@ -56,6 +56,9 @@ public class Media {
 
         longitude = "";
         latitude = "";
+
+        setFileTypeResID(R.drawable.file_icon);
+
     }
 
     public String getUuid() {
@@ -90,14 +93,6 @@ public class Media {
         this.height = height;
     }
 
-    public boolean isSelected() {
-        return selected;
-    }
-
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
-
     public boolean isLocal() {
         return local;
     }
@@ -120,14 +115,6 @@ public class Media {
 
     public void setThumb(String thumb) {
         this.thumb = thumb;
-    }
-
-    public boolean isLoaded() {
-        return loaded;
-    }
-
-    public void setLoaded(boolean loaded) {
-        this.loaded = loaded;
     }
 
     public String getBelongingMediaShareUUID() {
@@ -355,5 +342,10 @@ public class Media {
     public String toString() {
         return "uuid: " + getUuid() + " path: " + getOriginalPhotoPath() + " width: " + getWidth()
                 + " height: " + getHeight() + " formattedTime: " + getFormattedTime() + " orientationNumber: " + getOrientationNumber();
+    }
+
+    @Override
+    public boolean isFolder() {
+        return false;
     }
 }

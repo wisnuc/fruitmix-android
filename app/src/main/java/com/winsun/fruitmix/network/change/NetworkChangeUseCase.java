@@ -119,14 +119,14 @@ public class NetworkChangeUseCase {
                     public void onSucceed(List<StationInfoCallByStationAPI> data, OperationResult operationResult) {
                         super.onSucceed(data, operationResult);
 
-                        Log.d(TAG, "get station info succeed: check station ip succeed");
+                        Log.d(NetworkChangeUseCase.TAG, "get station info succeed: check station ip succeed");
                     }
 
                     @Override
                     public void onFail(OperationResult operationResult) {
                         super.onFail(operationResult);
 
-                        Log.d(TAG, "get station info fail,check to wechat user");
+                        Log.d(NetworkChangeUseCase.TAG, "get station info fail,check to wechat user");
 
                         handleCheckToWeChatUser();
 
@@ -186,6 +186,8 @@ public class NetworkChangeUseCase {
 
     private void checkToLocalUser(String token, String ip) {
 
+        Log.d(TAG, "checkToLocalUser: ip:" + ip);
+
         httpRequestFactory.checkToLocalUser(token, ip);
 
         EventBus.getDefault().postSticky(new OperationEvent(Util.LOGIN_STATE_CHANGED, new OperationSuccess()));
@@ -193,6 +195,8 @@ public class NetworkChangeUseCase {
     }
 
     private void checkToWeChatUser(String token) {
+
+        Log.d(TAG, "checkToWeChatUser: token:" + token);
 
         httpRequestFactory.checkToWeChatUser(token);
 

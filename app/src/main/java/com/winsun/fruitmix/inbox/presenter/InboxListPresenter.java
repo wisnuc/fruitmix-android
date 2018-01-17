@@ -1,7 +1,12 @@
 package com.winsun.fruitmix.inbox.presenter;
 
 import android.databinding.ViewDataBinding;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.DynamicDrawableSpan;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -413,12 +418,20 @@ public class InboxListPresenter implements ActiveView {
 
             refreshCommentTitle(groupFileComment, binding, from);
 
+            binding.sharePre.setVisibility(View.VISIBLE);
             binding.shareText.setVisibility(View.VISIBLE);
 
-            String shareText = mInboxView.getString(R.string.share_something,
-                    file.getName());
+            SpannableString spannableString = new SpannableString("default" + file.getName());
 
-            binding.shareText.setText(shareText);
+            Drawable drawable = mInboxView.getContext().getResources().getDrawable(file.getFileTypeResID());
+
+            drawable.setBounds(0,0,drawable.getIntrinsicWidth(),drawable.getIntrinsicHeight());
+
+            ImageSpan imageSpan = new ImageSpan(drawable, ImageSpan.ALIGN_BASELINE);
+
+            spannableString.setSpan(imageSpan, 0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            binding.shareText.setText(spannableString);
 
         }
 
@@ -439,7 +452,6 @@ public class InboxListPresenter implements ActiveView {
         binding.time.setText(userComment.getDate(mInboxView.getContext()));
 
     }
-
 
     private class InboxUserInvitationViewHolder extends BindingViewHolder {
 

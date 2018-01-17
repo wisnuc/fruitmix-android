@@ -13,8 +13,8 @@ public class PhotoComment extends TextComment {
 
     private List<Media> medias;
 
-    public PhotoComment(User creator, long time, List<Media> medias) {
-        super(creator, time);
+    public PhotoComment(String uuid,User creator, long time, List<Media> medias) {
+        super(uuid,creator, time);
         this.medias = medias;
     }
 

@@ -49,15 +49,15 @@ public class SingleFileCommentView extends UserCommentView {
 
         if (data instanceof PhotoComment) {
 
+            frameLayout.removeAllViews();
+
             PhotoComment comment = (PhotoComment) data;
 
-            SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), null, false);
-
-            frameLayout.removeAllViews();
+            SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayout, false);
 
             frameLayout.addView(singlePhotoBinding.getRoot());
 
-            Util.setHeight(singlePhotoBinding.container,Util.dip2px(context, 250));
+            Util.setHeight(singlePhotoBinding.container, Util.dip2px(context, 250));
 
             NetworkImageView networkImageView = singlePhotoBinding.coverImg;
 
@@ -65,19 +65,19 @@ public class SingleFileCommentView extends UserCommentView {
 
             HttpRequest httpRequest = media.getImageThumbUrl(context);
 
-            MediaUtil.setMediaImageUrl(media,networkImageView, httpRequest, imageLoader);
+            MediaUtil.setMediaImageUrl(media, networkImageView, httpRequest, imageLoader);
 
         } else if (data instanceof FileComment) {
 
+            frameLayout.removeAllViews();
+
             FileComment fileComment = (FileComment) data;
 
-            SingleFileBinding singleFileBinding = SingleFileBinding.inflate(LayoutInflater.from(context), null, false);
-
-            frameLayout.removeAllViews();
+            SingleFileBinding singleFileBinding = SingleFileBinding.inflate(LayoutInflater.from(context), frameLayout, false);
 
             frameLayout.addView(singleFileBinding.getRoot());
 
-            Util.setHeight(singleFileBinding.container,Util.dip2px(context, 250));
+            Util.setHeight(singleFileBinding.container, Util.dip2px(context, 250));
 
             singleFileBinding.setFile(fileComment.getFiles().get(0));
 

@@ -11,8 +11,8 @@ public class AudioComment extends TextComment {
     private String audioRecordFilePath;
     private long audioRecordTime;
 
-    public AudioComment(User creator, long time, String audioRecordFilePath, long audioRecordTime) {
-        super(creator, time);
+    public AudioComment(String uuid, User creator, long time, String audioRecordFilePath, long audioRecordTime) {
+        super(uuid,creator, time);
         this.audioRecordFilePath = audioRecordFilePath;
         this.audioRecordTime = audioRecordTime;
     }

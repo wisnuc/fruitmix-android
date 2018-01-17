@@ -17,7 +17,6 @@ package com.winsun.fruitmix.component;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -31,11 +30,9 @@ import com.android.volley.toolbox.IImageLoadListener;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.gif.GifLoader.GifContainer;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -81,7 +78,7 @@ public class GifTouchNetworkImageView extends PinchImageView {
 
     private boolean isLoadGif = false;
 
-    private Media currentMedia;
+    private MediaViewModel currentMediaViewModel;
 
     public GifTouchNetworkImageView(Context context) {
         this(context, null);
@@ -158,12 +155,12 @@ public class GifTouchNetworkImageView extends PinchImageView {
         this.orientationNumber = orientationNumber;
     }
 
-    public void setCurrentMedia(Media currentMedia) {
-        this.currentMedia = currentMedia;
+    public void setCurrentMediaViewModel(MediaViewModel currentMediaViewModel) {
+        this.currentMediaViewModel = currentMediaViewModel;
     }
 
-    public Media getCurrentMedia() {
-        return currentMedia;
+    public MediaViewModel getCurrentMediaViewModel() {
+        return currentMediaViewModel;
     }
 
     /**

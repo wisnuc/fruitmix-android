@@ -8,7 +8,6 @@ import com.winsun.fruitmix.util.Util;
 
 public class Video extends Media {
 
-    private String name;
     private long size;
     private long duration;
 
@@ -16,12 +15,16 @@ public class Video extends Media {
         setName("");
     }
 
+    @Override
     public String getName() {
+
+        String name = super.getName();
+
         return name == null ? "" : name;
     }
 
     public void setName(String name) {
-        this.name = name;
+        super.setName(name);
     }
 
     public long getSize() {
