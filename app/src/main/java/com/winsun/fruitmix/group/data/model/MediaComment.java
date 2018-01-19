@@ -9,11 +9,11 @@ import java.util.List;
  * Created by Administrator on 2017/8/8.
  */
 
-public class PhotoComment extends TextComment {
+public class MediaComment extends TextComment {
 
     private List<Media> medias;
 
-    public PhotoComment(String uuid,User creator, long time, List<Media> medias) {
+    public MediaComment(String uuid, User creator, long time, List<Media> medias) {
         super(uuid,creator, time);
         this.medias = medias;
     }

@@ -1,11 +1,11 @@
 package com.winsun.fruitmix.inbox.presenter;
 
+import android.content.Context;
 import android.databinding.ViewDataBinding;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.style.DynamicDrawableSpan;
 import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,15 +21,17 @@ import com.winsun.fruitmix.databinding.InboxCommentTitleBinding;
 import com.winsun.fruitmix.databinding.InboxMediaItemBinding;
 import com.winsun.fruitmix.databinding.InboxUserInvitationBinding;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.group.data.model.FileComment;
+import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.http.InjectHttp;
-import com.winsun.fruitmix.inbox.data.model.GroupFileComment;
-import com.winsun.fruitmix.inbox.data.model.GroupMediaComment;
 import com.winsun.fruitmix.inbox.data.model.GroupUserComment;
 import com.winsun.fruitmix.inbox.data.source.InboxDataSource;
 import com.winsun.fruitmix.inbox.view.InboxView;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
+import com.winsun.fruitmix.list.ListActivity;
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ViewItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.User;
@@ -172,14 +174,16 @@ public class InboxListPresenter implements ActiveView {
 
         for (GroupUserComment groupUserComment : groupUserComments) {
 
-            if (groupUserComment instanceof GroupMediaComment) {
+            UserComment userComment = groupUserComment.getUserComment();
 
-                MediaItem mediaItem = new MediaItem((GroupMediaComment) groupUserComment);
+            if (userComment instanceof MediaComment) {
+
+                MediaItem mediaItem = new MediaItem( groupUserComment);
 
                 viewItems.add(mediaItem);
-            } else if (groupUserComment instanceof GroupFileComment) {
+            } else if (userComment instanceof FileComment) {
 
-                FileItem fileItem = new FileItem((GroupFileComment) groupUserComment);
+                FileItem fileItem = new FileItem(groupUserComment);
 
                 viewItems.add(fileItem);
 
@@ -278,7 +282,7 @@ public class InboxListPresenter implements ActiveView {
             if (viewItem instanceof MediaItem) {
 
                 InboxMediaViewHolder inboxMediaViewHolder = (InboxMediaViewHolder) holder;
-                inboxMediaViewHolder.refreshView(((MediaItem) viewItem).getGroupMediaComment());
+                inboxMediaViewHolder.refreshView((MediaItem) viewItem);
 
 
             } else if (viewItem instanceof UserInvitationItem) {
@@ -291,7 +295,7 @@ public class InboxListPresenter implements ActiveView {
 
                 InboxFileViewHolder viewHolder = (InboxFileViewHolder) holder;
 
-                viewHolder.refreshView(((FileItem) viewItem).getGroupFileComment());
+                viewHolder.refreshView((FileItem) viewItem);
 
             }
 
@@ -310,14 +314,27 @@ public class InboxListPresenter implements ActiveView {
 
     private class MediaItem implements ViewItem {
 
-        private GroupMediaComment mGroupMediaComment;
+        private GroupUserComment mGroupUserComment;
 
-        public MediaItem(GroupMediaComment groupMediaComment) {
-            mGroupMediaComment = groupMediaComment;
+        private MediaComment mMediaComment;
+
+        public MediaItem(GroupUserComment groupUserComment) {
+            mGroupUserComment = groupUserComment;
+
+            mMediaComment = (MediaComment) mGroupUserComment.getUserComment();
+
         }
 
-        public GroupMediaComment getGroupMediaComment() {
-            return mGroupMediaComment;
+        public GroupUserComment getGroupUserComment() {
+            return mGroupUserComment;
+        }
+
+        public List<Media> getMedias() {
+            return mMediaComment.getMedias();
+        }
+
+        public MediaComment getMediaComment() {
+            return mMediaComment;
         }
 
         @Override
@@ -346,14 +363,25 @@ public class InboxListPresenter implements ActiveView {
 
     private class FileItem implements ViewItem {
 
-        private GroupFileComment mGroupFileComment;
+        private GroupUserComment mGroupUserComment;
 
-        public FileItem(GroupFileComment groupFileComment) {
-            mGroupFileComment = groupFileComment;
+        private FileComment mFileComment;
+
+        public FileItem(GroupUserComment groupUserComment) {
+            mGroupUserComment = groupUserComment;
+            mFileComment = (FileComment) groupUserComment.getUserComment();
         }
 
-        public GroupFileComment getGroupFileComment() {
-            return mGroupFileComment;
+        public GroupUserComment getGroupUserComment() {
+            return mGroupUserComment;
+        }
+
+        public FileComment getFileComment() {
+            return mFileComment;
+        }
+
+        public List<AbstractFile> getFiles() {
+            return mFileComment.getFiles();
         }
 
         @Override
@@ -370,24 +398,25 @@ public class InboxListPresenter implements ActiveView {
             super(viewDataBinding);
         }
 
-        void refreshView(GroupMediaComment groupMediaComment) {
+        void refreshView(MediaItem mediaItem) {
 
             InboxMediaItemBinding binding = (InboxMediaItemBinding) getViewDataBinding();
 
-            refreshTitle(groupMediaComment, binding);
+            refreshTitle(mediaItem, binding);
 
-            new InboxMediaPresenter(binding, groupMediaComment, mImageLoader);
-
+            new InboxMediaPresenter(binding, mediaItem.getMediaComment(), mImageLoader);
 
         }
 
-        private void refreshTitle(GroupMediaComment groupMediaComment, InboxMediaItemBinding binding) {
+        private void refreshTitle(MediaItem mediaItem, InboxMediaItemBinding binding) {
 
             InboxCommentTitleBinding inboxCommentTitleBinding = binding.inboxCommentTitle;
 
-            String from = mInboxView.getString(R.string.group_come_from, groupMediaComment.getGroupName());
+            GroupUserComment groupUserComment = mediaItem.getGroupUserComment();
 
-            int mediaSize = groupMediaComment.getMedias().size();
+            String from = mInboxView.getString(R.string.group_come_from, groupUserComment.getGroupName());
+
+            int mediaSize = mediaItem.getMedias().size();
 
             String share = mInboxView.getString(R.string.share_something,
                     mInboxView.getQuantityString(R.plurals.photo, mediaSize, mediaSize));
@@ -396,7 +425,7 @@ public class InboxListPresenter implements ActiveView {
 
             inboxCommentTitleBinding.shareText.setVisibility(View.GONE);
 
-            refreshCommentTitle(groupMediaComment, inboxCommentTitleBinding, text);
+            refreshCommentTitle(groupUserComment, inboxCommentTitleBinding, text);
 
         }
 
@@ -408,30 +437,66 @@ public class InboxListPresenter implements ActiveView {
             super(viewDataBinding);
         }
 
-        void refreshView(GroupFileComment groupFileComment) {
+        void refreshView(final FileItem fileItem) {
 
             InboxCommentTitleBinding binding = (InboxCommentTitleBinding) getViewDataBinding();
 
-            AbstractFile file = groupFileComment.getAbstractFiles().get(0);
+            final Context context= binding.getRoot().getContext();
 
-            String from = mInboxView.getString(R.string.group_come_from, groupFileComment.getGroupName());
+            List<AbstractFile> files = fileItem.getFiles();
 
-            refreshCommentTitle(groupFileComment, binding, from);
+            GroupUserComment groupUserComment = fileItem.getGroupUserComment();
+
+            int size = files.size();
+
+            final AbstractFile file = files.get(0);
+
+            String from = mInboxView.getString(R.string.group_come_from, groupUserComment.getGroupName());
+
+            refreshCommentTitle(groupUserComment, binding, from);
 
             binding.sharePre.setVisibility(View.VISIBLE);
             binding.shareText.setVisibility(View.VISIBLE);
 
-            SpannableString spannableString = new SpannableString("default" + file.getName());
+            String fileName = file.getName();
+
+            StringBuilder name = new StringBuilder();
+
+            if (fileName.length() > 10) {
+                name.append(fileName.substring(0, 10));
+
+                name.append(mInboxView.getString(R.string.android_ellipsize));
+            } else
+                name.append(fileName);
+
+            name.append("\"");
+
+            if (size > 1) {
+                name.append(mInboxView.getString(R.string.more, mInboxView.getQuantityString(R.plurals.file, size, size)));
+            } else {
+                name.append(mInboxView.getString(R.string.file));
+            }
+
+            SpannableString spannableString = new SpannableString("\"" + "default" + name.toString());
 
             Drawable drawable = mInboxView.getContext().getResources().getDrawable(file.getFileTypeResID());
 
-            drawable.setBounds(0,0,drawable.getIntrinsicWidth(),drawable.getIntrinsicHeight());
+            drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
 
             ImageSpan imageSpan = new ImageSpan(drawable, ImageSpan.ALIGN_BASELINE);
 
-            spannableString.setSpan(imageSpan, 0, 7, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannableString.setSpan(imageSpan, 1, 8, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             binding.shareText.setText(spannableString);
+
+            binding.getRoot().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    ListActivity.startListActivity(fileItem.getFileComment(),context);
+
+                }
+            });
 
         }
 

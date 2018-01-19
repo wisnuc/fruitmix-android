@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.inbox.presenter;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -12,8 +13,9 @@ import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.InboxMediaItemBinding;
 import com.winsun.fruitmix.databinding.InboxPhotoItemBinding;
-import com.winsun.fruitmix.inbox.data.model.GroupMediaComment;
-import com.winsun.fruitmix.inbox.data.model.GroupUserComment;
+import com.winsun.fruitmix.group.data.model.MediaComment;
+import com.winsun.fruitmix.group.data.model.UserComment;
+import com.winsun.fruitmix.list.ListActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.util.MediaUtil;
@@ -37,10 +39,13 @@ public class InboxMediaPresenter {
 
     private ImageLoader mImageLoader;
 
-    public InboxMediaPresenter(InboxMediaItemBinding inboxMediaItemBinding, GroupMediaComment groupMediaComment, ImageLoader imageLoader) {
+    private MediaComment mMediaComment;
+
+    public InboxMediaPresenter(InboxMediaItemBinding inboxMediaItemBinding, MediaComment mediaComment, ImageLoader imageLoader) {
         mInboxMediaItemBinding = inboxMediaItemBinding;
 
-        mMedias = groupMediaComment.getMedias();
+        mMediaComment = mediaComment;
+        mMedias = mediaComment.getMedias();
 
         mImageLoader = imageLoader;
 
@@ -70,15 +75,20 @@ public class InboxMediaPresenter {
 
                 setCount(position + 1);
 
-
-
             }
         });
+
+        mInboxMediaItemBinding.setInboxMediaPresenter(this);
 
     }
 
     private void setCount(int position) {
         mediaCountTV.setText(getString(R.string.slash, position, mMedias.size()));
+    }
+
+    public void enterListActivity(Context context){
+
+        ListActivity.startListActivity(mMediaComment,context);
     }
 
     private String getString(int resID) {

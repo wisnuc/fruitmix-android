@@ -9,6 +9,10 @@
             name="groupUserComment"
             type="com.winsun.fruitmix.inbox.data.model.GroupUserComment" />
 
+        <variable
+            name="inboxMediaPresenter"
+            type="com.winsun.fruitmix.inbox.presenter.InboxMediaPresenter"/>
+
     </data>
 
     <LinearLayout
@@ -66,6 +70,7 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginRight="16dp"
+                android:onClick="@{()->inboxMediaPresenter.enterListActivity(context)}"
                 android:layout_marginTop="8dp"
                 android:text="@string/show_all"
                 android:textColor="#03a9f4"

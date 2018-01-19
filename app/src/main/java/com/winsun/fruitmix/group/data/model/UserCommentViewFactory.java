@@ -48,9 +48,9 @@ public class UserCommentViewFactory {
 
         if (userComment instanceof AudioComment)
             return TYPE_VOICE;
-        else if (userComment instanceof PhotoComment) {
+        else if (userComment instanceof MediaComment) {
 
-            List<Media> medias = ((PhotoComment) userComment).getMedias();
+            List<Media> medias = ((MediaComment) userComment).getMedias();
 
             if (medias.size() > 1)
                 return TYPE_MULTIPLE_FILE;

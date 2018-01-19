@@ -18,7 +18,7 @@ import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.view.LocalFileFragment;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
 import com.winsun.fruitmix.group.data.model.FileComment;
-import com.winsun.fruitmix.group.data.model.PhotoComment;
+import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
@@ -390,7 +390,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //            userComment = new MultiPhotoComment(currentUser, System.currentTimeMillis(), selectMedias);
 //        }
 
-        userComment = new PhotoComment(Util.createLocalUUid(),currentUser, System.currentTimeMillis(), selectMedias);
+        userComment = new MediaComment(Util.createLocalUUid(),currentUser, System.currentTimeMillis(), selectMedias);
 
         return userComment;
     }

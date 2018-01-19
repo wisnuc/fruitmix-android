@@ -218,7 +218,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         selectedFiles = new ArrayList<>();
 
         currentFolderUUID = rootUUID;
-        currentFolderName = activity.getString(R.string.file);
+        currentFolderName = activity.getString(R.string.files);
 
         driveRootUUID = "";
 

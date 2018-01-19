@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <data>
+
+        <variable
+            name="loadingViewModel"
+            type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
+
+    </data>
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.winsun.fruitmix.list.ListActivity">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/media_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <include layout="@layout/new_loading_layout"
+            android:visibility="gone"
+            app:loadingViewModel="@{loadingViewModel}"/>
+
+
+    </FrameLayout>
+
+
+</layout>
+

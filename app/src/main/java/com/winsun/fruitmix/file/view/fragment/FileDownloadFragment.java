@@ -232,7 +232,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     public void handleTitle() {
 
-        toolbarViewModel.titleText.set(activity.getString(R.string.file));
+        toolbarViewModel.titleText.set(activity.getString(R.string.files));
         toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
         toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
 

@@ -175,22 +175,27 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
 
         Toolbar mToolbar = toolbarLayoutBinding.toolbar;
 
-        toolbarLayoutBinding.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
-
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
         toolbarViewModel.setBaseView(this);
 
-        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
         toolbarViewModel.titleText.set(title);
+
+        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
 
         binding.setVariable(BR.toolbarViewModel, toolbarViewModel);
 
-        mToolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.login_ui_blue));
-
-        Util.setStatusBarColor(this, R.color.login_ui_blue);
+        setStatusBarToolbarBgColor(mToolbar, R.color.login_ui_blue);
 
         return toolbarViewModel;
 
+    }
+
+
+    private void setStatusBarToolbarBgColor(Toolbar mToolbar, int colorResID) {
+        mToolbar.setBackgroundColor(ContextCompat.getColor(this, colorResID));
+
+        Util.setStatusBarColor(this, colorResID);
     }
 
 

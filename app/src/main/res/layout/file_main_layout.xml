@@ -40,7 +40,7 @@
                     android:ellipsize="end"
                     android:gravity="center_vertical"
                     android:maxLines="1"
-                    android:text="@string/file"
+                    android:text="@string/files"
                     android:textColor="@color/toolbar_title"
                     android:textSize="18dp" />
 

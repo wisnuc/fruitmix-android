@@ -10,7 +10,7 @@ import com.winsun.fruitmix.databinding.MultiFileCommentBinding;
 import com.winsun.fruitmix.databinding.SingleFileBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
-import com.winsun.fruitmix.group.data.model.PhotoComment;
+import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.http.HttpRequest;
@@ -48,9 +48,9 @@ public class MultiFileCommentView extends UserCommentView {
 
         int size;
 
-        if (data instanceof PhotoComment) {
+        if (data instanceof MediaComment) {
 
-            PhotoComment comment = (PhotoComment) data;
+            MediaComment comment = (MediaComment) data;
 
             List<Media> medias = comment.getMedias();
 

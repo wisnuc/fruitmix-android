@@ -23,6 +23,12 @@
 
     </plurals>
 
+    <plurals name="file">
+
+        <item quantity="other">%1$d个文件</item>
+
+    </plurals>
+
     <string name="android_ellipsize">…</string>
 
     <string name="android_no_write_external_storage_permission">您没有在SD卡的写权限</string>
@@ -243,7 +249,7 @@
     <string name="password_has_illegal_character">密码含有非法字符</string>
 
     <!-- 文件 -->
-    <string name="file">文件</string>
+    <string name="files">文件</string>
     <string name="download">下载</string>
     <string name="select_file">选择文件</string>
     <string name="download_select_item">下载所选项</string>
@@ -569,5 +575,9 @@
     <string name="slash">%1$d/%2$d</string>
 
     <string name="application_for_wisnuc">申请\"WISNUC\"用户</string>
+
+    <string name="more">等%1$s</string>
+
+    <string name="file">文件</string>
 
 </resources>

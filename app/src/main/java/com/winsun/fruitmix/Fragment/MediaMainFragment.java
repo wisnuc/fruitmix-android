@@ -1265,7 +1265,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         } else {
 
-            toolbarViewModel.titleText.set(getString(R.string.file));
+            toolbarViewModel.titleText.set(getString(R.string.files));
             toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
 
             toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);

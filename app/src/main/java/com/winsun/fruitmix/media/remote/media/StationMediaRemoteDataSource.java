@@ -8,6 +8,7 @@ import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.parser.RemoteMediaParser;
 import com.winsun.fruitmix.parser.RemoteMediaStreamParser;

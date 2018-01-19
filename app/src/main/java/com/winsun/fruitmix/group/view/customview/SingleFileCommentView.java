@@ -12,7 +12,7 @@ import com.winsun.fruitmix.databinding.SingleFileBinding;
 import com.winsun.fruitmix.databinding.SingleFileCommentBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
 import com.winsun.fruitmix.group.data.model.FileComment;
-import com.winsun.fruitmix.group.data.model.PhotoComment;
+import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -47,11 +47,11 @@ public class SingleFileCommentView extends UserCommentView {
 
         FrameLayout frameLayout = binding.singleFileFramelayout;
 
-        if (data instanceof PhotoComment) {
+        if (data instanceof MediaComment) {
 
             frameLayout.removeAllViews();
 
-            PhotoComment comment = (PhotoComment) data;
+            MediaComment comment = (MediaComment) data;
 
             SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayout, false);
 

@@ -68,7 +68,7 @@
                 android:gravity="center_vertical"
                 android:maxLines="1"
                 android:text="@{toolbarViewModel.titleText,default=@string/photo}"
-                android:textColor="@color/eighty_seven_percent_black"
+                android:textColor="@{toolbarViewModel.titleTextColorResID,default=@color/eighty_seven_percent_black}"
                 android:textSize="18dp" />
 
         </RelativeLayout>
