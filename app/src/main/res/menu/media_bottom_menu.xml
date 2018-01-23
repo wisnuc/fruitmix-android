@@ -3,12 +3,12 @@
 
     <item
         android:id="@+id/inbox"
-        android:icon="@drawable/ic_share"
+        android:icon="@drawable/inbox"
         android:title="@string/inbox" />
 
     <item
         android:id="@+id/group"
-        android:icon="@drawable/ic_share"
+        android:icon="@drawable/group"
         android:title="@string/group" />
 
     <item

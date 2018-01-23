@@ -34,8 +34,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -309,6 +313,67 @@ public class Util {
 
     public static String createLocalUUid() {
         return UUID.randomUUID().toString();
+    }
+
+    public static String formatShareTime(Context context, long shareTimeMillis,long currentTimeMillis) {
+
+        Calendar shareCalendar = Calendar.getInstance();
+
+        shareCalendar.setTimeInMillis(shareTimeMillis);
+
+        Calendar currentCalendar = Calendar.getInstance();
+
+        currentCalendar.setTimeInMillis(currentTimeMillis);
+
+        int currentYear = currentCalendar.get(Calendar.YEAR);
+        int shareYear = shareCalendar.get(Calendar.YEAR);
+
+        int shareMonth = shareCalendar.get(Calendar.MONTH) + 1;
+        int shareDay = shareCalendar.get(Calendar.DAY_OF_MONTH);
+
+        if (currentYear != shareYear) {
+            return context.getString(R.string.year_month_day, shareYear, shareMonth, shareDay);
+        }
+
+        int currentMonth = currentCalendar.get(Calendar.MONTH) + 1;
+        int currentDay = currentCalendar.get(Calendar.DAY_OF_MONTH);
+
+        if (currentMonth != shareMonth || currentDay - shareDay > 1) {
+            return context.getString(R.string.month_day, shareMonth, shareDay);
+        }
+
+        int shareHour = shareCalendar.get(Calendar.HOUR_OF_DAY);
+        int shareMin = shareCalendar.get(Calendar.MINUTE);
+
+        if (currentDay - shareDay == 1) {
+            return context.getString(R.string.yesterday_hour_min, String.valueOf(shareHour), Util.formatHourMinSec(shareMin));
+        }
+
+        int currentHour = currentCalendar.get(Calendar.HOUR_OF_DAY);
+
+        int diffHour = currentHour - shareHour;
+
+        if (diffHour >= 5) {
+            return context.getString(R.string.hour_min, String.valueOf(shareHour), Util.formatHourMinSec(shareMin));
+        } else if (diffHour < 5 && diffHour > 1) {
+
+            String hourAgo = context.getResources().getQuantityString(R.plurals.hour, diffHour, diffHour);
+
+            return context.getString(R.string.time_ago, hourAgo);
+        } else {
+
+            int currentMin = currentCalendar.get(Calendar.MINUTE);
+
+            int diffMin = currentMin - shareMin;
+            if (diffMin < 2)
+                diffMin = 1;
+
+            String minAgo = context.getResources().getQuantityString(R.plurals.minute, diffMin, diffMin);
+
+            return context.getString(R.string.time_ago, minAgo);
+        }
+
+
     }
 
     /**

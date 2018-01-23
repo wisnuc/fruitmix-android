@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.group.data.source;
 
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
@@ -15,15 +17,15 @@ import java.util.List;
 
 public interface GroupDataSource {
 
-    void addGroup(Collection<PrivateGroup> groups);
+    void addGroup(PrivateGroup group, BaseOperateCallback callback);
 
-    List<PrivateGroup> getAllGroups();
+    void getAllGroups(BaseLoadDataCallback<PrivateGroup> callback);
 
     void clearGroups();
 
-    PrivateGroup getGroupByUUID(String groupUUID);
+    void getAllUserCommentByGroupUUID(String groupUUID, BaseLoadDataCallback<UserComment> callback);
 
-    UserComment insertUserComment(String groupUUID, UserComment userComment);
+    void insertUserComment(String groupUUID, UserComment userComment,BaseOperateCallback callback);
 
     Pin insertPin(String groupUUID, Pin pin);
 

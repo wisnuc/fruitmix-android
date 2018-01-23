@@ -19,6 +19,8 @@ import com.winsun.fruitmix.group.view.GroupListPageView;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.token.TokenDataSource;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -34,6 +36,10 @@ public class GroupListPresenter implements ActiveView {
 
     private GroupRepository groupRepository;
 
+    private User mCurrentUser;
+
+    private TokenDataSource mTokenDataSource;
+
     private GroupListAdapter groupListAdapter;
 
     private LoadingViewModel loadingViewModel;
@@ -42,8 +48,10 @@ public class GroupListPresenter implements ActiveView {
 
     private GroupListPageView groupListPageView;
 
-    public GroupListPresenter(GroupListPageView groupListPageView, GroupRepository groupRepository, LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel, GroupListViewModel groupListViewModel) {
+    public GroupListPresenter(GroupListPageView groupListPageView, User currentUser, TokenDataSource tokenDataSource, GroupRepository groupRepository, LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel, GroupListViewModel groupListViewModel) {
         this.groupRepository = groupRepository;
+        mCurrentUser = currentUser;
+        mTokenDataSource = tokenDataSource;
         this.loadingViewModel = loadingViewModel;
         this.noContentViewModel = noContentViewModel;
         this.groupListViewModel = groupListViewModel;
@@ -62,6 +70,37 @@ public class GroupListPresenter implements ActiveView {
         return groupListAdapter;
     }
 
+    public void refreshView() {
+
+        mTokenDataSource.getWATokenThroughStationToken(mCurrentUser.getAssociatedWeChatGUID(),
+                new BaseLoadDataCallbackWrapper<>(
+                        new BaseLoadDataCallback<String>() {
+                            @Override
+                            public void onSucceed(List<String> data, OperationResult operationResult) {
+
+                                groupRepository.setCloudToken(data.get(0));
+
+                                refreshGroups();
+
+                            }
+
+                            @Override
+                            public void onFail(OperationResult operationResult) {
+
+                                loadingViewModel.showLoading.set(false);
+                                noContentViewModel.showNoContent.set(true);
+
+                                groupListViewModel.showRecyclerView.set(false);
+                                groupListViewModel.showAddFriendsFAB.set(false);
+
+                            }
+                        }, this
+                )
+
+        );
+
+    }
+
     public void refreshGroups() {
 
         groupRepository.getGroupList(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<PrivateGroup>() {
@@ -69,26 +108,35 @@ public class GroupListPresenter implements ActiveView {
             public void onSucceed(final List<PrivateGroup> data, OperationResult operationResult) {
 
                 loadingViewModel.showLoading.set(false);
-                noContentViewModel.showNoContent.set(false);
 
-                groupListViewModel.showRecyclerView.set(true);
-                groupListViewModel.showAddFriendsFAB.set(false);
+                if (data.size() > 0) {
 
-                groupListAdapter.setPrivateGroups(data);
-                groupListAdapter.notifyDataSetChanged();
+                    noContentViewModel.showNoContent.set(false);
 
+                    groupListViewModel.showRecyclerView.set(true);
+
+                    groupListAdapter.setPrivateGroups(data);
+                    groupListAdapter.notifyDataSetChanged();
+
+                } else {
+
+                    noContentViewModel.showNoContent.set(true);
+
+                    groupListViewModel.showRecyclerView.set(false);
+                }
+
+                groupListViewModel.showAddFriendsFAB.set(true);
 
             }
 
             @Override
             public void onFail(OperationResult operationResult) {
 
-
                 loadingViewModel.showLoading.set(false);
                 noContentViewModel.showNoContent.set(true);
 
                 groupListViewModel.showRecyclerView.set(false);
-                groupListViewModel.showAddFriendsFAB.set(false);
+                groupListViewModel.showAddFriendsFAB.set(true);
 
 
             }
@@ -101,7 +149,6 @@ public class GroupListPresenter implements ActiveView {
         return groupListPageView != null;
     }
 
-
     public class GroupListAdapter extends RecyclerView.Adapter<BindingViewHolder> {
 
         private List<PrivateGroup> mPrivateGroups;
@@ -112,7 +159,15 @@ public class GroupListPresenter implements ActiveView {
 
         void setPrivateGroups(List<PrivateGroup> privateGroups) {
             mPrivateGroups.clear();
+
+            for (PrivateGroup group:privateGroups){
+
+                group.addUser(mCurrentUser);
+
+            }
+
             mPrivateGroups.addAll(privateGroups);
+
         }
 
         @Override
@@ -156,7 +211,7 @@ public class GroupListPresenter implements ActiveView {
 
         UserComment userComment = privateGroup.getLastComment();
 
-        if (userComment instanceof TextComment) {
+        if (userComment != null && userComment instanceof TextComment) {
 
             TextComment textComment = (TextComment) userComment;
 

@@ -5,6 +5,7 @@ import android.util.Patterns;
 
 import com.winsun.fruitmix.callback.BaseDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.equipment.search.data.EquipmentBootInfo;
 import com.winsun.fruitmix.exception.NetworkException;
@@ -15,6 +16,7 @@ import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
+import com.winsun.fruitmix.model.operationResult.OperationSucceedWithData;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.model.operationResult.OperationSuccessWithEquipmentBootInfo;
 import com.winsun.fruitmix.model.operationResult.OperationSuccessWithFile;
@@ -62,8 +64,6 @@ public class BaseHttpCallWrapper {
 
     public <T> void operateCall(HttpRequest httpRequest, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
 
-        if (!checkPreCondition(httpRequest, callback)) return;
-
         operateCall(httpRequest, callback, parser, 0);
     }
 
@@ -105,6 +105,41 @@ public class BaseHttpCallWrapper {
             e.printStackTrace();
 
             callback.onFail(new OperationJSONException());
+        }
+
+    }
+
+    public void operateCall(HttpRequest httpRequest, BaseOperateCallback callback){
+
+        if(!checkPreCondition(httpRequest,callback))return;
+
+        try {
+
+            HttpResponse httpResponse = iHttpUtil.remoteCall(httpRequest);
+
+            if (httpResponse.getResponseCode() == 200) {
+
+                callback.onSucceed();
+
+            } else {
+
+                callback.onFail(new OperationNetworkException(httpResponse));
+
+            }
+
+
+        } catch (MalformedURLException e) {
+
+            callback.onFail(new OperationMalformedUrlException());
+
+        } catch (SocketTimeoutException ex) {
+
+            callback.onFail(new OperationSocketTimeoutException());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            callback.onFail(new OperationIOException());
         }
 
     }
@@ -250,8 +285,50 @@ public class BaseHttpCallWrapper {
 
     }
 
-    public OperationResult loadCall(HttpRequest httpRequest, RemoteDatasParser<AbstractRemoteFile> parser) {
+    public <T> OperationResult loadCallWithData(HttpRequest httpRequest, RemoteDatasParser<T> parser) {
 
+        if (!checkUrl(httpRequest.getUrl()))
+            return new OperationMalformedUrlException();
+
+        try {
+
+            HttpResponse httpResponse = iHttpUtil.remoteCall(httpRequest);
+
+            if (httpResponse.getResponseCode() == 200) {
+
+                List<T> datas = parser.parse(httpResponse.getResponseData());
+
+                return new OperationSucceedWithData<>(datas);
+
+            } else {
+
+                return new OperationNetworkException(httpResponse);
+
+            }
+
+
+        } catch (MalformedURLException e) {
+
+            return new OperationMalformedUrlException();
+
+        } catch (SocketTimeoutException ex) {
+
+            return new OperationSocketTimeoutException();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            return new OperationIOException();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+            return new OperationJSONException();
+        }
+
+    }
+
+    public OperationResult loadCall(HttpRequest httpRequest, RemoteDatasParser<AbstractRemoteFile> parser) {
 
         if (!checkUrl(httpRequest.getUrl()))
             return new OperationMalformedUrlException();

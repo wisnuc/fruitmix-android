@@ -30,6 +30,20 @@
 
     </plurals>
 
+    <plurals name="minute">
+
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+
+    </plurals>
+
+    <plurals name="hour">
+
+        <item quantity="one">%1$d hour</item>
+        <item quantity="other">%1$d hours</item>
+
+    </plurals>
+
     <string name="android_ellipsize">…</string>
 
     <string name="android_no_write_external_storage_permission">Written permission denied in SDCard.</string>
@@ -606,5 +620,13 @@
     <string name="more">%1$s and more</string>
 
     <string name="file"> file</string>
+
+    <!-- time format -->
+    <string name="year_month_day">%3$d/%2$d/%1$d</string>
+    <string name="month_day">%1$d/%2$d</string>
+    <string name="yesterday_hour_min">Yesterday %1$s:%2$s</string>
+    <string name="hour_min">%1$s:%2$s</string>
+    <string name="time_ago">%1$s ago</string>
+
 
 </resources>

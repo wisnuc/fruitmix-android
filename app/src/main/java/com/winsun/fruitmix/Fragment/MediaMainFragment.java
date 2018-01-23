@@ -463,6 +463,10 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             onDidAppear(PAGE_FILE);
             pageList.get(PAGE_FILE).refreshView();
 //            pageList.get(PAGE_GROUP).refreshDownloadItemView();
+        }else if(requestCode == GroupListPage.CREATE_GROUP_REQUEST_CODE && resultCode == RESULT_OK){
+
+            groupListPage.refreshView();
+
         }
     }
 

@@ -55,11 +55,11 @@ public class NetworkChangeUseCase {
 
     public void handleNetworkChange() {
 
-        Log.d(TAG, "handleNetworkChange: httpRequestFactory:" + httpRequestFactory);
+        Log.i(TAG, "handleNetworkChange: httpRequestFactory:" + httpRequestFactory);
 
         if (!mLoginUseCase.isAlreadyLogin()) {
 
-            Log.d(TAG, "handleNetworkChange: not login,return");
+            Log.i(TAG, "handleNetworkChange: not login,return");
 
             return;
 
@@ -71,7 +71,7 @@ public class NetworkChangeUseCase {
 
             if (systemSettingDataSource.getLoginWithWechatCodeOrNot()) {
 
-                Log.d(TAG, "handleNetworkChange: loginWithWechatCodeOrNot is true,check station");
+                Log.i(TAG, "handleNetworkChange: loginWithWechatCodeOrNot is true,check station");
 
                 String guid = systemSettingDataSource.getCurrentLoginUserGUID();
 
@@ -99,7 +99,7 @@ public class NetworkChangeUseCase {
 
             } else {
 
-                Log.d(TAG, "handleNetworkChange: loginWithWechatCodeOrNot is false,get currentIP");
+                Log.i(TAG, "handleNetworkChange: loginWithWechatCodeOrNot is false,get currentIP");
 
                 String currentIP = systemSettingDataSource.getCurrentEquipmentIp();
 
@@ -119,14 +119,14 @@ public class NetworkChangeUseCase {
                     public void onSucceed(List<StationInfoCallByStationAPI> data, OperationResult operationResult) {
                         super.onSucceed(data, operationResult);
 
-                        Log.d(NetworkChangeUseCase.TAG, "get station info succeed: check station ip succeed");
+                        Log.i(NetworkChangeUseCase.TAG, "get station info succeed: check station ip succeed");
                     }
 
                     @Override
                     public void onFail(OperationResult operationResult) {
                         super.onFail(operationResult);
 
-                        Log.d(NetworkChangeUseCase.TAG, "get station info fail,check to wechat user");
+                        Log.i(NetworkChangeUseCase.TAG, "get station info fail,check to wechat user");
 
                         handleCheckToWeChatUser();
 
@@ -138,7 +138,7 @@ public class NetworkChangeUseCase {
 
         } else if (!networkState.isWifiConnected() && networkState.isMobileConnected()) {
 
-            Log.d(TAG, "handleNetworkChange: no wifi connected,isMobileConnected is true,then check to wechat user");
+            Log.i(TAG, "handleNetworkChange: no wifi connected,isMobileConnected is true,then check to wechat user");
 
             handleCheckToWeChatUser();
 
@@ -148,7 +148,7 @@ public class NetworkChangeUseCase {
 
     private void checkStation(final String ip, final String stationID) {
 
-        Log.d(TAG, "checkStation: ip: " + ip + " stationID: " + stationID);
+        Log.i(TAG, "checkStation: ip: " + ip + " stationID: " + stationID);
 
         stationsDataSource.getStationInfoByStationAPI(ip, new BaseLoadDataCallbackImpl<StationInfoCallByStationAPI>() {
             @Override
@@ -186,7 +186,7 @@ public class NetworkChangeUseCase {
 
     private void checkToLocalUser(String token, String ip) {
 
-        Log.d(TAG, "checkToLocalUser: ip:" + ip);
+        Log.i(TAG, "checkToLocalUser: ip:" + ip);
 
         httpRequestFactory.checkToLocalUser(token, ip);
 
@@ -196,7 +196,7 @@ public class NetworkChangeUseCase {
 
     private void checkToWeChatUser(String token) {
 
-        Log.d(TAG, "checkToWeChatUser: token:" + token);
+        Log.i(TAG, "checkToWeChatUser: token:" + token);
 
         httpRequestFactory.checkToWeChatUser(token);
 

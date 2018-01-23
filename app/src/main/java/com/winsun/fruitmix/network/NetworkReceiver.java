@@ -22,6 +22,8 @@ public class NetworkReceiver extends BroadcastReceiver {
 
         EventBus.getDefault().post(new OperationEvent(Util.NETWORK_CHANGED, new OperationSuccess()));
 
+        //TODO:change way of notify:start service for handle network changed
+
     }
 
 }

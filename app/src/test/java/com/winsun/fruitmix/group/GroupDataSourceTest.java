@@ -1,10 +1,13 @@
 package com.winsun.fruitmix.group;
 
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 
@@ -39,14 +42,36 @@ public class GroupDataSourceTest {
 
         PrivateGroup privateGroup = new PrivateGroup(testGroupUuid, testGroupName1,"testOwnerUUID", Collections.<User>emptyList());
 
-        groupDataSource.addGroup(Collections.singleton(privateGroup));
+        groupDataSource.addGroup(privateGroup, new BaseOperateCallback() {
+            @Override
+            public void onSucceed() {
 
-        List<PrivateGroup> data = groupDataSource.getAllGroups();
+            }
 
-        assertEquals(1, data.size());
+            @Override
+            public void onFail(OperationResult operationResult) {
 
-        assertEquals(testGroupUuid, data.get(0).getUUID());
-        assertEquals(testGroupName1, data.get(0).getName());
+            }
+        });
+
+        groupDataSource.getAllGroups(new BaseLoadDataCallback<PrivateGroup>() {
+            @Override
+            public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
+
+                assertEquals(1, data.size());
+
+                assertEquals(testGroupUuid, data.get(0).getUUID());
+                assertEquals(testGroupName1, data.get(0).getName());
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+            }
+        });
+
+
 
     }
 
@@ -55,9 +80,18 @@ public class GroupDataSourceTest {
 
         testAddGroup();
 
-        PrivateGroup group = groupDataSource.getGroupByUUID(testGroupUuid);
+        groupDataSource.getAllUserCommentByGroupUUID(testGroupUuid, new BaseLoadDataCallback<UserComment>() {
+            @Override
+            public void onSucceed(List<UserComment> data, OperationResult operationResult) {
 
-        assertEquals(testGroupName1, group.getName());
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+            }
+        });
 
     }
 
@@ -66,23 +100,42 @@ public class GroupDataSourceTest {
 
         long time = System.currentTimeMillis();
 
-        String testText = "testAddTextComment";
+        final String testText = "testAddTextComment";
 
         testAddGroup();
 
         UserComment userComment = new TextComment(Util.createLocalUUid(),new User(), time, testText);
 
-        groupDataSource.insertUserComment(testGroupUuid, userComment);
+        groupDataSource.insertUserComment(testGroupUuid, userComment, new BaseOperateCallback() {
+            @Override
+            public void onSucceed() {
 
-        PrivateGroup group = groupDataSource.getGroupByUUID(testGroupUuid);
+                groupDataSource.getAllUserCommentByGroupUUID(testGroupUuid, new BaseLoadDataCallback<UserComment>() {
+                    @Override
+                    public void onSucceed(List<UserComment> data, OperationResult operationResult) {
 
-        List<UserComment> userComments = group.getUserComments();
+                        assertEquals(1, data.size());
 
-        assertEquals(1, userComments.size());
+                        TextComment result = (TextComment) data.get(0);
 
-        TextComment result = (TextComment) userComments.get(0);
+                        assertEquals(testText, result.getText());
 
-        assertEquals(testText, result.getText());
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                    }
+                });
+
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+            }
+        });
 
     }
 

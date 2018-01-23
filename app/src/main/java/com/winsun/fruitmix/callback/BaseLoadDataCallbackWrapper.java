@@ -8,15 +8,14 @@ import java.util.List;
  * Created by Administrator on 2017/11/14.
  */
 
-public class BaseLoadDataCallbackWrapper<T> implements BaseLoadDataCallback<T> {
+public class BaseLoadDataCallbackWrapper<T> extends BaseDataCallbackWrapper implements BaseLoadDataCallback<T> {
 
     private BaseLoadDataCallback<T> callback;
 
-    private ActiveView activeView;
-
     public BaseLoadDataCallbackWrapper(BaseLoadDataCallback<T> callback, ActiveView activeView) {
+        super(callback,activeView);
         this.callback = callback;
-        this.activeView = activeView;
+
     }
 
     @Override
@@ -27,15 +26,6 @@ public class BaseLoadDataCallbackWrapper<T> implements BaseLoadDataCallback<T> {
 
         callback.onSucceed(data, operationResult);
 
-    }
-
-    @Override
-    public void onFail(OperationResult operationResult) {
-
-        if (!activeView.isActive())
-            return;
-
-        callback.onFail(operationResult);
     }
 
 }

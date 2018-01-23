@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.databinding.NewActivityAlbumPicChooseBinding;
@@ -325,10 +326,13 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
             userComment = createFileComment();
         }
 
-        groupDataSource.insertUserComment(groupUUID, userComment, new BaseOperateDataCallbackImpl<UserComment>() {
+        showProgressDialog(getString(R.string.operating_title, "发送"));
+
+        groupDataSource.insertUserComment(groupUUID, userComment, new BaseOperateCallback() {
             @Override
-            public void onSucceed(UserComment data, OperationResult result) {
-                super.onSucceed(data, result);
+            public void onSucceed() {
+
+                showToast(getString(R.string.success, "发送"));
 
                 NewPicChooseActivity.this.setResult(RESULT_OK);
 
@@ -338,9 +342,8 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
             @Override
             public void onFail(OperationResult result) {
-                super.onFail(result);
 
-                Toast.makeText(NewPicChooseActivity.this, "插入失败", Toast.LENGTH_SHORT).show();
+                showToast(result.getResultMessage(NewPicChooseActivity.this));
 
                 NewPicChooseActivity.this.setResult(RESULT_CANCELED);
 
@@ -367,7 +370,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //            userComment = new MultiFileComment(currentUser, System.currentTimeMillis(), selectFiles);
 //        }
 
-        userComment = new FileComment(Util.createLocalUUid(),currentUser, System.currentTimeMillis(), selectFiles);
+        userComment = new FileComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), selectFiles);
 
         return userComment;
     }
@@ -390,7 +393,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //            userComment = new MultiPhotoComment(currentUser, System.currentTimeMillis(), selectMedias);
 //        }
 
-        userComment = new MediaComment(Util.createLocalUUid(),currentUser, System.currentTimeMillis(), selectMedias);
+        userComment = new MediaComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), selectMedias);
 
         return userComment;
     }

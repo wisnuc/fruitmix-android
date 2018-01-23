@@ -10,7 +10,7 @@ import java.util.List;
  * Created by Administrator on 2017/7/13.
  */
 
-public class BaseLoadDataCallbackImpl<T> implements BaseLoadDataCallback<T> {
+public class BaseLoadDataCallbackImpl<T> extends BaseDataCallbackImpl implements BaseLoadDataCallback<T> {
 
     public static final String TAG = BaseLoadDataCallbackImpl.class.getSimpleName();
 
@@ -19,8 +19,4 @@ public class BaseLoadDataCallbackImpl<T> implements BaseLoadDataCallback<T> {
 
     }
 
-    @Override
-    public void onFail(OperationResult operationResult) {
-        Log.d(TAG, "onFail: result: " + operationResult);
-    }
 }

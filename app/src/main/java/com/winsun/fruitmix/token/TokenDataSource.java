@@ -14,5 +14,6 @@ public interface TokenDataSource {
 
     void getTokenThroughWAToken(BaseLoadDataCallback<String> callback);
 
+    void getWATokenThroughStationToken(String userGUID,BaseLoadDataCallback<String> callback);
 
 }

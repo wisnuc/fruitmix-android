@@ -1,6 +1,7 @@
 package com.winsun.fruitmix;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -19,7 +20,7 @@ public class BaseDataRepository {
         this.mThreadManager = threadManager;
     }
 
-    protected  <T> BaseOperateDataCallback<T> createOperateCallbackRunOnMainThread(final BaseOperateDataCallback<T> callback) {
+    protected <T> BaseOperateDataCallback<T> createOperateCallbackRunOnMainThread(final BaseOperateDataCallback<T> callback) {
         return new BaseOperateDataCallback<T>() {
             @Override
             public void onSucceed(final T data, final OperationResult result) {
@@ -47,7 +48,36 @@ public class BaseDataRepository {
         };
     }
 
-    protected  <T> BaseLoadDataCallback<T> createLoadCallbackRunOnMainThread(final BaseLoadDataCallback<T> callback) {
+    protected BaseOperateCallback createOperateCallbackRunOnMainThread(final BaseOperateCallback callback) {
+
+        return new BaseOperateCallback() {
+            @Override
+            public void onSucceed() {
+
+                mThreadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onSucceed();
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFail(final OperationResult operationResult) {
+                mThreadManager.runOnMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onFail(operationResult);
+                    }
+                });
+            }
+        };
+
+    }
+
+
+    protected <T> BaseLoadDataCallback<T> createLoadCallbackRunOnMainThread(final BaseLoadDataCallback<T> callback) {
         return new BaseLoadDataCallback<T>() {
             @Override
             public void onSucceed(final List<T> data, final OperationResult result) {

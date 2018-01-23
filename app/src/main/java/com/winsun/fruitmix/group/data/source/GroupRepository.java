@@ -2,6 +2,7 @@ package com.winsun.fruitmix.group.data.source;
 
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.Pin;
@@ -14,7 +15,6 @@ import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * Created by Administrator on 2017/7/20.
@@ -29,6 +29,7 @@ public class GroupRepository extends BaseDataRepository {
     public static GroupRepository getInstance(GroupDataSource groupDataSource, ThreadManager threadManager) {
         if (ourInstance == null)
             ourInstance = new GroupRepository(threadManager, groupDataSource);
+
         return ourInstance;
     }
 
@@ -47,6 +48,13 @@ public class GroupRepository extends BaseDataRepository {
             ((FakeGroupDataSource) groupDataSource).setCurrentUser(currentUser);
     }
 
+    public void setCloudToken(String cloudToken){
+
+        if(groupDataSource instanceof GroupRemoteDataSource)
+            ((GroupRemoteDataSource) groupDataSource).setCloudToken(cloudToken);
+
+    }
+
     public void getGroupList(BaseLoadDataCallback<PrivateGroup> callback) {
 
         final BaseLoadDataCallback<PrivateGroup> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
@@ -54,47 +62,50 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                runOnMainThreadCallback.onSucceed(groupDataSource.getAllGroups(), new OperationSuccess());
+                groupDataSource.getAllGroups(runOnMainThreadCallback);
             }
         });
 
+    }
+
+    public void getAllUserCommentByGroupUUID(final String groupUUID, final BaseLoadDataCallback<UserComment> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                groupDataSource.getAllUserCommentByGroupUUID(groupUUID,createLoadCallbackRunOnMainThread(callback));
+            }
+        });
 
     }
 
-    public PrivateGroup getGroup(String groupUUID) {
+    public void addGroup(final PrivateGroup privateGroup, BaseOperateCallback callback) {
 
-        return groupDataSource.getGroupByUUID(groupUUID);
-
-    }
-
-    public void addGroup(final PrivateGroup privateGroup, BaseOperateDataCallback<Boolean> callback) {
-
-        final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+        final BaseOperateCallback runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
 
-                groupDataSource.addGroup(Collections.singleton(privateGroup));
+                groupDataSource.addGroup(privateGroup,runOnMainThreadCallback);
 
-                runOnMainThreadCallback.onSucceed(true, new OperationSuccess());
             }
         });
 
     }
 
+    public void insertUserComment(final String groupUUID, final UserComment userComment, BaseOperateCallback callback) {
 
-    public void insertUserComment(final String groupUUID, final UserComment userComment, BaseOperateDataCallback<UserComment> callback) {
-
-        final BaseOperateDataCallback<UserComment> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+        final BaseOperateCallback runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                runOnMainThreadCallback.onSucceed(groupDataSource.insertUserComment(groupUUID, userComment), new OperationSuccess());
+
+                groupDataSource.insertUserComment(groupUUID,userComment,runOnMainThreadCallback);
+
             }
         });
-
 
     }
 

@@ -29,6 +29,18 @@
 
     </plurals>
 
+    <plurals name="minute">
+
+        <item quantity="other">%1$d分钟</item>
+
+    </plurals>
+
+    <plurals name="hour">
+
+        <item quantity="other">%1$d小时</item>
+
+    </plurals>
+
     <string name="android_ellipsize">…</string>
 
     <string name="android_no_write_external_storage_permission">您没有在SD卡的写权限</string>
@@ -579,5 +591,13 @@
     <string name="more">等%1$s</string>
 
     <string name="file">文件</string>
+
+    <!-- time format -->
+    <string name="year_month_day">%1$d年%2$d月%3$d日</string>
+    <string name="month_day">%1$d月%2$d日</string>
+    <string name="yesterday_hour_min">昨天 %1$s:%2$s</string>
+    <string name="hour_min">%1$s:%2$s</string>
+    <string name="time_ago">%1$s前</string>
+
 
 </resources>

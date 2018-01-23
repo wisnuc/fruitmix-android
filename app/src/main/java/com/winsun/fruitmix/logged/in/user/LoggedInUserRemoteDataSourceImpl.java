@@ -33,6 +33,5 @@ public class LoggedInUserRemoteDataSourceImpl extends BaseRemoteDataSourceImpl i
             }
         });
 
-
     }
 }

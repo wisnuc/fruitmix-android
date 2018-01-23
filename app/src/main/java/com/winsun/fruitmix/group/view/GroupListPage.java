@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.databinding.ActivityGroupListBinding;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
@@ -22,9 +23,14 @@ import com.winsun.fruitmix.group.presenter.GroupListPresenter;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
+import com.winsun.fruitmix.token.TokenDataSource;
+import com.winsun.fruitmix.torrent.data.TorrentDataRepository;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
@@ -41,29 +47,31 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
     private Activity containerActivity;
 
+    public static final int CREATE_GROUP_REQUEST_CODE = 1;
+
     public GroupListPage(Activity activity) {
 
         containerActivity = activity;
 
         ActivityGroupListBinding binding = ActivityGroupListBinding.inflate(LayoutInflater.from(activity), null, false);
 
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
+        final LoadingViewModel loadingViewModel = new LoadingViewModel();
 
         binding.setLoadingViewModel(loadingViewModel);
 
-        NoContentViewModel noContentViewModel = new NoContentViewModel();
+        final NoContentViewModel noContentViewModel = new NoContentViewModel();
         noContentViewModel.setNoContentImgResId(R.drawable.no_file);
         noContentViewModel.setNoContentText("没有内容");
 
         binding.setNoContentViewModel(noContentViewModel);
 
-        GroupListViewModel groupListViewModel = new GroupListViewModel();
+        final GroupListViewModel groupListViewModel = new GroupListViewModel();
 
         binding.setGroupListViewModel(groupListViewModel);
 
         view = binding.getRoot();
 
-        GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository(containerActivity);
+        final GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository(containerActivity);
 
         String currentLoginUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(containerActivity).getCurrentLoginUserUUID();
 
@@ -71,7 +79,10 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         groupRepository.setCurrentUser(currentUser);
 
-        groupListPresenter = new GroupListPresenter(this, groupRepository, loadingViewModel, noContentViewModel, groupListViewModel);
+        TokenDataSource tokenDataSource = InjectTokenRemoteDataSource.provideTokenDataSource(containerActivity);
+
+        groupListPresenter = new GroupListPresenter(this,currentUser,tokenDataSource,
+                groupRepository, loadingViewModel, noContentViewModel, groupListViewModel);
 
         recyclerView = binding.groupRecyclerview;
 
@@ -80,7 +91,18 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(groupListPresenter.getGroupListAdapter());
 
-        groupListPresenter.refreshGroups();
+        groupListPresenter.refreshView();
+
+        binding.addFriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent(containerActivity,CreateGroupActivity.class);
+                containerActivity.startActivityForResult(intent,CREATE_GROUP_REQUEST_CODE);
+
+            }
+        });
+
     }
 
     @Override
@@ -90,6 +112,8 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
     @Override
     public void refreshView() {
+
+        groupListPresenter.refreshGroups();
 
     }
 

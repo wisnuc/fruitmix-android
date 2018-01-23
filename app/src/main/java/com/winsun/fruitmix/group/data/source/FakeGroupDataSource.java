@@ -1,16 +1,21 @@
 package com.winsun.fruitmix.group.data.source;
 
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.operationResult.OperationFail;
+import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -170,12 +175,16 @@ public class FakeGroupDataSource implements GroupDataSource {
     }
 
     @Override
-    public void addGroup(Collection<PrivateGroup> groups) {
-        mPrivateGroups.addAll(groups);
+    public void addGroup(PrivateGroup group, BaseOperateCallback callback) {
+
+        mPrivateGroups.add(group);
+
+        callback.onSucceed();
+
     }
 
     @Override
-    public List<PrivateGroup> getAllGroups() {
+    public void getAllGroups(BaseLoadDataCallback<PrivateGroup> callback) {
 
         List<PrivateGroup> privateGroups = new ArrayList<>(mPrivateGroups.size());
 
@@ -183,7 +192,8 @@ public class FakeGroupDataSource implements GroupDataSource {
             privateGroups.add(privateGroup.cloneSelf());
         }
 
-        return privateGroups;
+        callback.onSucceed(privateGroups, new OperationSuccess());
+
     }
 
     @Override
@@ -192,9 +202,11 @@ public class FakeGroupDataSource implements GroupDataSource {
     }
 
     @Override
-    public PrivateGroup getGroupByUUID(String groupUUID) {
+    public void getAllUserCommentByGroupUUID(String groupUUID, BaseLoadDataCallback<UserComment> callback) {
 
         PrivateGroup originalPrivateGroup = null;
+
+        PrivateGroup result = null;
 
         for (PrivateGroup privateGroup : mPrivateGroups) {
             if (privateGroup.getUUID().equals(groupUUID))
@@ -203,10 +215,13 @@ public class FakeGroupDataSource implements GroupDataSource {
 
         if (originalPrivateGroup != null) {
 
-            return originalPrivateGroup.cloneSelf();
+            result = originalPrivateGroup.cloneSelf();
+
+            callback.onSucceed(result.getUserComments(), new OperationSuccess());
+        } else {
+            callback.onFail(new OperationFail("result is null"));
         }
 
-        return null;
 
     }
 
@@ -223,14 +238,15 @@ public class FakeGroupDataSource implements GroupDataSource {
 
 
     @Override
-    public UserComment insertUserComment(String groupUUID, UserComment userComment) {
+    public void insertUserComment(String groupUUID, UserComment userComment, BaseOperateCallback callback) {
 
         PrivateGroup privateGroup = getOriginalGroupByUUID(groupUUID);
 
         if (privateGroup != null)
             privateGroup.addUserComment(userComment);
 
-        return userComment;
+        callback.onSucceed();
+
     }
 
     @Override

@@ -52,4 +52,12 @@ public class TokenRemoteDataSource extends BaseRemoteDataSourceImpl implements T
 
     }
 
+    @Override
+    public void getWATokenThroughStationToken(String userGUID, BaseLoadDataCallback<String> callback) {
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest("/cloudToken?guid=" + userGUID);
+
+        wrapper.loadCall(httpRequest, callback, new RemoteTokenParser());
+
+    }
 }

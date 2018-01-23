@@ -8,7 +8,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
  * Created by Administrator on 2017/7/13.
  */
 
-public class BaseOperateDataCallbackImpl<T> implements BaseOperateDataCallback<T> {
+public class BaseOperateDataCallbackImpl<T> extends BaseDataCallbackImpl implements BaseOperateDataCallback<T> {
 
     public static final String TAG = BaseOperateDataCallbackImpl.class.getSimpleName();
 
@@ -18,8 +18,5 @@ public class BaseOperateDataCallbackImpl<T> implements BaseOperateDataCallback<T
 
     }
 
-    @Override
-    public void onFail(OperationResult result) {
-        Log.d(TAG, "onFail: result: " + result);
-    }
+
 }

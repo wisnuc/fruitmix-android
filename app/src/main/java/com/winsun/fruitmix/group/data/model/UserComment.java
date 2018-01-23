@@ -22,7 +22,7 @@ public class UserComment {
 
     private String date;
 
-    public UserComment(String uuid,User creator, long time) {
+    public UserComment(String uuid, User creator, long time) {
 
         this.uuid = uuid;
         this.creator = creator;
@@ -59,7 +59,7 @@ public class UserComment {
 
         if (date == null) {
 
-            date = Util.formatTime(context, time);
+            date = Util.formatShareTime(context, time, System.currentTimeMillis());
 
             return date;
         } else

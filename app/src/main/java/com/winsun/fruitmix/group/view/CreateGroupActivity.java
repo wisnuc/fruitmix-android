@@ -8,6 +8,7 @@ import android.view.View;
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.BaseToolbarActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.databinding.ActivityCreateGroupBinding;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
@@ -44,6 +45,8 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
 
         mActivityCreateGroupBinding.setCreateGroupViewModel(createGroupViewModel);
 
+        mActivityCreateGroupBinding.setCreateGroupPresenter(this);
+
     }
 
     @Override
@@ -67,9 +70,9 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
 
         showProgressDialog(getString(R.string.operating_title,getString(R.string.create_group)));
 
-        groupRepository.addGroup(group, new BaseOperateDataCallback<Boolean>() {
+        groupRepository.addGroup(group, new BaseOperateCallback() {
             @Override
-            public void onSucceed(Boolean data, OperationResult result) {
+            public void onSucceed() {
                 dismissDialog();
 
                 CreateGroupActivity.this.setResult(RESULT_OK);

@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.BR;
+import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.databinding.GroupAddPingItemBinding;
 import com.winsun.fruitmix.databinding.GroupPingItemBinding;
@@ -57,7 +59,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private String groupUUID;
 
-    private PrivateGroup currentPrivateGroup;
+//    private PrivateGroup currentPrivateGroup;
 
     private GroupContentView groupContentView;
 
@@ -84,6 +86,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
         pingViewPageAdapter = new PingViewPageAdapter();
 
+        userComments = new ArrayList<>();
+
     }
 
     public GroupContentAdapter getGroupContentAdapter() {
@@ -98,18 +102,35 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
         refreshGroup();
 
-        refreshUserComment();
-
-        refreshPinView();
-
     }
 
     private void refreshGroup() {
-        currentPrivateGroup = groupRepository.getGroup(groupUUID);
+
+        groupRepository.getAllUserCommentByGroupUUID(groupUUID, new BaseLoadDataCallback<UserComment>() {
+            @Override
+            public void onSucceed(List<UserComment> data, OperationResult operationResult) {
+
+                userComments = data;
+
+                refreshUserComment();
+
+                refreshPinView();
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                groupContentView.showToast(operationResult.getResultMessage(groupContentView.getContext()));
+
+            }
+        });
     }
 
     private void refreshUserComment() {
-        userComments = currentPrivateGroup.getUserComments();
+
+        if (userComments.size() == 0)
+            return;
 
         groupContentAdapter.setUserComments(userComments);
         groupContentAdapter.notifyDataSetChanged();
@@ -127,7 +148,9 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private void refreshPinView() {
 
-        List<Pin> pins = currentPrivateGroup.getPins();
+        List<Pin> pins = new ArrayList<>();
+
+        groupContentViewModel.showPing.set(false);
 
         List<PinView> pinViews = new ArrayList<>(pins.size() + 1);
 
@@ -171,13 +194,12 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         GroupContentAdapter() {
             mUserComments = new ArrayList<>();
 
-            factory = UserCommentViewFactory.getInstance(imageLoader,playAudioUseCase);
+            factory = UserCommentViewFactory.getInstance(imageLoader, playAudioUseCase);
         }
 
         void setUserComments(List<UserComment> userComments) {
             mUserComments.clear();
             mUserComments.addAll(userComments);
-
         }
 
         @Override
@@ -239,7 +261,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void sendTxt(String text) {
 
-        TextComment textComment = new TextComment(Util.createLocalUUid(),currentLoggedInUser, System.currentTimeMillis(), text);
+        TextComment textComment = new TextComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), text);
 
         insertUserComment(textComment);
 
@@ -247,21 +269,19 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void sendAudio(String filePath, long audioRecordTime) {
 
-        AudioComment audioComment = new AudioComment(Util.createLocalUUid(),currentLoggedInUser, System.currentTimeMillis(), filePath, audioRecordTime);
+        AudioComment audioComment = new AudioComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), filePath, audioRecordTime);
 
         insertUserComment(audioComment);
 
     }
 
-    private void insertUserComment(UserComment userComment) {
-        currentPrivateGroup.addUserComment(userComment);
+    private void insertUserComment(final UserComment userComment) {
 
-        groupRepository.insertUserComment(groupUUID, userComment, new BaseOperateDataCallbackImpl<UserComment>() {
+        groupRepository.insertUserComment(groupUUID, userComment, new BaseOperateCallback() {
             @Override
-            public void onSucceed(UserComment data, OperationResult result) {
-                super.onSucceed(data, result);
+            public void onSucceed() {
 
-                List<UserComment> userComments = currentPrivateGroup.getUserComments();
+                userComments.add(userComment);
 
                 int lastPosition = userComments.size() - 1;
 
@@ -271,6 +291,12 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
                 groupContentView.smoothToChatListPosition(lastPosition);
 
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                groupContentView.showToast(operationResult.getResultMessage(groupContentView.getContext()));
 
             }
         });
@@ -278,9 +304,12 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
 
     public void smoothToChatListEnd() {
+
+        if (userComments.size() == 0)
+            return;
+
         groupContentView.smoothToChatListPosition(userComments.size() - 1);
     }
-
 
     private class PingViewPageAdapter extends RecyclerView.Adapter<BindingViewHolder> {
 

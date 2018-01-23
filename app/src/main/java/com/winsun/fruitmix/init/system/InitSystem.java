@@ -7,6 +7,7 @@ import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.station.StationFileDataSourceImpl;
 import com.winsun.fruitmix.file.data.station.StationFileRepositoryImpl;
+import com.winsun.fruitmix.group.data.source.GroupRemoteDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
@@ -47,6 +48,8 @@ public class InitSystem {
         OkHttpUtil.destroyInstance();
 
         GroupRepository.destroyInstance();
+
+        GroupRemoteDataSource.destroyInstance();
 
         StationsRepository.destroyInstance();
 

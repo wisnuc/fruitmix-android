@@ -27,8 +27,20 @@ public class PrivateGroup {
 
     private List<Pin> pins;
 
-    private String createTime;
-    private String modifyTime;
+    private long createTime;
+    private long modifyTime;
+
+    public PrivateGroup(String uuid, String name, String ownerUUID) {
+        this.uuid = uuid;
+        this.name = name;
+        this.ownerUUID = ownerUUID;
+
+        userComments = new ArrayList<>();
+
+        pins = new ArrayList<>();
+
+        users = new ArrayList<>();
+    }
 
     public PrivateGroup(String uuid, String name, String ownerUUID, List<User> users) {
         this.uuid = uuid;
@@ -78,12 +90,17 @@ public class PrivateGroup {
     }
 
     public UserComment getLastComment() {
-        return userComments.get(userComments.size() - 1);
+        return userComments.size() > 0 ? userComments.get(userComments.size() - 1) : null;
     }
 
     public String getLastCommentDate(Context context) {
 
-        return getLastComment().getDate(context);
+        UserComment userComment = getLastComment();
+
+        if (userComment != null) {
+            return userComment.getDate(context);
+        } else
+            return "";
 
     }
 
@@ -128,9 +145,25 @@ public class PrivateGroup {
         return false;
     }
 
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public long getModifyTime() {
+        return modifyTime;
+    }
+
+    public void setModifyTime(long modifyTime) {
+        this.modifyTime = modifyTime;
+    }
+
     public PrivateGroup cloneSelf() {
 
-        PrivateGroup privateGroup = new PrivateGroup(getUUID(), getName(),getOwnerUUID(), new ArrayList<>(getUsers()));
+        PrivateGroup privateGroup = new PrivateGroup(getUUID(), getName(), getOwnerUUID(), new ArrayList<>(getUsers()));
 
         privateGroup.addUserComments(getUserComments());
 
