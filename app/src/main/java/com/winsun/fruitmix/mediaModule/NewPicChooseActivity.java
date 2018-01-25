@@ -16,7 +16,10 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.databinding.NewActivityAlbumPicChooseBinding;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.view.LocalFileFragment;
+import com.winsun.fruitmix.file.view.fragment.FileFragment;
+import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
 import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.MediaComment;
@@ -33,12 +36,14 @@ import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Administrator on 2016/5/9.
  */
-public class NewPicChooseActivity extends BaseActivity implements IPhotoListListener, RevealToolbarViewModel.RevealToolbarRightTextOnClickListener, HandleFileListOperateCallback {
+public class NewPicChooseActivity extends BaseActivity implements IPhotoListListener, RevealToolbarViewModel.RevealToolbarRightTextOnClickListener, HandleFileListOperateCallback,
+        FileListSelectModeListener {
 
     public static final String TAG = "NewAlbumPicChooseActivity";
 
@@ -56,7 +61,9 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
     private NewPhotoList mNewPhotoList;
 
-    private LocalFileFragment localFileFragment;
+//    private LocalFileFragment localFileFragment;
+
+    private FileFragment mFileFragment;
 
     private boolean onResume = false;
 
@@ -115,15 +122,22 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         } else {
 
-            setEnterSelectModeVisibility(View.VISIBLE);
+//            setEnterSelectModeVisibility(View.VISIBLE);
+//
+//            localFileFragment = new LocalFileFragment(this);
+//
+//            localFileFragment.setSelectMode(true);
+//
+//            localFileFragment.setAlreadySelectedFileArrayList(getIntent().getStringArrayListExtra(ALREADY_SELECT_FILE_NAME));
+//
+//            mMainFrameLayout.addView(localFileFragment.getView());
 
-            localFileFragment = new LocalFileFragment(this);
+            mFileFragment = new FileFragment(this, this, this);
 
-            localFileFragment.setSelectMode(true);
+            mFileFragment.setCanEnterFolderWhenSelectMode(true);
 
-            localFileFragment.setAlreadySelectedFileArrayList(getIntent().getStringArrayListExtra(ALREADY_SELECT_FILE_NAME));
+            mMainFrameLayout.addView(mFileFragment.getView());
 
-            mMainFrameLayout.addView(localFileFragment.getView());
 
         }
 
@@ -157,8 +171,16 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
             if (showMedia)
                 mNewPhotoList.refreshView();
-            else
-                localFileFragment.refreshView();
+            else {
+
+//                localFileFragment.refreshView();
+
+                mFileFragment.refreshView();
+
+                mFileFragment.enterSelectMode();
+
+            }
+
 
             onResume = true;
         }
@@ -178,8 +200,14 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         if (showMedia)
             mNewPhotoList.onDestroy();
-        else
-            localFileFragment.onDestroy();
+        else {
+
+//            localFileFragment.onDestroy();
+
+            mFileFragment.onDestroy();
+
+        }
+
     }
 
     @Override
@@ -189,14 +217,25 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
             super.onBackPressed();
         else {
 
-            if (!localFileFragment.onBackPressed())
+//            if (!localFileFragment.onBackPressed())
+//                super.onBackPressed();
+
+            if (mFileFragment.notRootFolder())
+                mFileFragment.goToUpperLevel();
+            else
                 super.onBackPressed();
+
         }
     }
 
     @Override
     public void onPhotoItemClick(int selectedItemCount) {
 
+        handleSelectItemCountChanged(selectedItemCount);
+
+    }
+
+    private void handleSelectItemCountChanged(int selectedItemCount) {
         if (selectedItemCount > mAlreadySelectedImageKeyListSize) {
             setEnterSelectModeVisibility(View.VISIBLE);
         } else {
@@ -204,7 +243,6 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
         }
 
         setSelectCountText(String.format(getString(R.string.select_count), selectedItemCount));
-
     }
 
     private void setSelectCountText(String text) {
@@ -294,7 +332,13 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         } else {
 
-            groupDataSource.insertFileToPin(localFileFragment.getSelectFiles(), groupUUID, pinUUID, new BaseOperateDataCallback<Boolean>() {
+            List<AbstractRemoteFile> abstractRemoteFiles = mFileFragment.getSelectedFiles();
+
+            List<AbstractFile> files = new ArrayList<>(abstractRemoteFiles.size());
+
+            files.addAll(abstractRemoteFiles);
+
+            groupDataSource.insertFileToPin(files, groupUUID, pinUUID, new BaseOperateDataCallback<Boolean>() {
 
                 @Override
                 public void onSucceed(Boolean data, OperationResult result) {
@@ -356,13 +400,11 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
     private UserComment createFileComment() {
         UserComment userComment;
 
-        List<AbstractFile> files = localFileFragment.getSelectFiles();
+        List<AbstractRemoteFile> abstractRemoteFiles = mFileFragment.getSelectedFiles();
 
-        List<AbstractFile> selectFiles;
-        if (files.size() > 6) {
-            selectFiles = files.subList(0, 6);
-        } else
-            selectFiles = files;
+        List<AbstractFile> files = new ArrayList<>(abstractRemoteFiles.size());
+
+        files.addAll(abstractRemoteFiles);
 
 //        if (files.size() == 1) {
 //            userComment = new SingleFileComment(currentUser, System.currentTimeMillis(), selectFiles.get(0));
@@ -370,7 +412,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //            userComment = new MultiFileComment(currentUser, System.currentTimeMillis(), selectFiles);
 //        }
 
-        userComment = new FileComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), selectFiles);
+        userComment = new FileComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID, files);
 
         return userComment;
     }
@@ -381,11 +423,11 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         List<Media> medias = mNewPhotoList.getSelectedMedias();
 
-        List<Media> selectMedias;
-        if (medias.size() > 6) {
-            selectMedias = medias.subList(0, 6);
-        } else
-            selectMedias = medias;
+//        List<Media> selectMedias;
+//        if (medias.size() > 6) {
+//            selectMedias = medias.subList(0, 6);
+//        } else
+//            selectMedias = medias;
 
 //        if (medias.size() == 1) {
 //            userComment = new SinglePhotoComment(currentUser, System.currentTimeMillis(), selectMedias.get(0));
@@ -393,14 +435,35 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //            userComment = new MultiPhotoComment(currentUser, System.currentTimeMillis(), selectMedias);
 //        }
 
-        userComment = new MediaComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), selectMedias);
+        userComment = new MediaComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID, medias);
 
         return userComment;
+
     }
 
 
     @Override
     public void handleFileListOperate(String currentFolderName) {
+
+    }
+
+    @Override
+    public void onFileSelectItemClick(int selectItemCount) {
+        handleSelectItemCountChanged(selectItemCount);
+    }
+
+    @Override
+    public void onFileItemLongClick() {
+
+    }
+
+    @Override
+    public void onFileSelectOperationUnavailable() {
+
+    }
+
+    @Override
+    public void onFileSelectOperationAvailable() {
 
     }
 }

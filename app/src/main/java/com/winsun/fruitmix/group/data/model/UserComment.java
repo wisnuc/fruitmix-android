@@ -22,11 +22,15 @@ public class UserComment {
 
     private String date;
 
-    public UserComment(String uuid, User creator, long time) {
+    private String groupUUID;
+
+    public UserComment(String uuid, User creator, long time, String groupUUID) {
 
         this.uuid = uuid;
         this.creator = creator;
         this.time = time;
+        this.groupUUID = groupUUID;
+
     }
 
     public String getUuid() {
@@ -45,8 +49,20 @@ public class UserComment {
         return time;
     }
 
+    public String getGroupUUID() {
+        return groupUUID;
+    }
+
+    public void setGroupUUID(String groupUUID) {
+        this.groupUUID = groupUUID;
+    }
+
     public User getCreator() {
         return creator;
+    }
+
+    public void setCreator(User creator) {
+        this.creator = creator;
     }
 
     public String getDate(Context context) {

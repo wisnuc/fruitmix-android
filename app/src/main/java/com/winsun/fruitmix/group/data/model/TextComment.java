@@ -10,12 +10,12 @@ public class TextComment extends UserComment {
 
     private String text;
 
-    public TextComment(String uuid,User creator, long time) {
-        super(uuid,creator, time);
+    public TextComment(String uuid,User creator, long time,String groupUUID) {
+        super(uuid,creator, time,groupUUID);
     }
 
-    public TextComment(String uuid,User creator, long time, String text) {
-        super(uuid,creator, time);
+    public TextComment(String uuid,User creator, long time, String groupUUID,String text) {
+        super(uuid,creator, time,groupUUID);
         this.text = text;
     }
 

@@ -458,16 +458,9 @@ public class InboxListPresenter implements ActiveView {
             binding.sharePre.setVisibility(View.VISIBLE);
             binding.shareText.setVisibility(View.VISIBLE);
 
-            String fileName = file.getName();
-
             StringBuilder name = new StringBuilder();
 
-            if (fileName.length() > 10) {
-                name.append(fileName.substring(0, 10));
-
-                name.append(mInboxView.getString(R.string.android_ellipsize));
-            } else
-                name.append(fileName);
+            name.append(file.getFormatName(mInboxView.getContext()));
 
             name.append("\"");
 

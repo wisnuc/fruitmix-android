@@ -116,7 +116,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
         OperationResult result = stationFileDataSource.getFile(rootUUID, folderUUID);
 
         if (result instanceof OperationSuccessWithFile)
-            handleGetFileSucceed(((OperationSuccessWithFile) result).getList(), folderUUID);
+            handleGetFileSucceed(((OperationSuccessWithFile) result).getList(), rootUUID, folderUUID);
 
         return result;
 
@@ -129,7 +129,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
             public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
 
-                handleGetFileSucceed(data, folderUUID);
+                handleGetFileSucceed(data, rootUUID, folderUUID);
 
                 runOnMainThreadCallback.onSucceed(data, operationResult);
 
@@ -152,10 +152,11 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
         cacheDirty = false;
     }
 
-    private void handleGetFileSucceed(List<AbstractRemoteFile> data, String folderUUID) {
+    private void handleGetFileSucceed(List<AbstractRemoteFile> data, String rootUUID, String folderUUID) {
 
         for (AbstractRemoteFile file : data) {
             file.setParentFolderUUID(folderUUID);
+            file.setRootFolderUUID(rootUUID);
         }
 
         cacheDirty = false;

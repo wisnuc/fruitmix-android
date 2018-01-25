@@ -16,8 +16,6 @@
             android:id="@+id/cover_img"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="2dp"
-            android:layout_marginTop="2dp"
             android:adjustViewBounds="true"
             android:background="@drawable/default_place_holder"
             android:scaleType="centerCrop" />

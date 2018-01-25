@@ -21,6 +21,7 @@ public abstract class AbstractRemoteFile extends AbstractFile{
     private String size;
 
     private String parentFolderUUID;
+    private String rootFolderUUID;
 
     AbstractRemoteFile() {
         owners = new ArrayList<>();
@@ -82,6 +83,13 @@ public abstract class AbstractRemoteFile extends AbstractFile{
         this.parentFolderUUID = parentFolderUUID;
     }
 
+    public String getRootFolderUUID() {
+        return rootFolderUUID;
+    }
+
+    public void setRootFolderUUID(String rootFolderUUID) {
+        this.rootFolderUUID = rootFolderUUID;
+    }
 
     @Override
     public boolean equals(Object o) {

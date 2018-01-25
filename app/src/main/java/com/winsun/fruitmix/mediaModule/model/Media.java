@@ -13,13 +13,15 @@ import com.winsun.fruitmix.util.Util;
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class Media extends AbstractFile{
+public class Media extends AbstractFile {
 
     private static final String TAG = Media.class.getSimpleName();
 
     private static final String THUMB_PHOTO_FORMAT_CODE = "%1$s?alt=thumbnail&width=%2$s&height=%3$s&autoOrient=true&modifier=caret";
     private static final String THUMB_PHOTO_FORMAT_CODE_WITHOUT_WIDTH = "%1$s?alt=thumbnail&height=%2$s&autoOrient=true&modifier=caret";
     private static final String THUMB_PHOTO_FORMAT_CODE_WITHOUT_HEIGHT = "%1$s?alt=thumbnail&width=%2$s&autoOrient=true&modifier=caret";
+    public static final String ALT_DATA = "?alt=data";
+    public static final String BOX_UUID = "&boxUUID=";
 
     private String uuid;
     private String thumb;
@@ -234,6 +236,14 @@ public class Media extends AbstractFile{
 
     }
 
+    public HttpRequest getImageThumbUrl(Context context, String groupUUID) {
+
+        HttpRequest httpRequest = getImageThumbUrl(context);
+
+        return addGroupUUIDToUrl(groupUUID, httpRequest);
+    }
+
+
     public HttpRequest getImageThumbUrl(Context context) {
 
         return getImageThumbUrl(context, 200, 200);
@@ -304,7 +314,7 @@ public class Media extends AbstractFile{
     }
 
     public String getRemoteMediaRequestPath() {
-        return Util.MEDIA_PARAMETER + "/" + getUuid() + "?alt=data";
+        return Util.MEDIA_PARAMETER + "/" + getUuid() + ALT_DATA;
 
     }
 
@@ -326,6 +336,21 @@ public class Media extends AbstractFile{
         }
 
         Log.d(TAG, "media uuid: " + getUuid() + " getImageOriginalUrl: " + httpRequest.getUrl());
+
+        return httpRequest;
+
+    }
+
+    public HttpRequest getImageOriginalUrl(Context context, String groupUUID) {
+
+        HttpRequest httpRequest = getImageOriginalUrl(context);
+
+        return addGroupUUIDToUrl(groupUUID, httpRequest);
+    }
+
+    private HttpRequest addGroupUUIDToUrl(String groupUUID, HttpRequest httpRequest) {
+        if (!isLocal() && groupUUID.length() > 1)
+            httpRequest.setUrl(httpRequest.getUrl() + BOX_UUID + groupUUID);
 
         return httpRequest;
 

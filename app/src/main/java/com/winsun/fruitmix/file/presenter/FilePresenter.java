@@ -164,6 +164,8 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
     private FileListSelectModeListener fileListSelectModeListener;
 
+    private boolean canEnterFolderWhenSelectMode = false;
+
     public FilePresenter(final Activity activity, FileView fileView, FileListSelectModeListener fileListSelectModeListener, StationFileRepository stationFileRepository,
                          NetworkStateManager networkStateManager, NoContentViewModel noContentViewModel, LoadingViewModel loadingViewModel, FileViewModel fileViewModel,
                          HandleFileListOperateCallback handleFileListOperateCallback, UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
@@ -691,9 +693,10 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         return selectMode || notRootFolder();
     }
 
-    private boolean notRootFolder() {
+    public boolean notRootFolder() {
 
         return !currentFolderUUID.equals(rootUUID);
+
     }
 
     public void onBackPressed() {
@@ -702,21 +705,29 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
             unSelectMode();
         } else if (notRootFolder()) {
 
-            if (loadingViewModel.showLoading.get() && !noContentViewModel.showNoContent.get())
-                return;
-
-            retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
-            currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
-
-            retrievedFolderNameList.remove(retrievedFolderNameList.size() - 1);
-            currentFolderName = retrievedFolderNameList.get(retrievedFolderNameList.size() - 1);
-
-            getFile();
-
-            handleFileListOperateCallback.handleFileListOperate(currentFolderName);
+            goToUpperLevel();
 
         }
 
+    }
+
+    public void goToUpperLevel() {
+        if (loadingViewModel.showLoading.get() && !noContentViewModel.showNoContent.get())
+            return;
+
+        retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
+        currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
+
+        retrievedFolderNameList.remove(retrievedFolderNameList.size() - 1);
+        currentFolderName = retrievedFolderNameList.get(retrievedFolderNameList.size() - 1);
+
+        getFile();
+
+        handleFileListOperateCallback.handleFileListOperate(currentFolderName);
+    }
+
+    public void setCanEnterFolderWhenSelectMode(boolean canEnterFolderWhenSelectMode) {
+        this.canEnterFolderWhenSelectMode = canEnterFolderWhenSelectMode;
     }
 
     public void onDestroy() {
@@ -1089,7 +1100,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                 @Override
                 public void onClick(View v) {
 
-                    if (selectMode)
+                    if (selectMode && !canEnterFolderWhenSelectMode)
                         return;
 
                     currentFolderUUID = abstractRemoteFile.getUuid();
@@ -1300,6 +1311,10 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
             }
         }
 
+    }
+
+    public List<AbstractRemoteFile> getSelectedFiles() {
+        return selectedFiles;
     }
 
 }

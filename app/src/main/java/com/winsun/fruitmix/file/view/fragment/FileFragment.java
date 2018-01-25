@@ -17,6 +17,7 @@ import com.winsun.fruitmix.databinding.FragmentFileBinding;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.presenter.FilePresenter;
@@ -95,8 +96,8 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
         fileRecyclerView = binding.fileRecyclerview;
 
         return binding.getRoot();
-    }
 
+    }
 
     private void initFileRecyclerView(Activity activity) {
         fileRecyclerView.setLayoutManager(new LinearLayoutManager(activity));
@@ -189,20 +190,42 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
         return filePresenter.handleBackPressedOrNot();
     }
 
+    public boolean notRootFolder() {
+
+        return filePresenter.notRootFolder();
+
+    }
+
     public void onBackPressed() {
 
         filePresenter.onBackPressed();
 
     }
 
+    public void goToUpperLevel() {
+
+        filePresenter.goToUpperLevel();
+
+    }
+
+    public List<AbstractRemoteFile> getSelectedFiles() {
+        return filePresenter.getSelectedFiles();
+    }
+
+    public void setCanEnterFolderWhenSelectMode(boolean canEnterFolderWhenSelectMode) {
+        filePresenter.setCanEnterFolderWhenSelectMode(canEnterFolderWhenSelectMode);
+    }
+
     public Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
 
         return filePresenter.getBottomSheetDialog(bottomMenuItems);
+
     }
 
     public List<BottomMenuItem> getMainMenuItem() {
 
         return filePresenter.getMainMenuItem();
+
     }
 
     public void requestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

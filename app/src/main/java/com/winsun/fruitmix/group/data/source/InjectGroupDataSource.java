@@ -13,10 +13,12 @@ public class InjectGroupDataSource {
 
     public static GroupRepository provideGroupRepository(Context context) {
 
-//        GroupDataSource fakeGroupDataSource = FakeGroupDataSource.getInstance();
 
         return GroupRepository.getInstance(GroupRemoteDataSource.getInstance(InjectHttp.provideIHttpUtil(context), InjectHttp.provideHttpRequestFactory(context)),
                 ThreadManagerImpl.getInstance());
+
+//        GroupDataSource fakeGroupDataSource = FakeGroupDataSource.getInstance();
+//        return GroupRepository.getInstance(fakeGroupDataSource,ThreadManagerImpl.getInstance());
 
     }
 

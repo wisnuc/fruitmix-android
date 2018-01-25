@@ -9,12 +9,14 @@ import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/7/20.
@@ -48,9 +50,9 @@ public class GroupRepository extends BaseDataRepository {
             ((FakeGroupDataSource) groupDataSource).setCurrentUser(currentUser);
     }
 
-    public void setCloudToken(String cloudToken){
+    public void setCloudToken(String cloudToken) {
 
-        if(groupDataSource instanceof GroupRemoteDataSource)
+        if (groupDataSource instanceof GroupRemoteDataSource)
             ((GroupRemoteDataSource) groupDataSource).setCloudToken(cloudToken);
 
     }
@@ -70,10 +72,24 @@ public class GroupRepository extends BaseDataRepository {
 
     public void getAllUserCommentByGroupUUID(final String groupUUID, final BaseLoadDataCallback<UserComment> callback) {
 
+        final BaseLoadDataCallback<UserComment> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
+
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.getAllUserCommentByGroupUUID(groupUUID,createLoadCallbackRunOnMainThread(callback));
+                groupDataSource.getAllUserCommentByGroupUUID(groupUUID, new BaseLoadDataCallback<UserComment>() {
+                    @Override
+                    public void onSucceed(List<UserComment> data, OperationResult operationResult) {
+
+                        runOnMainThreadCallback.onSucceed(data, operationResult);
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+                        runOnMainThreadCallback.onFail(operationResult);
+                    }
+                });
             }
         });
 
@@ -87,7 +103,7 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
-                groupDataSource.addGroup(privateGroup,runOnMainThreadCallback);
+                groupDataSource.addGroup(privateGroup, runOnMainThreadCallback);
 
             }
         });
@@ -102,7 +118,7 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
-                groupDataSource.insertUserComment(groupUUID,userComment,runOnMainThreadCallback);
+                groupDataSource.insertUserComment(groupUUID, userComment, runOnMainThreadCallback);
 
             }
         });

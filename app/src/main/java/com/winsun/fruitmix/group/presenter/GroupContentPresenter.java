@@ -112,6 +112,11 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
                 userComments = data;
 
+                for (UserComment userComment : userComments) {
+                    userComment.setCreator(currentLoggedInUser);
+                    userComment.setGroupUUID(groupUUID);
+                }
+
                 refreshUserComment();
 
                 refreshPinView();
@@ -261,7 +266,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void sendTxt(String text) {
 
-        TextComment textComment = new TextComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), text);
+        TextComment textComment = new TextComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), groupUUID,text);
 
         insertUserComment(textComment);
 
@@ -269,7 +274,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void sendAudio(String filePath, long audioRecordTime) {
 
-        AudioComment audioComment = new AudioComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), filePath, audioRecordTime);
+        AudioComment audioComment = new AudioComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(),groupUUID, filePath, audioRecordTime);
 
         insertUserComment(audioComment);
 

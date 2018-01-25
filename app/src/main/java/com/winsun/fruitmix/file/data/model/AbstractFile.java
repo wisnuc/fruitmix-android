@@ -1,5 +1,8 @@
 package com.winsun.fruitmix.file.data.model;
 
+import android.content.Context;
+
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.util.Util;
 
 /**
@@ -49,6 +52,23 @@ public abstract class AbstractFile {
     public String getTimeText() {
 
         return Util.formatTime(getTime());
+
+    }
+
+    public String getFormatName(Context context) {
+
+        String fileName = getName();
+
+        StringBuilder name = new StringBuilder();
+
+        if (fileName.length() > 10) {
+            name.append(fileName.substring(0, 10));
+
+            name.append(context.getString(R.string.android_ellipsize));
+        } else
+            name.append(fileName);
+
+        return name.toString();
 
     }
 

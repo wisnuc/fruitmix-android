@@ -104,7 +104,7 @@ public class GroupDataSourceTest {
 
         testAddGroup();
 
-        UserComment userComment = new TextComment(Util.createLocalUUid(),new User(), time, testText);
+        UserComment userComment = new TextComment(Util.createLocalUUid(),new User(), time, testGroupUuid,testText);
 
         groupDataSource.insertUserComment(testGroupUuid, userComment, new BaseOperateCallback() {
             @Override

@@ -40,7 +40,7 @@ public class GroupRepositoryTest {
     @Test
     public void testInsert() {
 
-        groupRepository.insertUserComment("", new UserComment(Util.createLocalUUid(),null, 0), new BaseOperateCallbackImpl());
+        groupRepository.insertUserComment("", new UserComment(Util.createLocalUUid(),null, 0,""), new BaseOperateCallbackImpl());
 
         verify(groupDataSource).insertUserComment(anyString(), any(UserComment.class), any(BaseOperateCallback.class));
 

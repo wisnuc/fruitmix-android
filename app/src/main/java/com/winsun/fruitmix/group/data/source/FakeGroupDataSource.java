@@ -3,6 +3,7 @@ package com.winsun.fruitmix.group.data.source;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.gif.GifRequest;
 import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.TextComment;
@@ -57,6 +58,8 @@ public class FakeGroupDataSource implements GroupDataSource {
         if (!mPrivateGroups.isEmpty())
             return;
 
+        String groupUuid1 = "1";
+
         List<User> users = new ArrayList<>();
 
         User aimi = new User();
@@ -77,34 +80,34 @@ public class FakeGroupDataSource implements GroupDataSource {
 
         List<UserComment> userComments = new ArrayList<>();
 
-        UserComment userComment = new TextComment(Util.createLocalUUid(), aimi, 1494475200, "照片扔进毕业十年聚,请务必放进毕业十年聚，别忘啦");
+        UserComment userComment = new TextComment(Util.createLocalUUid(), aimi, 1494475200, groupUuid1, "照片扔进毕业十年聚,请务必放进毕业十年聚，别忘啦");
         userComments.add(userComment);
 
-        userComment = new TextComment(Util.createLocalUUid(), naomi, 1494820800, "务必放进毕业十年聚");
+        userComment = new TextComment(Util.createLocalUUid(), naomi, 1494820800, groupUuid1, "务必放进毕业十年聚");
         userComments.add(userComment);
 
-        userComment = new TextComment(Util.createLocalUUid(), myself, 1497067200, "同学们速度快点");
+        userComment = new TextComment(Util.createLocalUUid(), myself, 1497067200, groupUuid1, "同学们速度快点");
         userComments.add(userComment);
 
-        userComment = new TextComment(Util.createLocalUUid(), aimi, 1500189121, "快点");
+        userComment = new TextComment(Util.createLocalUUid(), aimi, 1500189121, groupUuid1, "快点");
         userComments.add(userComment);
 
-        userComment = new TextComment(Util.createLocalUUid(), naomi, 1500189301, "来了");
+        userComment = new TextComment(Util.createLocalUUid(), naomi, 1500189301, groupUuid1, "来了");
         userComments.add(userComment);
 
-        userComment = new TextComment(Util.createLocalUUid(), aimi, 1500189361, "ok");
+        userComment = new TextComment(Util.createLocalUUid(), aimi, 1500189361, groupUuid1, "ok");
         userComments.add(userComment);
 
-        userComment = new TextComment(Util.createLocalUUid(), myself, 1500189421, "come on");
+        userComment = new TextComment(Util.createLocalUUid(), myself, 1500189421, groupUuid1, "come on");
         userComments.add(userComment);
 
-        userComment = new TextComment(Util.createLocalUUid(), naomi, 1500189481, "coming");
+        userComment = new TextComment(Util.createLocalUUid(), naomi, 1500189481, groupUuid1, "coming");
         userComments.add(userComment);
 
-        userComment = new TextComment(Util.createLocalUUid(), aimi, 1500189541, "waiting");
+        userComment = new TextComment(Util.createLocalUUid(), aimi, 1500189541, groupUuid1, "waiting");
         userComments.add(userComment);
 
-        userComment = new TextComment(Util.createLocalUUid(), naomi, 1500189601, "here");
+        userComment = new TextComment(Util.createLocalUUid(), naomi, 1500189601, groupUuid1, "here");
         userComments.add(userComment);
 
         List<Pin> pins = new ArrayList<>();
@@ -127,7 +130,7 @@ public class FakeGroupDataSource implements GroupDataSource {
 
         String groupName1 = "大学同学";
 
-        PrivateGroup privateGroup1 = new PrivateGroup("1", groupName1, myself.getUuid(), new ArrayList<>(users));
+        PrivateGroup privateGroup1 = new PrivateGroup(groupUuid1, groupName1, myself.getUuid(), new ArrayList<>(users));
 
         privateGroup1.addPins(pins);
 
@@ -135,16 +138,18 @@ public class FakeGroupDataSource implements GroupDataSource {
 
         mPrivateGroups.add(privateGroup1);
 
+        String groupUuid2 = "2";
         String groupName2 = "外卖小分队";
 
-        PrivateGroup privateGroup2 = new PrivateGroup("2", groupName2, myself.getUuid(), new ArrayList<>(users));
+        PrivateGroup privateGroup2 = new PrivateGroup(groupUuid2, groupName2, myself.getUuid(), new ArrayList<>(users));
         privateGroup2.addUserComments(userComments);
 
         mPrivateGroups.add(privateGroup2);
 
+        String groupUuid3 = "3";
         String groupName3 = "软件学院同学会";
 
-        PrivateGroup privateGroup3 = new PrivateGroup("3", groupName3, myself.getUuid(), new ArrayList<>(users));
+        PrivateGroup privateGroup3 = new PrivateGroup(groupUuid3, groupName3, myself.getUuid(), new ArrayList<>(users));
         privateGroup3.addUserComments(userComments);
 
         mPrivateGroups.add(privateGroup3);
@@ -157,16 +162,18 @@ public class FakeGroupDataSource implements GroupDataSource {
 
         mPrivateGroups.add(privateGroup4);
 
+        String groupUuid5 = "5";
         String groupName5 = "校广播站";
 
-        PrivateGroup privateGroup5 = new PrivateGroup("5", groupName5, myself.getUuid(), new ArrayList<>(users));
+        PrivateGroup privateGroup5 = new PrivateGroup(groupUuid5, groupName5, myself.getUuid(), new ArrayList<>(users));
         privateGroup5.addUserComments(userComments);
 
         mPrivateGroups.add(privateGroup5);
 
+        String groupUuid6 = "6";
         String groupName6 = "211宿舍派对";
 
-        PrivateGroup privateGroup6 = new PrivateGroup("6", groupName6, myself.getUuid(), new ArrayList<>(users));
+        PrivateGroup privateGroup6 = new PrivateGroup(groupUuid6, groupName6, myself.getUuid(), new ArrayList<>(users));
         privateGroup6.addUserComments(userComments);
 
         mPrivateGroups.add(privateGroup6);

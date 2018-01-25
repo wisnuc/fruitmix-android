@@ -713,7 +713,6 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         }
     }
 
-
     public void setPhotoListRefresh() {
         if (Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && Util.isRemoteMediaLoaded())
             mPhotoListRefresh = true;
@@ -952,6 +951,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         } else if (currentItem == PAGE_PHOTO) {
 
             quitSelectMode();
+
         }
 
     }

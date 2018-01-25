@@ -9,6 +9,7 @@ import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractLocalFile;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.Pin;
@@ -47,6 +48,8 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
     private static final String BOXES = "/boxes";
     public static final String TWEETS = "/tweets";
+    public static final String METADATA_TRUE = "?metadata=true";
+    public static final String INDRIVE = "/indrive";
 
     private static GroupDataSource instance;
 
@@ -119,25 +122,88 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
     }
 
-
     @Override
     public void getAllUserCommentByGroupUUID(String groupUUID, BaseLoadDataCallback<UserComment> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(BOXES + "/" + groupUUID + TWEETS, getAuthorizationValue());
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(BOXES + "/" + groupUUID + TWEETS + METADATA_TRUE, getAuthorizationValue());
 
         wrapper.loadCall(httpRequest, callback, new RemoteUserCommentParser());
 
     }
 
     @Override
-    public void insertUserComment(String groupUUID, UserComment userComment, final BaseOperateCallback callback) {
+    public void insertUserComment(final String groupUUID, final UserComment userComment, final BaseOperateCallback callback) {
 
+        if (userComment instanceof MediaComment) {
+
+            List<Media> medias = ((MediaComment) userComment).getMedias();
+
+            List<Media> localMedias = new ArrayList<>();
+            final List<Media> remoteMedias = new ArrayList<>();
+
+            for (Media media : medias) {
+
+                if (media.isLocal())
+                    localMedias.add(media);
+                else
+                    remoteMedias.add(media);
+
+            }
+
+            if (localMedias.size() != 0) {
+
+                UserComment localMediaComment = new MediaComment(userComment.getUuid(), userComment.getCreator(), userComment.getTime(),
+                        userComment.getGroupUUID(), localMedias);
+
+                insertUserCommentSrcFromPhone(groupUUID, localMediaComment, new BaseOperateCallback() {
+                    @Override
+                    public void onSucceed() {
+
+                        handleLocalMediaCommentCreated(groupUUID, userComment, callback, remoteMedias);
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+                        callback.onFail(operationResult);
+                    }
+                });
+
+            }else {
+
+                handleLocalMediaCommentCreated(groupUUID, userComment, callback, remoteMedias);
+
+            }
+
+
+        }else if(userComment instanceof FileComment){
+
+            insertUserCommentSrcFromNas(groupUUID,userComment,callback);
+
+        }
+
+
+    }
+
+    private void handleLocalMediaCommentCreated(String groupUUID, UserComment userComment, BaseOperateCallback callback, List<Media> remoteMedias) {
+        if (remoteMedias.size() != 0) {
+
+            UserComment remoteMediaComment = new MediaComment(userComment.getUuid(), userComment.getCreator(), userComment.getTime(),
+                    userComment.getGroupUUID(), remoteMedias);
+
+            insertUserCommentSrcFromNas(groupUUID, remoteMediaComment, callback);
+
+        } else
+            callback.onSucceed();
+    }
+
+    private void insertUserCommentSrcFromPhone(String groupUUID, UserComment userComment, final BaseOperateCallback callback) {
         String path = BOXES + "/" + groupUUID + TWEETS;
 
         HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", getAuthorizationValue());
 
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("comment", "test");
+        jsonObject.addProperty("comment", "");
         jsonObject.addProperty("type", "list");
 
         JsonArray jsonArray = new JsonArray();
@@ -157,7 +223,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
                 item.addProperty("size", file.length());
                 item.addProperty("sha256", media.getUuid());
 
-                FileFormData fileFormData = new FileFormData(file.getName(), item.toString(),file);
+                FileFormData fileFormData = new FileFormData(file.getName(), item.toString(), file);
 
                 fileFormDatas.add(fileFormData);
 
@@ -167,7 +233,6 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
 
             }
-
 
         } else if (userComment instanceof FileComment) {
 
@@ -184,7 +249,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
                 item.addProperty("size", fileItem.length());
                 item.addProperty("sha256", Util.calcSHA256OfFile(abstractLocalFile.getPath()));
 
-                FileFormData fileFormData = new FileFormData(fileItem.getName(),item.toString(), fileItem);
+                FileFormData fileFormData = new FileFormData(fileItem.getName(), item.toString(), fileItem);
 
                 fileFormDatas.add(fileFormData);
 
@@ -196,7 +261,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         }
 
-        jsonObject.add("list",jsonArray);
+        jsonObject.add("list", jsonArray);
 
         TextFormData textFormData = new TextFormData("list", jsonObject.toString());
 
@@ -221,9 +286,65 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
                         return null;
                     }
                 });
-
-
     }
+
+    private void insertUserCommentSrcFromNas(String groupUUID, UserComment userComment, final BaseOperateCallback callback) {
+
+        String path = BOXES + "/" + groupUUID + TWEETS + INDRIVE;
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("comment", "");
+        jsonObject.addProperty("type", "list");
+
+        JsonArray jsonArray = new JsonArray();
+
+        if (userComment instanceof MediaComment) {
+
+            List<Media> medias = ((MediaComment) userComment).getMedias();
+
+            for (Media media : medias) {
+
+                JsonObject item = new JsonObject();
+
+                item.addProperty("type", "media");
+                item.addProperty("sha256", media.getUuid());
+
+                jsonArray.add(item);
+
+
+            }
+
+        } else if (userComment instanceof FileComment) {
+
+            List<AbstractFile> files = ((FileComment) userComment).getFiles();
+
+            for (AbstractFile file : files) {
+
+                AbstractRemoteFile abstractRemoteFile = (AbstractRemoteFile) file;
+
+                JsonObject item = new JsonObject();
+
+                item.addProperty("type", "file");
+
+                item.addProperty("filename", abstractRemoteFile.getName());
+
+                item.addProperty("driveUUID", abstractRemoteFile.getRootFolderUUID());
+
+                item.addProperty("dirUUID", abstractRemoteFile.getParentFolderUUID());
+
+                jsonArray.add(item);
+
+            }
+
+        }
+
+        jsonObject.add("list", jsonArray);
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(path, jsonObject.toString(), getAuthorizationValue());
+
+        wrapper.operateCall(httpRequest, callback);
+    }
+
 
     @Override
     public Pin insertPin(String groupUUID, Pin pin) {
