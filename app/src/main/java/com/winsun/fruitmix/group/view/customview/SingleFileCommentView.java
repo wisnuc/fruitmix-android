@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.group.view.customview;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
@@ -23,9 +24,13 @@ import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.viewmodel.FileCommentViewModel;
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.list.TweetContentListActivity;
+import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
+
+import java.util.Collections;
 
 /**
  * Created by Administrator on 2017/8/8.
@@ -51,7 +56,7 @@ public class SingleFileCommentView extends UserCommentView {
     }
 
     @Override
-    protected void refreshContent(Context context, UserComment data, boolean isLeftModel) {
+    protected void refreshContent(final Context context, final View toolbar, final UserComment data, boolean isLeftModel) {
 
         FrameLayout frameLayout = binding.singleFileFramelayout;
 
@@ -61,7 +66,7 @@ public class SingleFileCommentView extends UserCommentView {
 
             MediaComment comment = (MediaComment) data;
 
-            SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayout, false);
+            final SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayout, false);
 
             frameLayout.addView(singlePhotoBinding.getRoot());
 
@@ -71,11 +76,22 @@ public class SingleFileCommentView extends UserCommentView {
 
             NetworkImageView networkImageView = singlePhotoBinding.coverImg;
 
-            Media media = comment.getMedias().get(0);
+            final Media media = comment.getMedias().get(0);
 
-            HttpRequest httpRequest = media.getImageThumbUrl(context,data.getGroupUUID());
+            HttpRequest httpRequest = media.getImageThumbUrl(context, data.getGroupUUID());
 
             MediaUtil.setMediaImageUrl(media, networkImageView, httpRequest, imageLoader);
+
+            singlePhotoBinding.getRoot().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    PhotoSliderActivity.startPhotoSliderActivity(toolbar, (Activity) context, Collections.singletonList(media), data.getGroupUUID(),
+                            3, singlePhotoBinding.coverImg, media);
+
+                }
+            });
+
 
         } else if (data instanceof FileComment) {
 
@@ -117,6 +133,15 @@ public class SingleFileCommentView extends UserCommentView {
             spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(context, R.color.blue)), start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
             fileCommentViewModel.shareText.set(spannableString.toString());
+
+            fileTweetGroupItemBinding.getRoot().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    TweetContentListActivity.startListActivity(data, context);
+
+                }
+            });
 
 //            SingleFileBinding singleFileBinding = SingleFileBinding.inflate(LayoutInflater.from(context), frameLayout, false);
 //

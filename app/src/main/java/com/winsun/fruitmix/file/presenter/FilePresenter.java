@@ -854,7 +854,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
     }
 
-    public void checkWriteExternalStoragePermission() {
+    private void checkWriteExternalStoragePermission() {
 
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
@@ -883,7 +883,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         }
 
         mCurrentDownloadFileCommand = new DownloadFileCommand(fileTaskManager, file, stationFileRepository,
-                networkStateManager, currentFolderUUID, driveRootUUID);
+                networkStateManager, currentUserUUID, driveRootUUID);
 
         currentDownloadFileProgressDialog = new ProgressDialog(activity);
 

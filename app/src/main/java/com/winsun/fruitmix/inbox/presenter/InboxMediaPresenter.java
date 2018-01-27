@@ -14,8 +14,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.InboxMediaItemBinding;
 import com.winsun.fruitmix.databinding.InboxPhotoItemBinding;
 import com.winsun.fruitmix.group.data.model.MediaComment;
-import com.winsun.fruitmix.group.data.model.UserComment;
-import com.winsun.fruitmix.list.ListActivity;
+import com.winsun.fruitmix.list.TweetContentListActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.util.MediaUtil;
@@ -88,7 +87,7 @@ public class InboxMediaPresenter {
 
     public void enterListActivity(Context context){
 
-        ListActivity.startListActivity(mMediaComment,context);
+        TweetContentListActivity.startListActivity(mMediaComment,context);
     }
 
     private String getString(int resID) {

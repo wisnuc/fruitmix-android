@@ -11,6 +11,8 @@ import com.winsun.fruitmix.util.Util;
 
 public abstract class AbstractFile {
 
+    //TODO:setFileTypeResID automatic when set name to avoid forget
+
     private String name;
 
     private long time;
@@ -45,13 +47,13 @@ public abstract class AbstractFile {
 
     public String getDateText() {
 
-        return Util.formatDate(getTime());
+        return time != 0 ? Util.formatDate(getTime()) : "";
 
     }
 
     public String getTimeText() {
 
-        return Util.formatTime(getTime());
+        return time != 0 ? Util.formatTime(getTime()) : "";
 
     }
 

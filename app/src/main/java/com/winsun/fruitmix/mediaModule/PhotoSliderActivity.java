@@ -123,6 +123,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private int initialPhotoPosition = 0;
     private int currentPhotoPosition = 0;
 
+    private String groupUUID;
+
     private List<MediaViewModel> mediaViewModelsAlreadyLoaded;
 
     private boolean sInEdit = true;
@@ -162,13 +164,15 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                 if (media instanceof Video)
                     return;
 
-                String imageTag = media.getImageThumbUrl(mContext).getUrl();
+                String imageTag;
+
+                imageTag = getMediaThumbHttpRequest(media).getUrl();
 
                 PinchImageView view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
 
                 if (view == null) {
 
-                    imageTag = media.getImageOriginalUrl(mContext).getUrl();
+                    imageTag = getMediaOriginalHttpRequest(media).getUrl();
 
                     view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
                 }
@@ -205,9 +209,89 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
     };
 
-    public static void startPhotoSliderActivity(View toolbar, Activity activity, List<MediaViewModel> transitionMediaViewModels, Intent intent, int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
+    private HttpRequest getMediaThumbHttpRequest(Media media) {
+        HttpRequest httpRequest;
+        if (groupUUID != null)
+            httpRequest = media.getImageThumbUrl(mContext, groupUUID);
+        else
+            httpRequest = media.getImageThumbUrl(mContext);
+        return httpRequest;
+    }
+
+    private HttpRequest getMediaOriginalHttpRequest(Media media) {
+        HttpRequest httpRequest;
+        if (groupUUID != null)
+            httpRequest = media.getImageOriginalUrl(mContext, groupUUID);
+        else
+            httpRequest = media.getImageOriginalUrl(mContext);
+        return httpRequest;
+    }
+
+    public static void startPhotoSliderActivity(View toolbar, Activity activity, List<Media> transitionMedias,
+                                                String groupUUID,int spanCount, NetworkImageView transitionView, Media currentMedia){
+
+        int initialPhotoPosition = getMediaPosition(transitionMedias, currentMedia);
+
+        List<MediaViewModel> mediaViewModels = new ArrayList<>(transitionMedias.size());
+
+        for (Media media1 : transitionMedias) {
+            mediaViewModels.add(new MediaViewModel(media1));
+        }
+
+        PhotoSliderActivity.startPhotoSliderActivity(toolbar, activity, mediaViewModels,
+                groupUUID,initialPhotoPosition, initialPhotoPosition, spanCount, transitionView, currentMedia);
+
+    }
+
+    private static int getMediaPosition(List<Media> medias, Media media) {
+
+        int position = 0;
+        int size = medias.size();
+
+        for (int i = 0; i < size; i++) {
+            Media media1 = medias.get(i);
+
+            if (media.getKey().equals(media1.getKey())) {
+                position = i;
+                break;
+            }
+        }
+        return position;
+    }
+
+
+    private static void startPhotoSliderActivity(View toolbar, Activity activity, List<MediaViewModel> transitionMediaViewModels,
+                                                String groupUUID, int initialPhotoPosition,
+                                                int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
         setMediaViewModels(transitionMediaViewModels);
+
+        Intent intent = new Intent();
+        intent.putExtra(Util.KEY_GROUP_UUID, groupUUID);
+
+        startPhotoSliderActivity(toolbar, activity, intent, initialPhotoPosition, motionPosition, spanCount, transitionView, currentMedia);
+
+    }
+
+    public static void startPhotoSliderActivity(View toolbar, Activity activity, List<MediaViewModel> transitionMediaViewModels,
+                                                int initialPhotoPosition,
+                                                int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
+
+        setMediaViewModels(transitionMediaViewModels);
+
+        Intent intent = new Intent();
+
+        startPhotoSliderActivity(toolbar, activity, intent, initialPhotoPosition, motionPosition, spanCount, transitionView, currentMedia);
+
+    }
+
+    private static void startPhotoSliderActivity(View toolbar, Activity activity, Intent intent,
+                                                 int initialPhotoPosition,
+                                                 int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
+
+        intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
+        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
+        intent.setClass(activity, PhotoSliderActivity.class);
 
         if (transitionView == null || transitionView.isLoaded()) {
 
@@ -231,17 +315,26 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         } else {
 
             intent.putExtra(Util.KEY_NEED_TRANSITION, false);
+
             activity.startActivity(intent);
 
         }
 
     }
 
-    public static void startPhotoSliderActivity(Activity activity, List<MediaViewModel> transitionMediaViewModels, Intent intent) {
+
+    public static void startPhotoSliderActivity(Activity activity, List<MediaViewModel> transitionMediaViewModels, int initialPhotoPosition) {
 
         setMediaViewModels(transitionMediaViewModels);
 
+        Intent intent = new Intent();
+        intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
+        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
+
         intent.putExtra(Util.KEY_NEED_TRANSITION, false);
+
+        intent.setClass(activity, PhotoSliderActivity.class);
+
         activity.startActivity(intent);
 
     }
@@ -296,6 +389,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         initialPhotoPosition = getIntent().getIntExtra(Util.INITIAL_PHOTO_POSITION, 0);
 
         boolean mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
+
+        groupUUID = getIntent().getStringExtra(Util.KEY_GROUP_UUID);
 
         mediaViewModelsAlreadyLoaded = new ArrayList<>();
 
@@ -888,7 +983,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         } else {
 
-            httpRequest = media.getImageOriginalUrl(mContext);
+            httpRequest = getMediaOriginalHttpRequest(media);
+
             remoteUrl = httpRequest.getUrl();
 
             mainPic.setOrientationNumber(media.getOrientationNumber());
@@ -934,10 +1030,23 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
             mediaHeight = Integer.parseInt(media.getHeight());
         }
 
-        if (screenWidth / screenHeight > mediaWidth / mediaHeight)
-            httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight);
-        else
-            httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1);
+        if (screenWidth / screenHeight > mediaWidth / mediaHeight) {
+
+            if (groupUUID != null)
+                httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight, groupUUID);
+            else
+                httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight);
+
+        } else {
+
+            if (groupUUID != null)
+                httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1, groupUUID);
+            else
+                httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1);
+
+        }
+
+
         return httpRequest;
     }
 
@@ -1033,7 +1142,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             mainPic.setCurrentMediaViewModel(mediaViewModel);
 
-            HttpRequest httpRequest = media.getImageThumbUrl(mContext);
+            HttpRequest httpRequest = getMediaThumbHttpRequest(media);
 
             ArrayMap<String, String> header = new ArrayMap<>();
             header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());

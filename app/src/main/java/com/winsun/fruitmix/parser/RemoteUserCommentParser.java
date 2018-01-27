@@ -7,6 +7,7 @@ import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,6 +67,24 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
 
                     media.setLocal(false);
 
+                    String type = metadata.optString("m");
+                    media.setType(type);
+
+                    String dateTime = metadata.optString("date");
+                    if (dateTime.isEmpty()) {
+                        dateTime = metadata.optString("datetime");
+                    }
+
+                    if (dateTime.equals("") || dateTime.length() < 10) {
+                        media.setFormattedTime(Util.DEFAULT_DATE);
+                    } else {
+
+                        dateTime = dateTime.substring(0, 10).replace(":", "-") + dateTime.substring(10);
+
+                        media.setFormattedTime(dateTime);
+
+                    }
+
                     medias.add(media);
 
                 } else {
@@ -94,7 +113,19 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
 
             } else {
 
-                files.addAll(medias);
+                for (Media media:medias){
+
+                    RemoteFile file = new RemoteFile();
+
+                    String name = media.getName();
+
+                    file.setName(name);
+                    file.setFileHash(media.getUuid());
+                    file.setFileTypeResID(FileUtil.getFileTypeResID(name));
+
+                    files.add(file);
+
+                }
 
                 FileComment fileComment = new FileComment(uuid, null, time, "",files);
 

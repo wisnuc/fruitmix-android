@@ -2,6 +2,7 @@ package com.winsun.fruitmix.file.data.download;
 
 import android.util.Log;
 
+import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
 import com.winsun.fruitmix.file.data.model.FileTaskItem;
 
 import java.util.concurrent.Future;
@@ -14,9 +15,7 @@ public class FileDownloadItem extends FileTaskItem {
 
     public static final String TAG = FileDownloadItem.class.getSimpleName();
 
-    private String parentFolderUUID;
-
-    private String driveUUID;
+    private FileDownloadParam mFileDownloadParam;
 
     private FileDownloadState fileDownloadState;
 
@@ -27,10 +26,9 @@ public class FileDownloadItem extends FileTaskItem {
         super(fileUUID,fileName,fileSize);
     }
 
-    public FileDownloadItem(String fileName, long fileSize, String fileUUID, String parentFolderUUID, String driveUUID) {
+    public FileDownloadItem(String fileName, long fileSize, String fileUUID, FileDownloadParam fileDownloadParam) {
         super(fileUUID,fileName,fileSize);
-        this.parentFolderUUID = parentFolderUUID;
-        this.driveUUID = driveUUID;
+        mFileDownloadParam = fileDownloadParam;
     }
 
     public void setFileDownloadState(FileDownloadState fileDownloadState) {
@@ -45,13 +43,10 @@ public class FileDownloadItem extends FileTaskItem {
         fileDownloadState.notifyDownloadStateChanged();
     }
 
-    public String getParentFolderUUID() {
-        return parentFolderUUID;
+    public FileDownloadParam getFileDownloadParam() {
+        return mFileDownloadParam;
     }
 
-    public String getDriveUUID() {
-        return driveUUID;
-    }
 
     @Override
     public TaskState getTaskState() {

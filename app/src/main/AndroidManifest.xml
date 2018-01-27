@@ -194,7 +194,10 @@
             android:screenOrientation="portrait"
             android:theme="@style/TranslucentTheme" />
         <activity
-            android:name=".list.ListActivity"
+            android:name=".list.TweetContentListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".mediaModule.MediaListActivity"
             android:screenOrientation="portrait" />
     </application>
 

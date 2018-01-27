@@ -47,7 +47,8 @@
             android:id="@+id/input_chat_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" />
+            android:layout_alignParentBottom="true"
+            android:visibility="gone" />
 
 
         <FrameLayout
@@ -71,17 +72,56 @@
                 android:layout_width="wrap_content"
                 android:layout_height="28dp"
                 android:layout_gravity="right"
-                android:visibility="gone"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/comment_count_bg"
                 android:gravity="center_vertical"
                 android:text="125条评论"
                 android:textColor="#4caf50"
                 android:textSize="12dp"
+                android:visibility="gone"
                 tools:text="125条评论" />
 
-
         </FrameLayout>
+
+
+        <LinearLayout
+            android:id="@+id/btmenu"
+            android:layout_width="88dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/send_file_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:src="@drawable/ic_file_download_white_24dp"
+                android:visibility="gone"
+                app:borderWidth="0dp"
+                app:fabSize="mini" />
+
+            <ImageView
+                android:id="@+id/send_media"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginBottom="16dp"
+                android:src="@drawable/fab_share"
+                android:visibility="gone" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:src="@drawable/ic_add_white_24dp"
+                android:visibility="visible"
+                app:borderWidth="0dp"
+                app:fabSize="normal" />
+
+        </LinearLayout>
 
     </RelativeLayout>
 

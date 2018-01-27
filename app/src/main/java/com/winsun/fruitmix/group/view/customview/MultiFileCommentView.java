@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.group.view.customview;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
@@ -14,7 +15,6 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.FileTweetGroupItemBinding;
 import com.winsun.fruitmix.databinding.MorePhotoMaskBinding;
 import com.winsun.fruitmix.databinding.MultiFileCommentBinding;
-import com.winsun.fruitmix.databinding.SingleFileBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.MediaComment;
@@ -22,6 +22,8 @@ import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.viewmodel.FileCommentViewModel;
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.list.TweetContentListActivity;
+import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
@@ -51,7 +53,7 @@ public class MultiFileCommentView extends UserCommentView {
     }
 
     @Override
-    protected void refreshContent(Context context, UserComment data, boolean isLeftModel) {
+    protected void refreshContent(final Context context, final View toolbar, final UserComment data, boolean isLeftModel) {
 
         FrameLayout[] frameLayouts = {binding.pic0, binding.pic1, binding.pic2, binding.pic0SecondRow, binding.pic1SecondRow, binding.pic2SecondRow};
 
@@ -68,7 +70,7 @@ public class MultiFileCommentView extends UserCommentView {
 
             MediaComment comment = (MediaComment) data;
 
-            List<Media> medias = comment.getMedias();
+            final List<Media> medias = comment.getMedias();
 
             totalSize = medias.size();
 
@@ -91,15 +93,32 @@ public class MultiFileCommentView extends UserCommentView {
 
                 }
 
-                Media media = medias.get(i);
+                final Media media = medias.get(i);
 
                 HttpRequest httpRequest = media.getImageThumbUrl(context, data.getGroupUUID());
 
-                SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayouts[layoutNum], false);
+                final SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayouts[layoutNum], false);
 
                 frameLayouts[layoutNum].addView(singlePhotoBinding.getRoot());
 
                 MediaUtil.setMediaImageUrl(media, singlePhotoBinding.coverImg, httpRequest, imageLoader);
+
+//                NewPhotoGridlayoutItemBinding newPhotoGridlayoutItemBinding = NewPhotoGridlayoutItemBinding.inflate(LayoutInflater.from(context),
+//                        frameLayouts[layoutNum],false);
+//
+//                frameLayouts[layoutNum].addView(newPhotoGridlayoutItemBinding.getRoot());
+//
+//                MediaUtil.setMediaImageUrl(media, newPhotoGridlayoutItemBinding.photoIv, httpRequest, imageLoader);
+
+                singlePhotoBinding.getRoot().setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        PhotoSliderActivity.startPhotoSliderActivity(toolbar, (Activity) context,medias,data.getGroupUUID(),
+                                3,singlePhotoBinding.coverImg,media);
+
+                    }
+                });
 
                 layoutNum++;
 
@@ -120,7 +139,17 @@ public class MultiFileCommentView extends UserCommentView {
 
                 morePhotoMaskBinding.sizeTextview.setText(text);
 
+                morePhotoMaskBinding.maskContainer.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        TweetContentListActivity.startListActivity(data, context);
+
+                    }
+                });
+
             }
+
 
         } else if (data instanceof FileComment) {
 
@@ -172,6 +201,15 @@ public class MultiFileCommentView extends UserCommentView {
             spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(context, R.color.blue)), start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
             fileCommentViewModel.shareText.set(spannableString.toString());
+
+            fileTweetGroupItemBinding.getRoot().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    TweetContentListActivity.startListActivity(data, context);
+
+                }
+            });
 
         }
 

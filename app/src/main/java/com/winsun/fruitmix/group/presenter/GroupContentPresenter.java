@@ -8,7 +8,9 @@ import android.view.ViewGroup;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.BR;
+import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.databinding.GroupAddPingItemBinding;
@@ -41,7 +43,7 @@ import java.util.List;
  * Created by Administrator on 2017/7/21.
  */
 
-public class GroupContentPresenter implements CustomArrowToggleButton.PingToggleListener {
+public class GroupContentPresenter implements CustomArrowToggleButton.PingToggleListener,ActiveView {
 
     private PlayAudioUseCase playAudioUseCase;
 
@@ -106,7 +108,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private void refreshGroup() {
 
-        groupRepository.getAllUserCommentByGroupUUID(groupUUID, new BaseLoadDataCallback<UserComment>() {
+        groupRepository.getAllUserCommentByGroupUUID(groupUUID,new BaseLoadDataCallbackWrapper<UserComment>( new BaseLoadDataCallback<UserComment>() {
             @Override
             public void onSucceed(List<UserComment> data, OperationResult operationResult) {
 
@@ -129,7 +131,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
                 groupContentView.showToast(operationResult.getResultMessage(groupContentView.getContext()));
 
             }
-        });
+        },this));
     }
 
     private void refreshUserComment() {
@@ -190,6 +192,11 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     }
 
+    @Override
+    public boolean isActive() {
+        return groupContentView != null;
+    }
+
     private class GroupContentAdapter extends RecyclerView.Adapter<UserCommentViewHolder> {
 
         private List<UserComment> mUserComments;
@@ -233,7 +240,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
             UserCommentShowStrategy userCommentShowStrategy = new UserCommentShowStrategy(preUserComment, currentUserComment, currentLoggedInUser.getUuid());
 
-            holder.userCommentView.refreshCommentView(groupContentView.getContext(), userCommentShowStrategy, currentUserComment);
+            holder.userCommentView.refreshCommentView(groupContentView.getContext(),groupContentView.getToolbar(), userCommentShowStrategy, currentUserComment);
 
         }
 

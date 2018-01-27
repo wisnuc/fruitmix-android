@@ -1529,12 +1529,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                         int initialPhotoPosition = getInitialPhotoPosition(currentMedia);
 
-                        Intent intent = new Intent();
-                        intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
-                        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
-                        intent.setClass(containerActivity, PhotoSliderActivity.class);
-
-                        PhotoSliderActivity.startPhotoSliderActivity(mPhotoListListener.getToolbar(), containerActivity, mMediaViewModels, intent, mediaInListPosition, mSpanCount, mPhotoIv, currentMedia);
+                        PhotoSliderActivity.startPhotoSliderActivity(mPhotoListListener.getToolbar(), containerActivity, mMediaViewModels,
+                                initialPhotoPosition, mediaInListPosition, mSpanCount, mPhotoIv, currentMedia);
 
                         mEnteringPhotoSlider = true;
 
@@ -1690,7 +1686,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, mMediaViewModels, intent);
+                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, mMediaViewModels,initialPhotoPosition);
 
                     }
 
@@ -1860,6 +1856,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             if (media.getKey().equals(media1.getKey())) {
                 position = i;
+                break;
             }
         }
         return position;

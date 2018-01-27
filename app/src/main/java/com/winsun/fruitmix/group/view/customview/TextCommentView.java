@@ -31,7 +31,7 @@ public class TextCommentView extends UserCommentView {
     }
 
     @Override
-    protected void refreshContent(Context context,UserComment userComment, boolean isLeftModel) {
+    protected void refreshContent(Context context,View toolbar,UserComment userComment, boolean isLeftModel) {
 
         TextComment textComment = (TextComment) userComment;
 

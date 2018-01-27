@@ -7,12 +7,17 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.android.volley.toolbox.ImageLoader;
+import com.winsun.fruitmix.databinding.ActivityBaseToolbarBinding;
+import com.winsun.fruitmix.databinding.ActivityMediaListBinding;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
+import com.winsun.fruitmix.group.data.model.MediaComment;
+import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
 import com.winsun.fruitmix.util.MediaUtil;
@@ -34,6 +39,8 @@ public class MediaListPresenter {
 
     private List<Media> mMedias;
 
+    private String groupUUID;
+
     private ImageLoader mImageLoader;
 
     private MediaListAdapter mMediaListAdapter;
@@ -43,14 +50,28 @@ public class MediaListPresenter {
     private int mScreenWidth;
     private int mItemWidth;
 
-    public MediaListPresenter(List<Media> medias, ImageLoader imageLoader, Activity activity) {
-        mMedias = medias;
+    private ActivityBaseToolbarBinding mActivityBaseToolbarBinding;
+
+    private Activity containerActivity;
+
+    public MediaListPresenter(ActivityBaseToolbarBinding activityBaseToolbarBinding, MediaComment mediaComment, ImageLoader imageLoader, Activity activity) {
+        mActivityBaseToolbarBinding = activityBaseToolbarBinding;
+        mMedias = mediaComment.getMedias();
+        groupUUID = mediaComment.getGroupUUID();
         mImageLoader = imageLoader;
 
         mMediaListAdapter = new MediaListAdapter();
 
         calcScreenWidth(activity);
         calcPhotoItemWidth(activity);
+
+        containerActivity = activity;
+
+    }
+
+    public void onDestroy() {
+
+        containerActivity = null;
 
     }
 
@@ -63,7 +84,8 @@ public class MediaListPresenter {
     private void calcPhotoItemWidth(Context context) {
         mItemWidth = mScreenWidth / SPAN_COUNT - Util.dip2px(context, 5);
     }
-    public void refreshView(Context context,RecyclerView recyclerView) {
+
+    public void refreshView(Context context, RecyclerView recyclerView) {
 
         recyclerView.setLayoutManager(new GridLayoutManager(context, SPAN_COUNT));
 
@@ -120,19 +142,29 @@ public class MediaListPresenter {
             super(viewDataBinding);
         }
 
-        void refreshView(Media media, List<Media> medias) {
+        void refreshView(final Media media, final List<Media> medias) {
 
-            NewPhotoGridlayoutItemBinding binding = (NewPhotoGridlayoutItemBinding) getViewDataBinding();
+            final NewPhotoGridlayoutItemBinding binding = (NewPhotoGridlayoutItemBinding) getViewDataBinding();
 
             Context context = binding.getRoot().getContext();
 
-            MediaUtil.setMediaImageUrl(media, binding.photoIv, media.getImageThumbUrl(context), mImageLoader);
+            MediaUtil.setMediaImageUrl(media, binding.photoIv, media.getImageThumbUrl(context, groupUUID), mImageLoader);
 
             int temporaryPosition = 0;
 
             temporaryPosition = getMediaPosition(medias, media);
 
             setPhotoItemMargin(temporaryPosition, binding.photoItemLayout, context);
+
+            binding.photoItemLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    PhotoSliderActivity.startPhotoSliderActivity(mActivityBaseToolbarBinding.toolbarLayout.toolbar,containerActivity,medias,
+                            groupUUID,SPAN_COUNT,binding.photoIv,media);
+
+                }
+            });
 
         }
 
@@ -149,6 +181,7 @@ public class MediaListPresenter {
 
             if (media.getKey().equals(media1.getKey())) {
                 position = i;
+                break;
             }
         }
         return position;

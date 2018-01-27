@@ -15,7 +15,7 @@ public abstract class BaseToolbarActivity extends BaseActivity {
 
     protected ToolbarViewModel toolbarViewModel;
 
-    private ActivityBaseToolbarBinding mActivityBaseToolbarBinding;
+    protected ActivityBaseToolbarBinding mActivityBaseToolbarBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +64,8 @@ public abstract class BaseToolbarActivity extends BaseActivity {
         Util.setStatusBarColor(this, colorResID);
 
     }
+
+
 
     protected abstract String getToolbarTitle();
 

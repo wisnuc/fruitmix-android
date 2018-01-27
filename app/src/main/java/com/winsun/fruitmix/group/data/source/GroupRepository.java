@@ -28,6 +28,8 @@ public class GroupRepository extends BaseDataRepository {
 
     private GroupDataSource groupDataSource;
 
+    private String cloudToken;
+
     public static GroupRepository getInstance(GroupDataSource groupDataSource, ThreadManager threadManager) {
         if (ourInstance == null)
             ourInstance = new GroupRepository(threadManager, groupDataSource);
@@ -52,10 +54,19 @@ public class GroupRepository extends BaseDataRepository {
 
     public void setCloudToken(String cloudToken) {
 
+        this.cloudToken = cloudToken;
+
         if (groupDataSource instanceof GroupRemoteDataSource)
             ((GroupRemoteDataSource) groupDataSource).setCloudToken(cloudToken);
 
     }
+
+    public String getCloudToken() {
+
+        return cloudToken;
+
+    }
+
 
     public void getGroupList(BaseLoadDataCallback<PrivateGroup> callback) {
 

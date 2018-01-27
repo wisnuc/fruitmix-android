@@ -52,7 +52,7 @@ public class AudioCommentView extends UserCommentView {
     }
 
     @Override
-    protected void refreshContent(Context context, UserComment data, boolean isLeftModel) {
+    protected void refreshContent(Context context, View toolbar,UserComment data, boolean isLeftModel) {
 
         LinearLayout audioCommentContainer = binding.autoCommentContainer;
 

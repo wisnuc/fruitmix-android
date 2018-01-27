@@ -9,6 +9,8 @@ import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.file.data.download.FileDownloadErrorState;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
+import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
+import com.winsun.fruitmix.file.data.download.param.FileFromBoxDownloadParam;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
@@ -113,17 +115,28 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
     }
 
+
     /*
      * WISNUC API:GET DIRENTRY
      */
     @Override
     public void downloadFile(FileDownloadState fileDownloadState, BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        String encodedFileName = URLEncoder.encode(fileDownloadState.getFileName(), "UTF-8");
+        FileDownloadParam fileDownloadParam = fileDownloadState.getFileDownloadParam();
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequest(ROOT_DRIVE_PARAMETER + "/"
-                + fileDownloadState.getDriveUUID() + DIRS + fileDownloadState.getParentFolderUUID()
-                + "/entries/" + fileDownloadState.getFileUUID() + "?name=" + encodedFileName);
+        HttpRequest httpRequest;
+
+        if (fileDownloadParam instanceof FileFromBoxDownloadParam) {
+
+            httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),
+                    Util.KEY_JWT_HEAD + ((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken());
+
+        } else {
+
+            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath());
+
+        }
+
 
         if (!wrapper.checkPreCondition(httpRequest, callback))
             return;

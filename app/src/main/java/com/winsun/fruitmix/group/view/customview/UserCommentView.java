@@ -39,14 +39,17 @@ public abstract class UserCommentView {
 
     protected abstract View generateContentView(Context context);
 
-    public void refreshCommentView(Context context,UserCommentShowStrategy strategy, UserComment data) {
+    public void refreshCommentView(Context context, View toolbar, UserCommentShowStrategy strategy, UserComment data) {
 
         viewDataBinding.setVariable(BR.userComment, data);
+
         viewDataBinding.setVariable(BR.userCommentShowStrategy, strategy);
 
         viewDataBinding.executePendingBindings();
 
         ImageView userAvatar = viewDataBinding.userAvatar;
+
+        ImageView currentUserIcon = viewDataBinding.currentUserIcon;
 
         RelativeLayout.LayoutParams userAvatarLayoutParams = (RelativeLayout.LayoutParams) userAvatar.getLayoutParams();
 
@@ -60,6 +63,10 @@ public abstract class UserCommentView {
 
         if (strategy.isShowLeft()) {
 
+            userAvatar.setVisibility(View.VISIBLE);
+
+            currentUserIcon.setVisibility(View.GONE);
+
             userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
             userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
 
@@ -71,22 +78,31 @@ public abstract class UserCommentView {
 
         } else {
 
-            userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
-            userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+            userAvatar.setVisibility(View.GONE);
+
+            currentUserIcon.setVisibility(View.VISIBLE);
+
+            viewDataBinding.createTime.setVisibility(View.GONE);
+            viewDataBinding.userName.setVisibility(View.GONE);
+
+//            userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+//            userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+
 
             userInfoLayoutLayoutParams.addRule(RelativeLayout.RIGHT_OF, 0);
             userInfoLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, R.id.user_avatar);
 
             commentContentLayoutLayoutParams.addRule(RelativeLayout.RIGHT_OF, 0);
-            commentContentLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, R.id.user_avatar);
+//            commentContentLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, R.id.user_avatar);
+
+            commentContentLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, R.id.current_user_icon);
 
         }
 
-
-        refreshContent(context,data, strategy.isShowLeft());
+        refreshContent(context, toolbar, data, strategy.isShowLeft());
 
     }
 
-    protected abstract void refreshContent(Context context,UserComment data, boolean isLeftModel);
+    protected abstract void refreshContent(Context context, View toolbar, UserComment data, boolean isLeftModel);
 
 }

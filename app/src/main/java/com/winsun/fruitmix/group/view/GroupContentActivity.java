@@ -1,17 +1,22 @@
 package com.winsun.fruitmix.group.view;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.databinding.ActivityGroupContentBinding;
 import com.winsun.fruitmix.group.data.model.AudioComment;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
@@ -58,29 +63,35 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
     private InputChatLayout inputChatLayout;
 
+    private FloatingActionButton mFabBtn;
+    private FloatingActionButton mSendFileBtn;
+    private ImageView mSendMediaBtn;
+
+    private ActivityGroupContentBinding mActivityGroupContentBinding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ActivityGroupContentBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_group_content);
+        mActivityGroupContentBinding = DataBindingUtil.setContentView(this, R.layout.activity_group_content);
 
-        initInputChatLayout(binding);
+        initInputChatLayout(mActivityGroupContentBinding);
 
         groupUUID = getIntent().getStringExtra(GROUP_UUID);
 
         final GroupContentViewModel groupContentViewModel = new GroupContentViewModel();
 
-        binding.setGroupContentViewModel(groupContentViewModel);
+        mActivityGroupContentBinding.setGroupContentViewModel(groupContentViewModel);
 
         initPresenter(groupUUID, groupContentViewModel);
 
-        initToolbarViewModel(binding);
+        initToolbarViewModel(mActivityGroupContentBinding);
 
-        binding.setPingToggleListener(groupContentPresenter);
+        mActivityGroupContentBinding.setPingToggleListener(groupContentPresenter);
 
-        chatRecyclerView = binding.chatRecyclerview;
+        chatRecyclerView = mActivityGroupContentBinding.chatRecyclerview;
 
-        pingRecyclerView = binding.pingRecyclerview;
+        pingRecyclerView = mActivityGroupContentBinding.pingRecyclerview;
 
         initChatRecyclerView();
 
@@ -88,13 +99,21 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         groupContentPresenter.refreshView();
 
-        toggleButton = binding.groupContentToolbar.toggle;
+        toggleButton = mActivityGroupContentBinding.groupContentToolbar.toggle;
 
-        LinearLayout toggleLayout = binding.groupContentToolbar.toggleLayout;
+        LinearLayout toggleLayout = mActivityGroupContentBinding.groupContentToolbar.toggleLayout;
 
         toggleLayout.setOnClickListener(this);
 
-        binding.chatContentLayout.setOnClickListener(this);
+        mActivityGroupContentBinding.chatContentLayout.setOnClickListener(this);
+
+        mFabBtn = mActivityGroupContentBinding.fab;
+        mSendFileBtn = mActivityGroupContentBinding.sendFileBtn;
+        mSendMediaBtn = mActivityGroupContentBinding.sendMedia;
+
+        mFabBtn.setOnClickListener(this);
+        mSendFileBtn.setOnClickListener(this);
+        mSendMediaBtn.setOnClickListener(this);
 
     }
 
@@ -205,7 +224,89 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
                 toggleButton.onclick();
                 break;
 
+            case R.id.fab:
+                refreshFabState();
+                break;
+
+            case R.id.send_file_btn:
+
+                sendFileChat();
+
+                collapseFab();
+
+                break;
+            case R.id.send_media:
+
+                sendPhotoChat();
+
+                collapseFab();
+
+                break;
+
         }
+
+    }
+
+    private boolean sMenuUnfolding = false;
+
+    private void refreshFabState() {
+        if (sMenuUnfolding) {
+            sMenuUnfolding = false;
+            collapseFabAnimation();
+        } else {
+            sMenuUnfolding = true;
+            extendFabAnimation();
+        }
+    }
+
+    private void collapseFab() {
+        if (sMenuUnfolding) {
+            sMenuUnfolding = false;
+            collapseFabAnimation();
+        }
+    }
+
+    private void collapseFabAnimation() {
+
+        new AnimatorBuilder(getContext(), R.animator.fab_remote_restore, mFabBtn).startAnimator();
+
+        new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation_restore, mSendMediaBtn).addAdapter(new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                mSendMediaBtn.setVisibility(View.GONE);
+
+            }
+        }).startAnimator();
+
+        new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation_restore, mSendFileBtn).addAdapter(new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                mSendFileBtn.setVisibility(View.GONE);
+
+            }
+        }).startAnimator();
+
+
+    }
+
+    private void extendFabAnimation() {
+
+        new AnimatorBuilder(getContext(), R.animator.fab_remote, mFabBtn).startAnimator();
+
+        mSendMediaBtn.setVisibility(View.VISIBLE);
+
+        mSendFileBtn.setVisibility(View.VISIBLE);
+
+        new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, mSendMediaBtn).startAnimator();
+
+        new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation, mSendFileBtn).startAnimator();
+
 
     }
 
@@ -292,6 +393,11 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
     @Override
     public Context getContext() {
         return this;
+    }
+
+    @Override
+    public View getToolbar() {
+        return mActivityGroupContentBinding.groupContentToolbar.toolbar;
     }
 
     @Override

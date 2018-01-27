@@ -250,6 +250,14 @@ public class Media extends AbstractFile {
 
     }
 
+    public HttpRequest getImageThumbUrl(Context context, int width, int height, String groupUUID) {
+
+        HttpRequest httpRequest = getImageThumbUrl(context, width, height);
+
+        return addGroupUUIDToUrl(groupUUID, httpRequest);
+
+    }
+
     public HttpRequest getImageThumbUrl(Context context, int width, int height) {
 
         String imageUrl;
@@ -275,6 +283,7 @@ public class Media extends AbstractFile {
             Log.d(TAG, "media uuid: " + getUuid() + " getImageThumbUrl: " + httpRequest.getUrl());
 
         }
+
         return httpRequest;
 
     }

@@ -16,6 +16,8 @@ import android.widget.VideoView;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.PlayVideoFragmentBinding;
+import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
+import com.winsun.fruitmix.file.data.download.param.FileFromBoxDownloadParam;
 import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
@@ -136,6 +138,26 @@ public class PlayVideoFragment {
     public void startPlayVideo(String driveRootUUID, RemoteFile remoteFile) {
 
         startPlayVideo(getHttpRequest(driveRootUUID, remoteFile));
+    }
+
+    public void startPlayVideo(FileDownloadParam fileDownloadParam){
+
+        if (fileDownloadParam instanceof FileFromBoxDownloadParam) {
+
+            try {
+                HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),
+                        Util.KEY_JWT_HEAD + ((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken());
+
+                startPlayVideo(httpRequest);
+
+            } catch (UnsupportedEncodingException e) {
+
+                e.printStackTrace();
+
+            }
+
+        }
+
     }
 
     private void startPlayVideo(HttpRequest httpRequest) {

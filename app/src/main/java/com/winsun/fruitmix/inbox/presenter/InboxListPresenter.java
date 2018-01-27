@@ -30,7 +30,7 @@ import com.winsun.fruitmix.inbox.data.source.InboxDataSource;
 import com.winsun.fruitmix.inbox.view.InboxView;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
 import com.winsun.fruitmix.invitation.data.InvitationDataSource;
-import com.winsun.fruitmix.list.ListActivity;
+import com.winsun.fruitmix.list.TweetContentListActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ViewItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -486,7 +486,7 @@ public class InboxListPresenter implements ActiveView {
                 @Override
                 public void onClick(View v) {
 
-                    ListActivity.startListActivity(fileItem.getFileComment(),context);
+                    TweetContentListActivity.startListActivity(fileItem.getFileComment(),context);
 
                 }
             });

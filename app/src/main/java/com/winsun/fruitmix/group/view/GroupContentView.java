@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.group.view;
 
 import android.content.Context;
+import android.view.View;
 
 import com.winsun.fruitmix.interfaces.BaseView;
 
@@ -13,6 +14,8 @@ public interface GroupContentView extends BaseView {
     void smoothToChatListPosition(int position);
 
     Context getContext();
+
+    View getToolbar();
 
     void showCreatePing();
 

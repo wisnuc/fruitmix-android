@@ -315,7 +315,7 @@ public class Util {
         return UUID.randomUUID().toString();
     }
 
-    public static String formatShareTime(Context context, long shareTimeMillis,long currentTimeMillis) {
+    public static String formatShareTime(Context context, long shareTimeMillis, long currentTimeMillis) {
 
         Calendar shareCalendar = Calendar.getInstance();
 
@@ -602,10 +602,18 @@ public class Util {
         }
 
         if (includeBottomNavigationView) {
-            Pair bottomNavigationViewPair = new Pair<>(decor.findViewById(R.id.bottom_navigation_view),
-                    activity.getString(R.string.transition_bottom_navigation_view));
 
-            pairs.add(bottomNavigationViewPair);
+            View bottomNavigationView = decor.findViewById(R.id.bottom_navigation_view);
+
+            if (bottomNavigationView != null) {
+
+                Pair bottomNavigationViewPair = new Pair<>(bottomNavigationView,
+                        activity.getString(R.string.transition_bottom_navigation_view));
+
+                pairs.add(bottomNavigationViewPair);
+
+            }
+
         }
 
         // only add transition participants if there's at least one none-null element

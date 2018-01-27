@@ -14,16 +14,18 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.winsun.fruitmix.list.ListActivity">
+        tools:context="com.winsun.fruitmix.list.TweetContentListActivity">
+
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/media_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <include layout="@layout/new_loading_layout"
+        <include
+            layout="@layout/new_loading_layout"
             android:visibility="gone"
-            app:loadingViewModel="@{loadingViewModel}"/>
+            app:loadingViewModel="@{loadingViewModel}" />
 
 
     </FrameLayout>

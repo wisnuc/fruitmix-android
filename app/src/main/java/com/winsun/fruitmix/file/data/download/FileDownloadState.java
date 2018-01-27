@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.file.data.download;
 
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
+import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
 import com.winsun.fruitmix.file.data.model.FileTaskState;
 
 import org.greenrobot.eventbus.EventBus;
@@ -38,11 +39,9 @@ public abstract class FileDownloadState extends FileTaskState{
         return (FileDownloadItem) getFileTaskItem();
     }
 
-    public String getParentFolderUUID() {
-        return getFileDownloadItem().getParentFolderUUID();
+    public FileDownloadParam getFileDownloadParam() {
+        return getFileDownloadItem().getFileDownloadParam();
     }
 
-    public String getDriveUUID(){
-        return getFileDownloadItem().getDriveUUID();
-    }
+
 }
