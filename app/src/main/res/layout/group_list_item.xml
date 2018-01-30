@@ -41,7 +41,7 @@
                     android:id="@+id/group_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{privateGroup.name,default=大学同学}"
+                    android:text="@{privateGroup.getNameWithHandleEmptyName(context),default=大学同学}"
                     android:textColor="@color/eighty_seven_percent_black"
                     android:textSize="16dp" />
 

@@ -575,6 +575,8 @@
     <string name="group_name">群名</string>
     <string name="add_friend">添加好友</string>
 
+    <string name="group_chat">群聊(%1$d)</string>
+
     <!-- inbox -->
     <string name="inbox">收件箱</string>
     <string name="group_come_from">来自 \"%1$s\" 群,</string>

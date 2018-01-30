@@ -9,11 +9,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.BaseLeftCommentBinding;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
+import com.winsun.fruitmix.http.InjectHttp;
 
 /**
  * Created by Administrator on 2017/7/20.
@@ -47,7 +50,7 @@ public abstract class UserCommentView {
 
         viewDataBinding.executePendingBindings();
 
-        ImageView userAvatar = viewDataBinding.userAvatar;
+        UserAvatar userAvatar = viewDataBinding.userAvatar;
 
         ImageView currentUserIcon = viewDataBinding.currentUserIcon;
 
@@ -75,6 +78,10 @@ public abstract class UserCommentView {
 
             commentContentLayoutLayoutParams.addRule(RelativeLayout.RIGHT_OF, R.id.user_avatar);
             commentContentLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, 0);
+
+            ImageLoader imageLoader = InjectHttp.provideImageGifLoaderInstance(context).getImageLoader(context);
+
+            userAvatar.setUser(data.getCreator(),imageLoader);
 
         } else {
 

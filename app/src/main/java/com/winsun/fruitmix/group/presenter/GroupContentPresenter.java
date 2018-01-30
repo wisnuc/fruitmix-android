@@ -43,7 +43,7 @@ import java.util.List;
  * Created by Administrator on 2017/7/21.
  */
 
-public class GroupContentPresenter implements CustomArrowToggleButton.PingToggleListener,ActiveView {
+public class GroupContentPresenter implements CustomArrowToggleButton.PingToggleListener, ActiveView {
 
     private PlayAudioUseCase playAudioUseCase;
 
@@ -67,6 +67,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private List<UserComment> userComments;
 
+    private UserDataRepository mUserDataRepository;
+
     public GroupContentPresenter(GroupContentView groupContentView, String groupUUID,
                                  UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
                                  GroupRepository groupRepository, GroupContentViewModel groupContentViewModel,
@@ -78,6 +80,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         this.groupUUID = groupUUID;
         this.groupRepository = groupRepository;
         this.groupContentViewModel = groupContentViewModel;
+
+        mUserDataRepository = userDataRepository;
 
         currentLoggedInUser = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
 
@@ -108,15 +112,18 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private void refreshGroup() {
 
-        groupRepository.getAllUserCommentByGroupUUID(groupUUID,new BaseLoadDataCallbackWrapper<UserComment>( new BaseLoadDataCallback<UserComment>() {
+        groupRepository.getAllUserCommentByGroupUUID(groupUUID, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<UserComment>() {
             @Override
             public void onSucceed(List<UserComment> data, OperationResult operationResult) {
 
                 userComments = data;
 
                 for (UserComment userComment : userComments) {
-                    userComment.setCreator(currentLoggedInUser);
+
+                    User user = mUserDataRepository.getUserByGUID(userComment.getCreator().getAssociatedWeChatGUID());
+                    userComment.setCreator(user);
                     userComment.setGroupUUID(groupUUID);
+
                 }
 
                 refreshUserComment();
@@ -131,7 +138,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
                 groupContentView.showToast(operationResult.getResultMessage(groupContentView.getContext()));
 
             }
-        },this));
+        }, this));
     }
 
     private void refreshUserComment() {
@@ -240,7 +247,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
             UserCommentShowStrategy userCommentShowStrategy = new UserCommentShowStrategy(preUserComment, currentUserComment, currentLoggedInUser.getUuid());
 
-            holder.userCommentView.refreshCommentView(groupContentView.getContext(),groupContentView.getToolbar(), userCommentShowStrategy, currentUserComment);
+            holder.userCommentView.refreshCommentView(groupContentView.getContext(), groupContentView.getToolbar(), userCommentShowStrategy, currentUserComment);
 
         }
 
@@ -273,7 +280,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void sendTxt(String text) {
 
-        TextComment textComment = new TextComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), groupUUID,text);
+        TextComment textComment = new TextComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), groupUUID, text);
 
         insertUserComment(textComment);
 
@@ -281,7 +288,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void sendAudio(String filePath, long audioRecordTime) {
 
-        AudioComment audioComment = new AudioComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(),groupUUID, filePath, audioRecordTime);
+        AudioComment audioComment = new AudioComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), groupUUID, filePath, audioRecordTime);
 
         insertUserComment(audioComment);
 

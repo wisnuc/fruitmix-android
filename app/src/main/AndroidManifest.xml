@@ -199,6 +199,9 @@
         <activity
             android:name=".mediaModule.MediaListActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".contact.ContactListActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

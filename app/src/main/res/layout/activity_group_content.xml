@@ -83,6 +83,12 @@
 
         </FrameLayout>
 
+        <ImageView
+            android:id="@+id/mask_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#c8000000"
+            android:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/btmenu"

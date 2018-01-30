@@ -6,6 +6,7 @@ import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
@@ -41,6 +42,11 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
             long index = jsonObject.optLong("index");
 
             String comment = jsonObject.optString("comment");
+
+            JSONObject tweeter = jsonObject.optJSONObject("tweeter");
+
+            User creator = new User();
+            creator.setAssociatedWeChatGUID(tweeter.optString("id"));
 
             JSONArray list = jsonObject.optJSONArray("list");
 
@@ -104,7 +110,7 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
 
             if (files.size() == 0) {
 
-                MediaComment mediaComment = new MediaComment(uuid, null, time, "",medias);
+                MediaComment mediaComment = new MediaComment(uuid, creator, time, "",medias);
 
                 mediaComment.setIndex(index);
                 mediaComment.setText(comment);
@@ -127,7 +133,7 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
 
                 }
 
-                FileComment fileComment = new FileComment(uuid, null, time, "",files);
+                FileComment fileComment = new FileComment(uuid, creator, time, "",files);
 
                 fileComment.setIndex(index);
                 fileComment.setText(comment);

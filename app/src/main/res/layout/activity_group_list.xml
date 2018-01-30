@@ -28,6 +28,7 @@
             android:id="@+id/group_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/white"
             android:visibility="@{groupListViewModel.showRecyclerView?View.VISIBLE:View.GONE,default=gone}" />
 
         <android.support.design.widget.FloatingActionButton

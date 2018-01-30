@@ -603,6 +603,8 @@
     <string name="create_group">Create group</string>
     <string name="group_name">Group name</string>
     <string name="add_friend">Add friend</string>
+    
+    <string name="group_chat">Group Chat(%1$d)</string>
 
     <!-- inbox -->
     <string name="inbox">Inbox</string>
@@ -628,5 +630,6 @@
     <string name="hour_min">%1$s:%2$s</string>
     <string name="time_ago">%1$s ago</string>
 
+    
 
 </resources>

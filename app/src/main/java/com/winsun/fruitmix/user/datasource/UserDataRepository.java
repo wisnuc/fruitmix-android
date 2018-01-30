@@ -18,6 +18,8 @@ public interface UserDataRepository extends UserRemoteDataSource{
 
     User getUserByUUID(String userUUID);
 
+    User getUserByGUID(String userGUID);
+
     void insertUsers(Collection<User> users);
 
     boolean updateUser(User user);

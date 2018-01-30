@@ -13,6 +13,7 @@ import android.view.View;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.contact.ContactListActivity;
 import com.winsun.fruitmix.databinding.ActivityGroupListBinding;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
@@ -30,6 +31,7 @@ import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.torrent.data.TorrentDataRepository;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -75,14 +77,16 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         String currentLoginUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(containerActivity).getCurrentLoginUserUUID();
 
-        User currentUser = InjectUser.provideRepository(containerActivity).getUserByUUID(currentLoginUserUUID);
+        UserDataRepository userDataRepository = InjectUser.provideRepository(containerActivity);
+
+        User currentUser = userDataRepository.getUserByUUID(currentLoginUserUUID);
 
         groupRepository.setCurrentUser(currentUser);
 
         TokenDataSource tokenDataSource = InjectTokenRemoteDataSource.provideTokenDataSource(containerActivity);
 
-        groupListPresenter = new GroupListPresenter(this,currentUser,tokenDataSource,
-                groupRepository, loadingViewModel, noContentViewModel, groupListViewModel);
+        groupListPresenter = new GroupListPresenter(this, currentUser, tokenDataSource,
+                groupRepository, loadingViewModel, noContentViewModel, groupListViewModel, userDataRepository);
 
         recyclerView = binding.groupRecyclerview;
 
@@ -97,8 +101,8 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
             @Override
             public void onClick(View v) {
 
-                Intent intent = new Intent(containerActivity,CreateGroupActivity.class);
-                containerActivity.startActivityForResult(intent,CREATE_GROUP_REQUEST_CODE);
+                Intent intent = new Intent(containerActivity, ContactListActivity.class);
+                containerActivity.startActivityForResult(intent, CREATE_GROUP_REQUEST_CODE);
 
             }
         });
@@ -158,6 +162,11 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         containerActivity.startActivity(intent);
 
+    }
+
+    @Override
+    public String getString(int resID, Object... formatArgs) {
+        return containerActivity.getString(resID, formatArgs);
     }
 
     @Override

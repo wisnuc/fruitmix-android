@@ -1,7 +1,10 @@
 package com.winsun.fruitmix.group.view;
 
+import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -23,7 +26,9 @@ import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class CreateGroupActivity extends BaseToolbarActivity implements CreateGroupPresenter {
 
@@ -32,6 +37,15 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
     private User currentUser;
 
     private ActivityCreateGroupBinding mActivityCreateGroupBinding;
+
+    private static List<User> mUsers;
+
+    public static void start(List<User> users, Context context){
+
+        mUsers = users;
+        context.startActivity(new Intent(context,CreateGroupActivity.class));
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +60,9 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
         mActivityCreateGroupBinding.setCreateGroupViewModel(createGroupViewModel);
 
         mActivityCreateGroupBinding.setCreateGroupPresenter(this);
+
+        if(mUsers == null)
+            mUsers = new ArrayList<>();
 
     }
 
@@ -66,7 +83,11 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
 
     @Override
     public void createGroup(CreateGroupViewModel createGroupViewModel) {
-        PrivateGroup group = new PrivateGroup(Util.createLocalUUid(), createGroupViewModel.getGroupName(),currentUser.getUuid(), Collections.singletonList(currentUser));
+
+        List<User> groupUser = new ArrayList<>(mUsers);
+        groupUser.add(currentUser);
+
+        PrivateGroup group = new PrivateGroup(Util.createLocalUUid(), createGroupViewModel.getGroupName(),currentUser.getUuid(), groupUser);
 
         showProgressDialog(getString(R.string.operating_title,getString(R.string.create_group)));
 

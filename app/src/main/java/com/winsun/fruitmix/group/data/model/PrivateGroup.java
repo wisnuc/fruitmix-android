@@ -2,10 +2,12 @@ package com.winsun.fruitmix.group.data.model;
 
 import android.content.Context;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -61,6 +63,32 @@ public class PrivateGroup {
         return name;
     }
 
+    public String getNameWithHandleEmptyName(Context context) {
+
+        if (getName().isEmpty()) {
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for (User user : getUsers()) {
+                stringBuilder.append(user.getUserName());
+                stringBuilder.append(",");
+            }
+
+            String name = stringBuilder.toString();
+            name = name.substring(0, name.length() - 1);
+
+            if (name.length() > 20) {
+                name = name.substring(0, 20);
+                name += context.getString(R.string.android_ellipsize);
+            }
+
+            return name;
+
+        } else
+            return getName();
+
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -71,6 +99,14 @@ public class PrivateGroup {
 
     public List<User> getUsers() {
         return users;
+    }
+
+    public void clearUsers() {
+        users.clear();
+    }
+
+    public void addUsers(Collection<User> users) {
+        this.users.addAll(users);
     }
 
     public void addUser(User user) {

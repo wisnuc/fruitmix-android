@@ -65,8 +65,6 @@ public abstract class BaseToolbarActivity extends BaseActivity {
 
     }
 
-
-
     protected abstract String getToolbarTitle();
 
 }

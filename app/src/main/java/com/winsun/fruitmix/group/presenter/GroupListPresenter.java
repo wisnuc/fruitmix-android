@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.winsun.fruitmix.BR;
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
@@ -21,6 +22,7 @@ import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -48,7 +50,12 @@ public class GroupListPresenter implements ActiveView {
 
     private GroupListPageView groupListPageView;
 
-    public GroupListPresenter(GroupListPageView groupListPageView, User currentUser, TokenDataSource tokenDataSource, GroupRepository groupRepository, LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel, GroupListViewModel groupListViewModel) {
+    private UserDataRepository mUserDataRepository;
+
+    public GroupListPresenter(GroupListPageView groupListPageView, User currentUser,
+                              TokenDataSource tokenDataSource, GroupRepository groupRepository,
+                              LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel,
+                              GroupListViewModel groupListViewModel, UserDataRepository userDataRepository) {
         this.groupRepository = groupRepository;
         mCurrentUser = currentUser;
         mTokenDataSource = tokenDataSource;
@@ -57,6 +64,8 @@ public class GroupListPresenter implements ActiveView {
         this.groupListViewModel = groupListViewModel;
 
         this.groupListPageView = groupListPageView;
+
+        mUserDataRepository = userDataRepository;
 
         groupListAdapter = new GroupListAdapter();
 
@@ -111,6 +120,23 @@ public class GroupListPresenter implements ActiveView {
 
                 if (data.size() > 0) {
 
+                    for (PrivateGroup group : data) {
+
+                        List<User> users = group.getUsers();
+                        List<User> usersWithInfo = new ArrayList<>(users.size());
+
+                        for (User user : users) {
+
+                            User userWithInfo = mUserDataRepository.getUserByGUID(user.getAssociatedWeChatGUID());
+                            usersWithInfo.add(userWithInfo);
+
+                        }
+
+                        group.clearUsers();
+                        group.addUsers(usersWithInfo);
+
+                    }
+
                     noContentViewModel.showNoContent.set(false);
 
                     groupListViewModel.showRecyclerView.set(true);
@@ -125,7 +151,7 @@ public class GroupListPresenter implements ActiveView {
                     groupListViewModel.showRecyclerView.set(false);
                 }
 
-                groupListViewModel.showAddFriendsFAB.set(true);
+                groupListViewModel.showAddFriendsFAB.set(false);
 
             }
 
@@ -136,7 +162,7 @@ public class GroupListPresenter implements ActiveView {
                 noContentViewModel.showNoContent.set(true);
 
                 groupListViewModel.showRecyclerView.set(false);
-                groupListViewModel.showAddFriendsFAB.set(true);
+                groupListViewModel.showAddFriendsFAB.set(false);
 
 
             }
@@ -158,13 +184,8 @@ public class GroupListPresenter implements ActiveView {
         }
 
         void setPrivateGroups(List<PrivateGroup> privateGroups) {
+
             mPrivateGroups.clear();
-
-            for (PrivateGroup group:privateGroups){
-
-                group.addUser(mCurrentUser);
-
-            }
 
             mPrivateGroups.addAll(privateGroups);
 
@@ -193,7 +214,13 @@ public class GroupListPresenter implements ActiveView {
                 @Override
                 public void onClick(View v) {
 
-                    groupListPageView.gotoGroupContentActivity(privateGroup.getUUID(), privateGroup.getName());
+                    String groupName = privateGroup.getName();
+
+                    if (groupName.isEmpty()) {
+                        groupName = groupListPageView.getString(R.string.group_chat, privateGroup.getUsers().size());
+                    }
+
+                    groupListPageView.gotoGroupContentActivity(privateGroup.getUUID(), groupName);
 
                 }
             });

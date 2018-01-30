@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.parser;
 
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.user.User;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,17 +25,32 @@ public class RemoteGroupParser extends BaseRemoteDataParser implements RemoteDat
 
         JSONArray jsonArray = new JSONArray(root);
 
-        for (int i = 0;i < jsonArray.length();i++){
+        for (int i = 0; i < jsonArray.length(); i++) {
 
             JSONObject jsonObject = jsonArray.optJSONObject(i);
 
             String uuid = jsonObject.optString("uuid");
             String name = jsonObject.optString("name");
-            String owerUUID = jsonObject.optString("owner");
+            String ownerUUID = jsonObject.optString("owner");
             long createTime = jsonObject.optLong("ctime");
             long mTime = jsonObject.optLong("mtime");
 
-            PrivateGroup group = new PrivateGroup(uuid,name,owerUUID);
+            JSONArray usersJSONArray = jsonObject.optJSONArray("users");
+
+            List<User> users = new ArrayList<>(usersJSONArray.length());
+
+            for (int j = 0; j < usersJSONArray.length(); j++) {
+
+                User user = new User();
+                user.setAssociatedWeChatGUID(usersJSONArray.optString(j));
+
+                users.add(user);
+            }
+
+            PrivateGroup group = new PrivateGroup(uuid, name, ownerUUID, users);
+
+            group.setCreateTime(createTime);
+            group.setModifyTime(mTime);
 
             groups.add(group);
         }

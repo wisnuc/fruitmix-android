@@ -67,6 +67,8 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
     private FloatingActionButton mSendFileBtn;
     private ImageView mSendMediaBtn;
 
+    private ImageView mMaskLayout;
+
     private ActivityGroupContentBinding mActivityGroupContentBinding;
 
     @Override
@@ -114,6 +116,9 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         mFabBtn.setOnClickListener(this);
         mSendFileBtn.setOnClickListener(this);
         mSendMediaBtn.setOnClickListener(this);
+
+        mMaskLayout = mActivityGroupContentBinding.maskLayout;
+        mMaskLayout.setOnClickListener(this);
 
     }
 
@@ -243,6 +248,11 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
                 break;
 
+            case R.id.mask_layout:
+
+                collapseFab();
+
+                break;
         }
 
     }
@@ -267,6 +277,8 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
     }
 
     private void collapseFabAnimation() {
+
+        mMaskLayout.setVisibility(View.GONE);
 
         new AnimatorBuilder(getContext(), R.animator.fab_remote_restore, mFabBtn).startAnimator();
 
@@ -296,6 +308,8 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
     }
 
     private void extendFabAnimation() {
+
+        mMaskLayout.setVisibility(View.VISIBLE);
 
         new AnimatorBuilder(getContext(), R.animator.fab_remote, mFabBtn).startAnimator();
 

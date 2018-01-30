@@ -279,6 +279,18 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
     }
 
     @Override
+    public User getUserByGUID(String userGUID) {
+
+        for (User user : cacheUsers.values()) {
+
+            if (user.getAssociatedWeChatGUID().equals(userGUID))
+                return user;
+        }
+
+        return null;
+    }
+
+    @Override
     public void getWeUserInfoByGUIDWithCloudAPI(final String guid, final BaseLoadDataCallback<User> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {
