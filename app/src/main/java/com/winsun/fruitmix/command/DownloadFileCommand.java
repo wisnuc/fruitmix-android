@@ -80,7 +80,7 @@ public class DownloadFileCommand extends AbstractCommand {
 
             FileDownloadParam fileDownloadParam = new FileFromBoxDownloadParam(boxUUID, fileHash, cloudToken);
 
-            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), 0, fileHash,
+            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), Long.parseLong(abstractRemoteFile.getSize()), fileHash,
                     fileDownloadParam);
 
         } else {

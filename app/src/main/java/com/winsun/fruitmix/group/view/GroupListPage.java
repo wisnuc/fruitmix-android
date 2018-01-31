@@ -26,6 +26,7 @@ import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
 import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.torrent.data.TorrentDataRepository;
@@ -75,7 +76,9 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         final GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository(containerActivity);
 
-        String currentLoginUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(containerActivity).getCurrentLoginUserUUID();
+        SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(containerActivity);
+
+        String currentLoginUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 
         UserDataRepository userDataRepository = InjectUser.provideRepository(containerActivity);
 
@@ -86,7 +89,8 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
         TokenDataSource tokenDataSource = InjectTokenRemoteDataSource.provideTokenDataSource(containerActivity);
 
         groupListPresenter = new GroupListPresenter(this, currentUser, tokenDataSource,
-                groupRepository, loadingViewModel, noContentViewModel, groupListViewModel, userDataRepository);
+                groupRepository, loadingViewModel, noContentViewModel, groupListViewModel, userDataRepository,
+                systemSettingDataSource);
 
         recyclerView = binding.groupRecyclerview;
 

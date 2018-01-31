@@ -15,6 +15,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.FileTweetGroupItemBinding;
+import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.SingleFileBinding;
 import com.winsun.fruitmix.databinding.SingleFileCommentBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
@@ -66,15 +67,20 @@ public class SingleFileCommentView extends UserCommentView {
 
             MediaComment comment = (MediaComment) data;
 
-            final SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayout, false);
+//            final SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayout, false);
 
-            frameLayout.addView(singlePhotoBinding.getRoot());
+            final NewPhotoGridlayoutItemBinding newPhotoGridlayoutItemBinding = NewPhotoGridlayoutItemBinding.inflate(LayoutInflater.from(context),
+                    frameLayout,false);
+
+            View rootView = newPhotoGridlayoutItemBinding.getRoot();
+
+            frameLayout.addView(rootView);
 
             int widthHeight = Util.dip2px(context, 134);
 
-            Util.setWidthAndHeight(singlePhotoBinding.container, widthHeight, widthHeight);
+            Util.setWidthAndHeight(newPhotoGridlayoutItemBinding.photoItemLayout, widthHeight, widthHeight);
 
-            NetworkImageView networkImageView = singlePhotoBinding.coverImg;
+            final NetworkImageView networkImageView = newPhotoGridlayoutItemBinding.photoIv;
 
             final Media media = comment.getMedias().get(0);
 
@@ -82,12 +88,12 @@ public class SingleFileCommentView extends UserCommentView {
 
             MediaUtil.setMediaImageUrl(media, networkImageView, httpRequest, imageLoader);
 
-            singlePhotoBinding.getRoot().setOnClickListener(new View.OnClickListener() {
+            rootView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
                     PhotoSliderActivity.startPhotoSliderActivity(toolbar, (Activity) context, Collections.singletonList(media), data.getGroupUUID(),
-                            3, singlePhotoBinding.coverImg, media);
+                            3, networkImageView, media);
 
                 }
             });

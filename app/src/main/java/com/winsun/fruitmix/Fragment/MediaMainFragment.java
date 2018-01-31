@@ -2,6 +2,7 @@ package com.winsun.fruitmix.fragment;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -1397,8 +1398,12 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                         @Override
                         public void onClick() {
 
+                            Activity activity = getActivity();
+                            if (activity == null)
+                                return;
+
                             Intent intent = new Intent(mContext, ContactListActivity.class);
-                            startActivityForResult(intent, CREATE_GROUP_REQUEST_CODE);
+                            activity.startActivityForResult(intent, CREATE_GROUP_REQUEST_CODE);
 
                         }
                     });

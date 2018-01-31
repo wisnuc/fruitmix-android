@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.winsun.fruitmix.BaseToolbarActivity;
 import com.winsun.fruitmix.R;
@@ -94,9 +95,9 @@ public class PinContentActivity extends BaseToolbarActivity implements PinConten
     }
 
     @Override
-    protected View generateContent() {
+    protected View generateContent(ViewGroup root) {
 
-        binding = ActivityPinContentBinding.inflate(LayoutInflater.from(this), null, false);
+        binding = ActivityPinContentBinding.inflate(LayoutInflater.from(this), root, false);
 
         return binding.getRoot();
     }

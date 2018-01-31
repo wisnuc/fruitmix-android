@@ -577,6 +577,17 @@
 
     <string name="group_chat">群聊(%1$d)</string>
 
+    <!-- group setting -->
+    <string name="group_member">群成员</string>
+    <string name="check_more_group_members">查看更多群员</string>
+    <string name="property">属性</string>
+    <string name="message_notification">消息通知</string>
+    <string name="message_free_from_interruption">消息免打扰</string>
+    <string name="group_management">群管理</string>
+    <string name="group_invitation_confirmation">群邀请确认</string>
+    <string name="need_to_be_audited">需要审核</string>
+    <string name="group_transfer">群转让</string>
+
     <!-- inbox -->
     <string name="inbox">收件箱</string>
     <string name="group_come_from">来自 \"%1$s\" 群,</string>

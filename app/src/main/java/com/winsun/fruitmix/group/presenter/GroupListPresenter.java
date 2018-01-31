@@ -18,6 +18,7 @@ import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.viewmodel.GroupListViewModel;
 import com.winsun.fruitmix.group.view.GroupListPageView;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.token.TokenDataSource;
@@ -52,10 +53,13 @@ public class GroupListPresenter implements ActiveView {
 
     private UserDataRepository mUserDataRepository;
 
+    private SystemSettingDataSource mSystemSettingDataSource;
+
     public GroupListPresenter(GroupListPageView groupListPageView, User currentUser,
                               TokenDataSource tokenDataSource, GroupRepository groupRepository,
                               LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel,
-                              GroupListViewModel groupListViewModel, UserDataRepository userDataRepository) {
+                              GroupListViewModel groupListViewModel, UserDataRepository userDataRepository,
+                              SystemSettingDataSource systemSettingDataSource) {
         this.groupRepository = groupRepository;
         mCurrentUser = currentUser;
         mTokenDataSource = tokenDataSource;
@@ -66,6 +70,8 @@ public class GroupListPresenter implements ActiveView {
         this.groupListPageView = groupListPageView;
 
         mUserDataRepository = userDataRepository;
+
+        mSystemSettingDataSource = systemSettingDataSource;
 
         groupListAdapter = new GroupListAdapter();
 
@@ -81,32 +87,43 @@ public class GroupListPresenter implements ActiveView {
 
     public void refreshView() {
 
-        mTokenDataSource.getWATokenThroughStationToken(mCurrentUser.getAssociatedWeChatGUID(),
-                new BaseLoadDataCallbackWrapper<>(
-                        new BaseLoadDataCallback<String>() {
-                            @Override
-                            public void onSucceed(List<String> data, OperationResult operationResult) {
+        if(mSystemSettingDataSource.getLoginWithWechatCodeOrNot()){
 
-                                groupRepository.setCloudToken(data.get(0));
+            groupRepository.setCloudToken(mSystemSettingDataSource.getCurrentWAToken());
 
-                                refreshGroups();
+            refreshGroups();
 
-                            }
+        }else {
 
-                            @Override
-                            public void onFail(OperationResult operationResult) {
+            mTokenDataSource.getWATokenThroughStationToken(mCurrentUser.getAssociatedWeChatGUID(),
+                    new BaseLoadDataCallbackWrapper<>(
+                            new BaseLoadDataCallback<String>() {
+                                @Override
+                                public void onSucceed(List<String> data, OperationResult operationResult) {
 
-                                loadingViewModel.showLoading.set(false);
-                                noContentViewModel.showNoContent.set(true);
+                                    groupRepository.setCloudToken(data.get(0));
 
-                                groupListViewModel.showRecyclerView.set(false);
-                                groupListViewModel.showAddFriendsFAB.set(false);
+                                    refreshGroups();
 
-                            }
-                        }, this
-                )
+                                }
 
-        );
+                                @Override
+                                public void onFail(OperationResult operationResult) {
+
+                                    loadingViewModel.showLoading.set(false);
+                                    noContentViewModel.showNoContent.set(true);
+
+                                    groupListViewModel.showRecyclerView.set(false);
+                                    groupListViewModel.showAddFriendsFAB.set(false);
+
+                                }
+                            }, this
+                    )
+
+            );
+
+        }
+
 
     }
 

@@ -157,8 +157,8 @@ public class FileListPresenter {
                     parent, false);
 
             return new FileListViewHolder(binding);
-        }
 
+        }
 
         @Override
         public void onBindViewHolder(FileListViewHolder holder, int position) {

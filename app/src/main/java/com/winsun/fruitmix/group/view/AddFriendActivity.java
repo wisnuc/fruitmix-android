@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 
 import com.winsun.fruitmix.BaseToolbarActivity;
@@ -43,9 +44,9 @@ public class AddFriendActivity extends BaseToolbarActivity {
     }
 
     @Override
-    protected View generateContent() {
+    protected View generateContent(ViewGroup root) {
 
-        binding = ActivityAddFriendBinding.inflate(LayoutInflater.from(this), null, false);
+        binding = ActivityAddFriendBinding.inflate(LayoutInflater.from(this), root, false);
 
         return binding.getRoot();
     }

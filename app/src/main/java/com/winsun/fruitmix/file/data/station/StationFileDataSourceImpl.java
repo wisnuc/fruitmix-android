@@ -128,15 +128,16 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         if (fileDownloadParam instanceof FileFromBoxDownloadParam) {
 
-            httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),
-                    Util.KEY_JWT_HEAD + ((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken());
+//            httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),
+//                    Util.KEY_JWT_HEAD + ((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken());
+
+            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath());
 
         } else {
 
             httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath());
 
         }
-
 
         if (!wrapper.checkPreCondition(httpRequest, callback))
             return;

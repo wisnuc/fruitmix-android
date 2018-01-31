@@ -14,11 +14,6 @@ public class FileFromBoxDownloadParam extends FileDownloadParam {
 
     private String cloudToken;
 
-    public FileFromBoxDownloadParam(String fileHash, String boxUUID) {
-        this.fileHash =fileHash;
-        this.boxUUID = boxUUID;
-    }
-
     public FileFromBoxDownloadParam(String boxUUID, String fileHash, String cloudToken) {
         this.boxUUID = boxUUID;
         this.fileHash = fileHash;

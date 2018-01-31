@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.winsun.fruitmix.databinding.ActivityBaseToolbarBinding;
 import com.winsun.fruitmix.util.Util;
@@ -24,7 +26,9 @@ public abstract class BaseToolbarActivity extends BaseActivity {
 
         mActivityBaseToolbarBinding = DataBindingUtil.setContentView(this, R.layout.activity_base_toolbar);
 
-        mActivityBaseToolbarBinding.rootLayout.addView(generateContent());
+        LinearLayout root = mActivityBaseToolbarBinding.rootLayout;
+
+        root.addView(generateContent(root));
 
         initToolbar(mActivityBaseToolbarBinding);
 
@@ -33,7 +37,7 @@ public abstract class BaseToolbarActivity extends BaseActivity {
 
     }
 
-    protected abstract View generateContent();
+    protected abstract View generateContent(ViewGroup root);
 
     private void initToolbar(ActivityBaseToolbarBinding binding) {
 

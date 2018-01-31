@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.winsun.fruitmix.BaseToolbarActivity;
 import com.winsun.fruitmix.R;
@@ -39,10 +40,6 @@ public class ContactListActivity extends BaseToolbarActivity implements ContactL
 
         mContext = this;
 
-        setStatusBarToolbarBgColor(R.color.login_ui_blue);
-
-        setToolbarWhiteStyle(toolbarViewModel);
-
         mRecyclerView = mActivityContactListBinding.contactRecyclerView;
 
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -69,19 +66,9 @@ public class ContactListActivity extends BaseToolbarActivity implements ContactL
 
         toolbarViewModel.showSelect.set(true);
 
-        toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_white));
-
         toolbarViewModel.selectTextResID.set(R.string.finish_text);
 
-        toolbarViewModel.setToolbarSelectBtnOnClickListener(new ToolbarViewModel.ToolbarSelectBtnOnClickListener() {
-            @Override
-            public void onClick() {
-
-                mContactListPresenter.createGroup();
-
-            }
-        });
-
+        onSelectItemChanged(0);
 
         mRecyclerView.setAdapter(mContactListPresenter.getContactRecyclerViewAdapter());
 
@@ -90,10 +77,10 @@ public class ContactListActivity extends BaseToolbarActivity implements ContactL
     }
 
     @Override
-    protected View generateContent() {
+    protected View generateContent(ViewGroup root) {
 
         mActivityContactListBinding = ActivityContactListBinding
-                .inflate(LayoutInflater.from(this), null, false);
+                .inflate(LayoutInflater.from(this), root, false);
 
         return mActivityContactListBinding.getRoot();
     }
@@ -116,5 +103,37 @@ public class ContactListActivity extends BaseToolbarActivity implements ContactL
     @Override
     public Context getContext() {
         return this;
+    }
+
+    @Override
+    public void onSelectItemChanged(int selectedItemCount) {
+
+        if (selectedItemCount > 0) {
+
+            toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(mContext, R.color.eighty_seven_percent_black));
+
+            toolbarViewModel.setToolbarSelectBtnOnClickListener(new ToolbarViewModel.ToolbarSelectBtnOnClickListener() {
+                @Override
+                public void onClick() {
+
+                    mContactListPresenter.createGroup();
+
+                }
+            });
+
+        } else {
+
+            toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(mContext, R.color.twenty_six_percent_black));
+
+            toolbarViewModel.setToolbarSelectBtnOnClickListener(new ToolbarViewModel.ToolbarSelectBtnOnClickListener() {
+                @Override
+                public void onClick() {
+
+                }
+            });
+
+        }
+
+
     }
 }

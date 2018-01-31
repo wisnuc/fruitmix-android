@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.BaseToolbarActivity;
@@ -115,10 +116,10 @@ public class TweetContentListActivity extends BaseToolbarActivity {
     }
 
     @Override
-    protected View generateContent() {
+    protected View generateContent(ViewGroup root) {
 
         mActivityMediaListBinding = ActivityMediaListBinding.inflate(LayoutInflater.from(this),
-                null, false);
+                root, false);
 
         return mActivityMediaListBinding.getRoot();
     }

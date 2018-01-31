@@ -98,6 +98,7 @@ public class ContactListPresenter implements ActiveView {
                 mContactListView.setResult(RESULT_OK);
 
                 mContactListView.finishView();
+
             }
 
             @Override
@@ -252,11 +253,14 @@ public class ContactListPresenter implements ActiveView {
 
                     }
 
+                    mContactListView.onSelectItemChanged(mSelectedUsers.size());
+
                 }
             });
 
         }
 
     }
+
 
 }

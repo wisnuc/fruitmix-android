@@ -603,8 +603,19 @@
     <string name="create_group">Create group</string>
     <string name="group_name">Group name</string>
     <string name="add_friend">Add friend</string>
-    
+
     <string name="group_chat">Group Chat(%1$d)</string>
+
+    <!-- group setting -->
+    <string name="group_member">Group Members</string>
+    <string name="check_more_group_members">Check more group members</string>
+    <string name="property">Property</string>
+    <string name="message_notification">Message Notification</string>
+    <string name="message_free_from_interruption">Message free from interruption</string>
+    <string name="group_management">Group Management</string>
+    <string name="group_invitation_confirmation">Group invitation confirmation</string>
+    <string name="need_to_be_audited">Need to be audited</string>
+    <string name="group_transfer">Group transfer</string>
 
     <!-- inbox -->
     <string name="inbox">Inbox</string>
@@ -630,6 +641,5 @@
     <string name="hour_min">%1$s:%2$s</string>
     <string name="time_ago">%1$s ago</string>
 
-    
 
 </resources>

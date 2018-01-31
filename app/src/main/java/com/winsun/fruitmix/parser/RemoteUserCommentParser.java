@@ -59,6 +59,7 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
 
                 String name = listItem.optString("filename");
                 String hash = listItem.optString("sha256");
+                long size = listItem.optLong("size");
 
                 if (listItem.has("metadata")) {
 
@@ -101,6 +102,7 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
                     abstractFile.setName(name);
 
                     abstractFile.setFileTypeResID(FileUtil.getFileTypeResID(name));
+                    abstractFile.setSize(String.valueOf(size));
 
                     files.add(abstractFile);
 

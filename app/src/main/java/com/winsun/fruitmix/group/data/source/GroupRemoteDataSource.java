@@ -89,7 +89,9 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         jsonObject.add("users", jsonArray);
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(BOXES, jsonObject.toString(), getAuthorizationValue());
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(BOXES,jsonObject.toString());
+
+//        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(BOXES, jsonObject.toString(), getAuthorizationValue());
 
         wrapper.operateCall(httpRequest, callback);
 
@@ -100,7 +102,9 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         String authorizationValue = getAuthorizationValue();
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(BOXES, authorizationValue);
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(BOXES);
+
+//        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(BOXES, authorizationValue);
 
         wrapper.loadCall(httpRequest, callback, new RemoteGroupParser());
 
@@ -125,7 +129,9 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
     @Override
     public void getAllUserCommentByGroupUUID(String groupUUID, BaseLoadDataCallback<UserComment> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(BOXES + "/" + groupUUID + TWEETS + METADATA_TRUE, getAuthorizationValue());
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(BOXES + "/" + groupUUID + TWEETS + METADATA_TRUE);
+
+//        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(BOXES + "/" + groupUUID + TWEETS + METADATA_TRUE, getAuthorizationValue());
 
         wrapper.loadCall(httpRequest, callback, new RemoteUserCommentParser());
 

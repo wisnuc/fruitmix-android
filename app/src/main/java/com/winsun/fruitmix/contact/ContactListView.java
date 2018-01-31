@@ -12,4 +12,6 @@ public interface ContactListView extends BaseView{
 
     Context getContext();
 
+    void onSelectItemChanged(int selectedItemCount);
+
 }

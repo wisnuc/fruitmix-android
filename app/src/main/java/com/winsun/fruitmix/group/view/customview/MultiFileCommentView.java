@@ -15,6 +15,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.FileTweetGroupItemBinding;
 import com.winsun.fruitmix.databinding.MorePhotoMaskBinding;
 import com.winsun.fruitmix.databinding.MultiFileCommentBinding;
+import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.MediaComment;
@@ -97,25 +98,25 @@ public class MultiFileCommentView extends UserCommentView {
 
                 HttpRequest httpRequest = media.getImageThumbUrl(context, data.getGroupUUID());
 
-                final SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayouts[layoutNum], false);
-
-                frameLayouts[layoutNum].addView(singlePhotoBinding.getRoot());
-
-                MediaUtil.setMediaImageUrl(media, singlePhotoBinding.coverImg, httpRequest, imageLoader);
-
-//                NewPhotoGridlayoutItemBinding newPhotoGridlayoutItemBinding = NewPhotoGridlayoutItemBinding.inflate(LayoutInflater.from(context),
-//                        frameLayouts[layoutNum],false);
+//                final SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayouts[layoutNum], false);
 //
-//                frameLayouts[layoutNum].addView(newPhotoGridlayoutItemBinding.getRoot());
+//                frameLayouts[layoutNum].addView(singlePhotoBinding.getRoot());
 //
-//                MediaUtil.setMediaImageUrl(media, newPhotoGridlayoutItemBinding.photoIv, httpRequest, imageLoader);
+//                MediaUtil.setMediaImageUrl(media, singlePhotoBinding.coverImg, httpRequest, imageLoader);
 
-                singlePhotoBinding.getRoot().setOnClickListener(new View.OnClickListener() {
+                final NewPhotoGridlayoutItemBinding newPhotoGridlayoutItemBinding = NewPhotoGridlayoutItemBinding.inflate(LayoutInflater.from(context),
+                        frameLayouts[layoutNum],false);
+
+                frameLayouts[layoutNum].addView(newPhotoGridlayoutItemBinding.getRoot());
+
+                MediaUtil.setMediaImageUrl(media, newPhotoGridlayoutItemBinding.photoIv, httpRequest, imageLoader);
+
+                newPhotoGridlayoutItemBinding.getRoot().setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
 
                         PhotoSliderActivity.startPhotoSliderActivity(toolbar, (Activity) context,medias,data.getGroupUUID(),
-                                3,singlePhotoBinding.coverImg,media);
+                                3,newPhotoGridlayoutItemBinding.photoIv,media);
 
                     }
                 });

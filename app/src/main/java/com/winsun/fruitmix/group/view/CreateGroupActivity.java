@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.BaseToolbarActivity;
@@ -67,10 +68,10 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
     }
 
     @Override
-    protected View generateContent() {
+    protected View generateContent(ViewGroup root) {
 
         mActivityCreateGroupBinding = ActivityCreateGroupBinding.inflate(LayoutInflater.from(this),
-                null,false);
+                root,false);
 
         return mActivityCreateGroupBinding.getRoot();
     }

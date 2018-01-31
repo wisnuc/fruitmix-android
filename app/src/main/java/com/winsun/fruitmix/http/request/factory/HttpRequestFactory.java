@@ -295,7 +295,6 @@ public class HttpRequestFactory {
 
         return factory.createHttpGetRequest(httpPath, false);
 
-
     }
 
 

@@ -134,7 +134,7 @@ public class FileUtil {
     }
 
     public static boolean createLocalPhotoThumbnailNoMediaFile(Context context) {
-        String path  =  getLocalPhotoThumbnailFolderPath() + File.separator + NO_MEDIA;
+        String path = getLocalPhotoThumbnailFolderPath() + File.separator + NO_MEDIA;
 
         boolean result = createFile(path);
 

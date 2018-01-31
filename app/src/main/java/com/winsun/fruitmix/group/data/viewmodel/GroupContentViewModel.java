@@ -8,6 +8,6 @@ import android.databinding.ObservableBoolean;
 
 public class GroupContentViewModel {
 
-    public final ObservableBoolean showPing = new ObservableBoolean(true);
+    public final ObservableBoolean showPing = new ObservableBoolean(false);
 
 }

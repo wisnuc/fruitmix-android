@@ -202,6 +202,9 @@
         <activity
             android:name=".contact.ContactListActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".group.setting.GroupSettingActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

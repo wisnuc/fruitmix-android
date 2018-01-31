@@ -3,6 +3,7 @@ package com.winsun.fruitmix.group.view;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.winsun.fruitmix.BaseToolbarActivity;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -70,9 +71,9 @@ public class OperatePinActivity extends BaseToolbarActivity implements CreatePin
     }
 
     @Override
-    protected View generateContent() {
+    protected View generateContent(ViewGroup root) {
 
-        binding = ActivityOperatePinBinding.inflate(LayoutInflater.from(this), null, false);
+        binding = ActivityOperatePinBinding.inflate(LayoutInflater.from(this), root, false);
 
         return binding.getRoot();
     }
