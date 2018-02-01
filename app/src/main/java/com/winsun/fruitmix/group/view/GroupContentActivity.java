@@ -23,6 +23,7 @@ import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
 import com.winsun.fruitmix.group.presenter.GroupContentPresenter;
+import com.winsun.fruitmix.group.setting.GroupSettingActivity;
 import com.winsun.fruitmix.group.usecase.InputChatMenuUseCase;
 import com.winsun.fruitmix.group.usecase.PlayAudioUseCaseImpl;
 import com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton;
@@ -36,6 +37,7 @@ import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 public class GroupContentActivity extends BaseActivity implements GroupContentView, View.OnClickListener
@@ -85,7 +87,11 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         mActivityGroupContentBinding.setGroupContentViewModel(groupContentViewModel);
 
-        initPresenter(groupUUID, groupContentViewModel);
+        LoadingViewModel loadingViewModel = new LoadingViewModel();
+
+        mActivityGroupContentBinding.setLoadingViewModel(loadingViewModel);
+
+        initPresenter(groupUUID,loadingViewModel, groupContentViewModel);
 
         initToolbarViewModel(mActivityGroupContentBinding);
 
@@ -175,9 +181,13 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         toolbarViewModel.titleText.set(groupName);
 
+        toolbarViewModel.showMenu.set(true);
+
         toolbarViewModel.setToolbarMenuBtnOnClickListener(new ToolbarViewModel.ToolbarMenuBtnOnClickListener() {
             @Override
             public void onClick() {
+
+                GroupSettingActivity.start(groupUUID,GroupContentActivity.this);
 
             }
         });
@@ -185,13 +195,13 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         binding.setToolbarViewModel(toolbarViewModel);
     }
 
-    private void initPresenter(String groupUUID, GroupContentViewModel groupContentViewModel) {
+    private void initPresenter(String groupUUID, LoadingViewModel loadingViewModel,GroupContentViewModel groupContentViewModel) {
         GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository(this);
 
         UserDataRepository userDataRepository = InjectUser.provideRepository(this);
 
         groupContentPresenter = new GroupContentPresenter(this, groupUUID, userDataRepository, InjectSystemSettingDataSource.provideSystemSettingDataSource(this),
-                groupRepository, groupContentViewModel, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this), PlayAudioUseCaseImpl.getInstance());
+                groupRepository, groupContentViewModel,loadingViewModel, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this), PlayAudioUseCaseImpl.getInstance());
     }
 
     @Override

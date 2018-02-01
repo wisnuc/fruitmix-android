@@ -11,6 +11,10 @@
             type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
 
         <variable
+            name="loadingViewModel"
+            type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
+
+        <variable
             name="pingToggleListener"
             type="com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton.PingToggleListener" />
 
@@ -66,6 +70,10 @@
                 android:layout_marginRight="16dp"
                 android:paddingBottom="16dp"
                 android:paddingTop="16dp" />
+
+            <include
+                layout="@layout/new_loading_layout"
+                app:loadingViewModel="@{loadingViewModel}"/>
 
             <TextView
                 android:id="@+id/new_comment__count_textview"

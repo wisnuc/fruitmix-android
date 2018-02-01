@@ -80,6 +80,11 @@ class CloudHttpRequestForStationAPIFactory extends CloudHttpRequestFactory {
         return createHttpHasBodyRequest(httpPath, Util.HTTP_PUT_METHOD, body, false);
     }
 
+    @Override
+    public HttpRequest createHttpDeleteRequest(String httpPath, String body) {
+        return createHttpHasBodyRequest(httpPath, Util.HTTP_DELETE_METHOD, body, false);
+    }
+
     private HttpRequest createHttpHasBodyRequest(String httpPath, String method, String body, boolean isStream) {
 
         Log.d(TAG, "createHasBodyRequestThroughPipe: " + getGateway() + ":" + getPort() + httpPath);

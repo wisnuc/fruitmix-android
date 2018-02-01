@@ -173,15 +173,20 @@ public class User {
     }
 
     public String getFormatUserName(Context context) {
+        return getFormatUserName(context,20);
+    }
+
+    public String getFormatUserName(Context context,int lengthLimit) {
         String userName = getUserName();
 
-        if (userName.length() > 20) {
-            userName = userName.substring(0, 20);
+        if (userName.length() > lengthLimit) {
+            userName = userName.substring(0, lengthLimit);
             userName += context.getString(R.string.android_ellipsize);
         }
 
         return userName;
     }
+
 
     public String getUserType(Context context) {
 

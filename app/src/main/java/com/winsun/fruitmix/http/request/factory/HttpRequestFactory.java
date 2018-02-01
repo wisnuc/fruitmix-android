@@ -237,15 +237,15 @@ public class HttpRequestFactory {
 
     }
 
-    public HttpRequest createPostRequestWithoutToken(String ip, String httpPath,String body) {
+    public HttpRequest createPostRequestWithoutToken(String ip, String httpPath, String body) {
 
         BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(ip, null);
 
-        return factory.createHttpPostRequest(httpPath, body,false);
+        return factory.createHttpPostRequest(httpPath, body, false);
 
     }
 
-    public HttpRequest createPatchRequestWithoutToken(String ip, String httpPath,String body) {
+    public HttpRequest createPatchRequestWithoutToken(String ip, String httpPath, String body) {
 
         BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(ip, null);
 
@@ -253,9 +253,9 @@ public class HttpRequestFactory {
 
     }
 
-    public HttpRequest createGetRequestWithToken(String ip,String token, String httpPath) {
+    public HttpRequest createGetRequestWithToken(String ip, String token, String httpPath) {
 
-        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(ip, new HttpHeader(Util.KEY_AUTHORIZATION,Util.KEY_JWT_HEAD + token));
+        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(ip, new HttpHeader(Util.KEY_AUTHORIZATION, Util.KEY_JWT_HEAD + token));
 
         return factory.createHttpGetRequest(httpPath, false);
 
@@ -297,6 +297,45 @@ public class HttpRequestFactory {
 
     }
 
+    public synchronized HttpRequest createHttpPostRequestByCloudAPIWithWrap(String httpPath, String body, String stationID) {
+
+        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+
+        return factory.createHttpPostRequest(httpPath, body, true);
+
+    }
+
+    public synchronized HttpRequest createHttpPostFileRequestByCloudAPIWithWrap(String httpPath, String body, String stationID) {
+
+        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+
+        return factory.createHttpPostRequest(httpPath, body, true);
+
+    }
+
+    public synchronized HttpRequest createHttpPatchRequestByCloudAPIWithWrap(String httpPath, String body, String stationID) {
+
+        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+
+        return factory.createHttpPatchRequest(httpPath, body);
+
+    }
+
+    public synchronized HttpRequest createHttpPutRequestByCloudAPIWithWrap(String httpPath, String body, String stationID) {
+
+        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+
+        return factory.createHttpPutRequest(httpPath, body);
+
+    }
+
+    public synchronized HttpRequest createHttpDeleteRequestByCloudAPIWithWrap(String httpPath, String body, String stationID) {
+
+        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+
+        return factory.createHttpDeleteRequest(httpPath, body);
+
+    }
 
     public HttpRequest createHttpGetFileRequest(String httpPath) {
 
@@ -312,13 +351,13 @@ public class HttpRequestFactory {
     }
 
 
-    public synchronized HttpRequest createHttpGetRequest(String httpPath,int port){
+    public synchronized HttpRequest createHttpGetRequest(String httpPath, int port) {
 
         setDefaultFactoryState();
 
         currentDefaultHttpRequestFactory.setPort(port);
 
-        return currentDefaultHttpRequestFactory.createHttpGetRequest(httpPath,false);
+        return currentDefaultHttpRequestFactory.createHttpGetRequest(httpPath, false);
 
     }
 
@@ -384,7 +423,7 @@ public class HttpRequestFactory {
 
     }
 
-    public synchronized HttpRequest createHttpPatchRequest(String httpPath, String body,int port) {
+    public synchronized HttpRequest createHttpPatchRequest(String httpPath, String body, int port) {
 
         setDefaultFactoryState();
 
@@ -394,7 +433,7 @@ public class HttpRequestFactory {
 
     }
 
-    public synchronized HttpRequest createHttpPutRequest(String httpPath, String body,int port) {
+    public synchronized HttpRequest createHttpPutRequest(String httpPath, String body, int port) {
 
         setDefaultFactoryState();
 
@@ -419,30 +458,29 @@ public class HttpRequestFactory {
 
     }
 
-    public synchronized HttpRequest createHttpGetRequest(String httpPath,String authorizationValue){
+    public synchronized HttpRequest createHttpGetRequest(String httpPath, String authorizationValue) {
 
-        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION,authorizationValue));
+        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, authorizationValue));
 
         return factory.createHttpGetRequest(httpPath, false);
 
     }
 
-    public synchronized HttpRequest createHttpPostRequest(String httpPath,String body,String authorizationValue){
+    public synchronized HttpRequest createHttpPostRequest(String httpPath, String body, String authorizationValue) {
 
-        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION,authorizationValue));
+        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, authorizationValue));
 
-        return factory.createHttpPostRequest(httpPath, body,false);
-
-    }
-
-    public synchronized HttpRequest createHttpPostFileRequest(String httpPath,String body,String authorizationValue){
-
-        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION,authorizationValue));
-
-        return factory.createHttpPostRequest(httpPath, body,true);
+        return factory.createHttpPostRequest(httpPath, body, false);
 
     }
 
+    public synchronized HttpRequest createHttpPostFileRequest(String httpPath, String body, String authorizationValue) {
+
+        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, authorizationValue));
+
+        return factory.createHttpPostRequest(httpPath, body, true);
+
+    }
 
 
     private String getTokenWithPrefix() {

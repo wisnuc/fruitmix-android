@@ -588,6 +588,10 @@
     <string name="need_to_be_audited">需要审核</string>
     <string name="group_transfer">群转让</string>
 
+    <string name="group_setting">群设置</string>
+
+    <string name="unnamed">未命名</string>
+
     <!-- inbox -->
     <string name="inbox">收件箱</string>
     <string name="group_come_from">来自 \"%1$s\" 群,</string>

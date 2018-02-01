@@ -3,6 +3,7 @@ package com.winsun.fruitmix.http.request.factory;
 import android.util.Log;
 
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 
 /**
@@ -69,6 +70,10 @@ public class BaseAbsHttpRequestFactory {
 
         return createHttpHasBodyRequest(httpPath, body, Util.HTTP_PUT_METHOD);
 
+    }
+
+    public HttpRequest createHttpDeleteRequest(String httpPath,String body){
+        return createHttpHasBodyRequest(httpPath,body, Util.HTTP_DELETE_METHOD);
     }
 
     private HttpRequest createHttpHasBodyRequest(String httpPath, String body, String method) {

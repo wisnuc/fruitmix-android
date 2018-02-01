@@ -35,6 +35,7 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +64,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
 //    private PrivateGroup currentPrivateGroup;
 
+    private LoadingViewModel mLoadingViewModel;
+
     private GroupContentView groupContentView;
 
     private List<UserComment> userComments;
@@ -72,10 +75,12 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
     public GroupContentPresenter(GroupContentView groupContentView, String groupUUID,
                                  UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
                                  GroupRepository groupRepository, GroupContentViewModel groupContentViewModel,
+                                 LoadingViewModel loadingViewModel,
                                  ImageLoader imageLoader, PlayAudioUseCase playAudioUseCase) {
 
         this.playAudioUseCase = playAudioUseCase;
         this.imageLoader = imageLoader;
+        mLoadingViewModel = loadingViewModel;
         this.groupContentView = groupContentView;
         this.groupUUID = groupUUID;
         this.groupRepository = groupRepository;
@@ -116,6 +121,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             @Override
             public void onSucceed(List<UserComment> data, OperationResult operationResult) {
 
+                mLoadingViewModel.showLoading.set(false);
+
                 userComments = data;
 
                 for (UserComment userComment : userComments) {
@@ -128,12 +135,14 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
                 refreshUserComment();
 
-                refreshPinView();
+//                refreshPinView();
 
             }
 
             @Override
             public void onFail(OperationResult operationResult) {
+
+                mLoadingViewModel.showLoading.set(false);
 
                 groupContentView.showToast(operationResult.getResultMessage(groupContentView.getContext()));
 

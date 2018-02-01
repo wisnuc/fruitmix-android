@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.group.data.source;
 
 import com.winsun.fruitmix.BaseDataRepository;
+import com.winsun.fruitmix.callback.BaseDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -15,8 +16,12 @@ import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/7/20.
@@ -29,6 +34,8 @@ public class GroupRepository extends BaseDataRepository {
     private GroupDataSource groupDataSource;
 
     private String cloudToken;
+
+    private Map<String,PrivateGroup> mPrivateGroups;
 
     public static GroupRepository getInstance(GroupDataSource groupDataSource, ThreadManager threadManager) {
         if (ourInstance == null)
@@ -44,6 +51,8 @@ public class GroupRepository extends BaseDataRepository {
     public GroupRepository(ThreadManager threadManager, GroupDataSource groupDataSource) {
         super(threadManager);
         this.groupDataSource = groupDataSource;
+
+        mPrivateGroups = new HashMap<>();
     }
 
     public void setCurrentUser(User currentUser) {
@@ -75,9 +84,31 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.getAllGroups(runOnMainThreadCallback);
+
+                groupDataSource.getAllGroups(new BaseLoadDataCallback<PrivateGroup>() {
+                    @Override
+                    public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
+
+                        for (PrivateGroup privateGroup:data){
+                            mPrivateGroups.put(privateGroup.getUUID(),privateGroup);
+                        }
+
+                        runOnMainThreadCallback.onSucceed(data, operationResult);
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+                        runOnMainThreadCallback.onFail(operationResult);
+                    }
+                });
             }
         });
+
+    }
+
+    public void getGroupFromMemory(String groupUUID,BaseLoadDataCallback<PrivateGroup> callback){
+
+        callback.onSucceed(Collections.singletonList(mPrivateGroups.get(groupUUID)),new OperationSuccess());
 
     }
 

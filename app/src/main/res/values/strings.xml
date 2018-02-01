@@ -617,6 +617,10 @@
     <string name="need_to_be_audited">Need to be audited</string>
     <string name="group_transfer">Group transfer</string>
 
+    <string name="group_setting">Group Setting</string>
+
+    <string name="unnamed">Unnamed</string>
+
     <!-- inbox -->
     <string name="inbox">Inbox</string>
     <string name="group_come_from">From \"%1$s\" group,</string>
