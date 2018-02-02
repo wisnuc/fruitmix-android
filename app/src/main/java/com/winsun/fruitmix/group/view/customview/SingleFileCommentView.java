@@ -67,24 +67,26 @@ public class SingleFileCommentView extends UserCommentView {
 
             MediaComment comment = (MediaComment) data;
 
-//            final SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayout, false);
+            final SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayout, false);
 
-            final NewPhotoGridlayoutItemBinding newPhotoGridlayoutItemBinding = NewPhotoGridlayoutItemBinding.inflate(LayoutInflater.from(context),
-                    frameLayout,false);
+//            final NewPhotoGridlayoutItemBinding newPhotoGridlayoutItemBinding = NewPhotoGridlayoutItemBinding.inflate(LayoutInflater.from(context),
+//                    frameLayout,false);
 
-            View rootView = newPhotoGridlayoutItemBinding.getRoot();
+            View rootView = singlePhotoBinding.getRoot();
 
             frameLayout.addView(rootView);
 
             int widthHeight = Util.dip2px(context, 134);
 
-            Util.setWidthAndHeight(newPhotoGridlayoutItemBinding.photoItemLayout, widthHeight, widthHeight);
+            Util.setWidthAndHeight(singlePhotoBinding.container, widthHeight, widthHeight);
 
-            final NetworkImageView networkImageView = newPhotoGridlayoutItemBinding.photoIv;
+            final NetworkImageView networkImageView = singlePhotoBinding.coverImg;
 
             final Media media = comment.getMedias().get(0);
 
             HttpRequest httpRequest = media.getImageThumbUrl(context, data.getGroupUUID());
+
+            httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
 
             MediaUtil.setMediaImageUrl(media, networkImageView, httpRequest, imageLoader);
 

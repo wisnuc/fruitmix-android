@@ -17,6 +17,7 @@ package com.android.volley.toolbox;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -295,8 +296,9 @@ public class NetworkImageView extends ImageView {
                                 bitmap = response.getBitmap();
                             }
 
+                            setImageBitmap(null);
                             setImageBitmap(bitmap);
-                            setBackgroundResource(0);
+//                            setBackgroundResource(0);
 
                             setLoaded(true);
 
@@ -320,7 +322,9 @@ public class NetworkImageView extends ImageView {
 
     private void setDefaultBackground() {
         if (mDefaultImageId != 0) {
-            setBackgroundResource(mDefaultImageId);
+
+            setImageBitmap(BitmapFactory.decodeResource(getResources(),mDefaultImageId));
+
         }
     }
 
@@ -328,8 +332,9 @@ public class NetworkImageView extends ImageView {
 //        if (mDefaultImageId != 0) {
 //            setBackgroundResource(mDefaultImageId);
 //        }
-        setDefaultBackground();
         setImageBitmap(null);
+        setDefaultBackground();
+
     }
 
     @Override
@@ -344,9 +349,9 @@ public class NetworkImageView extends ImageView {
             // If the view was bound to an image request, cancel it and clear
             // out the image from the view.
             mImageContainer.cancelRequest();
-            setImageBitmap(null);
-//            setBackgroundResource(mDefaultImageId);
-            setDefaultBackground();
+
+            setDefaultImageOrNull();
+
             // also clear out the container so we can reload the image if necessary.
             mImageContainer = null;
             cancelRequest = true;

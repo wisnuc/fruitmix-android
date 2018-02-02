@@ -43,6 +43,8 @@ public class Media extends AbstractFile {
 
     private Address address;
 
+    private long size;
+
     public Media() {
         uuid = "";
         orientationNumber = 1;
@@ -69,6 +71,14 @@ public class Media extends AbstractFile {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
     }
 
     public String getFormattedTime() {

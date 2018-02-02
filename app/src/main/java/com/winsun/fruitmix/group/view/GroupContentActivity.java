@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,7 +19,6 @@ import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.databinding.ActivityGroupContentBinding;
-import com.winsun.fruitmix.group.data.model.AudioComment;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
@@ -28,10 +28,7 @@ import com.winsun.fruitmix.group.usecase.InputChatMenuUseCase;
 import com.winsun.fruitmix.group.usecase.PlayAudioUseCaseImpl;
 import com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton;
 import com.winsun.fruitmix.group.view.customview.InputChatLayout;
-import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.InjectHttp;
-import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.mediaModule.NewPicChooseActivity;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.InjectUser;
@@ -49,6 +46,8 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
     public static final int REQUEST_CREATE_PING_ACTIVITY = 0x1002;
 
     public static final int REQUEST_PIN_CONTENT = 0x1003;
+
+    public static final int REQUEST_GROUP_SETTING_ACTIVITY = 0x3100;
 
     private RecyclerView chatRecyclerView;
 
@@ -91,9 +90,11 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         mActivityGroupContentBinding.setLoadingViewModel(loadingViewModel);
 
-        initPresenter(groupUUID,loadingViewModel, groupContentViewModel);
+        ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 
-        initToolbarViewModel(mActivityGroupContentBinding);
+        initToolbarViewModel(toolbarViewModel, mActivityGroupContentBinding);
+
+        initPresenter(groupUUID, loadingViewModel, toolbarViewModel, groupContentViewModel);
 
         mActivityGroupContentBinding.setPingToggleListener(groupContentPresenter);
 
@@ -173,21 +174,21 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         pingRecyclerView.setAdapter(groupContentPresenter.getPingViewPageAdapter());
     }
 
-    private void initToolbarViewModel(ActivityGroupContentBinding binding) {
-        final ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
+    private void initToolbarViewModel(ToolbarViewModel toolbarViewModel, ActivityGroupContentBinding binding) {
+
         toolbarViewModel.setBaseView(this);
 
-        String groupName = getIntent().getStringExtra(GROUP_NAME);
+        toolbarViewModel.showSelect.set(true);
+        toolbarViewModel.selectTextResID.set(R.string.setting_text);
+        toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_black));
 
-        toolbarViewModel.titleText.set(groupName);
-
-        toolbarViewModel.showMenu.set(true);
-
-        toolbarViewModel.setToolbarMenuBtnOnClickListener(new ToolbarViewModel.ToolbarMenuBtnOnClickListener() {
+        toolbarViewModel.setToolbarSelectBtnOnClickListener(new ToolbarViewModel.ToolbarSelectBtnOnClickListener() {
             @Override
             public void onClick() {
 
-                GroupSettingActivity.start(groupUUID,GroupContentActivity.this);
+                Intent intent = new Intent(GroupContentActivity.this, GroupSettingActivity.class);
+                intent.putExtra(Util.KEY_GROUP_UUID, groupUUID);
+                startActivityForResult(intent, REQUEST_GROUP_SETTING_ACTIVITY);
 
             }
         });
@@ -195,13 +196,14 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         binding.setToolbarViewModel(toolbarViewModel);
     }
 
-    private void initPresenter(String groupUUID, LoadingViewModel loadingViewModel,GroupContentViewModel groupContentViewModel) {
+    private void initPresenter(String groupUUID, LoadingViewModel loadingViewModel, ToolbarViewModel toolbarViewModel, GroupContentViewModel groupContentViewModel) {
         GroupRepository groupRepository = InjectGroupDataSource.provideGroupRepository(this);
 
         UserDataRepository userDataRepository = InjectUser.provideRepository(this);
 
         groupContentPresenter = new GroupContentPresenter(this, groupUUID, userDataRepository, InjectSystemSettingDataSource.provideSystemSettingDataSource(this),
-                groupRepository, groupContentViewModel,loadingViewModel, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this), PlayAudioUseCaseImpl.getInstance());
+                groupRepository, groupContentViewModel, loadingViewModel, toolbarViewModel,
+                InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this), PlayAudioUseCaseImpl.getInstance());
     }
 
     @Override
@@ -388,6 +390,12 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
             groupContentPresenter.refreshView();
         else if (requestCode == REQUEST_PIN_CONTENT && resultCode == RESULT_OK) {
             groupContentPresenter.refreshPin();
+        } else if (requestCode == REQUEST_GROUP_SETTING_ACTIVITY && resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_NAME) {
+
+            setResult(GroupSettingActivity.RESULT_MODIFY_GROUP_NAME);
+
+            groupContentPresenter.refreshTitle();
+
         }
 
     }

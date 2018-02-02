@@ -131,7 +131,8 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 //            httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),
 //                    Util.KEY_JWT_HEAD + ((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken());
 
-            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath());
+            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
+                    getAuthorizationValue(((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken()));
 
         } else {
 
@@ -172,6 +173,17 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         }
 
     }
+
+    private String getAuthorizationValue(String cloudToken) {
+        String token = httpRequestFactory.getTokenForHeaderValue();
+
+        if (token.startsWith(Util.KEY_JWT_HEAD)) {
+            token = token.substring(4, token.length());
+        }
+
+        return Util.KEY_JWT_HEAD + cloudToken + " " + token;
+    }
+
 
     /*
      * WISNUC API:POST DIRENTRY LIST

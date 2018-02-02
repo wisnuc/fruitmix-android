@@ -35,7 +35,7 @@ public class GroupRepository extends BaseDataRepository {
 
     private String cloudToken;
 
-    private Map<String,PrivateGroup> mPrivateGroups;
+    private Map<String, PrivateGroup> mPrivateGroups;
 
     public static GroupRepository getInstance(GroupDataSource groupDataSource, ThreadManager threadManager) {
         if (ourInstance == null)
@@ -76,7 +76,6 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-
     public void getGroupList(BaseLoadDataCallback<PrivateGroup> callback) {
 
         final BaseLoadDataCallback<PrivateGroup> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
@@ -89,8 +88,10 @@ public class GroupRepository extends BaseDataRepository {
                     @Override
                     public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
 
-                        for (PrivateGroup privateGroup:data){
-                            mPrivateGroups.put(privateGroup.getUUID(),privateGroup);
+                        mPrivateGroups.clear();
+
+                        for (PrivateGroup privateGroup : data) {
+                            mPrivateGroups.put(privateGroup.getUUID(), privateGroup);
                         }
 
                         runOnMainThreadCallback.onSucceed(data, operationResult);
@@ -106,9 +107,9 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    public void getGroupFromMemory(String groupUUID,BaseLoadDataCallback<PrivateGroup> callback){
+    public void getGroupFromMemory(String groupUUID, BaseLoadDataCallback<PrivateGroup> callback) {
 
-        callback.onSucceed(Collections.singletonList(mPrivateGroups.get(groupUUID)),new OperationSuccess());
+        callback.onSucceed(Collections.singletonList(mPrivateGroups.get(groupUUID)), new OperationSuccess());
 
     }
 
@@ -166,6 +167,37 @@ public class GroupRepository extends BaseDataRepository {
         });
 
     }
+
+    public void updateGroupName(final String groupUUID, final String newValue, final BaseOperateCallback callback) {
+
+        final BaseOperateCallback runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                groupDataSource.updateGroupProperty(groupUUID, "name", newValue, new BaseOperateCallback() {
+                    @Override
+                    public void onSucceed() {
+
+                        PrivateGroup group = mPrivateGroups.get(groupUUID);
+
+                        group.setName(newValue);
+
+                        runOnMainThreadCallback.onSucceed();
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        runOnMainThreadCallback.onFail(operationResult);
+
+                    }
+                });
+            }
+        });
+
+    }
+
 
     public void insertPin(final String groupUUID, final Pin pin, BaseOperateDataCallback<Pin> callback) {
 

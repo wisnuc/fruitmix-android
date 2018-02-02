@@ -52,6 +52,8 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
     public static final int CREATE_GROUP_REQUEST_CODE = 1;
 
+    public static final int GROUP_CONTENT_REQUEST_CODE = 2;
+
     public GroupListPage(Activity activity) {
 
         containerActivity = activity;
@@ -158,13 +160,12 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
     }
 
     @Override
-    public void gotoGroupContentActivity(String groupUUID, String groupName) {
+    public void gotoGroupContentActivity(String groupUUID) {
 
         Intent intent = new Intent(containerActivity, GroupContentActivity.class);
         intent.putExtra(GroupContentActivity.GROUP_UUID, groupUUID);
-        intent.putExtra(GroupContentActivity.GROUP_NAME, groupName);
 
-        containerActivity.startActivity(intent);
+        containerActivity.startActivityForResult(intent,GROUP_CONTENT_REQUEST_CODE);
 
     }
 

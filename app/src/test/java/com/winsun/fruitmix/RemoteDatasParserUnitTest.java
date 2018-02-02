@@ -147,7 +147,7 @@ public class RemoteDatasParserUnitTest {
         assertEquals(1502960620288L, abstractRemoteFile.getTime());
         assertEquals("1ed05292-5e98-4fb4-9307-e4e561411af1", abstractRemoteFile.getUuid());
         assertEquals("e9ccf83b68ff0a2e4664.hot-update.json", abstractRemoteFile.getName());
-        assertEquals("43", abstractRemoteFile.getSize());
+        assertEquals(43, abstractRemoteFile.getSize());
 
     }
 

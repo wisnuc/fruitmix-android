@@ -1,11 +1,14 @@
 package com.winsun.fruitmix.group.setting;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.databinding.ViewDataBinding;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 
@@ -14,6 +17,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.databinding.AddReduceGroupMemberItemBinding;
 import com.winsun.fruitmix.databinding.GroupMemberItemBinding;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
@@ -108,8 +112,8 @@ public class GroupSettingPresenter implements ActiveView {
             viewItems.add(new GroupMemberViewItem(user));
         }
 
-        viewItems.add(new GroupAddMemberViewItem());
-        viewItems.add(new GroupDeleteMemberViewItem());
+//        viewItems.add(new GroupAddMemberViewItem());
+//        viewItems.add(new GroupDeleteMemberViewItem());
 
         mGroupMemberRecyclerViewAdapter.setViewItems(viewItems);
         mGroupMemberRecyclerViewAdapter.notifyDataSetChanged();
@@ -121,10 +125,61 @@ public class GroupSettingPresenter implements ActiveView {
 
     }
 
+    String modifyGroupName = "修改群名称";
+
     public void modifyGroupName() {
 
+        final EditText editText = new EditText(mGroupSettingView.getContext());
+
+        editText.setHint(mGroupSettingViewModel.groupName.get());
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(mGroupSettingView.getContext())
+                .setTitle(modifyGroupName)
+                .setView(editText)
+                .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        String newName = editText.getText().toString();
+
+                        modifyGroupName(newName);
+
+                    }
+                }).setNegativeButton(R.string.cancel, null);
+
+        builder.create().show();
 
     }
+
+    private void modifyGroupName(final String newName) {
+
+        mGroupSettingView.showProgressDialog(mGroupSettingView.getString(R.string.operating_title, modifyGroupName));
+
+        mGroupRepository.updateGroupName(mGroupUUID, newName, new BaseOperateCallback() {
+            @Override
+            public void onSucceed() {
+
+                mGroupSettingView.dismissDialog();
+
+                mGroupSettingView.showToast(mGroupSettingView.getString(R.string.success, modifyGroupName));
+
+                mGroupSettingViewModel.groupName.set(newName);
+
+                mGroupSettingView.setResult(GroupSettingActivity.RESULT_MODIFY_GROUP_NAME);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                mGroupSettingView.dismissDialog();
+
+                mGroupSettingView.showToast(operationResult.getResultMessage(mGroupSettingView.getContext()));
+            }
+        });
+
+    }
+
 
     @Override
     public boolean isActive() {
@@ -165,7 +220,6 @@ public class GroupSettingPresenter implements ActiveView {
                             parent, false);
 
                     return new GroupMemberViewHolder(binding);
-
 
                 default:
 

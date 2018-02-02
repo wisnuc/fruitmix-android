@@ -44,6 +44,7 @@ import com.winsun.fruitmix.eventbus.RetrieveVideoThumbnailEvent;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
+import com.winsun.fruitmix.group.setting.GroupSettingActivity;
 import com.winsun.fruitmix.group.view.GroupListPage;
 import com.winsun.fruitmix.inbox.view.InboxListPage;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
@@ -81,6 +82,7 @@ import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 import static com.winsun.fruitmix.group.view.GroupListPage.CREATE_GROUP_REQUEST_CODE;
+import static com.winsun.fruitmix.group.view.GroupListPage.GROUP_CONTENT_REQUEST_CODE;
 
 public class MediaMainFragment extends Fragment implements View.OnClickListener, IPhotoListListener, HandleFileListOperateCallback, FileListSelectModeListener {
 
@@ -481,7 +483,11 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
             groupListPage.refreshView();
 
+        } else if (requestCode == GROUP_CONTENT_REQUEST_CODE && resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_NAME) {
+            groupListPage.refreshView();
         }
+
+
     }
 
     public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {

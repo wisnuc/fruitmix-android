@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.BR;
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
@@ -36,6 +37,7 @@ import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
+import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +68,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private LoadingViewModel mLoadingViewModel;
 
+    private ToolbarViewModel mToolbarViewModel;
+
     private GroupContentView groupContentView;
 
     private List<UserComment> userComments;
@@ -75,12 +79,14 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
     public GroupContentPresenter(GroupContentView groupContentView, String groupUUID,
                                  UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
                                  GroupRepository groupRepository, GroupContentViewModel groupContentViewModel,
-                                 LoadingViewModel loadingViewModel,
+                                 LoadingViewModel loadingViewModel,ToolbarViewModel toolbarViewModel,
                                  ImageLoader imageLoader, PlayAudioUseCase playAudioUseCase) {
+
+        mLoadingViewModel = loadingViewModel;
+        mToolbarViewModel = toolbarViewModel;
 
         this.playAudioUseCase = playAudioUseCase;
         this.imageLoader = imageLoader;
-        mLoadingViewModel = loadingViewModel;
         this.groupContentView = groupContentView;
         this.groupUUID = groupUUID;
         this.groupRepository = groupRepository;
@@ -111,7 +117,35 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void refreshView() {
 
+        refreshTitle();
+
         refreshGroup();
+
+    }
+
+    public void refreshTitle(){
+
+        groupRepository.getGroupFromMemory(groupUUID, new BaseLoadDataCallback<PrivateGroup>() {
+            @Override
+            public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
+
+                PrivateGroup group = data.get(0);
+
+                String groupName = group.getName();
+
+                if (groupName.isEmpty()) {
+                    groupName = groupContentView.getString(R.string.group_chat, group.getUsers().size());
+                }
+
+                mToolbarViewModel.titleText.set(groupName);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+            }
+        });
 
     }
 

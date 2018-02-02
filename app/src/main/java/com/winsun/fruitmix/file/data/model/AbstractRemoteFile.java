@@ -18,7 +18,7 @@ public abstract class AbstractRemoteFile extends AbstractFile{
     private List<String> owners;
     private List<String> writeList;
     private List<String> readList;
-    private String size;
+    private long size;
 
     private String parentFolderUUID;
     private String rootFolderUUID;
@@ -67,11 +67,11 @@ public abstract class AbstractRemoteFile extends AbstractFile{
         return Collections.unmodifiableList(writeList);
     }
 
-    public String getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void setSize(String size) {
+    public void setSize(long size) {
         this.size = size;
     }
 

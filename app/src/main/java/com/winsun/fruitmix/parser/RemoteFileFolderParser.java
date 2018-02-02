@@ -51,7 +51,7 @@ public class RemoteFileFolderParser extends BaseRemoteDataParser implements Remo
                 abstractRemoteFile = new RemoteFolder();
             }
 
-            String size = jsonObject.optString("size");
+            long size = jsonObject.optLong("size");
             abstractRemoteFile.setSize(size);
 
             long time = jsonObject.optLong("mtime");

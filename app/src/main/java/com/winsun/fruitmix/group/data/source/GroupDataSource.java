@@ -27,6 +27,8 @@ public interface GroupDataSource {
 
     void insertUserComment(String groupUUID, UserComment userComment,BaseOperateCallback callback);
 
+    void updateGroupProperty(String groupUUID,String property,String newValue,BaseOperateCallback callback);
+
     Pin insertPin(String groupUUID, Pin pin);
 
     boolean modifyPin(String groupUUID, String pinName,String pinUUID);

@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.http.request.factory;
 
+import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Log;
 
@@ -460,25 +461,53 @@ public class HttpRequestFactory {
 
     public synchronized HttpRequest createHttpGetRequest(String httpPath, String authorizationValue) {
 
-        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, authorizationValue));
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(authorizationValue);
 
         return factory.createHttpGetRequest(httpPath, false);
 
     }
 
+    public synchronized HttpRequest createHttpGetFileRequest(String httpPath, String authorizationValue) {
+
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(authorizationValue);
+
+        return factory.createHttpGetRequest(httpPath, true);
+
+    }
+
+
     public synchronized HttpRequest createHttpPostRequest(String httpPath, String body, String authorizationValue) {
 
-        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, authorizationValue));
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(authorizationValue);
 
         return factory.createHttpPostRequest(httpPath, body, false);
 
     }
 
+    @NonNull
+    private BaseAbsHttpRequestFactory getFactoryForBox(String authorizationValue) {
+        BaseAbsHttpRequestFactory factory;
+
+        if (checkIsLoginWithWeChatCode()) {
+            factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), getStationID());
+        } else
+            factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, authorizationValue));
+        return factory;
+    }
+
     public synchronized HttpRequest createHttpPostFileRequest(String httpPath, String body, String authorizationValue) {
 
-        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, authorizationValue));
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(authorizationValue);
 
         return factory.createHttpPostRequest(httpPath, body, true);
+
+    }
+
+    public synchronized HttpRequest createHttpPatchRequest(String httpPath, String body, String authorizationValue) {
+
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(authorizationValue);
+
+        return factory.createHttpPatchRequest(httpPath, body);
 
     }
 

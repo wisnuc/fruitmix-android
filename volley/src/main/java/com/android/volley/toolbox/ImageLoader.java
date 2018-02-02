@@ -285,7 +285,7 @@ public class ImageLoader {
             newRequest.setTag(mTag);
         }
 
-        if(mPriority != null)
+        if (mPriority != null)
             newRequest.setPriority(mPriority);
 
         newRequest.setShouldCache(mShouldCache);

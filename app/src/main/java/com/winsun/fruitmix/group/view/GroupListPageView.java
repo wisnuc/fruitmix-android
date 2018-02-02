@@ -10,6 +10,6 @@ public interface GroupListPageView {
 
     String getString(int resID,Object... formatArgs);
 
-    void gotoGroupContentActivity(String groupUUID,String groupName);
+    void gotoGroupContentActivity(String groupUUID);
 
 }

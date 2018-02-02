@@ -15,6 +15,8 @@ import org.json.JSONObject;
 
 class CloudHttpRequestForStationAPIFactory extends CloudHttpRequestFactory {
 
+    public static final String TAG = CloudHttpRequestForStationAPIFactory.class.getSimpleName();
+
     private String stationID;
 
     private static final String CALL_STATION_THROUGH_CLOUD_PRE = "/c/v1/stations/";
@@ -108,7 +110,11 @@ class CloudHttpRequestForStationAPIFactory extends CloudHttpRequestFactory {
             jsonObject.put("resource", httpPathEncodeByBase64);
             jsonObject.put("method", method);
 
-            httpRequest.setBody(jsonObject.toString());
+            String jsonObj = jsonObject.toString();
+
+            Log.d(TAG, "createHttpHasBodyRequest: " + jsonObj);
+
+            httpRequest.setBody(jsonObj);
 
         } catch (JSONException e) {
             e.printStackTrace();

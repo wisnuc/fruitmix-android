@@ -13,7 +13,7 @@
 
         <variable
             name="groupSettingPresenter"
-            type="com.winsun.fruitmix.group.setting.GroupSettingPresenter"/>
+            type="com.winsun.fruitmix.group.setting.GroupSettingPresenter" />
 
         <import type="android.view.View" />
 
@@ -149,6 +149,11 @@
 
             </android.support.constraint.ConstraintLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/divide_bg"/>
+
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp">
@@ -182,7 +187,8 @@
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:background="#fafafa">
+                android:background="#fafafa"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -201,7 +207,8 @@
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp">
+                android:layout_height="48dp"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/textView25"
@@ -233,7 +240,8 @@
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:background="#fafafa">
+                android:background="#fafafa"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -252,7 +260,8 @@
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp">
+                android:layout_height="48dp"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -281,7 +290,8 @@
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp">
+                android:layout_height="48dp"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -310,7 +320,8 @@
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp">
+                android:layout_height="48dp"
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="wrap_content"

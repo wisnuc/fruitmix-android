@@ -257,6 +257,11 @@ public class FakeGroupDataSource implements GroupDataSource {
     }
 
     @Override
+    public void updateGroupProperty(String groupUUID, String property, String newValue, BaseOperateCallback callback) {
+
+    }
+
+    @Override
     public Pin insertPin(String groupUUID, Pin pin) {
 
         PrivateGroup privateGroup = getOriginalGroupByUUID(groupUUID);

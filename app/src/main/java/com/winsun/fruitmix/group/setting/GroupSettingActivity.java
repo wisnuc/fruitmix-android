@@ -22,6 +22,8 @@ import com.winsun.fruitmix.util.Util;
 
 public class GroupSettingActivity extends BaseToolbarActivity implements GroupSettingView {
 
+    public static final int RESULT_MODIFY_GROUP_NAME = 0x1001;
+
     private ActivityGroupSettingBinding mActivityGroupSettingBinding;
 
     private static final int MEMBER_SPAN_COUNT = 4;
@@ -86,5 +88,8 @@ public class GroupSettingActivity extends BaseToolbarActivity implements GroupSe
         return getString(R.string.group_setting);
     }
 
-
+    @Override
+    public Context getContext() {
+        return this;
+    }
 }

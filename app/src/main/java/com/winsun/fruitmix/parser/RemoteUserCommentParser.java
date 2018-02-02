@@ -65,6 +65,8 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
 
                     Media media = new Media();
                     media.setName(name);
+                    media.setSize(size);
+
                     media.setUuid(hash);
 
                     JSONObject metadata = listItem.optJSONObject("metadata");
@@ -102,7 +104,7 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
                     abstractFile.setName(name);
 
                     abstractFile.setFileTypeResID(FileUtil.getFileTypeResID(name));
-                    abstractFile.setSize(String.valueOf(size));
+                    abstractFile.setSize(size);
 
                     files.add(abstractFile);
 
@@ -112,7 +114,7 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
 
             if (files.size() == 0) {
 
-                MediaComment mediaComment = new MediaComment(uuid, creator, time, "",medias);
+                MediaComment mediaComment = new MediaComment(uuid, creator, time, "", medias);
 
                 mediaComment.setIndex(index);
                 mediaComment.setText(comment);
@@ -121,7 +123,7 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
 
             } else {
 
-                for (Media media:medias){
+                for (Media media : medias) {
 
                     RemoteFile file = new RemoteFile();
 
@@ -130,12 +132,13 @@ public class RemoteUserCommentParser extends BaseRemoteDataParser implements Rem
                     file.setName(name);
                     file.setFileHash(media.getUuid());
                     file.setFileTypeResID(FileUtil.getFileTypeResID(name));
+                    file.setSize(media.getSize());
 
                     files.add(file);
 
                 }
 
-                FileComment fileComment = new FileComment(uuid, creator, time, "",files);
+                FileComment fileComment = new FileComment(uuid, creator, time, "", files);
 
                 fileComment.setIndex(index);
                 fileComment.setText(comment);

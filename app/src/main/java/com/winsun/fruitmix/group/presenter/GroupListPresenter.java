@@ -231,13 +231,7 @@ public class GroupListPresenter implements ActiveView {
                 @Override
                 public void onClick(View v) {
 
-                    String groupName = privateGroup.getName();
-
-                    if (groupName.isEmpty()) {
-                        groupName = groupListPageView.getString(R.string.group_chat, privateGroup.getUsers().size());
-                    }
-
-                    groupListPageView.gotoGroupContentActivity(privateGroup.getUUID(), groupName);
+                    groupListPageView.gotoGroupContentActivity(privateGroup.getUUID());
 
                 }
             });

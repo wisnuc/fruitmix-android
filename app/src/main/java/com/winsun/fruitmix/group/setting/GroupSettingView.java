@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.group.setting;
 
+import android.content.Context;
+
 import com.winsun.fruitmix.interfaces.BaseView;
 
 /**
@@ -8,5 +10,6 @@ import com.winsun.fruitmix.interfaces.BaseView;
 
 public interface GroupSettingView extends BaseView{
 
+    Context getContext();
 
 }

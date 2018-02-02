@@ -80,7 +80,7 @@ public class DownloadFileCommand extends AbstractCommand {
 
             FileDownloadParam fileDownloadParam = new FileFromBoxDownloadParam(boxUUID, fileHash, cloudToken);
 
-            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), Long.parseLong(abstractRemoteFile.getSize()), fileHash,
+            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), abstractRemoteFile.getSize(), fileHash,
                     fileDownloadParam);
 
         } else {
@@ -88,7 +88,7 @@ public class DownloadFileCommand extends AbstractCommand {
             FileDownloadParam fileDownloadParam = new FileFromStationFolderDownloadParam(abstractRemoteFile.getUuid(),
                     abstractRemoteFile.getParentFolderUUID(), driveUUID, abstractRemoteFile.getName());
 
-            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), Long.parseLong(abstractRemoteFile.getSize()), abstractRemoteFile.getUuid(),
+            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), abstractRemoteFile.getSize(), abstractRemoteFile.getUuid(),
                     fileDownloadParam);
 
         }

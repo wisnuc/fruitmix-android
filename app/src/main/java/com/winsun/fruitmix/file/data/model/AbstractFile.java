@@ -22,7 +22,7 @@ public abstract class AbstractFile {
     public abstract boolean isFolder();
 
     public String getName() {
-        return name;
+        return name != null ? name : "";
     }
 
     public int getFileTypeResID() {

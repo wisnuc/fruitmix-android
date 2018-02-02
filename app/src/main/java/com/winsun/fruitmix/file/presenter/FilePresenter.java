@@ -1165,7 +1165,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
             final RemoteFile abstractRemoteFile = (RemoteFile) abstractRemoteFiles.get(position);
 
-            fileSizeTv.setText(Formatter.formatFileSize(activity, Long.valueOf(abstractRemoteFile.getSize())));
+            fileSizeTv.setText(Formatter.formatFileSize(activity, abstractRemoteFile.getSize()));
 
             FileItemViewModel fileItemViewModel = binding.getFileItemViewModel();
 

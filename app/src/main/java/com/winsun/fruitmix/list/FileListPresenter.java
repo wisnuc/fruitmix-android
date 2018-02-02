@@ -198,6 +198,10 @@ public class FileListPresenter {
 
             binding.setFile(file);
 
+            final RemoteFile abstractRemoteFile = (RemoteFile) file;
+
+            binding.fileSize.setText(Formatter.formatFileSize(context, abstractRemoteFile.getSize()));
+
             FileItemViewModel fileItemViewModel = binding.getFileItemViewModel();
 
             if (fileItemViewModel == null)
@@ -208,8 +212,6 @@ public class FileListPresenter {
             fileItemViewModel.showFileIcon.set(true);
 
             binding.setFileItemViewModel(fileItemViewModel);
-
-            final RemoteFile abstractRemoteFile = (RemoteFile) file;
 
             binding.itemMenu.setOnClickListener(new View.OnClickListener() {
                 @Override
