@@ -73,6 +73,9 @@ android {
         flatDir {
             dirs 'libs'
         }
+        maven {
+            url "https://repo.eclipse.org/content/repositories/paho-snapshots/"
+        }
     }
 
     dataBinding {
@@ -123,9 +126,12 @@ dependencies {
     annotationProcessor 'org.greenrobot:eventbus-annotation-processor:3.0.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     implementation project(':steppers')
+    api 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
+    api 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
+
+    api 'com.szysky.customize:simageview:2.2'
 
     compile 'com.google.code.gson:gson:2.8.2'
-
 }
 repositories {
     mavenCentral()

@@ -10,6 +10,9 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
+    <!-- permission for mqtt service -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:name=".CustomApplication"
         android:allowBackup="true"
@@ -205,6 +208,13 @@
         <activity
             android:name=".group.setting.GroupSettingActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".group.TestMqttActivity"
+            android:screenOrientation="portrait" />
+
+        <!-- mqtt service -->
+        <service android:name="org.eclipse.paho.android.service.MqttService" />
+
     </application>
 
 </manifest>

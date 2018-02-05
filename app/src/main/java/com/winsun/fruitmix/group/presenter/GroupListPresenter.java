@@ -1,10 +1,14 @@
 package com.winsun.fruitmix.group.presenter;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.szysky.customize.siv.ImageLoader;
+import com.szysky.customize.siv.SImageView;
+import com.szysky.customize.siv.util.LogUtil;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.ActiveView;
@@ -24,6 +28,7 @@ import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -36,6 +41,8 @@ import java.util.List;
  */
 
 public class GroupListPresenter implements ActiveView {
+
+    public static final String TAG = GroupListPresenter.class.getSimpleName();
 
     private GroupRepository groupRepository;
 
@@ -75,6 +82,8 @@ public class GroupListPresenter implements ActiveView {
 
         groupListAdapter = new GroupListAdapter();
 
+        ImageLoader.getInstance(groupListPageView.getContext()).setPicUrlRegex("https?://.*?");
+
     }
 
     public void onDestroyView() {
@@ -87,13 +96,13 @@ public class GroupListPresenter implements ActiveView {
 
     public void refreshView() {
 
-        if(mSystemSettingDataSource.getLoginWithWechatCodeOrNot()){
+        if (mSystemSettingDataSource.getLoginWithWechatCodeOrNot()) {
 
             groupRepository.setCloudToken(mSystemSettingDataSource.getCurrentWAToken());
 
             refreshGroups();
 
-        }else {
+        } else {
 
             mTokenDataSource.getWATokenThroughStationToken(mCurrentUser.getAssociatedWeChatGUID(),
                     new BaseLoadDataCallbackWrapper<>(
@@ -145,7 +154,9 @@ public class GroupListPresenter implements ActiveView {
                         for (User user : users) {
 
                             User userWithInfo = mUserDataRepository.getUserByGUID(user.getAssociatedWeChatGUID());
-                            usersWithInfo.add(userWithInfo);
+
+                            if (userWithInfo != null)
+                                usersWithInfo.add(userWithInfo);
 
                         }
 
@@ -235,6 +246,20 @@ public class GroupListPresenter implements ActiveView {
 
                 }
             });
+
+            SImageView sImageView = binding.userIconView;
+
+            int size = privateGroup.getUsers().size();
+
+            List<String> avatarUrls = new ArrayList<>(size);
+
+            for (int i = 0;i < size;i++) {
+
+                avatarUrls.add("https://picsum.photos/200/300?image="+i);
+
+            }
+
+            sImageView.setImageUrls(avatarUrls.toArray(new String[]{}));
 
         }
 

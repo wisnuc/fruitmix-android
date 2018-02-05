@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.group.view;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.support.v7.app.AppCompatActivity;
@@ -167,6 +168,11 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         containerActivity.startActivityForResult(intent,GROUP_CONTENT_REQUEST_CODE);
 
+    }
+
+    @Override
+    public Context getContext() {
+        return containerActivity;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.group.view;
 
+import android.content.Context;
+
 import com.winsun.fruitmix.interfaces.BaseView;
 
 /**
@@ -11,5 +13,7 @@ public interface GroupListPageView {
     String getString(int resID,Object... formatArgs);
 
     void gotoGroupContentActivity(String groupUUID);
+
+    Context getContext();
 
 }
