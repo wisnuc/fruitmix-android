@@ -9,8 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ListView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.R;
@@ -71,7 +69,7 @@ public class GroupSettingPresenter implements ActiveView {
 
     public void refreshView() {
 
-        mGroupRepository.getGroupFromMemory(mGroupUUID, new BaseLoadDataCallbackWrapper<PrivateGroup>(
+        mGroupRepository.getGroupFromMemory(mGroupUUID, new BaseLoadDataCallbackWrapper<>(
                 new BaseLoadDataCallback<PrivateGroup>() {
                     @Override
                     public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
@@ -82,6 +80,8 @@ public class GroupSettingPresenter implements ActiveView {
 
                     @Override
                     public void onFail(OperationResult operationResult) {
+
+                        mGroupSettingView.showToast(operationResult.getResultMessage(mGroupSettingView.getContext()));
 
                     }
                 }, this
@@ -112,8 +112,8 @@ public class GroupSettingPresenter implements ActiveView {
             viewItems.add(new GroupMemberViewItem(user));
         }
 
-//        viewItems.add(new GroupAddMemberViewItem());
-//        viewItems.add(new GroupDeleteMemberViewItem());
+        viewItems.add(new GroupAddMemberViewItem());
+        viewItems.add(new GroupDeleteMemberViewItem());
 
         mGroupMemberRecyclerViewAdapter.setViewItems(viewItems);
         mGroupMemberRecyclerViewAdapter.notifyDataSetChanged();
@@ -125,8 +125,6 @@ public class GroupSettingPresenter implements ActiveView {
 
     }
 
-    String modifyGroupName = "修改群名称";
-
     public void modifyGroupName() {
 
         final EditText editText = new EditText(mGroupSettingView.getContext());
@@ -134,7 +132,7 @@ public class GroupSettingPresenter implements ActiveView {
         editText.setHint(mGroupSettingViewModel.groupName.get());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mGroupSettingView.getContext())
-                .setTitle(modifyGroupName)
+                .setTitle(mGroupSettingView.getString(R.string.modify_group_name))
                 .setView(editText)
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     @Override
@@ -153,7 +151,7 @@ public class GroupSettingPresenter implements ActiveView {
 
     private void modifyGroupName(final String newName) {
 
-        mGroupSettingView.showProgressDialog(mGroupSettingView.getString(R.string.operating_title, modifyGroupName));
+        mGroupSettingView.showProgressDialog(mGroupSettingView.getString(R.string.operating_title, mGroupSettingView.getString(R.string.modify_group_name)));
 
         mGroupRepository.updateGroupName(mGroupUUID, newName, new BaseOperateCallback() {
             @Override
@@ -161,11 +159,11 @@ public class GroupSettingPresenter implements ActiveView {
 
                 mGroupSettingView.dismissDialog();
 
-                mGroupSettingView.showToast(mGroupSettingView.getString(R.string.success, modifyGroupName));
+                mGroupSettingView.showToast(mGroupSettingView.getString(R.string.success, mGroupSettingView.getString(R.string.modify_group_name)));
 
                 mGroupSettingViewModel.groupName.set(newName);
 
-                mGroupSettingView.setResult(GroupSettingActivity.RESULT_MODIFY_GROUP_NAME);
+                mGroupSettingView.setResult(GroupSettingActivity.RESULT_MODIFY_GROUP_INFO);
 
             }
 
@@ -308,10 +306,28 @@ public class GroupSettingPresenter implements ActiveView {
 
                 mAddReduceGroupMemberItemBinding.addReduceImg.setImageResource(R.drawable.add_group_member);
 
+                mAddReduceGroupMemberItemBinding.getRoot().setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        mGroupSettingView.addUserBtnOnClick();
+
+                    }
+                });
+
 
             } else {
 
                 mAddReduceGroupMemberItemBinding.addReduceImg.setImageResource(R.drawable.reduce_group_member);
+
+                mAddReduceGroupMemberItemBinding.getRoot().setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        mGroupSettingView.deleteUserBtnOnClick();
+
+                    }
+                });
 
             }
 

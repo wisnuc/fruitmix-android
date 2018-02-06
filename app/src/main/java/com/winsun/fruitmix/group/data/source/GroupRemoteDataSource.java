@@ -141,7 +141,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         if (userComment instanceof MediaComment) {
 
-            insertMediaComment(groupUUID, (MediaComment) userComment,callback);
+            insertMediaComment(groupUUID, (MediaComment) userComment, callback);
 //            insertMediaCommentWhenWechatLogin(groupUUID, (MediaComment) userComment, callback);
 
             /*List<Media> medias = ((MediaComment) userComment).getMedias();
@@ -612,7 +612,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         String path = BOXES + "/" + groupUUID + TWEETS;
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "",getAuthorizationValue());
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", getAuthorizationValue());
 
         JsonObject jsonObject = new JsonObject();
 
@@ -695,14 +695,57 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
     }
 
     @Override
-    public void updateGroupProperty(String groupUUID,String property, String newValue, BaseOperateCallback callback) {
+    public void updateGroupProperty(String groupUUID, String property, String newValue, BaseOperateCallback callback) {
 
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty(property,newValue);
+        jsonObject.addProperty(property, newValue);
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(BOXES + "/" + groupUUID,jsonObject.toString(),getAuthorizationValue());
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(BOXES + "/" + groupUUID, jsonObject.toString(), getAuthorizationValue());
 
-        wrapper.operateCall(httpRequest,callback);
+        wrapper.operateCall(httpRequest, callback);
+
+    }
+
+    @Override
+    public void addUsersInGroup(String groupUUID, List<String> userGUIDs, BaseOperateCallback callback) {
+
+        JsonObject root = getAddDeleteUserBody("add", userGUIDs);
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(BOXES + "/" + groupUUID, root.toString(), getAuthorizationValue());
+
+        wrapper.operateCall(httpRequest, callback);
+
+    }
+
+
+    @NonNull
+    private JsonObject getAddDeleteUserBody(String op, List<String> userGUIDs) {
+        JsonObject users = new JsonObject();
+        users.addProperty("op", op);
+
+        JsonArray userGUIDsArray = new JsonArray();
+
+        for (String userGUID : userGUIDs) {
+            userGUIDsArray.add(userGUID);
+        }
+
+        users.add("value", userGUIDsArray);
+
+        JsonObject root = new JsonObject();
+
+        root.add("users", users);
+        return root;
+    }
+
+
+    @Override
+    public void deleteUsersInGroup(String groupUUID, List<String> userGUIDs, BaseOperateCallback callback) {
+
+        JsonObject root = getAddDeleteUserBody("delete", userGUIDs);
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(BOXES + "/" + groupUUID, root.toString(), getAuthorizationValue());
+
+        wrapper.operateCall(httpRequest, callback);
 
     }
 

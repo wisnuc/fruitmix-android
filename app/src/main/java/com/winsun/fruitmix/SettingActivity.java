@@ -4,6 +4,7 @@ import android.databinding.DataBindingUtil;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 
 import com.winsun.fruitmix.databinding.ActivitySettingBinding;
 import com.winsun.fruitmix.firmware.FirmwareActivity;
@@ -52,6 +53,7 @@ public class SettingActivity extends BaseActivity implements SettingView {
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 
         toolbarViewModel.titleText.set(getString(R.string.setting));
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_black));
 
         toolbarViewModel.setBaseView(this);
 

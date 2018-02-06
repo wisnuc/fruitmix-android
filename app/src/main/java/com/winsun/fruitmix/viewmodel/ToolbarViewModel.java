@@ -17,7 +17,7 @@ public class ToolbarViewModel {
 
     public final ObservableField<String> titleText = new ObservableField<>();
 
-    public final ObservableInt titleTextColorResID = new ObservableInt(R.color.eighty_seven_percent_black);
+    public final ObservableInt titleTextColorResID = new ObservableInt();
 
     public final ObservableInt selectTextResID = new ObservableInt(R.string.choose_text);
 

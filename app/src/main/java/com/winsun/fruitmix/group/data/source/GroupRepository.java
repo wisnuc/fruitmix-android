@@ -1,5 +1,8 @@
 package com.winsun.fruitmix.group.data.source;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
@@ -28,6 +31,8 @@ import java.util.Map;
  */
 
 public class GroupRepository extends BaseDataRepository {
+
+    public static final String TAG = GroupRepository.class.getSimpleName();
 
     private static GroupRepository ourInstance;
 
@@ -198,6 +203,78 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
+    public void addUsersToGroup(final String groupUUID, final List<User> users, final BaseOperateCallback callback) {
+
+        final BaseOperateCallback runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                groupDataSource.addUsersInGroup(groupUUID, getSelectedUserGUIDs(users), new BaseOperateCallback() {
+                    @Override
+                    public void onSucceed() {
+
+                        PrivateGroup group = mPrivateGroups.get(groupUUID);
+
+                        group.addUsers(users);
+
+                        runOnMainThreadCallback.onSucceed();
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        runOnMainThreadCallback.onFail(operationResult);
+
+                    }
+                });
+            }
+        });
+
+    }
+
+    public void deleteUsersToGroup(final String groupUUID, final List<User> users, final BaseOperateCallback callback) {
+
+        final BaseOperateCallback runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                groupDataSource.deleteUsersInGroup(groupUUID, getSelectedUserGUIDs(users), new BaseOperateCallback() {
+                    @Override
+                    public void onSucceed() {
+
+                        PrivateGroup group = mPrivateGroups.get(groupUUID);
+
+                        boolean result = group.deleteUsers(users);
+
+                        Log.d(TAG, "onSucceed: delete users in group result: " + result);
+
+                        runOnMainThreadCallback.onSucceed();
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+
+                        runOnMainThreadCallback.onFail(operationResult);
+                    }
+                });
+            }
+        });
+
+    }
+
+    @NonNull
+    private List<String> getSelectedUserGUIDs(List<User> users) {
+        List<String> selectedUserGUID = new ArrayList<>(users.size());
+
+        for (User user : users) {
+            selectedUserGUID.add(user.getAssociatedWeChatGUID());
+        }
+        return selectedUserGUID;
+    }
 
     public void insertPin(final String groupUUID, final Pin pin, BaseOperateDataCallback<Pin> callback) {
 

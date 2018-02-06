@@ -127,9 +127,6 @@
             android:name=".group.view.OperatePinActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".group.view.AddFriendActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".group.view.PinContentActivity"
             android:screenOrientation="portrait" />
         <activity

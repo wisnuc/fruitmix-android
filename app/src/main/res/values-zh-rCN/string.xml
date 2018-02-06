@@ -66,6 +66,8 @@
     <string name="loading">正在加载…</string>        <!-- loading resource: photos, file, data -->
     <!--   <string name="loading_message">请稍候</string>-->
 
+    <string name="add_text">添加</string>
+
     <string name="operating_title">正在%1$s…</string> <!-- waiting for server response -->
 
     <string name="no_photos">还没有照片</string>       <!-- empty list -->
@@ -573,9 +575,13 @@
 
     <string name="create_group">创建群</string>
     <string name="group_name">群名</string>
-    <string name="add_friend">添加好友</string>
 
     <string name="group_chat">群聊(%1$d)</string>
+
+    <string name="no_contact">没有联系人</string>
+    <string name="select_contact">选择联系人</string>
+    <string name="add_contact">添加联系人</string>
+    <string name="delete_contact">删除联系人</string>
 
     <!-- group setting -->
     <string name="group_member">群成员</string>
@@ -591,6 +597,8 @@
     <string name="group_setting">群设置</string>
 
     <string name="unnamed">未命名</string>
+
+    <string name="modify_group_name">修改群名称</string>
 
     <!-- inbox -->
     <string name="inbox">收件箱</string>

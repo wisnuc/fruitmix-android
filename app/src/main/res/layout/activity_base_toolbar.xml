@@ -19,8 +19,8 @@
         android:orientation="vertical">
 
         <include
-            layout="@layout/toolbar_layout"
             android:id="@+id/toolbar_layout"
+            layout="@layout/toolbar_layout"
             app:toolbarViewModel="@{toolbarViewModel}" />
 
     </LinearLayout>

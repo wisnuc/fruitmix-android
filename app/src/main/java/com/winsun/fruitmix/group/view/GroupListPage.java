@@ -104,16 +104,6 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         groupListPresenter.refreshView();
 
-        binding.addFriend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Intent intent = new Intent(containerActivity, ContactListActivity.class);
-                containerActivity.startActivityForResult(intent, CREATE_GROUP_REQUEST_CODE);
-
-            }
-        });
-
     }
 
     @Override

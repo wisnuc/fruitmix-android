@@ -19,6 +19,7 @@ import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.databinding.ActivityGroupContentBinding;
+import com.winsun.fruitmix.group.TestMqttActivity;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
@@ -178,9 +179,11 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         toolbarViewModel.setBaseView(this);
 
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_black));
+
         toolbarViewModel.showSelect.set(true);
         toolbarViewModel.selectTextResID.set(R.string.setting_text);
-        toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_black));
+        toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(this, R.color.eighty_seven_percent_black));
 
         toolbarViewModel.setToolbarSelectBtnOnClickListener(new ToolbarViewModel.ToolbarSelectBtnOnClickListener() {
             @Override
@@ -189,6 +192,8 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
                 Intent intent = new Intent(GroupContentActivity.this, GroupSettingActivity.class);
                 intent.putExtra(Util.KEY_GROUP_UUID, groupUUID);
                 startActivityForResult(intent, REQUEST_GROUP_SETTING_ACTIVITY);
+
+//                Util.startActivity(GroupContentActivity.this, TestMqttActivity.class);
 
             }
         });
@@ -390,9 +395,9 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
             groupContentPresenter.refreshView();
         else if (requestCode == REQUEST_PIN_CONTENT && resultCode == RESULT_OK) {
             groupContentPresenter.refreshPin();
-        } else if (requestCode == REQUEST_GROUP_SETTING_ACTIVITY && resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_NAME) {
+        } else if (requestCode == REQUEST_GROUP_SETTING_ACTIVITY && resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_INFO) {
 
-            setResult(GroupSettingActivity.RESULT_MODIFY_GROUP_NAME);
+            setResult(GroupSettingActivity.RESULT_MODIFY_GROUP_INFO);
 
             groupContentPresenter.refreshTitle();
 

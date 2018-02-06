@@ -61,13 +61,13 @@ public class TorrentDownloadManageActivity extends BaseActivity implements BaseV
 
         Toolbar mToolbar = binding.toolbarLayout.toolbar;
 
-        binding.toolbarLayout.title.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
-
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
         toolbarViewModel.setBaseView(this);
 
         toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
+
         toolbarViewModel.titleText.set(getString(R.string.download_manage));
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
 
         binding.setToolbarViewModel(toolbarViewModel);
 

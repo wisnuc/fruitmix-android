@@ -12,4 +12,7 @@ public interface GroupSettingView extends BaseView{
 
     Context getContext();
 
+    void addUserBtnOnClick();
+
+    void deleteUserBtnOnClick();
 }

@@ -27,7 +27,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/imageView6"
+            app:layout_constraintStart_toEndOf="@+id/select_img"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -46,12 +46,11 @@
             tools:text="Admin" />
 
         <ImageView
-            android:id="@+id/imageView6"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:id="@+id/select_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
-            android:src="@{contactListItemViewModel.isSelected?@drawable/check_circle_selected:@drawable/round_circle,default=@drawable/round_circle}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

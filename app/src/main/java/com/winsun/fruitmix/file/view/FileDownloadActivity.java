@@ -2,6 +2,7 @@ package com.winsun.fruitmix.file.view;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
@@ -39,6 +40,7 @@ public class FileDownloadActivity extends BaseActivity implements BaseView {
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 
         toolbarViewModel.titleText.set(getString(R.string.transmission_manage));
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_black));
 
         toolbarViewModel.showMenu.set(true);
         toolbarViewModel.setBaseView(this);

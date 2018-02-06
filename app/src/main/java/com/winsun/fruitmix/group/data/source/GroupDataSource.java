@@ -29,6 +29,10 @@ public interface GroupDataSource {
 
     void updateGroupProperty(String groupUUID,String property,String newValue,BaseOperateCallback callback);
 
+    void addUsersInGroup(String groupUUID,List<String> userGUIDs,BaseOperateCallback callback);
+
+    void deleteUsersInGroup(String groupUUID,List<String> userGUIDs,BaseOperateCallback callback);
+
     Pin insertPin(String groupUUID, Pin pin);
 
     boolean modifyPin(String groupUUID, String pinName,String pinUUID);

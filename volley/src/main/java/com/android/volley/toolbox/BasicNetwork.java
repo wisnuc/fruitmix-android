@@ -252,10 +252,13 @@ public class BasicNetwork implements Network {
      * Reads the contents of HttpEntity into a byte[].
      */
     private byte[] entityToBytes(HttpEntity entity) throws IOException, ServerError {
-        PoolingByteArrayOutputStream bytes =
-                new PoolingByteArrayOutputStream(mPool, (int) entity.getContentLength());
+
+        PoolingByteArrayOutputStream bytes = null;
         byte[] buffer = null;
+
         try {
+
+            bytes = new PoolingByteArrayOutputStream(mPool, (int) entity.getContentLength());
             InputStream in = entity.getContent();
             if (in == null) {
                 throw new ServerError();
@@ -266,7 +269,7 @@ public class BasicNetwork implements Network {
                 bytes.write(buffer, 0, count);
             }
             return bytes.toByteArray();
-        }catch (OutOfMemoryError error) {
+        } catch (OutOfMemoryError error) {
 
             error.printStackTrace();
 
@@ -282,7 +285,10 @@ public class BasicNetwork implements Network {
                 VolleyLog.v("Error occured when calling consumingContent");
             }
             mPool.returnBuf(buffer);
-            bytes.close();
+
+            if (bytes != null)
+                bytes.close();
+
         }
     }
 

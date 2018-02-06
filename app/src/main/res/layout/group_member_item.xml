@@ -13,7 +13,9 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="48dp"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp">
 
         <com.winsun.fruitmix.component.UserAvatar
             android:id="@+id/userAvatar3"
@@ -28,6 +30,7 @@
             android:id="@+id/textView26"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:text="@{groupMemberItemViewModel.userName}"
             android:textColor="@color/eighty_seven_percent_black"
             android:textSize="14dp"

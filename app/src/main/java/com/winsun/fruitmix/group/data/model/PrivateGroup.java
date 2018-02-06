@@ -113,6 +113,10 @@ public class PrivateGroup {
         users.add(user);
     }
 
+    public boolean deleteUsers(Collection<User> users){
+        return this.users.removeAll(users);
+    }
+
     public List<UserComment> getUserComments() {
         return userComments;
     }

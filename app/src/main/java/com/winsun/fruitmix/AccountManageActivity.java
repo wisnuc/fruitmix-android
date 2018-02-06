@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 
@@ -43,6 +44,7 @@ public class AccountManageActivity extends BaseActivity implements AccountManage
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 
         toolbarViewModel.titleText.set(getString(R.string.account_manage));
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_black));
 
         toolbarViewModel.setBaseView(this);
 

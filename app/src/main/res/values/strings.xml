@@ -602,9 +602,13 @@
 
     <string name="create_group">Create group</string>
     <string name="group_name">Group name</string>
-    <string name="add_friend">Add friend</string>
 
     <string name="group_chat">Group Chat(%1$d)</string>
+
+    <string name="no_contact">No Contacts</string>
+    <string name="select_contact">Select Contact</string>
+    <string name="add_contact">Add contact</string>
+    <string name="delete_contact">Delete contact</string>
 
     <!-- group setting -->
     <string name="group_member">Group Members</string>
@@ -620,6 +624,8 @@
     <string name="group_setting">Group Setting</string>
 
     <string name="unnamed">Unnamed</string>
+
+    <string name="modify_group_name">Modify group name</string>
 
     <!-- inbox -->
     <string name="inbox">Inbox</string>

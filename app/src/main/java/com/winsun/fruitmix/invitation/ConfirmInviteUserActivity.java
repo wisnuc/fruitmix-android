@@ -4,6 +4,7 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -47,6 +48,7 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
 
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
         toolbarViewModel.titleText.set(getString(R.string.invitation));
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_black));
         toolbarViewModel.setBaseView(this);
 
         binding.setToolbarViewModel(toolbarViewModel);

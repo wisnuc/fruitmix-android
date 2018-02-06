@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 
 import com.winsun.fruitmix.BaseToolbarActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.contact.ContactListActivity;
 import com.winsun.fruitmix.databinding.ActivityGroupSettingBinding;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
@@ -22,7 +23,7 @@ import com.winsun.fruitmix.util.Util;
 
 public class GroupSettingActivity extends BaseToolbarActivity implements GroupSettingView {
 
-    public static final int RESULT_MODIFY_GROUP_NAME = 0x1001;
+    public static final int RESULT_MODIFY_GROUP_INFO = 0x1001;
 
     private ActivityGroupSettingBinding mActivityGroupSettingBinding;
 
@@ -32,17 +33,19 @@ public class GroupSettingActivity extends BaseToolbarActivity implements GroupSe
 
     public static void start(String groupUUID, Context context) {
 
-        Intent intent = new Intent(context,GroupSettingActivity.class);
-        intent.putExtra(Util.KEY_GROUP_UUID,groupUUID);
+        Intent intent = new Intent(context, GroupSettingActivity.class);
+        intent.putExtra(Util.KEY_GROUP_UUID, groupUUID);
         context.startActivity(intent);
 
     }
+
+    private String mGroupUUID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String groupUUID = getIntent().getStringExtra(Util.KEY_GROUP_UUID);
+        mGroupUUID = getIntent().getStringExtra(Util.KEY_GROUP_UUID);
 
         GroupSettingViewModel groupSettingViewModel = new GroupSettingViewModel();
 
@@ -54,7 +57,7 @@ public class GroupSettingActivity extends BaseToolbarActivity implements GroupSe
         membersRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         mGroupSettingPresenter = new GroupSettingPresenter(groupSettingViewModel,
-                InjectGroupDataSource.provideGroupRepository(this), groupUUID,
+                InjectGroupDataSource.provideGroupRepository(this), mGroupUUID,
                 InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this),
                 this);
 
@@ -91,5 +94,34 @@ public class GroupSettingActivity extends BaseToolbarActivity implements GroupSe
     @Override
     public Context getContext() {
         return this;
+    }
+
+    @Override
+    public void addUserBtnOnClick() {
+
+        ContactListActivity.start(this, ContactListActivity.ADD_USER, mGroupUUID);
+
+    }
+
+    @Override
+    public void deleteUserBtnOnClick() {
+
+        ContactListActivity.start(this, ContactListActivity.DELETE_USER, mGroupUUID);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == ContactListActivity.MODIFY_GROUP_USERS_REQUEST_CODE && resultCode == RESULT_OK){
+
+            mGroupSettingPresenter.refreshView();
+
+            setResult(RESULT_MODIFY_GROUP_INFO);
+
+        }
+
+
     }
 }

@@ -30,7 +30,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
-import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.SharpCurveInterpolator;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
@@ -61,8 +60,6 @@ import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
@@ -260,6 +257,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
 
         toolbarViewModel.titleText.set("");
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(mContext,R.color.eighty_seven_percent_black));
 
         defaultListener = new ToolbarViewModel.ToolbarNavigationOnClickListener() {
             @Override
@@ -483,7 +481,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
             groupListPage.refreshView();
 
-        } else if (requestCode == GROUP_CONTENT_REQUEST_CODE && resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_NAME) {
+        } else if (requestCode == GROUP_CONTENT_REQUEST_CODE && resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_INFO) {
             groupListPage.refreshView();
         }
 
@@ -1408,8 +1406,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                             if (activity == null)
                                 return;
 
-                            Intent intent = new Intent(mContext, ContactListActivity.class);
-                            activity.startActivityForResult(intent, CREATE_GROUP_REQUEST_CODE);
+                            ContactListActivity.startForCreateGroup(getActivity());
 
                         }
                     });

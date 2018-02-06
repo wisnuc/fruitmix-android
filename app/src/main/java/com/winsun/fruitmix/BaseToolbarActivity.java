@@ -1,5 +1,6 @@
 package com.winsun.fruitmix;
 
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -44,6 +45,7 @@ public abstract class BaseToolbarActivity extends BaseActivity {
         toolbarViewModel = new ToolbarViewModel();
 
         toolbarViewModel.titleText.set(getToolbarTitle());
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_black));
 
         toolbarViewModel.setBaseView(this);
 
