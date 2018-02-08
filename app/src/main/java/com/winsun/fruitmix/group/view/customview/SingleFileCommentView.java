@@ -23,6 +23,7 @@ import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.group.data.viewmodel.FileCommentViewModel;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.list.TweetContentListActivity;
@@ -49,9 +50,9 @@ public class SingleFileCommentView extends UserCommentView {
 
 
     @Override
-    protected View generateContentView(Context context) {
+    protected View generateContentView(Context context,ViewGroup parent) {
 
-        binding = SingleFileCommentBinding.inflate(LayoutInflater.from(context), null, false);
+        binding = SingleFileCommentBinding.inflate(LayoutInflater.from(context), parent, false);
 
         return binding.getRoot();
     }
@@ -84,7 +85,7 @@ public class SingleFileCommentView extends UserCommentView {
 
             final Media media = comment.getMedias().get(0);
 
-            HttpRequest httpRequest = media.getImageThumbUrl(context, data.getGroupUUID());
+            HttpRequest httpRequest = media.getImageThumbUrl(context, new GroupRequestParam(data.getGroupUUID(),data.getStationID()));
 
             httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
 
@@ -95,7 +96,7 @@ public class SingleFileCommentView extends UserCommentView {
                 public void onClick(View v) {
 
                     PhotoSliderActivity.startPhotoSliderActivity(toolbar, (Activity) context, Collections.singletonList(media), data.getGroupUUID(),
-                            3, networkImageView, media);
+                            data.getStationID(),3, networkImageView, media);
 
                 }
             });

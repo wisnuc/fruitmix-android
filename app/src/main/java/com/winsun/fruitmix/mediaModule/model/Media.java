@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
@@ -237,7 +238,9 @@ public class Media extends AbstractFile {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            httpRequest = getRemoteMediaThumbUrl(context, 64, 64);
+            String httpPath = getRemoteMediaThumbHttpPath(context, 64, 64);
+
+            httpRequest = generateUrl(context,httpPath);
 
             Log.d(TAG, "media uuid: " + getUuid() + " getImageSmallThumbUrl: " + httpRequest.getUrl());
 
@@ -246,25 +249,25 @@ public class Media extends AbstractFile {
 
     }
 
-    public HttpRequest getImageThumbUrl(Context context, String groupUUID) {
+    public HttpRequest getImageThumbUrl(Context context, GroupRequestParam groupRequestParam) {
 
-        HttpRequest httpRequest = getImageThumbUrl(context);
+        HttpRequest httpRequest = getImageThumbUrl(context, 200, 200,groupRequestParam.getStationID());
 
-        return addGroupUUIDToUrl(groupUUID, httpRequest);
+        return addGroupUUIDToUrl(groupRequestParam.getGroupUUID(), httpRequest);
+
     }
 
+    public HttpRequest getImageThumbUrl(Context context, int width,int height,GroupRequestParam groupRequestParam) {
+
+        HttpRequest httpRequest = getImageThumbUrl(context, width, height,groupRequestParam.getStationID());
+
+        return addGroupUUIDToUrl(groupRequestParam.getGroupUUID(), httpRequest);
+
+    }
 
     public HttpRequest getImageThumbUrl(Context context) {
 
         return getImageThumbUrl(context, 200, 200);
-
-    }
-
-    public HttpRequest getImageThumbUrl(Context context, int width, int height, String groupUUID) {
-
-        HttpRequest httpRequest = getImageThumbUrl(context, width, height);
-
-        return addGroupUUIDToUrl(groupUUID, httpRequest);
 
     }
 
@@ -288,7 +291,41 @@ public class Media extends AbstractFile {
 
 //            int[] result = Util.formatPhotoWidthHeight(width, height);
 
-            httpRequest = getRemoteMediaThumbUrl(context, width, height);
+            String httpPath = getRemoteMediaThumbHttpPath(context, width, height);
+
+            httpRequest = generateUrl(context,httpPath);
+
+            Log.d(TAG, "media uuid: " + getUuid() + " getImageThumbUrl: " + httpRequest.getUrl());
+
+        }
+
+        return httpRequest;
+
+    }
+
+    private HttpRequest getImageThumbUrl(Context context, int width, int height,String stationID){
+
+        String imageUrl;
+
+        HttpRequest httpRequest;
+
+        if (isLocal()) {
+            imageUrl = getThumb();
+
+            if (imageUrl.isEmpty()) {
+                imageUrl = getOriginalPhotoPath();
+            }
+
+            HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
+            httpRequest = httpRequestFactory.createHttpGetRequestForLocalMedia(imageUrl);
+
+        } else {
+
+//            int[] result = Util.formatPhotoWidthHeight(width, height);
+
+            String httpPath = getRemoteMediaThumbHttpPath(context, width, height);
+
+            httpRequest = generateUrl(context,httpPath,stationID);
 
             Log.d(TAG, "media uuid: " + getUuid() + " getImageThumbUrl: " + httpRequest.getUrl());
 
@@ -299,6 +336,7 @@ public class Media extends AbstractFile {
     }
 
 
+
     private HttpRequest generateUrl(Context context, String req) {
 
         HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
@@ -307,7 +345,16 @@ public class Media extends AbstractFile {
 
     }
 
-    private HttpRequest getRemoteMediaThumbUrl(Context context, int width, int height) {
+    private HttpRequest generateUrl(Context context,String req,String stationID){
+
+        HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
+
+        return httpRequestFactory.createHttpGetFileRequestByCloudAPIWithWrap(req,stationID);
+
+    }
+
+
+    private String getRemoteMediaThumbHttpPath(Context context, int width, int height) {
 
         String httpPath;
 
@@ -322,7 +369,7 @@ public class Media extends AbstractFile {
                     String.valueOf(width), String.valueOf(height));
         }
 
-        return generateUrl(context, httpPath);
+        return httpPath;
 
     }
 
@@ -360,11 +407,34 @@ public class Media extends AbstractFile {
 
     }
 
-    public HttpRequest getImageOriginalUrl(Context context, String groupUUID) {
+    public HttpRequest getImageOriginalUrl(Context context, GroupRequestParam groupRequestParam) {
 
-        HttpRequest httpRequest = getImageOriginalUrl(context);
+        HttpRequest httpRequest = getImageOriginalUrl(context,groupRequestParam.getStationID());
 
-        return addGroupUUIDToUrl(groupUUID, httpRequest);
+        return addGroupUUIDToUrl(groupRequestParam.getGroupUUID(), httpRequest);
+    }
+
+    private HttpRequest getImageOriginalUrl(Context context,String stationID) {
+
+        String imageUrl;
+
+        HttpRequest httpRequest;
+
+        if (isLocal()) {
+            imageUrl = getOriginalPhotoPath();
+
+            HttpRequestFactory httpRequestFactory = InjectHttp.provideHttpRequestFactory(context);
+            httpRequest = httpRequestFactory.createHttpGetRequestForLocalMedia(imageUrl);
+
+        } else {
+
+            httpRequest = generateUrl(context,getRemoteMediaRequestPath(),stationID);
+        }
+
+        Log.d(TAG, "media uuid: " + getUuid() + " getImageOriginalUrl: " + httpRequest.getUrl());
+
+        return httpRequest;
+
     }
 
     private HttpRequest addGroupUUIDToUrl(String groupUUID, HttpRequest httpRequest) {

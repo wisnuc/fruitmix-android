@@ -19,7 +19,6 @@ import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.databinding.ActivityGroupContentBinding;
-import com.winsun.fruitmix.group.TestMqttActivity;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
@@ -179,7 +178,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         toolbarViewModel.setBaseView(this);
 
-        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_black));
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this, R.color.eighty_seven_percent_black));
 
         toolbarViewModel.showSelect.set(true);
         toolbarViewModel.selectTextResID.set(R.string.setting_text);
@@ -395,11 +394,19 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
             groupContentPresenter.refreshView();
         else if (requestCode == REQUEST_PIN_CONTENT && resultCode == RESULT_OK) {
             groupContentPresenter.refreshPin();
-        } else if (requestCode == REQUEST_GROUP_SETTING_ACTIVITY && resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_INFO) {
+        } else if (requestCode == REQUEST_GROUP_SETTING_ACTIVITY) {
 
             setResult(GroupSettingActivity.RESULT_MODIFY_GROUP_INFO);
 
-            groupContentPresenter.refreshTitle();
+            if (resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_INFO) {
+
+                groupContentPresenter.refreshTitle();
+
+            } else if (resultCode == GroupSettingActivity.RESULT_DELETE_OR_QUIT_GROUP) {
+
+                finishView();
+
+            }
 
         }
 

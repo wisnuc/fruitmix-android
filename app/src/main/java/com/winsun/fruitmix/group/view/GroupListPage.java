@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -47,6 +48,8 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
     private RecyclerView recyclerView;
 
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
     private GroupListPresenter groupListPresenter;
 
     private Activity containerActivity;
@@ -60,6 +63,10 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
         containerActivity = activity;
 
         ActivityGroupListBinding binding = ActivityGroupListBinding.inflate(LayoutInflater.from(activity), null, false);
+
+        mSwipeRefreshLayout = binding.swipeRefreshLayout;
+
+        initSwipeRefreshLayout();
 
         final LoadingViewModel loadingViewModel = new LoadingViewModel();
 
@@ -102,8 +109,18 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(groupListPresenter.getGroupListAdapter());
 
-        groupListPresenter.refreshView();
+    }
 
+    private void initSwipeRefreshLayout() {
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                refreshView();
+
+            }
+        });
     }
 
     @Override
@@ -115,6 +132,14 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
     public void refreshView() {
 
         groupListPresenter.refreshGroups();
+
+    }
+
+    @Override
+    public void finishSwipeRefreshAnimation() {
+
+        if (mSwipeRefreshLayout.isRefreshing())
+            mSwipeRefreshLayout.setRefreshing(false);
 
     }
 
@@ -156,7 +181,7 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
         Intent intent = new Intent(containerActivity, GroupContentActivity.class);
         intent.putExtra(GroupContentActivity.GROUP_UUID, groupUUID);
 
-        containerActivity.startActivityForResult(intent,GROUP_CONTENT_REQUEST_CODE);
+        containerActivity.startActivityForResult(intent, GROUP_CONTENT_REQUEST_CODE);
 
     }
 
@@ -168,6 +193,11 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
     @Override
     public String getString(int resID, Object... formatArgs) {
         return containerActivity.getString(resID, formatArgs);
+    }
+
+    @Override
+    public String getString(int resID) {
+        return containerActivity.getString(resID);
     }
 
     @Override

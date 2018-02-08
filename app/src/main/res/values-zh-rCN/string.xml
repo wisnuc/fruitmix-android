@@ -600,6 +600,16 @@
 
     <string name="modify_group_name">修改群名称</string>
 
+    <string name="delete_group">删除群</string>
+
+    <string name="quit_group">退出群</string>
+
+    <string name="no_operate_group_permission">只有群主可以操作</string>
+
+    <string name="login_with_wechat_to_use_group">请用微信登录以使用群功能</string>
+
+    <string name="station_offline">[离线]</string>
+
     <!-- inbox -->
     <string name="inbox">收件箱</string>
     <string name="group_come_from">来自 \"%1$s\" 群,</string>

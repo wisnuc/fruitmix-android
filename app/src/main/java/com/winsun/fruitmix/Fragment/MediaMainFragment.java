@@ -257,7 +257,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
 
         toolbarViewModel.titleText.set("");
-        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(mContext,R.color.eighty_seven_percent_black));
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(mContext, R.color.eighty_seven_percent_black));
 
         defaultListener = new ToolbarViewModel.ToolbarNavigationOnClickListener() {
             @Override
@@ -1368,6 +1368,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         showBottomNavAnim();
     }
 
+    private boolean groupOnResume = false;
+
     private void onDidAppear(int position) {
 
         if (sInChooseMode) {
@@ -1414,6 +1416,14 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 } else {
 
                     toolbarViewModel.showMenu.set(false);
+
+                }
+
+                if (groupListPage != null && isResumed() && !groupOnResume) {
+
+                    groupListPage.refreshView();
+
+                    groupOnResume = true;
 
                 }
 

@@ -21,18 +21,17 @@ import com.winsun.fruitmix.http.FileFormData;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.http.TextFormData;
+import com.winsun.fruitmix.http.request.factory.CloudHttpRequestFactory;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.RemoteDataParser;
-import com.winsun.fruitmix.parser.RemoteDatasParser;
 import com.winsun.fruitmix.parser.RemoteGroupParser;
 import com.winsun.fruitmix.parser.RemoteUserCommentParser;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -60,13 +59,18 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
     private String cloudToken;
 
-    private GroupRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
+    private SystemSettingDataSource mSystemSettingDataSource;
+
+    private GroupRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, SystemSettingDataSource systemSettingDataSource) {
         super(iHttpUtil, httpRequestFactory);
+
+        mSystemSettingDataSource = systemSettingDataSource;
     }
 
-    public static GroupDataSource getInstance(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
+    public static GroupDataSource getInstance(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory,
+                                              SystemSettingDataSource systemSettingDataSource) {
         if (instance == null)
-            instance = new GroupRemoteDataSource(iHttpUtil, httpRequestFactory);
+            instance = new GroupRemoteDataSource(iHttpUtil, httpRequestFactory, systemSettingDataSource);
         return instance;
     }
 
@@ -105,7 +109,12 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         String authorizationValue = getAuthorizationValue();
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(BOXES, authorizationValue);
+        HttpRequest httpRequest;
+
+        if (mSystemSettingDataSource.getCurrentWAToken().length() != 0) {
+            httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(CloudHttpRequestFactory.CLOUD_API_LEVEL + BOXES);
+        } else
+            httpRequest = httpRequestFactory.createHttpGetRequest(BOXES, authorizationValue);
 
         wrapper.loadCall(httpRequest, callback, new RemoteGroupParser());
 
@@ -128,20 +137,49 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
     }
 
     @Override
-    public void getAllUserCommentByGroupUUID(String groupUUID, BaseLoadDataCallback<UserComment> callback) {
+    public void deleteGroup(GroupRequestParam groupRequestParam, BaseOperateCallback callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(BOXES + "/" + groupUUID + TWEETS + METADATA_TRUE, getAuthorizationValue());
+        String authorizationValue = getAuthorizationValue();
+
+        HttpRequest httpRequest;
+
+        httpRequest = httpRequestFactory.createHttpDeleteRequestByCloudAPIWithWrap(BOXES + "/" + groupRequestParam.getGroupUUID(), "",
+                groupRequestParam.getStationID());
+
+        wrapper.operateCall(httpRequest, callback);
+
+    }
+
+    @Override
+    public void quitGroup(GroupRequestParam groupRequestParam, String currentUserGUID, BaseOperateCallback callback) {
+
+        JsonObject root = getAddDeleteUserBody("delete", Collections.singletonList(currentUserGUID));
+
+        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID();
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequestByCloudAPIWithWrap(httpPath, root.toString(), groupRequestParam.getStationID());
+
+        wrapper.operateCall(httpRequest, callback);
+
+    }
+
+    @Override
+    public void getAllUserCommentByGroupUUID(GroupRequestParam groupRequestParam, BaseLoadDataCallback<UserComment> callback) {
+
+        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS + METADATA_TRUE;
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithWrap(httpPath, groupRequestParam.getStationID());
 
         wrapper.loadCall(httpRequest, callback, new RemoteUserCommentParser());
 
     }
 
     @Override
-    public void insertUserComment(final String groupUUID, final UserComment userComment, final BaseOperateCallback callback) {
+    public void insertUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, final BaseOperateCallback callback) {
 
         if (userComment instanceof MediaComment) {
 
-            insertMediaComment(groupUUID, (MediaComment) userComment, callback);
+            insertMediaCommentWhenWechatLogin(groupRequestParam, (MediaComment) userComment, callback);
 //            insertMediaCommentWhenWechatLogin(groupUUID, (MediaComment) userComment, callback);
 
             /*List<Media> medias = ((MediaComment) userComment).getMedias();
@@ -186,14 +224,16 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         } else if (userComment instanceof FileComment) {
 
-            insertUserCommentSrcFromNas(groupUUID, userComment, callback);
+//            insertFileCommentSrcFromNas(groupRequestParam, userComment, callback);
+
+            insertFileCommentSrcFromNasWhenWechatLogin(groupRequestParam, userComment, callback);
 
         }
 
 
     }
 
-    private void insertMediaCommentWhenWechatLogin(String groupUUID, MediaComment mediaComment, final BaseOperateCallback callback) {
+    private void insertMediaCommentWhenWechatLogin(GroupRequestParam groupRequestParam, MediaComment mediaComment, final BaseOperateCallback callback) {
 
         List<Media> medias = mediaComment.getMedias();
 
@@ -209,9 +249,9 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         }
 
-        String path = BOXES + "/" + groupUUID + TWEETS;
+        String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "");
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequestByCloudAPIWithWrap(path, "", groupRequestParam.getStationID());
 
         JsonObject jsonObject = new JsonObject();
         try {
@@ -306,7 +346,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
     }
 
-    private void insertMediaComment(String groupUUID, MediaComment mediaComment, final BaseOperateCallback callback) {
+    private void insertMediaComment(GroupRequestParam groupRequestParam, MediaComment mediaComment, final BaseOperateCallback callback) {
 
         List<Media> medias = mediaComment.getMedias();
 
@@ -322,7 +362,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         }
 
-        String path = BOXES + "/" + groupUUID + TWEETS;
+        String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
 
         HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", getAuthorizationValue());
 
@@ -400,19 +440,6 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
                     }
                 });
 
-    }
-
-
-    private void handleLocalMediaCommentCreated(String groupUUID, UserComment userComment, BaseOperateCallback callback, List<Media> remoteMedias) {
-        if (remoteMedias.size() != 0) {
-
-            UserComment remoteMediaComment = new MediaComment(userComment.getUuid(), userComment.getCreator(), userComment.getTime(),
-                    userComment.getGroupUUID(), remoteMedias);
-
-            insertUserCommentSrcFromNas(groupUUID, remoteMediaComment, callback);
-
-        } else
-            callback.onSucceed();
     }
 
     private void insertUserCommentSrcFromPhone(String groupUUID, UserComment userComment, final BaseOperateCallback callback) {
@@ -506,11 +533,11 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
                 });
     }
 
-    private void insertUserCommentSrcFromNasWhenWechatLogin(String groupUUID, UserComment userComment, final BaseOperateCallback callback) {
+    private void insertFileCommentSrcFromNasWhenWechatLogin(GroupRequestParam groupRequestParam, UserComment userComment, final BaseOperateCallback callback) {
 
-        String path = BOXES + "/" + groupUUID + TWEETS;
+        String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "");
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequestByCloudAPIWithWrap(path, "", groupRequestParam.getStationID());
 
         JsonObject jsonObject = new JsonObject();
 
@@ -608,9 +635,9 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
     }
 
-    private void insertUserCommentSrcFromNas(String groupUUID, UserComment userComment, final BaseOperateCallback callback) {
+    private void insertFileCommentSrcFromNas(GroupRequestParam groupRequestParam, UserComment userComment, final BaseOperateCallback callback) {
 
-        String path = BOXES + "/" + groupUUID + TWEETS;
+        String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
 
         HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", getAuthorizationValue());
 
@@ -695,23 +722,27 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
     }
 
     @Override
-    public void updateGroupProperty(String groupUUID, String property, String newValue, BaseOperateCallback callback) {
+    public void updateGroupProperty(GroupRequestParam groupRequestParam, String property, String newValue, BaseOperateCallback callback) {
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(property, newValue);
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(BOXES + "/" + groupUUID, jsonObject.toString(), getAuthorizationValue());
+        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID();
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequestByCloudAPIWithWrap(httpPath, jsonObject.toString(), groupRequestParam.getStationID());
 
         wrapper.operateCall(httpRequest, callback);
 
     }
 
     @Override
-    public void addUsersInGroup(String groupUUID, List<String> userGUIDs, BaseOperateCallback callback) {
+    public void addUsersInGroup(GroupRequestParam groupRequestParam, List<String> userGUIDs, BaseOperateCallback callback) {
 
         JsonObject root = getAddDeleteUserBody("add", userGUIDs);
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(BOXES + "/" + groupUUID, root.toString(), getAuthorizationValue());
+        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID();
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequestByCloudAPIWithWrap(httpPath, root.toString(), groupRequestParam.getStationID());
 
         wrapper.operateCall(httpRequest, callback);
 
@@ -739,11 +770,13 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
 
     @Override
-    public void deleteUsersInGroup(String groupUUID, List<String> userGUIDs, BaseOperateCallback callback) {
+    public void deleteUsersInGroup(GroupRequestParam groupRequestParam, List<String> userGUIDs, BaseOperateCallback callback) {
 
         JsonObject root = getAddDeleteUserBody("delete", userGUIDs);
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(BOXES + "/" + groupUUID, root.toString(), getAuthorizationValue());
+        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID();
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequestByCloudAPIWithWrap(httpPath, root.toString(), groupRequestParam.getStationID());
 
         wrapper.operateCall(httpRequest, callback);
 

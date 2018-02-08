@@ -13,8 +13,8 @@ public class MediaComment extends TextComment {
 
     private List<Media> medias;
 
-    public MediaComment(String uuid, User creator, long time,String groupUUID, List<Media> medias) {
-        super(uuid,creator, time,groupUUID);
+    public MediaComment(String uuid, User creator, long time,String groupUUID,String stationID, List<Media> medias) {
+        super(uuid,creator, time,groupUUID,stationID);
         this.medias = medias;
     }
 

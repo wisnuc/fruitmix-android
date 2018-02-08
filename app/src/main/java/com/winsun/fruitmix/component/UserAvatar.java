@@ -99,7 +99,7 @@ public class UserAvatar extends FrameLayout {
             if (avatarImageView.getCurrentUrl() != null && url.equals(avatarImageView.getCurrentUrl()))
                 return;
 
-            avatarImageView.setVisibility(GONE);
+            avatarImageView.setVisibility(INVISIBLE);
             avatarTextLayout.setVisibility(VISIBLE);
 
             binding.setUser(user);
@@ -110,7 +110,7 @@ public class UserAvatar extends FrameLayout {
 
                     Log.d(TAG, "onImageLoadFinish: " + url);
 
-                    avatarTextLayout.setVisibility(GONE);
+                    avatarTextLayout.setVisibility(INVISIBLE);
                     avatarImageView.setVisibility(VISIBLE);
 
                 }

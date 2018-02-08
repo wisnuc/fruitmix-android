@@ -70,11 +70,13 @@ public class ContactListActivity extends BaseToolbarActivity implements ContactL
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        purpose = getIntent().getIntExtra(KEY_PURPOSE, -1);
+
         super.onCreate(savedInstanceState);
 
         mContext = this;
 
-        purpose = getIntent().getIntExtra(KEY_PURPOSE, -1);
         String groupUUID;
         if (purpose != CREATE_GROUP) {
             groupUUID = getIntent().getStringExtra(Util.KEY_GROUP_UUID);

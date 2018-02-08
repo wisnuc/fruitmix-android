@@ -18,6 +18,7 @@ import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -118,16 +119,55 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    public void getAllUserCommentByGroupUUID(final String groupUUID, final BaseLoadDataCallback<UserComment> callback) {
+    public PrivateGroup getGroupFromMemory(String groupUUID) {
+        return mPrivateGroups.get(groupUUID);
+    }
+
+    public void deleteGroup(final GroupRequestParam groupRequestParam, final BaseOperateCallback callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                groupDataSource.deleteGroup(groupRequestParam, createOperateCallbackRunOnMainThread(callback));
+            }
+        });
+
+    }
+
+    public void quitGroup(final GroupRequestParam groupRequestParam, final String currentUserGUID, final BaseOperateCallback callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                groupDataSource.quitGroup(groupRequestParam, currentUserGUID, createOperateCallbackRunOnMainThread(callback));
+            }
+        });
+
+    }
+
+    public void getAllUserCommentByGroupUUID(final GroupRequestParam groupRequestParam, final BaseLoadDataCallback<UserComment> callback) {
 
         final BaseLoadDataCallback<UserComment> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.getAllUserCommentByGroupUUID(groupUUID, new BaseLoadDataCallback<UserComment>() {
+                groupDataSource.getAllUserCommentByGroupUUID(groupRequestParam, new BaseLoadDataCallback<UserComment>() {
                     @Override
                     public void onSucceed(List<UserComment> data, OperationResult operationResult) {
+
+                        PrivateGroup group = getGroupFromMemory(groupRequestParam.getGroupUUID());
+
+                        List<User> groupUsers = group.getUsers();
+
+                        for (UserComment userComment : data) {
+
+                            Util.fillUserCommentUser(groupUsers, userComment);
+
+                            userComment.setGroupUUID(group.getUUID());
+                            userComment.setStationID(group.getStationID());
+
+                        }
 
                         runOnMainThreadCallback.onSucceed(data, operationResult);
 
@@ -158,7 +198,7 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    public void insertUserComment(final String groupUUID, final UserComment userComment, BaseOperateCallback callback) {
+    public void insertUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, BaseOperateCallback callback) {
 
         final BaseOperateCallback runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
@@ -166,25 +206,25 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
-                groupDataSource.insertUserComment(groupUUID, userComment, runOnMainThreadCallback);
+                groupDataSource.insertUserComment(groupRequestParam, userComment, runOnMainThreadCallback);
 
             }
         });
 
     }
 
-    public void updateGroupName(final String groupUUID, final String newValue, final BaseOperateCallback callback) {
+    public void updateGroupName(final GroupRequestParam groupRequestParam, final String newValue, final BaseOperateCallback callback) {
 
         final BaseOperateCallback runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.updateGroupProperty(groupUUID, "name", newValue, new BaseOperateCallback() {
+                groupDataSource.updateGroupProperty(groupRequestParam, "name", newValue, new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
 
-                        PrivateGroup group = mPrivateGroups.get(groupUUID);
+                        PrivateGroup group = mPrivateGroups.get(groupRequestParam.getGroupUUID());
 
                         group.setName(newValue);
 
@@ -203,18 +243,18 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    public void addUsersToGroup(final String groupUUID, final List<User> users, final BaseOperateCallback callback) {
+    public void addUsersToGroup(final GroupRequestParam groupRequestParam, final List<User> users, final BaseOperateCallback callback) {
 
         final BaseOperateCallback runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.addUsersInGroup(groupUUID, getSelectedUserGUIDs(users), new BaseOperateCallback() {
+                groupDataSource.addUsersInGroup(groupRequestParam, getSelectedUserGUIDs(users), new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
 
-                        PrivateGroup group = mPrivateGroups.get(groupUUID);
+                        PrivateGroup group = mPrivateGroups.get(groupRequestParam.getGroupUUID());
 
                         group.addUsers(users);
 
@@ -234,18 +274,18 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    public void deleteUsersToGroup(final String groupUUID, final List<User> users, final BaseOperateCallback callback) {
+    public void deleteUsersToGroup(final GroupRequestParam groupRequestParam, final List<User> users, final BaseOperateCallback callback) {
 
         final BaseOperateCallback runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.deleteUsersInGroup(groupUUID, getSelectedUserGUIDs(users), new BaseOperateCallback() {
+                groupDataSource.deleteUsersInGroup(groupRequestParam, getSelectedUserGUIDs(users), new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
 
-                        PrivateGroup group = mPrivateGroups.get(groupUUID);
+                        PrivateGroup group = mPrivateGroups.get(groupRequestParam.getGroupUUID());
 
                         boolean result = group.deleteUsers(users);
 

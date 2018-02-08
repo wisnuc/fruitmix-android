@@ -21,17 +21,21 @@ public interface GroupDataSource {
 
     void getAllGroups(BaseLoadDataCallback<PrivateGroup> callback);
 
+    void deleteGroup(GroupRequestParam groupRequestParam,BaseOperateCallback callback);
+
+    void quitGroup(GroupRequestParam groupRequestParam,String currentUserGUID,BaseOperateCallback callback);
+
     void clearGroups();
 
-    void getAllUserCommentByGroupUUID(String groupUUID, BaseLoadDataCallback<UserComment> callback);
+    void getAllUserCommentByGroupUUID(GroupRequestParam groupRequestParam, BaseLoadDataCallback<UserComment> callback);
 
-    void insertUserComment(String groupUUID, UserComment userComment,BaseOperateCallback callback);
+    void insertUserComment(GroupRequestParam groupRequestParam, UserComment userComment,BaseOperateCallback callback);
 
-    void updateGroupProperty(String groupUUID,String property,String newValue,BaseOperateCallback callback);
+    void updateGroupProperty(GroupRequestParam groupRequestParam,String property,String newValue,BaseOperateCallback callback);
 
-    void addUsersInGroup(String groupUUID,List<String> userGUIDs,BaseOperateCallback callback);
+    void addUsersInGroup(GroupRequestParam groupRequestParam,List<String> userGUIDs,BaseOperateCallback callback);
 
-    void deleteUsersInGroup(String groupUUID,List<String> userGUIDs,BaseOperateCallback callback);
+    void deleteUsersInGroup(GroupRequestParam groupRequestParam,List<String> userGUIDs,BaseOperateCallback callback);
 
     Pin insertPin(String groupUUID, Pin pin);
 

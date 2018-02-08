@@ -27,7 +27,9 @@ import android.view.inputmethod.InputMethodManager;
 import com.github.druk.rxdnssd.BonjourService;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.GravityArcMotion;
+import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.model.LoginType;
+import com.winsun.fruitmix.user.User;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -43,6 +45,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1022,6 +1025,37 @@ public class Util {
 
         return 0;
 
+    }
+
+    public static void fillUserCommentUser(List<User> users,UserComment userComment){
+
+        User commentUser = userComment.getCreator();
+
+        for (User user : users) {
+
+            if (commentUser.getAssociatedWeChatGUID().equals(user.getAssociatedWeChatGUID())) {
+                commentUser.setUserName(user.getUserName());
+                commentUser.setAvatar(user.getAvatar());
+
+                commentUser.setDefaultAvatar(user.getDefaultAvatar());
+                commentUser.setDefaultAvatarBgColor(user.getDefaultAvatarBgColor());
+
+            }
+
+        }
+
+    }
+
+    public static void setUserDefaultAvatar(User user, Random random) {
+        if (user.getDefaultAvatar() == null || user.getDefaultAvatar().isEmpty()) {
+            user.setDefaultAvatar(Util.getUserNameForAvatar(user.getUserName()));
+        }
+        if (user.getDefaultAvatarBgColor() == 0) {
+
+            int avatarBgColor = random.nextInt(3) + 1;
+
+            user.setDefaultAvatarBgColor(avatarBgColor);
+        }
     }
 
 

@@ -53,6 +53,10 @@ public class BottomMenuDialogFactory implements DialogFactory {
         BottomSheetBehavior behavior = BottomSheetBehavior.from(parent);
         behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
+        for (BottomMenuItem bottomMenuItem : bottomMenuItems) {
+            bottomMenuItem.setDialog(bottomSheetDialog);
+        }
+
         return bottomSheetDialog;
     }
 

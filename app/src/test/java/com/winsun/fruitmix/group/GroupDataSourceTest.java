@@ -7,6 +7,7 @@ import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
@@ -35,12 +36,15 @@ public class GroupDataSourceTest {
     }
 
     private String testGroupUuid = "testGroupUuid";
+
+    private String testStationId = "testStationId";
+
     private String testGroupName1 = "testGroupName1";
 
     @Test
     public void testAddGroup() {
 
-        PrivateGroup privateGroup = new PrivateGroup(testGroupUuid, testGroupName1,"testOwnerUUID", Collections.<User>emptyList());
+        PrivateGroup privateGroup = new PrivateGroup(testGroupUuid, testGroupName1,"testOwnerGUID", Collections.<User>emptyList());
 
         groupDataSource.addGroup(privateGroup, new BaseOperateCallback() {
             @Override
@@ -80,7 +84,7 @@ public class GroupDataSourceTest {
 
         testAddGroup();
 
-        groupDataSource.getAllUserCommentByGroupUUID(testGroupUuid, new BaseLoadDataCallback<UserComment>() {
+        groupDataSource.getAllUserCommentByGroupUUID(new GroupRequestParam(testGroupUuid,testStationId), new BaseLoadDataCallback<UserComment>() {
             @Override
             public void onSucceed(List<UserComment> data, OperationResult operationResult) {
 
@@ -104,13 +108,13 @@ public class GroupDataSourceTest {
 
         testAddGroup();
 
-        UserComment userComment = new TextComment(Util.createLocalUUid(),new User(), time, testGroupUuid,testText);
+        UserComment userComment = new TextComment(Util.createLocalUUid(),new User(), time, testGroupUuid,testStationId,testText);
 
-        groupDataSource.insertUserComment(testGroupUuid, userComment, new BaseOperateCallback() {
+        groupDataSource.insertUserComment(new GroupRequestParam(testGroupUuid,testStationId), userComment, new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
-                groupDataSource.getAllUserCommentByGroupUUID(testGroupUuid, new BaseLoadDataCallback<UserComment>() {
+                groupDataSource.getAllUserCommentByGroupUUID(new GroupRequestParam(testGroupUuid,testStationId), new BaseLoadDataCallback<UserComment>() {
                     @Override
                     public void onSucceed(List<UserComment> data, OperationResult operationResult) {
 

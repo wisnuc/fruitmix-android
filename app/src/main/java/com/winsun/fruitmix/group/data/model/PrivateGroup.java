@@ -7,7 +7,6 @@ import com.winsun.fruitmix.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,19 +22,25 @@ public class PrivateGroup {
 
     private List<User> users;
 
-    private String ownerUUID;
+    private String ownerGUID;
 
     private List<UserComment> userComments;
+
+    private String stationID;
+
+    private UserComment lastComment;
+
+    private boolean stationOnline;
 
     private List<Pin> pins;
 
     private long createTime;
     private long modifyTime;
 
-    public PrivateGroup(String uuid, String name, String ownerUUID) {
+    public PrivateGroup(String uuid, String name, String ownerGUID) {
         this.uuid = uuid;
         this.name = name;
-        this.ownerUUID = ownerUUID;
+        this.ownerGUID = ownerGUID;
 
         userComments = new ArrayList<>();
 
@@ -44,10 +49,10 @@ public class PrivateGroup {
         users = new ArrayList<>();
     }
 
-    public PrivateGroup(String uuid, String name, String ownerUUID, List<User> users) {
+    public PrivateGroup(String uuid, String name, String ownerGUID, List<User> users) {
         this.uuid = uuid;
         this.name = name;
-        this.ownerUUID = ownerUUID;
+        this.ownerGUID = ownerGUID;
         this.users = users;
 
         userComments = new ArrayList<>();
@@ -77,10 +82,10 @@ public class PrivateGroup {
             String name = stringBuilder.toString();
             name = name.substring(0, name.length() - 1);
 
-            if (name.length() > 20) {
-                name = name.substring(0, 20);
-                name += context.getString(R.string.android_ellipsize);
-            }
+//            if (name.length() > 10) {
+//                name = name.substring(0, 10);
+//                name += context.getString(R.string.android_ellipsize);
+//            }
 
             return name;
 
@@ -93,8 +98,8 @@ public class PrivateGroup {
         this.name = name;
     }
 
-    public String getOwnerUUID() {
-        return ownerUUID;
+    public String getOwnerGUID() {
+        return ownerGUID;
     }
 
     public List<User> getUsers() {
@@ -113,7 +118,7 @@ public class PrivateGroup {
         users.add(user);
     }
 
-    public boolean deleteUsers(Collection<User> users){
+    public boolean deleteUsers(Collection<User> users) {
         return this.users.removeAll(users);
     }
 
@@ -129,8 +134,15 @@ public class PrivateGroup {
         userComments.addAll(newUserComments);
     }
 
+    public void setLastComment(UserComment lastComment) {
+        this.lastComment = lastComment;
+    }
+
     public UserComment getLastComment() {
-        return userComments.size() > 0 ? userComments.get(userComments.size() - 1) : null;
+//        return userComments.size() > 0 ? userComments.get(userComments.size() - 1) : null;
+
+        return lastComment;
+
     }
 
     public String getLastCommentDate(Context context) {
@@ -142,6 +154,22 @@ public class PrivateGroup {
         } else
             return "";
 
+    }
+
+    public void setStationID(String stationID) {
+        this.stationID = stationID;
+    }
+
+    public String getStationID() {
+        return stationID;
+    }
+
+    public boolean isStationOnline() {
+        return stationOnline;
+    }
+
+    public void setStationOnline(boolean online) {
+        stationOnline = online;
     }
 
     public List<Pin> getPins() {
@@ -203,7 +231,7 @@ public class PrivateGroup {
 
     public PrivateGroup cloneSelf() {
 
-        PrivateGroup privateGroup = new PrivateGroup(getUUID(), getName(), getOwnerUUID(), new ArrayList<>(getUsers()));
+        PrivateGroup privateGroup = new PrivateGroup(getUUID(), getName(), getOwnerGUID(), new ArrayList<>(getUsers()));
 
         privateGroup.addUserComments(getUserComments());
 

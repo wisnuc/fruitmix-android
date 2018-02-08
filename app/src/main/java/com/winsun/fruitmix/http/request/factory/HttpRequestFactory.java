@@ -298,6 +298,14 @@ public class HttpRequestFactory {
 
     }
 
+    public synchronized HttpRequest createHttpGetFileRequestByCloudAPIWithWrap(String httpPath, String stationID) {
+
+        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+
+        return factory.createHttpGetRequest(httpPath, true);
+
+    }
+
     public synchronized HttpRequest createHttpPostRequestByCloudAPIWithWrap(String httpPath, String body, String stationID) {
 
         BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
@@ -488,7 +496,7 @@ public class HttpRequestFactory {
     private BaseAbsHttpRequestFactory getFactoryForBox(String authorizationValue) {
         BaseAbsHttpRequestFactory factory;
 
-        if (checkIsLoginWithWeChatCode()) {
+        if (systemSettingDataSource.getCurrentWAToken().length() > 0) {
             factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), getStationID());
         } else
             factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, authorizationValue));
@@ -503,13 +511,15 @@ public class HttpRequestFactory {
 
     }
 
-    public synchronized HttpRequest createHttpPatchRequest(String httpPath, String body, String authorizationValue) {
+    public synchronized HttpRequest createHttpDeleteRequest(String httpPath, String body, String authorizationValue) {
 
         BaseAbsHttpRequestFactory factory = getFactoryForBox(authorizationValue);
 
-        return factory.createHttpPatchRequest(httpPath, body);
+        return factory.createHttpDeleteRequest(httpPath, body);
 
     }
+
+
 
 
     private String getTokenWithPrefix() {

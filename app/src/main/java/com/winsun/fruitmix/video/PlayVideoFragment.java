@@ -148,7 +148,8 @@ public class PlayVideoFragment {
 //                HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),
 //                        Util.KEY_JWT_HEAD + ((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken());
 
-                HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath());
+                HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequestByCloudAPIWithWrap(
+                        fileDownloadParam.getFileDownloadPath(),((FileFromBoxDownloadParam) fileDownloadParam).getStationID());
 
                 startPlayVideo(httpRequest);
 

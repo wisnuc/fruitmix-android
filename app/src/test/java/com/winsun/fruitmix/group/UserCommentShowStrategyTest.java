@@ -20,16 +20,16 @@ public class UserCommentShowStrategyTest {
     @Test
     public void testCurrentUserShowStrategy() {
 
-        String currentUserUUID = "testCurrentUserUUID";
+        String currentUserGUID = "testCurrentUserUUID";
 
         User user = new User();
-        user.setUuid(currentUserUUID);
+        user.setAssociatedWeChatGUID(currentUserGUID);
 
-        UserComment preUserComment = new UserComment(Util.createLocalUUid(), user, 0,"");
+        UserComment preUserComment = new UserComment(Util.createLocalUUid(), user, 0,"","");
 
-        UserComment currentUserComment = new UserComment(Util.createLocalUUid(), user, 0,"");
+        UserComment currentUserComment = new UserComment(Util.createLocalUUid(), user, 0,"","");
 
-        userCommentShowStrategy = new UserCommentShowStrategy(preUserComment, currentUserComment, currentUserUUID);
+        userCommentShowStrategy = new UserCommentShowStrategy(preUserComment, currentUserComment, currentUserGUID);
 
         assertFalse(userCommentShowStrategy.isShowLeft());
 
@@ -38,16 +38,16 @@ public class UserCommentShowStrategyTest {
     @Test
     public void testCurrentUserCommentNotEqualsPreUserComment() {
 
-        String preCommentCreatorUUID = "testPreCommentCreatorUUID";
-        String currentCommentCreatorUUID = "testCurrentCommentCreatorUUID";
+        String preCommentCreatorGUID = "testPreCommentCreatorGUID";
+        String currentCommentCreatorGUID = "testCurrentCommentCreatorGUID";
 
         User preCreator = new User();
-        preCreator.setUuid(preCommentCreatorUUID);
+        preCreator.setAssociatedWeChatGUID(preCommentCreatorGUID);
 
         User currentCreator = new User();
-        currentCreator.setUuid(currentCommentCreatorUUID);
+        currentCreator.setAssociatedWeChatGUID(currentCommentCreatorGUID);
 
-        userCommentShowStrategy = new UserCommentShowStrategy(new UserComment(Util.createLocalUUid(), preCreator, 0,""), new UserComment(Util.createLocalUUid(), currentCreator, 0,""), currentCommentCreatorUUID);
+        userCommentShowStrategy = new UserCommentShowStrategy(new UserComment(Util.createLocalUUid(), preCreator, 0,"",""), new UserComment(Util.createLocalUUid(), currentCreator, 0,"",""), currentCommentCreatorGUID);
 
         assertShowUserInfo();
 
@@ -56,7 +56,7 @@ public class UserCommentShowStrategyTest {
     @Test
     public void testFirstUserComment() {
 
-        userCommentShowStrategy = new UserCommentShowStrategy(null, new UserComment(Util.createLocalUUid(), new User(), 0,""), "");
+        userCommentShowStrategy = new UserCommentShowStrategy(null, new UserComment(Util.createLocalUUid(), new User(), 0,"",""), "");
 
         assertShowUserInfo();
 

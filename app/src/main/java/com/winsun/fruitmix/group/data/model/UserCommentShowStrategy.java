@@ -14,23 +14,23 @@ public class UserCommentShowStrategy {
 
     private boolean showLeft = false;
 
-    public UserCommentShowStrategy(UserComment preComment, UserComment currentComment, String currentUserUUID) {
+    public UserCommentShowStrategy(UserComment preComment, UserComment currentComment, String currentUserGUID) {
 
-        refreshStrategy(preComment, currentComment, currentUserUUID);
+        refreshStrategy(preComment, currentComment, currentUserGUID);
     }
 
     //use strategy to determine show or not
 
-    private void refreshStrategy(UserComment preComment, UserComment currentComment, String currentUserUUID) {
+    private void refreshStrategy(UserComment preComment, UserComment currentComment, String currentUserGUID) {
 
-        showLeft = !currentComment.getCreator().getUuid().equals(currentUserUUID);
+        showLeft = !currentComment.getCreator().getAssociatedWeChatGUID().equals(currentUserGUID);
 
         if (preComment == null) {
             showUserInfo();
             return;
         }
 
-        if (preComment.getCreator().getUuid().equals(currentComment.getCreator().getUuid())) {
+        if (preComment.getCreator().getAssociatedWeChatGUID().equals(currentComment.getCreator().getAssociatedWeChatGUID())) {
             dismissUserInfo();
         } else {
             showUserInfo();

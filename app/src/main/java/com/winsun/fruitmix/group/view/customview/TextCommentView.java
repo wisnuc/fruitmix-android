@@ -4,6 +4,7 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.winsun.fruitmix.databinding.TextCommentBinding;
@@ -22,9 +23,9 @@ public class TextCommentView extends UserCommentView {
     private TextCommentBinding binding;
 
     @Override
-    protected View generateContentView(Context context) {
+    protected View generateContentView(Context context, ViewGroup parent) {
 
-        binding = TextCommentBinding.inflate(LayoutInflater.from(context), null, false);
+        binding = TextCommentBinding.inflate(LayoutInflater.from(context), parent, false);
 
         return binding.getRoot();
 

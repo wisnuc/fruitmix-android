@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -8,13 +9,16 @@
             name="privateGroup"
             type="com.winsun.fruitmix.group.data.model.PrivateGroup" />
 
+        <import type="android.view.View" />
+
     </data>
 
     <RelativeLayout
+        android:id="@+id/group_list_item_root_layout"
         android:layout_width="match_parent"
         android:layout_height="72dp"
         android:layout_marginTop="8dp"
-        android:clickable="true">
+        android:clickable="@{privateGroup.isStationOnline()}">
 
         <com.szysky.customize.siv.SImageView
             android:id="@+id/user_icon_view"
@@ -23,49 +27,71 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="16dp" />
 
-        <RelativeLayout
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_toRightOf="@id/user_icon_view">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/group_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@{privateGroup.getNameWithHandleEmptyName(context),default=大学同学}"
+                android:textColor="@color/eighty_seven_percent_black"
+                android:textSize="16dp"
+                app:layout_constraintBottom_toTopOf="@+id/last_comment_content"
+                app:layout_constraintEnd_toStartOf="@+id/textView28"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/last_comment_content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/group_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{privateGroup.getNameWithHandleEmptyName(context),default=大学同学}"
-                    android:textColor="@color/eighty_seven_percent_black"
-                    android:textSize="16dp" />
-
-                <TextView
-                    android:id="@+id/last_comment_content"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="@color/fifty_four_percent_black"
-                    android:textSize="14dp"
-                    tools:text="[照片]" />
-
-            </LinearLayout>
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="8dp"
+                android:textColor="@color/fifty_four_percent_black"
+                android:textSize="14dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/group_name"
+                tools:text="[照片]" />
 
 
             <TextView
+                android:id="@+id/textView27"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
+                android:layout_height="15dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:gravity="center"
                 android:text="@{privateGroup.getLastCommentDate(context),default=刚刚}"
                 android:textColor="@color/thirty_eight_percent_black"
-                android:textSize="12dp" />
+                android:textSize="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/group_name" />
 
-        </RelativeLayout>
+            <TextView
+                android:id="@+id/textView28"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:visibility="@{privateGroup.isStationOnline()?View.VISIBLE:View.INVISIBLE}"
+                app:layout_constraintEnd_toStartOf="@+id/textView27"
+                app:layout_constraintTop_toTopOf="@+id/group_name"
+                android:text="@string/station_offline" />
+
+        </android.support.constraint.ConstraintLayout>
 
         <View
             android:layout_width="match_parent"

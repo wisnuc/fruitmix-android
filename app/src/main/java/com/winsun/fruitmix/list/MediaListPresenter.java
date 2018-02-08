@@ -17,6 +17,7 @@ import com.winsun.fruitmix.databinding.ActivityMediaListBinding;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
 import com.winsun.fruitmix.group.data.model.MediaComment;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
@@ -41,6 +42,8 @@ public class MediaListPresenter {
 
     private String groupUUID;
 
+    private String stationID;
+
     private ImageLoader mImageLoader;
 
     private MediaListAdapter mMediaListAdapter;
@@ -57,7 +60,11 @@ public class MediaListPresenter {
     public MediaListPresenter(ActivityBaseToolbarBinding activityBaseToolbarBinding, MediaComment mediaComment, ImageLoader imageLoader, Activity activity) {
         mActivityBaseToolbarBinding = activityBaseToolbarBinding;
         mMedias = mediaComment.getMedias();
+
         groupUUID = mediaComment.getGroupUUID();
+
+        stationID = mediaComment.getStationID();
+
         mImageLoader = imageLoader;
 
         mMediaListAdapter = new MediaListAdapter();
@@ -148,7 +155,7 @@ public class MediaListPresenter {
 
             Context context = binding.getRoot().getContext();
 
-            MediaUtil.setMediaImageUrl(media, binding.photoIv, media.getImageThumbUrl(context, groupUUID), mImageLoader);
+            MediaUtil.setMediaImageUrl(media, binding.photoIv, media.getImageThumbUrl(context, new GroupRequestParam(groupUUID,stationID)), mImageLoader);
 
             int temporaryPosition = 0;
 
@@ -161,7 +168,7 @@ public class MediaListPresenter {
                 public void onClick(View v) {
 
                     PhotoSliderActivity.startPhotoSliderActivity(mActivityBaseToolbarBinding.toolbarLayout.toolbar,containerActivity,medias,
-                            groupUUID,SPAN_COUNT,binding.photoIv,media);
+                            groupUUID,stationID,SPAN_COUNT,binding.photoIv,media);
 
                 }
             });

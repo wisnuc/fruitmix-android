@@ -19,13 +19,13 @@ public class ContactDataRepository extends BaseDataRepository implements Contact
     }
 
     @Override
-    public void getContacts(final BaseLoadDataCallback<User> callback) {
+    public void getContacts(final String currentUserGUID,final BaseLoadDataCallback<User> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
 
-                mContactRemoteDataSource.getContacts(createLoadCallbackRunOnMainThread(callback));
+                mContactRemoteDataSource.getContacts(currentUserGUID,createLoadCallbackRunOnMainThread(callback));
 
             }
         });

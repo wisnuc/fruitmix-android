@@ -55,6 +55,7 @@ import com.winsun.fruitmix.dialog.PhotoOperationAlertDialogFactory;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.gif.GifLoader;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.media.InjectMedia;
@@ -124,6 +125,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private int currentPhotoPosition = 0;
 
     private String groupUUID;
+
+    private String stationID;
 
     private List<MediaViewModel> mediaViewModelsAlreadyLoaded;
 
@@ -212,7 +215,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private HttpRequest getMediaThumbHttpRequest(Media media) {
         HttpRequest httpRequest;
         if (groupUUID != null)
-            httpRequest = media.getImageThumbUrl(mContext, groupUUID);
+            httpRequest = media.getImageThumbUrl(mContext, new GroupRequestParam(groupUUID,stationID));
         else
             httpRequest = media.getImageThumbUrl(mContext);
         return httpRequest;
@@ -221,14 +224,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private HttpRequest getMediaOriginalHttpRequest(Media media) {
         HttpRequest httpRequest;
         if (groupUUID != null)
-            httpRequest = media.getImageOriginalUrl(mContext, groupUUID);
+            httpRequest = media.getImageOriginalUrl(mContext, new GroupRequestParam(groupUUID,stationID));
         else
             httpRequest = media.getImageOriginalUrl(mContext);
         return httpRequest;
     }
 
     public static void startPhotoSliderActivity(View toolbar, Activity activity, List<Media> transitionMedias,
-                                                String groupUUID,int spanCount, NetworkImageView transitionView, Media currentMedia){
+                                                String groupUUID,String stationID,int spanCount, NetworkImageView transitionView, Media currentMedia){
 
         int initialPhotoPosition = getMediaPosition(transitionMedias, currentMedia);
 
@@ -239,7 +242,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
 
         PhotoSliderActivity.startPhotoSliderActivity(toolbar, activity, mediaViewModels,
-                groupUUID,initialPhotoPosition, initialPhotoPosition, spanCount, transitionView, currentMedia);
+                groupUUID,stationID,initialPhotoPosition, initialPhotoPosition, spanCount, transitionView, currentMedia);
 
     }
 
@@ -261,13 +264,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
 
     private static void startPhotoSliderActivity(View toolbar, Activity activity, List<MediaViewModel> transitionMediaViewModels,
-                                                String groupUUID, int initialPhotoPosition,
+                                                String groupUUID, String stationID,int initialPhotoPosition,
                                                 int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
         setMediaViewModels(transitionMediaViewModels);
 
         Intent intent = new Intent();
         intent.putExtra(Util.KEY_GROUP_UUID, groupUUID);
+        intent.putExtra(KEY_STATION_ID,stationID);
 
         startPhotoSliderActivity(toolbar, activity, intent, initialPhotoPosition, motionPosition, spanCount, transitionView, currentMedia);
 
@@ -342,6 +346,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private Map<Integer, PlayVideoFragment> playVideoFragments;
     private int currentItem;
 
+    public static final String KEY_STATION_ID = "key_station_id";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -391,6 +397,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         boolean mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
 
         groupUUID = getIntent().getStringExtra(Util.KEY_GROUP_UUID);
+
+        stationID = getIntent().getStringExtra(KEY_STATION_ID);
 
         mediaViewModelsAlreadyLoaded = new ArrayList<>();
 
@@ -1033,14 +1041,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         if (screenWidth / screenHeight > mediaWidth / mediaHeight) {
 
             if (groupUUID != null)
-                httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight, groupUUID);
+                httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight, new GroupRequestParam(groupUUID,stationID));
             else
                 httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight);
 
         } else {
 
             if (groupUUID != null)
-                httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1, groupUUID);
+                httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1, new GroupRequestParam(groupUUID,stationID));
             else
                 httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1);
 

@@ -16,14 +16,20 @@ import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallbackWrapper;
+import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.databinding.AddReduceGroupMemberItemBinding;
 import com.winsun.fruitmix.databinding.GroupMemberItemBinding;
+import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
+import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.ViewItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,14 +56,25 @@ public class GroupSettingPresenter implements ActiveView {
 
     private GroupMemberRecyclerViewAdapter mGroupMemberRecyclerViewAdapter;
 
+    private PrivateGroup mPrivateGroup;
+
+    private User mCurrentUser;
+
+    private ToolbarViewModel mToolbarViewModel;
+
     public GroupSettingPresenter(GroupSettingViewModel groupSettingViewModel, GroupRepository groupRepository,
-                                 String groupUUID, ImageLoader imageLoader, GroupSettingView groupSettingView) {
+                                 String groupUUID, ImageLoader imageLoader, GroupSettingView groupSettingView,
+                                 User currentUser, ToolbarViewModel toolbarViewModel) {
 
         mGroupSettingViewModel = groupSettingViewModel;
         mGroupRepository = groupRepository;
         mImageLoader = imageLoader;
         mGroupSettingView = groupSettingView;
         mGroupUUID = groupUUID;
+
+        mCurrentUser = currentUser;
+
+        mToolbarViewModel = toolbarViewModel;
 
         mGroupMemberRecyclerViewAdapter = new GroupMemberRecyclerViewAdapter();
 
@@ -74,7 +91,18 @@ public class GroupSettingPresenter implements ActiveView {
                     @Override
                     public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
 
-                        refreshViewAfterGetGroup(data.get(0));
+                        mPrivateGroup = data.get(0);
+
+                        mToolbarViewModel.showMenu.set(true);
+
+                        mToolbarViewModel.setToolbarMenuBtnOnClickListener(new ToolbarViewModel.ToolbarMenuBtnOnClickListener() {
+                            @Override
+                            public void onClick() {
+                                menuBtnOnClick();
+                            }
+                        });
+
+                        refreshViewAfterGetGroup(mPrivateGroup);
 
                     }
 
@@ -125,7 +153,67 @@ public class GroupSettingPresenter implements ActiveView {
 
     }
 
+    private void menuBtnOnClick() {
+
+        List<BottomMenuItem> bottomMenuItems = new ArrayList<>();
+
+        if (checkIsOwner()) {
+
+            BottomMenuItem deleteGroupItem = new BottomMenuItem(R.drawable.delete_download_task, mGroupSettingView.getString(R.string.delete_group), new AbstractCommand() {
+                @Override
+                public void execute() {
+
+                    deleteGroup();
+
+                }
+
+                @Override
+                public void unExecute() {
+
+                }
+            });
+
+            bottomMenuItems.add(deleteGroupItem);
+
+        } else {
+
+            BottomMenuItem dropOutGroupItem = new BottomMenuItem(R.drawable.delete_download_task, mGroupSettingView.getString(R.string.quit_group), new AbstractCommand() {
+                @Override
+                public void execute() {
+
+                    quitGroup();
+
+                }
+
+                @Override
+                public void unExecute() {
+
+                }
+            });
+
+            bottomMenuItems.add(dropOutGroupItem);
+        }
+
+
+        new BottomMenuDialogFactory(bottomMenuItems).createDialog(mGroupSettingView.getContext()).show();
+
+    }
+
+    private boolean checkIsOwner() {
+
+        return mCurrentUser.getAssociatedWeChatGUID().equals(mPrivateGroup.getOwnerGUID());
+
+    }
+
     public void modifyGroupName() {
+
+        if (!checkIsOwner()) {
+
+            mGroupSettingView.showToast(mGroupSettingView.getString(R.string.no_operate_group_permission));
+
+            return;
+
+        }
 
         final EditText editText = new EditText(mGroupSettingView.getContext());
 
@@ -153,7 +241,9 @@ public class GroupSettingPresenter implements ActiveView {
 
         mGroupSettingView.showProgressDialog(mGroupSettingView.getString(R.string.operating_title, mGroupSettingView.getString(R.string.modify_group_name)));
 
-        mGroupRepository.updateGroupName(mGroupUUID, newName, new BaseOperateCallback() {
+        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(), mPrivateGroup.getStationID());
+
+        mGroupRepository.updateGroupName(groupRequestParam, newName, new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
@@ -177,6 +267,71 @@ public class GroupSettingPresenter implements ActiveView {
         });
 
     }
+
+    private void deleteGroup() {
+
+        mGroupSettingView.showProgressDialog(mGroupSettingView.getString(R.string.operating_title, mGroupSettingView.getString(R.string.delete_group)));
+
+        mGroupRepository.deleteGroup(new GroupRequestParam(mGroupUUID, mPrivateGroup.getStationID()), new BaseOperateCallbackWrapper(
+                new BaseOperateCallback() {
+                    @Override
+                    public void onSucceed() {
+
+                        mGroupSettingView.dismissDialog();
+
+                        mGroupSettingView.showToast(mGroupSettingView.getString(R.string.success, mGroupSettingView.getString(R.string.delete_group)));
+
+                        mGroupSettingView.setResult(GroupSettingActivity.RESULT_DELETE_OR_QUIT_GROUP);
+
+                        mGroupSettingView.finishView();
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        mGroupSettingView.dismissDialog();
+
+                        mGroupSettingView.showToast(operationResult.getResultMessage(mGroupSettingView.getContext()));
+
+                    }
+                }, this
+        ));
+
+    }
+
+    private void quitGroup() {
+
+        mGroupSettingView.showProgressDialog(mGroupSettingView.getString(R.string.operating_title, mGroupSettingView.getString(R.string.quit_group)));
+
+        mGroupRepository.quitGroup(new GroupRequestParam(mGroupUUID, mPrivateGroup.getStationID()),mCurrentUser.getAssociatedWeChatGUID(), new BaseOperateCallbackWrapper(
+                new BaseOperateCallback() {
+                    @Override
+                    public void onSucceed() {
+
+                        mGroupSettingView.dismissDialog();
+
+                        mGroupSettingView.showToast(mGroupSettingView.getString(R.string.success, mGroupSettingView.getString(R.string.quit_group)));
+
+                        mGroupSettingView.setResult(GroupSettingActivity.RESULT_DELETE_OR_QUIT_GROUP);
+
+                        mGroupSettingView.finishView();
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        mGroupSettingView.dismissDialog();
+
+                        mGroupSettingView.showToast(operationResult.getResultMessage(mGroupSettingView.getContext()));
+
+                    }
+                }, this
+        ));
+
+    }
+
 
 
     @Override
@@ -310,6 +465,14 @@ public class GroupSettingPresenter implements ActiveView {
                     @Override
                     public void onClick(View v) {
 
+                        if (!checkIsOwner()) {
+
+                            mGroupSettingView.showToast(mGroupSettingView.getString(R.string.no_operate_group_permission));
+
+                            return;
+
+                        }
+
                         mGroupSettingView.addUserBtnOnClick();
 
                     }
@@ -323,6 +486,14 @@ public class GroupSettingPresenter implements ActiveView {
                 mAddReduceGroupMemberItemBinding.getRoot().setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
+                        if (!checkIsOwner()) {
+
+                            mGroupSettingView.showToast(mGroupSettingView.getString(R.string.no_operate_group_permission));
+
+                            return;
+
+                        }
 
                         mGroupSettingView.deleteUserBtnOnClick();
 

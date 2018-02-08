@@ -1,7 +1,9 @@
 package com.winsun.fruitmix.group.setting;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -13,17 +15,27 @@ import android.view.ViewGroup;
 
 import com.winsun.fruitmix.BaseToolbarActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.contact.ContactListActivity;
 import com.winsun.fruitmix.databinding.ActivityGroupSettingBinding;
+import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.model.BottomMenuItem;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
+
+import java.util.Collections;
 
 public class GroupSettingActivity extends BaseToolbarActivity implements GroupSettingView {
 
     public static final int RESULT_MODIFY_GROUP_INFO = 0x1001;
+
+    public static final int RESULT_DELETE_OR_QUIT_GROUP = 0x1002;
 
     private ActivityGroupSettingBinding mActivityGroupSettingBinding;
 
@@ -56,10 +68,13 @@ public class GroupSettingActivity extends BaseToolbarActivity implements GroupSe
         membersRecyclerView.setLayoutManager(new GridLayoutManager(this, MEMBER_SPAN_COUNT));
         membersRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
+        User currentUser = InjectUser.provideRepository(this).
+                getUserByUUID(InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginUserUUID());
+
         mGroupSettingPresenter = new GroupSettingPresenter(groupSettingViewModel,
                 InjectGroupDataSource.provideGroupRepository(this), mGroupUUID,
                 InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this),
-                this);
+                this,currentUser,toolbarViewModel);
 
         mActivityGroupSettingBinding.setGroupSettingPresenter(mGroupSettingPresenter);
 
@@ -114,7 +129,7 @@ public class GroupSettingActivity extends BaseToolbarActivity implements GroupSe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == ContactListActivity.MODIFY_GROUP_USERS_REQUEST_CODE && resultCode == RESULT_OK){
+        if (requestCode == ContactListActivity.MODIFY_GROUP_USERS_REQUEST_CODE && resultCode == RESULT_OK) {
 
             mGroupSettingPresenter.refreshView();
 
@@ -122,6 +137,7 @@ public class GroupSettingActivity extends BaseToolbarActivity implements GroupSe
 
         }
 
-
     }
+
+
 }

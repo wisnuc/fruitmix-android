@@ -24,12 +24,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/group_recyclerview"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/white"
-            android:visibility="@{groupListViewModel.showRecyclerView?View.VISIBLE:View.GONE,default=gone}" />
+            android:layout_height="match_parent">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/group_recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/white"
+                    android:visibility="@{groupListViewModel.showRecyclerView?View.VISIBLE:View.INVISIBLE,default=invisible}" />
+
+                <include
+                    layout="@layout/new_no_content_layout"
+                    app:noContentViewModel="@{noContentViewModel}" />
+
+            </FrameLayout>
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/add_friend"
@@ -42,10 +59,6 @@
             android:visibility="@{groupListViewModel.showAddFriendsFAB?View.VISIBLE:View.GONE,default=gone}"
             app:borderWidth="0dp"
             app:fabSize="normal" />
-
-        <include
-            layout="@layout/new_no_content_layout"
-            app:noContentViewModel="@{noContentViewModel}" />
 
         <include
             layout="@layout/new_loading_layout"

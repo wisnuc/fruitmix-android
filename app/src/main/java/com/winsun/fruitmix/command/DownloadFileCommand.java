@@ -39,6 +39,8 @@ public class DownloadFileCommand extends AbstractCommand {
 
     private String boxUUID;
 
+    private String stationID;
+
     private String fileHash;
 
     private String cloudToken;
@@ -60,7 +62,7 @@ public class DownloadFileCommand extends AbstractCommand {
 
     public DownloadFileCommand(FileTaskManager fileTaskManager, String fileHash, AbstractRemoteFile abstractRemoteFile,
                                StationFileRepository stationFileRepository, NetworkStateManager networkStateManager,
-                               String currentUserUUID, String boxUUID, String cloudToken) {
+                               String currentUserUUID, String boxUUID, String stationID,String cloudToken) {
         this.fileHash = fileHash;
         this.abstractRemoteFile = abstractRemoteFile;
         this.fileTaskManager = fileTaskManager;
@@ -69,6 +71,7 @@ public class DownloadFileCommand extends AbstractCommand {
         this.networkStateManager = networkStateManager;
         this.currentUserUUID = currentUserUUID;
         this.boxUUID = boxUUID;
+        this.stationID = stationID;
 
         this.cloudToken = cloudToken;
     }
@@ -78,7 +81,7 @@ public class DownloadFileCommand extends AbstractCommand {
 
         if (boxUUID != null) {
 
-            FileDownloadParam fileDownloadParam = new FileFromBoxDownloadParam(boxUUID, fileHash, cloudToken);
+            FileDownloadParam fileDownloadParam = new FileFromBoxDownloadParam(boxUUID, stationID,fileHash, cloudToken);
 
             fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), abstractRemoteFile.getSize(), fileHash,
                     fileDownloadParam);

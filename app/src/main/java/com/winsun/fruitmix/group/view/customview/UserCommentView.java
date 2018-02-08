@@ -4,6 +4,7 @@ import android.content.Context;
 import android.databinding.ViewDataBinding;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,21 +27,21 @@ public abstract class UserCommentView {
 
     private BaseLeftCommentBinding viewDataBinding;
 
-    public ViewDataBinding getViewDataBinding(Context context) {
+    public ViewDataBinding getViewDataBinding(Context context, ViewGroup parent) {
 
-        viewDataBinding = BaseLeftCommentBinding.inflate(LayoutInflater.from(context), null, false);
+        viewDataBinding = BaseLeftCommentBinding.inflate(LayoutInflater.from(context), parent, false);
 
         View view = viewDataBinding.getRoot();
 
         FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.comment_content);
 
-        frameLayout.addView(generateContentView(context));
+        frameLayout.addView(generateContentView(context,frameLayout));
 
         return viewDataBinding;
 
     }
 
-    protected abstract View generateContentView(Context context);
+    protected abstract View generateContentView(Context context,ViewGroup parent);
 
     public void refreshCommentView(Context context, View toolbar, UserCommentShowStrategy strategy, UserComment data) {
 

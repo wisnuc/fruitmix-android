@@ -9,8 +9,6 @@ import com.winsun.fruitmix.user.User;
 
 public interface ContactDataSource {
 
-    void getContacts(BaseLoadDataCallback<User> callback);
-
-
+    void getContacts(String currentUserGUID,BaseLoadDataCallback<User> callback);
 
 }

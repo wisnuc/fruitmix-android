@@ -24,13 +24,15 @@ public class UserComment {
 
     private String groupUUID;
 
-    public UserComment(String uuid, User creator, long time, String groupUUID) {
+    private String stationID;
+
+    public UserComment(String uuid, User creator, long time, String groupUUID,String stationID) {
 
         this.uuid = uuid;
         this.creator = creator;
         this.time = time;
         this.groupUUID = groupUUID;
-
+        this.stationID = stationID;
     }
 
     public String getUuid() {
@@ -55,6 +57,14 @@ public class UserComment {
 
     public void setGroupUUID(String groupUUID) {
         this.groupUUID = groupUUID;
+    }
+
+    public String getStationID() {
+        return stationID;
+    }
+
+    public void setStationID(String stationID) {
+        this.stationID = stationID;
     }
 
     public User getCreator() {

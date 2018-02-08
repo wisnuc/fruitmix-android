@@ -24,6 +24,7 @@ import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
 import com.winsun.fruitmix.group.data.model.UserCommentViewFactory;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
 import com.winsun.fruitmix.group.usecase.PlayAudioUseCase;
 import com.winsun.fruitmix.group.view.GroupContentView;
@@ -64,6 +65,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private String groupUUID;
 
+    private String stationID;
+
 //    private PrivateGroup currentPrivateGroup;
 
     private LoadingViewModel mLoadingViewModel;
@@ -75,6 +78,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
     private List<UserComment> userComments;
 
     private UserDataRepository mUserDataRepository;
+
+    private PrivateGroup mPrivateGroup;
 
     public GroupContentPresenter(GroupContentView groupContentView, String groupUUID,
                                  UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
@@ -119,8 +124,6 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
         refreshTitle();
 
-        refreshGroup();
-
     }
 
     public void refreshTitle(){
@@ -129,15 +132,19 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             @Override
             public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
 
-                PrivateGroup group = data.get(0);
+                mPrivateGroup = data.get(0);
 
-                String groupName = group.getName();
+                stationID = mPrivateGroup.getStationID();
+
+                String groupName = mPrivateGroup.getName();
 
                 if (groupName.isEmpty()) {
-                    groupName = groupContentView.getString(R.string.group_chat, group.getUsers().size());
+                    groupName = groupContentView.getString(R.string.group_chat, mPrivateGroup.getUsers().size());
                 }
 
                 mToolbarViewModel.titleText.set(groupName);
+
+                refreshGroup();
 
             }
 
@@ -151,21 +158,15 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private void refreshGroup() {
 
-        groupRepository.getAllUserCommentByGroupUUID(groupUUID, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<UserComment>() {
+        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(),mPrivateGroup.getStationID());
+
+        groupRepository.getAllUserCommentByGroupUUID(groupRequestParam, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<UserComment>() {
             @Override
             public void onSucceed(List<UserComment> data, OperationResult operationResult) {
 
                 mLoadingViewModel.showLoading.set(false);
 
                 userComments = data;
-
-                for (UserComment userComment : userComments) {
-
-                    User user = mUserDataRepository.getUserByGUID(userComment.getCreator().getAssociatedWeChatGUID());
-                    userComment.setCreator(user);
-                    userComment.setGroupUUID(groupUUID);
-
-                }
 
                 refreshUserComment();
 
@@ -269,11 +270,11 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
             UserCommentView userCommentView = factory.createUserCommentView(viewType);
 
-            ViewDataBinding viewDataBinding = userCommentView.getViewDataBinding(parent.getContext());
+            ViewDataBinding viewDataBinding = userCommentView.getViewDataBinding(parent.getContext(),parent);
 
             return new UserCommentViewHolder(viewDataBinding.getRoot(), userCommentView);
-        }
 
+        }
 
         @Override
         public void onBindViewHolder(UserCommentViewHolder holder, int position) {
@@ -288,7 +289,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
             currentUserComment = mUserComments.get(position);
 
-            UserCommentShowStrategy userCommentShowStrategy = new UserCommentShowStrategy(preUserComment, currentUserComment, currentLoggedInUser.getUuid());
+            UserCommentShowStrategy userCommentShowStrategy = new UserCommentShowStrategy(preUserComment, currentUserComment, currentLoggedInUser.getAssociatedWeChatGUID());
 
             holder.userCommentView.refreshCommentView(groupContentView.getContext(), groupContentView.getToolbar(), userCommentShowStrategy, currentUserComment);
 
@@ -323,7 +324,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void sendTxt(String text) {
 
-        TextComment textComment = new TextComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), groupUUID, text);
+        TextComment textComment = new TextComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), groupUUID, stationID,text);
 
         insertUserComment(textComment);
 
@@ -331,7 +332,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void sendAudio(String filePath, long audioRecordTime) {
 
-        AudioComment audioComment = new AudioComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), groupUUID, filePath, audioRecordTime);
+        AudioComment audioComment = new AudioComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), groupUUID,
+                stationID,filePath, audioRecordTime);
 
         insertUserComment(audioComment);
 
@@ -339,7 +341,9 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private void insertUserComment(final UserComment userComment) {
 
-        groupRepository.insertUserComment(groupUUID, userComment, new BaseOperateCallback() {
+        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(),mPrivateGroup.getStationID());
+
+        groupRepository.insertUserComment(groupRequestParam, userComment, new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 

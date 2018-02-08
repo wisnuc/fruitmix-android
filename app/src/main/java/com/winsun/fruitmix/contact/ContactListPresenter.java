@@ -20,6 +20,7 @@ import com.winsun.fruitmix.contact.data.ContactDataSource;
 import com.winsun.fruitmix.databinding.ContactListItemBinding;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
@@ -57,6 +58,8 @@ public class ContactListPresenter implements ActiveView {
     private int mPurpose;
     private String mGroupUUID;
 
+    private PrivateGroup mPrivateGroup;
+
     private List<User> mSelectedUsers;
 
     private List<User> mAlreadySelectedUsers;
@@ -83,6 +86,7 @@ public class ContactListPresenter implements ActiveView {
 
         mAlreadySelectedUsers = new ArrayList<>();
 
+        mPrivateGroup = mGroupRepository.getGroupFromMemory(groupUUID);
     }
 
     public ContactRecyclerViewAdapter getContactRecyclerViewAdapter() {
@@ -129,7 +133,9 @@ public class ContactListPresenter implements ActiveView {
 
         mContactListView.showProgressDialog(mContactListView.getString(R.string.operating_title, mContactListView.getString(R.string.add_contact)));
 
-        mGroupRepository.addUsersToGroup(mGroupUUID, mSelectedUsers, new BaseOperateCallbackWrapper(
+        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(), mPrivateGroup.getStationID());
+
+        mGroupRepository.addUsersToGroup(groupRequestParam, mSelectedUsers, new BaseOperateCallbackWrapper(
                 new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
@@ -161,7 +167,9 @@ public class ContactListPresenter implements ActiveView {
 
         mContactListView.showProgressDialog(mContactListView.getString(R.string.operating_title, mContactListView.getString(R.string.delete_contact)));
 
-        mGroupRepository.deleteUsersToGroup(mGroupUUID, mSelectedUsers, new BaseOperateCallbackWrapper(
+        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(), mPrivateGroup.getStationID());
+
+        mGroupRepository.deleteUsersToGroup(groupRequestParam, mSelectedUsers, new BaseOperateCallbackWrapper(
                 new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
@@ -208,7 +216,7 @@ public class ContactListPresenter implements ActiveView {
                             while (userIterator.hasNext()) {
                                 User user = userIterator.next();
 
-                                if (user.getUuid().equals(mCurrentUser.getUuid())) {
+                                if (user.getAssociatedWeChatGUID().equals(mCurrentUser.getAssociatedWeChatGUID())) {
                                     userIterator.remove();
                                     break;
                                 }
@@ -268,7 +276,7 @@ public class ContactListPresenter implements ActiveView {
     }
 
     private void getContact() {
-        mContactDataSource.getContacts(new BaseLoadDataCallbackWrapper<>(
+        mContactDataSource.getContacts(mCurrentUser.getAssociatedWeChatGUID(),new BaseLoadDataCallbackWrapper<>(
 
                 new BaseLoadDataCallback<User>() {
                     @Override
@@ -280,7 +288,7 @@ public class ContactListPresenter implements ActiveView {
 
                         for (User user : data) {
 
-                            if (user.isBoundedWeChat() && !user.getUuid().equals(mCurrentUser.getUuid()))
+                            if (user.isBoundedWeChat() && !user.getAssociatedWeChatGUID().equals(mCurrentUser.getAssociatedWeChatGUID()))
                                 availableUsers.add(user);
 
                         }

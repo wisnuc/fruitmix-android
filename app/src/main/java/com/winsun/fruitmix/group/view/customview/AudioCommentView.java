@@ -5,6 +5,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -36,9 +37,9 @@ public class AudioCommentView extends UserCommentView {
     }
 
     @Override
-    protected View generateContentView(Context context) {
+    protected View generateContentView(Context context, ViewGroup parent) {
 
-        binding = AudioCommentItemBinding.inflate(LayoutInflater.from(context), null, false);
+        binding = AudioCommentItemBinding.inflate(LayoutInflater.from(context), parent, false);
 
         audioTimeTextView = new TextView(context);
         audioTimeTextView.setTextColor(ContextCompat.getColor(context, R.color.thirty_eight_percent_black));

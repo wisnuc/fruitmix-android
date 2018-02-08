@@ -131,8 +131,11 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 //            httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),
 //                    Util.KEY_JWT_HEAD + ((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken());
 
-            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
-                    getAuthorizationValue(((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken()));
+//            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
+//                    getAuthorizationValue(((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken()));
+
+            httpRequest = httpRequestFactory.createHttpGetFileRequestByCloudAPIWithWrap(
+                    fileDownloadParam.getFileDownloadPath(),((FileFromBoxDownloadParam) fileDownloadParam).getStationID());
 
         } else {
 

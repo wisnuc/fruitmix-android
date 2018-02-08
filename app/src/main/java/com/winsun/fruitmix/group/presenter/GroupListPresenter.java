@@ -1,20 +1,20 @@
 package com.winsun.fruitmix.group.presenter;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.szysky.customize.siv.ImageLoader;
 import com.szysky.customize.siv.SImageView;
-import com.szysky.customize.siv.util.LogUtil;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.GroupListItemBinding;
+import com.winsun.fruitmix.group.data.model.FileComment;
+import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
@@ -23,12 +23,9 @@ import com.winsun.fruitmix.group.data.viewmodel.GroupListViewModel;
 import com.winsun.fruitmix.group.view.GroupListPageView;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -133,20 +130,34 @@ public class GroupListPresenter implements ActiveView {
 
         }
 
-
     }
 
     public void refreshGroups() {
+
+        if (mSystemSettingDataSource.getCurrentWAToken().isEmpty()) {
+
+            loadingViewModel.showLoading.set(false);
+
+            noContentViewModel.setNoContentText(groupListPageView.getString(R.string.login_with_wechat_to_use_group));
+            noContentViewModel.showNoContent.set(true);
+
+            groupListViewModel.showRecyclerView.set(false);
+            groupListViewModel.showAddFriendsFAB.set(false);
+
+            return;
+        }
 
         groupRepository.getGroupList(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<PrivateGroup>() {
             @Override
             public void onSucceed(final List<PrivateGroup> data, OperationResult operationResult) {
 
+                groupListPageView.finishSwipeRefreshAnimation();
+
                 loadingViewModel.showLoading.set(false);
 
                 if (data.size() > 0) {
 
-                    for (PrivateGroup group : data) {
+                    /*for (PrivateGroup group : data) {
 
                         List<User> users = group.getUsers();
                         List<User> usersWithInfo = new ArrayList<>(users.size());
@@ -163,7 +174,7 @@ public class GroupListPresenter implements ActiveView {
                         group.clearUsers();
                         group.addUsers(usersWithInfo);
 
-                    }
+                    }*/
 
                     noContentViewModel.showNoContent.set(false);
 
@@ -177,6 +188,7 @@ public class GroupListPresenter implements ActiveView {
                     noContentViewModel.showNoContent.set(true);
 
                     groupListViewModel.showRecyclerView.set(false);
+
                 }
 
                 groupListViewModel.showAddFriendsFAB.set(false);
@@ -186,12 +198,13 @@ public class GroupListPresenter implements ActiveView {
             @Override
             public void onFail(OperationResult operationResult) {
 
+                groupListPageView.finishSwipeRefreshAnimation();
+
                 loadingViewModel.showLoading.set(false);
                 noContentViewModel.showNoContent.set(true);
 
                 groupListViewModel.showRecyclerView.set(false);
                 groupListViewModel.showAddFriendsFAB.set(false);
-
 
             }
         }, this));
@@ -236,9 +249,10 @@ public class GroupListPresenter implements ActiveView {
             holder.getViewDataBinding().executePendingBindings();
 
             GroupListItemBinding binding = (GroupListItemBinding) holder.getViewDataBinding();
+
             binding.lastCommentContent.setText(getLastCommentContent(privateGroup));
 
-            holder.getViewDataBinding().getRoot().setOnClickListener(new View.OnClickListener() {
+            binding.groupListItemRootLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
@@ -249,13 +263,15 @@ public class GroupListPresenter implements ActiveView {
 
             SImageView sImageView = binding.userIconView;
 
-            int size = privateGroup.getUsers().size();
+            List<User> users = privateGroup.getUsers();
+
+            int size = users.size();
 
             List<String> avatarUrls = new ArrayList<>(size);
 
-            for (int i = 0;i < size;i++) {
+            for (User user : users) {
 
-                avatarUrls.add("https://picsum.photos/200/300?image="+i);
+                avatarUrls.add(user.getAvatar());
 
             }
 
@@ -274,11 +290,24 @@ public class GroupListPresenter implements ActiveView {
 
         UserComment userComment = privateGroup.getLastComment();
 
-        if (userComment != null && userComment instanceof TextComment) {
+        if (userComment != null) {
 
-            TextComment textComment = (TextComment) userComment;
+            if (userComment instanceof MediaComment) {
 
-            return textComment.getCreator().getUserName() + ":" + textComment.getText();
+                return "[" + groupListPageView.getString(R.string.photo) + "]";
+
+            } else if (userComment instanceof FileComment) {
+
+                return "[" + groupListPageView.getString(R.string.files) + "]";
+
+            } else {
+
+                TextComment textComment = (TextComment) userComment;
+
+                return textComment.getCreator().getUserName() + ":" + textComment.getText();
+
+            }
+
         } else {
             return "";
         }

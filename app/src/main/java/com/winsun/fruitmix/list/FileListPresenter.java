@@ -87,6 +87,8 @@ public class FileListPresenter {
 
     private String groupUUID;
 
+    private String stationID;
+
     private DownloadFileCommand mCurrentDownloadFileCommand;
 
     private String cloudToken;
@@ -97,6 +99,8 @@ public class FileListPresenter {
         mAbstractFiles = fileComment.getFiles();
 
         groupUUID = fileComment.getGroupUUID();
+
+        stationID = fileComment.getStationID();
 
         this.cloudToken = cloudToken;
 
@@ -243,7 +247,7 @@ public class FileListPresenter {
                         AbstractCommand macroCommand = new MacroCommand();
                         AbstractCommand downloadFileCommand = new DownloadFileCommand(mFileTaskManager,
                                 abstractRemoteFile.getFileHash(),abstractRemoteFile, mStationFileRepository,
-                                mNetworkStateManager, currentUserUUID, groupUUID,cloudToken);
+                                mNetworkStateManager, currentUserUUID, groupUUID,stationID,cloudToken);
                         macroCommand.addCommand(downloadFileCommand);
                         macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
 
@@ -273,7 +277,7 @@ public class FileListPresenter {
                         if (FileUtil.checkFileIsVideo(abstractRemoteFile.getName())) {
 
                             PlayVideoActivity.startPlayVideoActivity(mActivity,
-                                    new FileFromBoxDownloadParam(groupUUID, abstractRemoteFile.getFileHash(),cloudToken));
+                                    new FileFromBoxDownloadParam(groupUUID, stationID,abstractRemoteFile.getFileHash(),cloudToken));
 
                             return;
                         }
@@ -327,7 +331,7 @@ public class FileListPresenter {
         }
 
         mCurrentDownloadFileCommand = new DownloadFileCommand(mFileTaskManager, abstractRemoteFile.getFileHash(),abstractRemoteFile, mStationFileRepository,
-                mNetworkStateManager, currentUserUUID, groupUUID,cloudToken);
+                mNetworkStateManager, currentUserUUID, groupUUID,stationID,cloudToken);
 
         currentDownloadFileProgressDialog = new ProgressDialog(activity);
 
@@ -432,7 +436,7 @@ public class FileListPresenter {
         MacroCommand macroCommand = new MacroCommand();
 
         AbstractCommand downloadFileCommand = new DownloadFileCommand(mFileTaskManager, abstractRemoteFile.getFileHash(),abstractRemoteFile, mStationFileRepository,
-                mNetworkStateManager, currentUserUUID, groupUUID,cloudToken);
+                mNetworkStateManager, currentUserUUID, groupUUID,stationID,cloudToken);
         macroCommand.addCommand(downloadFileCommand);
         macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
 

@@ -23,8 +23,10 @@ import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
 import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.MediaComment;
+import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
@@ -77,6 +79,10 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
     private String groupUUID;
 
+    private String stationID;
+
+    private PrivateGroup mPrivateGroup;
+
     private boolean showMedia;
 
     private boolean createComment;
@@ -111,6 +117,10 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
                 .getCurrentLoginUserUUID());
 
         groupUUID = getIntent().getStringExtra(Util.KEY_GROUP_UUID);
+
+        mPrivateGroup = groupDataSource.getGroupFromMemory(groupUUID);
+
+        stationID = mPrivateGroup.getStationID();
 
         createComment = getIntent().getBooleanExtra(KEY_CREATE_COMMENT, true);
 
@@ -370,13 +380,15 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
             userComment = createFileComment();
         }
 
-        showProgressDialog(getString(R.string.operating_title, "发送"));
+        showProgressDialog(getString(R.string.operating_title, getString(R.string.send)));
 
-        groupDataSource.insertUserComment(groupUUID, userComment, new BaseOperateCallback() {
+        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(),mPrivateGroup.getStationID());
+
+        groupDataSource.insertUserComment(groupRequestParam, userComment, new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
-                showToast(getString(R.string.success, "发送"));
+                showToast(getString(R.string.success, getString(R.string.send)));
 
                 NewPicChooseActivity.this.setResult(RESULT_OK);
 
@@ -412,7 +424,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //            userComment = new MultiFileComment(currentUser, System.currentTimeMillis(), selectFiles);
 //        }
 
-        userComment = new FileComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID, files);
+        userComment = new FileComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID,stationID, files);
 
         return userComment;
     }
@@ -435,7 +447,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //            userComment = new MultiPhotoComment(currentUser, System.currentTimeMillis(), selectMedias);
 //        }
 
-        userComment = new MediaComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID, medias);
+        userComment = new MediaComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID,stationID, medias);
 
         return userComment;
 
