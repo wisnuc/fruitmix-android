@@ -29,6 +29,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.GravityArcMotion;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.model.LoginType;
+import com.winsun.fruitmix.user.DefaultCommentUser;
 import com.winsun.fruitmix.user.User;
 
 import java.io.FileInputStream;
@@ -1027,11 +1028,17 @@ public class Util {
 
     }
 
-    public static void fillUserCommentUser(List<User> users,UserComment userComment){
+    public static void fillUserCommentUser(List<User> users, UserComment userComment) {
 
         User commentUser = userComment.getCreator();
 
-        for (User user : users) {
+        int size = users.size();
+
+        int position = 0;
+
+        for (; position < size; position++) {
+
+            User user = users.get(position);
 
             if (commentUser.getAssociatedWeChatGUID().equals(user.getAssociatedWeChatGUID())) {
                 commentUser.setUserName(user.getUserName());
@@ -1040,7 +1047,17 @@ public class Util {
                 commentUser.setDefaultAvatar(user.getDefaultAvatar());
                 commentUser.setDefaultAvatarBgColor(user.getDefaultAvatarBgColor());
 
+                break;
             }
+
+        }
+
+        if (position >= size) {
+
+            User defaultCommentUser = new DefaultCommentUser();
+            defaultCommentUser.setAssociatedWeChatGUID(commentUser.getAssociatedWeChatGUID());
+
+            userComment.setCreator(new DefaultCommentUser());
 
         }
 

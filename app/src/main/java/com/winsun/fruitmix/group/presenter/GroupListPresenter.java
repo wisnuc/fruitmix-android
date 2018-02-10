@@ -13,15 +13,19 @@ import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.GroupListItemBinding;
+import com.winsun.fruitmix.eventbus.MqttMessageEvent;
 import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.SystemMessageTextComment;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.viewmodel.GroupListViewModel;
 import com.winsun.fruitmix.group.view.GroupListPageView;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.mqtt.MqttUseCase;
+import com.winsun.fruitmix.parser.RemoteGroupParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.token.TokenDataSource;
 import com.winsun.fruitmix.user.User;
@@ -29,6 +33,8 @@ import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,11 +65,13 @@ public class GroupListPresenter implements ActiveView {
 
     private SystemSettingDataSource mSystemSettingDataSource;
 
+    private MqttUseCase mMqttUseCase;
+
     public GroupListPresenter(GroupListPageView groupListPageView, User currentUser,
                               TokenDataSource tokenDataSource, GroupRepository groupRepository,
                               LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel,
                               GroupListViewModel groupListViewModel, UserDataRepository userDataRepository,
-                              SystemSettingDataSource systemSettingDataSource) {
+                              SystemSettingDataSource systemSettingDataSource, MqttUseCase mqttUseCase) {
         this.groupRepository = groupRepository;
         mCurrentUser = currentUser;
         mTokenDataSource = tokenDataSource;
@@ -77,14 +85,12 @@ public class GroupListPresenter implements ActiveView {
 
         mSystemSettingDataSource = systemSettingDataSource;
 
+        mMqttUseCase = mqttUseCase;
+
         groupListAdapter = new GroupListAdapter();
 
         ImageLoader.getInstance(groupListPageView.getContext()).setPicUrlRegex("https?://.*?");
 
-    }
-
-    public void onDestroyView() {
-        groupListPageView = null;
     }
 
     public GroupListAdapter getGroupListAdapter() {
@@ -193,6 +199,8 @@ public class GroupListPresenter implements ActiveView {
 
                 groupListViewModel.showAddFriendsFAB.set(false);
 
+                initMqttService();
+
             }
 
             @Override
@@ -206,10 +214,46 @@ public class GroupListPresenter implements ActiveView {
                 groupListViewModel.showRecyclerView.set(false);
                 groupListViewModel.showAddFriendsFAB.set(false);
 
+                initMqttService();
+
             }
         }, this));
 
     }
+
+    private void initMqttService() {
+
+        mMqttUseCase.initMqttClient(groupListPageView.getContext(), mCurrentUser.getAssociatedWeChatGUID());
+
+    }
+
+    public void onDestroyView() {
+        groupListPageView = null;
+    }
+
+    public void handleMqttMessageEvent(MqttMessageEvent mqttMessageEvent) {
+
+        String message = mqttMessageEvent.getMessage();
+
+        try {
+
+            List<PrivateGroup> newGroups = new RemoteGroupParser().parse(message);
+
+            groupRepository.refreshGroupInMemory(newGroups);
+
+            refreshGroupUsingMemoryCache();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void refreshGroupUsingMemoryCache() {
+        groupListAdapter.setPrivateGroups(groupRepository.getAllGroupFromMemory());
+        groupListAdapter.notifyDataSetChanged();
+    }
+
 
     @Override
     public boolean isActive() {
@@ -301,6 +345,9 @@ public class GroupListPresenter implements ActiveView {
                 return "[" + groupListPageView.getString(R.string.files) + "]";
 
             } else {
+
+                if (userComment instanceof SystemMessageTextComment)
+                    return "";
 
                 TextComment textComment = (TextComment) userComment;
 

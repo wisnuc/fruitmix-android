@@ -125,6 +125,8 @@ public class GroupSettingPresenter implements ActiveView {
             mGroupSettingViewModel.groupName.set(group.getName());
         }
 
+        mGroupSettingViewModel.deviceName.set(group.getStationName());
+
         List<User> users = group.getUsers();
 
         int userSize = users.size();
@@ -304,7 +306,7 @@ public class GroupSettingPresenter implements ActiveView {
 
         mGroupSettingView.showProgressDialog(mGroupSettingView.getString(R.string.operating_title, mGroupSettingView.getString(R.string.quit_group)));
 
-        mGroupRepository.quitGroup(new GroupRequestParam(mGroupUUID, mPrivateGroup.getStationID()),mCurrentUser.getAssociatedWeChatGUID(), new BaseOperateCallbackWrapper(
+        mGroupRepository.quitGroup(new GroupRequestParam(mGroupUUID, mPrivateGroup.getStationID()), mCurrentUser.getAssociatedWeChatGUID(), new BaseOperateCallbackWrapper(
                 new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
@@ -331,7 +333,6 @@ public class GroupSettingPresenter implements ActiveView {
         ));
 
     }
-
 
 
     @Override

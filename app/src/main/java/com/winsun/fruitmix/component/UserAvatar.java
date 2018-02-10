@@ -20,6 +20,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.UserAvatarBinding;
 import com.winsun.fruitmix.invitation.ConfirmInviteUser;
+import com.winsun.fruitmix.user.DefaultCommentUser;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
@@ -78,8 +79,18 @@ public class UserAvatar extends FrameLayout {
 
         if (url.equals(User.DEFAULT_AVATAR) || !Patterns.WEB_URL.matcher(url).matches()) {
 
+            if(user instanceof DefaultCommentUser){
+
+                avatarImageView.setVisibility(VISIBLE);
+                avatarTextLayout.setVisibility(INVISIBLE);
+
+                avatarImageView.setImageResource(R.drawable.default_img);
+
+                return;
+            }
+
             avatarTextLayout.setVisibility(VISIBLE);
-            avatarImageView.setVisibility(GONE);
+            avatarImageView.setVisibility(INVISIBLE);
 
             binding.setUser(user);
 

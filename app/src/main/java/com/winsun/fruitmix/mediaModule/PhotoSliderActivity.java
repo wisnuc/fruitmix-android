@@ -215,7 +215,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private HttpRequest getMediaThumbHttpRequest(Media media) {
         HttpRequest httpRequest;
         if (groupUUID != null)
-            httpRequest = media.getImageThumbUrl(mContext, new GroupRequestParam(groupUUID,stationID));
+            httpRequest = media.getImageThumbUrl(mContext, new GroupRequestParam(groupUUID, stationID));
         else
             httpRequest = media.getImageThumbUrl(mContext);
         return httpRequest;
@@ -224,14 +224,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private HttpRequest getMediaOriginalHttpRequest(Media media) {
         HttpRequest httpRequest;
         if (groupUUID != null)
-            httpRequest = media.getImageOriginalUrl(mContext, new GroupRequestParam(groupUUID,stationID));
+            httpRequest = media.getImageOriginalUrl(mContext, new GroupRequestParam(groupUUID, stationID));
         else
             httpRequest = media.getImageOriginalUrl(mContext);
         return httpRequest;
     }
 
     public static void startPhotoSliderActivity(View toolbar, Activity activity, List<Media> transitionMedias,
-                                                String groupUUID,String stationID,int spanCount, NetworkImageView transitionView, Media currentMedia){
+                                                String groupUUID, String stationID, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
         int initialPhotoPosition = getMediaPosition(transitionMedias, currentMedia);
 
@@ -242,7 +242,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
 
         PhotoSliderActivity.startPhotoSliderActivity(toolbar, activity, mediaViewModels,
-                groupUUID,stationID,initialPhotoPosition, initialPhotoPosition, spanCount, transitionView, currentMedia);
+                groupUUID, stationID, initialPhotoPosition, initialPhotoPosition, spanCount, transitionView, currentMedia);
 
     }
 
@@ -264,14 +264,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
 
     private static void startPhotoSliderActivity(View toolbar, Activity activity, List<MediaViewModel> transitionMediaViewModels,
-                                                String groupUUID, String stationID,int initialPhotoPosition,
-                                                int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
+                                                 String groupUUID, String stationID, int initialPhotoPosition,
+                                                 int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
         setMediaViewModels(transitionMediaViewModels);
 
         Intent intent = new Intent();
         intent.putExtra(Util.KEY_GROUP_UUID, groupUUID);
-        intent.putExtra(KEY_STATION_ID,stationID);
+        intent.putExtra(KEY_STATION_ID, stationID);
 
         startPhotoSliderActivity(toolbar, activity, intent, initialPhotoPosition, motionPosition, spanCount, transitionView, currentMedia);
 
@@ -739,7 +739,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         resetMediaLoadedState();
 
-        if (needTransition) {
+        if (needTransition && groupUUID == null) {
             supportFinishAfterTransition();
         } else
             finish();
@@ -1041,14 +1041,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         if (screenWidth / screenHeight > mediaWidth / mediaHeight) {
 
             if (groupUUID != null)
-                httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight, new GroupRequestParam(groupUUID,stationID));
+                httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight, new GroupRequestParam(groupUUID, stationID));
             else
                 httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight);
 
         } else {
 
             if (groupUUID != null)
-                httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1, new GroupRequestParam(groupUUID,stationID));
+                httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1, new GroupRequestParam(groupUUID, stationID));
             else
                 httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1);
 

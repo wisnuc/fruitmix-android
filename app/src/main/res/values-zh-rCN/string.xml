@@ -583,6 +583,13 @@
     <string name="add_contact">添加联系人</string>
     <string name="delete_contact">删除联系人</string>
 
+    <string name="send_file">发送文件</string>
+    <string name="send_media">发送照片</string>
+
+    <string name="create_group_message">私友群已建立，你可以分享照片和文件给群友</string>
+    <string name="add_user_message">%1$s邀请了%2$s加入群</string>
+    <string name="change_group_name_message">%1$s将群名修改为\"%2$s\"</string>
+    
     <!-- group setting -->
     <string name="group_member">群成员</string>
     <string name="check_more_group_members">查看更多群员</string>
@@ -609,6 +616,10 @@
     <string name="login_with_wechat_to_use_group">请用微信登录以使用群功能</string>
 
     <string name="station_offline">[离线]</string>
+
+    <string name="quited_user">退群用户</string>
+
+    <string name="only_support_upload_for_one_local_media">目前仅支持上传一张本地照片</string>
 
     <!-- inbox -->
     <string name="inbox">收件箱</string>

@@ -24,6 +24,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -54,7 +55,7 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
 
     private boolean mediaDataChanged = false;
 
-    private List<CalcMediaDigestStrategy.CalcMediaDigestCallback> calcMediaDigestCallbacks;
+    private final List<CalcMediaDigestStrategy.CalcMediaDigestCallback> calcMediaDigestCallbacks;
 
     public static MediaDataSourceRepositoryImpl getInstance(LocalMediaRepository localMediaRepository, StationMediaRepository stationMediaRepository,
                                                             CalcMediaDigestStrategy calcMediaDigestStrategy, ThreadManager threadManager) {
@@ -86,14 +87,22 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
     @Override
     public void registerCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback) {
 
-        calcMediaDigestCallbacks.add(calcMediaDigestCallback);
+        synchronized (calcMediaDigestCallbacks){
+
+            calcMediaDigestCallbacks.add(calcMediaDigestCallback);
+
+        }
 
     }
 
     @Override
     public void unregisterCalcDigestCallback(CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback) {
 
-        calcMediaDigestCallbacks.remove(calcMediaDigestCallback);
+        synchronized (calcMediaDigestCallbacks){
+
+            calcMediaDigestCallbacks.remove(calcMediaDigestCallback);
+
+        }
 
     }
 
@@ -146,10 +155,14 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
                 @Override
                 public void handleFinished() {
 
-                    for (CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback : calcMediaDigestCallbacks) {
+                    synchronized (calcMediaDigestCallbacks){
 
-                        if (calcMediaDigestCallback != null)
-                            calcMediaDigestCallback.handleFinished();
+                        for (CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback : calcMediaDigestCallbacks) {
+
+                            if (calcMediaDigestCallback != null)
+                                calcMediaDigestCallback.handleFinished();
+
+                        }
 
                     }
 
@@ -158,10 +171,14 @@ public class MediaDataSourceRepositoryImpl extends BaseDataRepository implements
                 @Override
                 public void handleNothing() {
 
-                    for (CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback : calcMediaDigestCallbacks) {
+                    synchronized (calcMediaDigestCallbacks){
 
-                        if (calcMediaDigestCallback != null)
-                            calcMediaDigestCallback.handleNothing();
+                        for (CalcMediaDigestStrategy.CalcMediaDigestCallback calcMediaDigestCallback : calcMediaDigestCallbacks) {
+
+                            if (calcMediaDigestCallback != null)
+                                calcMediaDigestCallback.handleNothing();
+
+                        }
 
                     }
 

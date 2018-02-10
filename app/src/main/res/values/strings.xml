@@ -610,6 +610,13 @@
     <string name="add_contact">Add contact</string>
     <string name="delete_contact">Delete contact</string>
 
+    <string name="send_file">Send file</string>
+    <string name="send_media">Send media</string>
+
+    <string name="create_group_message">Box has been established, you can share photos and documents to the box of friends</string>
+    <string name="add_user_message">%1$s invite %2$s into box</string>
+    <string name="change_group_name_message">%1$s modify box name to \"%2$s\"</string>
+
     <!-- group setting -->
     <string name="group_member">Group Members</string>
     <string name="check_more_group_members">Check more group members</string>
@@ -636,6 +643,10 @@
     <string name="login_with_wechat_to_use_group">Please log in with WeChat to use group</string>
 
     <string name="station_offline">[Offline]</string>
+
+    <string name="quited_user">Quited user</string>
+
+    <string name="only_support_upload_for_one_local_media">Currently only support for uploading a local photo</string>
 
     <!-- inbox -->
     <string name="inbox">Inbox</string>

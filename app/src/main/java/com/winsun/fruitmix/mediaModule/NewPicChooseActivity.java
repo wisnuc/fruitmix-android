@@ -170,6 +170,8 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
         mNewPhotoList.setSelectMode(true);
         mNewPhotoList.setAlreadySelectedImageKeysFromChooseActivity(alreadySelectedImageKeyArrayList);
 
+        mNewPhotoList.setSelectForCreateComment(true);
+
         mNewPhotoList.setPhotoListListener(this);
     }
 
@@ -382,7 +384,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         showProgressDialog(getString(R.string.operating_title, getString(R.string.send)));
 
-        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(),mPrivateGroup.getStationID());
+        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(), mPrivateGroup.getStationID());
 
         groupDataSource.insertUserComment(groupRequestParam, userComment, new BaseOperateCallback() {
             @Override
@@ -424,7 +426,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //            userComment = new MultiFileComment(currentUser, System.currentTimeMillis(), selectFiles);
 //        }
 
-        userComment = new FileComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID,stationID, files);
+        userComment = new FileComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID, stationID, files);
 
         return userComment;
     }
@@ -447,7 +449,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //            userComment = new MultiPhotoComment(currentUser, System.currentTimeMillis(), selectMedias);
 //        }
 
-        userComment = new MediaComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID,stationID, medias);
+        userComment = new MediaComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID, stationID, medias);
 
         return userComment;
 

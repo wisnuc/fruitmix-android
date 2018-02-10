@@ -25,7 +25,9 @@ public class UserCommentShowStrategy {
 
         showLeft = !currentComment.getCreator().getAssociatedWeChatGUID().equals(currentUserGUID);
 
-        if (preComment == null) {
+        showUserInfo();
+
+/*        if (preComment == null) {
             showUserInfo();
             return;
         }
@@ -34,7 +36,7 @@ public class UserCommentShowStrategy {
             dismissUserInfo();
         } else {
             showUserInfo();
-        }
+        }*/
 
     }
 

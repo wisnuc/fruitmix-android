@@ -6,6 +6,7 @@ import com.winsun.fruitmix.group.usecase.PlayAudioUseCase;
 import com.winsun.fruitmix.group.view.customview.AudioCommentView;
 import com.winsun.fruitmix.group.view.customview.MultiFileCommentView;
 import com.winsun.fruitmix.group.view.customview.SingleFileCommentView;
+import com.winsun.fruitmix.group.view.customview.SystemMessageTextCommentView;
 import com.winsun.fruitmix.group.view.customview.TextCommentView;
 import com.winsun.fruitmix.group.view.customview.UserCommentView;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -44,6 +45,8 @@ public class UserCommentViewFactory {
     private static final int TYPE_SINGLE_FILE = 4;
     private static final int TYPE_MULTIPLE_FILE = 5;
 
+    private static final int TYPE_SYSTEM_MESSAGE_TEXT = 6;
+
     public int getUserCommentViewType(UserComment userComment) {
 
         if (userComment instanceof AudioComment)
@@ -66,7 +69,11 @@ public class UserCommentViewFactory {
             else
                 return TYPE_SINGLE_FILE;
 
-        } else if (userComment instanceof TextComment)
+        } else if(userComment instanceof SystemMessageTextComment){
+
+            return TYPE_SYSTEM_MESSAGE_TEXT;
+
+        }else if (userComment instanceof TextComment)
             return TYPE_TEXT;
         else
             return TYPE_OTHER;
@@ -83,6 +90,8 @@ public class UserCommentViewFactory {
             return new MultiFileCommentView(imageLoader);
         else if (type == TYPE_SINGLE_FILE)
             return new SingleFileCommentView(imageLoader);
+        else if(type == TYPE_SYSTEM_MESSAGE_TEXT)
+            return new SystemMessageTextCommentView();
         else
             return null;
 

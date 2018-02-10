@@ -59,6 +59,8 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.mqtt.InjectMqttUseCase;
+import com.winsun.fruitmix.mqtt.MqttUseCase;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -334,6 +336,8 @@ public class NavPagerActivity extends BaseActivity
 
     private ThreadManager threadManager;
 
+    private MqttUseCase mMqttUseCase;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -440,6 +444,8 @@ public class NavPagerActivity extends BaseActivity
 
             }
         });
+
+        mMqttUseCase = InjectMqttUseCase.provideInstance(this);
 
     }
 
@@ -723,6 +729,9 @@ public class NavPagerActivity extends BaseActivity
         uploadMediaUseCase.unregisterUploadMediaCountChangeListener(this);
 
         mainPagePresenter.onDestroy();
+
+        mMqttUseCase.stopMqtt();
+        MqttUseCase.destroyInstance();
 
         mContext = null;
 

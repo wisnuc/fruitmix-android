@@ -32,6 +32,8 @@ public class PrivateGroup {
 
     private boolean stationOnline;
 
+    private String stationName;
+
     private List<Pin> pins;
 
     private long createTime;
@@ -149,7 +151,9 @@ public class PrivateGroup {
 
         UserComment userComment = getLastComment();
 
-        if (userComment != null) {
+        if (userComment instanceof SystemMessageTextComment)
+            return "";
+        else if (userComment != null) {
             return userComment.getDate(context);
         } else
             return "";
@@ -170,6 +174,14 @@ public class PrivateGroup {
 
     public void setStationOnline(boolean online) {
         stationOnline = online;
+    }
+
+    public String getStationName() {
+        return stationName != null ? stationName : "";
+    }
+
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
     }
 
     public List<Pin> getPins() {

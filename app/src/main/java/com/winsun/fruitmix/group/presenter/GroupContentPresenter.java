@@ -13,12 +13,13 @@ import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
-import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.databinding.GroupAddPingItemBinding;
 import com.winsun.fruitmix.databinding.GroupPingItemBinding;
+import com.winsun.fruitmix.eventbus.MqttMessageEvent;
 import com.winsun.fruitmix.group.data.model.AudioComment;
 import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.SystemMessageTextComment;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
@@ -30,8 +31,8 @@ import com.winsun.fruitmix.group.usecase.PlayAudioUseCase;
 import com.winsun.fruitmix.group.view.GroupContentView;
 import com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton;
 import com.winsun.fruitmix.group.view.customview.UserCommentView;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.parser.RemoteGroupParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
@@ -39,6 +40,9 @@ import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,10 +85,12 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private PrivateGroup mPrivateGroup;
 
+    public static final int RESULT_GROUP_REFRESH = 0x1001;
+
     public GroupContentPresenter(GroupContentView groupContentView, String groupUUID,
                                  UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
                                  GroupRepository groupRepository, GroupContentViewModel groupContentViewModel,
-                                 LoadingViewModel loadingViewModel,ToolbarViewModel toolbarViewModel,
+                                 LoadingViewModel loadingViewModel, ToolbarViewModel toolbarViewModel,
                                  ImageLoader imageLoader, PlayAudioUseCase playAudioUseCase) {
 
         mLoadingViewModel = loadingViewModel;
@@ -124,41 +130,28 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
         refreshTitle();
 
+        refreshGroup();
     }
 
-    public void refreshTitle(){
+    public void refreshTitle() {
 
-        groupRepository.getGroupFromMemory(groupUUID, new BaseLoadDataCallback<PrivateGroup>() {
-            @Override
-            public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
+        mPrivateGroup = groupRepository.getGroupFromMemory(groupUUID);
 
-                mPrivateGroup = data.get(0);
+        stationID = mPrivateGroup.getStationID();
 
-                stationID = mPrivateGroup.getStationID();
+        String groupName = mPrivateGroup.getName();
 
-                String groupName = mPrivateGroup.getName();
+        if (groupName.isEmpty()) {
+            groupName = groupContentView.getString(R.string.group_chat, mPrivateGroup.getUsers().size());
+        }
 
-                if (groupName.isEmpty()) {
-                    groupName = groupContentView.getString(R.string.group_chat, mPrivateGroup.getUsers().size());
-                }
-
-                mToolbarViewModel.titleText.set(groupName);
-
-                refreshGroup();
-
-            }
-
-            @Override
-            public void onFail(OperationResult operationResult) {
-
-            }
-        });
+        mToolbarViewModel.titleText.set(groupName);
 
     }
 
     private void refreshGroup() {
 
-        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(),mPrivateGroup.getStationID());
+        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(), mPrivateGroup.getStationID());
 
         groupRepository.getAllUserCommentByGroupUUID(groupRequestParam, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<UserComment>() {
             @Override
@@ -194,6 +187,40 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         groupContentAdapter.notifyDataSetChanged();
 
         smoothToChatListEnd();
+    }
+
+    public void handleMqttMessage(MqttMessageEvent mqttMessageEvent) {
+
+        String message = mqttMessageEvent.getMessage();
+
+        try {
+
+            List<PrivateGroup> newGroups = new RemoteGroupParser().parse(message);
+
+            for (PrivateGroup group : newGroups) {
+
+                groupRepository.refreshGroupInMemory(newGroups);
+
+                if (group.getUUID().equals(groupUUID)) {
+
+                    refreshTitle();
+
+                    if (group.getLastComment().getIndex() > mPrivateGroup.getLastComment().getIndex()) {
+
+                        refreshGroup();
+
+                    }
+
+                }
+
+            }
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     public void refreshPin() {
@@ -261,8 +288,34 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         }
 
         void setUserComments(List<UserComment> userComments) {
+
             mUserComments.clear();
-            mUserComments.addAll(userComments);
+
+            for (UserComment userComment : userComments) {
+
+                if (userComment instanceof SystemMessageTextComment) {
+
+                    SystemMessageTextComment systemMessageTextComment = (SystemMessageTextComment) userComment;
+
+                    try {
+                        JSONObject commentJson = new JSONObject(systemMessageTextComment.getText());
+
+                        String op = commentJson.optString("op");
+
+                        if (!op.equals("deleteUser")) {
+                            mUserComments.add(userComment);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+                } else
+                    mUserComments.add(userComment);
+
+            }
+
         }
 
         @Override
@@ -270,7 +323,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
             UserCommentView userCommentView = factory.createUserCommentView(viewType);
 
-            ViewDataBinding viewDataBinding = userCommentView.getViewDataBinding(parent.getContext(),parent);
+            ViewDataBinding viewDataBinding = userCommentView.getViewDataBinding(parent.getContext(), parent);
 
             return new UserCommentViewHolder(viewDataBinding.getRoot(), userCommentView);
 
@@ -324,7 +377,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void sendTxt(String text) {
 
-        TextComment textComment = new TextComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), groupUUID, stationID,text);
+        TextComment textComment = new TextComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), groupUUID, stationID, text);
 
         insertUserComment(textComment);
 
@@ -333,7 +386,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
     public void sendAudio(String filePath, long audioRecordTime) {
 
         AudioComment audioComment = new AudioComment(Util.createLocalUUid(), currentLoggedInUser, System.currentTimeMillis(), groupUUID,
-                stationID,filePath, audioRecordTime);
+                stationID, filePath, audioRecordTime);
 
         insertUserComment(audioComment);
 
@@ -341,7 +394,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private void insertUserComment(final UserComment userComment) {
 
-        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(),mPrivateGroup.getStationID());
+        GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(), mPrivateGroup.getStationID());
 
         groupRepository.insertUserComment(groupRequestParam, userComment, new BaseOperateCallback() {
             @Override

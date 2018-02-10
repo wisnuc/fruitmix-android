@@ -123,6 +123,39 @@ public class GroupRepository extends BaseDataRepository {
         return mPrivateGroups.get(groupUUID);
     }
 
+    public List<PrivateGroup> getAllGroupFromMemory(){
+        return new ArrayList<>(mPrivateGroups.values());
+    }
+
+    public void refreshGroupInMemory(List<PrivateGroup> newGroups){
+
+        for (PrivateGroup newGroup:newGroups){
+
+            String groupUUID = newGroup.getUUID();
+
+            PrivateGroup currentGroup = mPrivateGroups.get(groupUUID);
+
+            if(currentGroup == null)
+                mPrivateGroups.put(groupUUID,newGroup);
+            else {
+
+                long currentGroupMTime = currentGroup.getModifyTime();
+
+                long newGroupMTime = newGroup.getModifyTime();
+
+                if(newGroupMTime > currentGroupMTime){
+
+                    mPrivateGroups.put(groupUUID,newGroup);
+
+                }
+
+            }
+
+        }
+
+    }
+
+
     public void deleteGroup(final GroupRequestParam groupRequestParam, final BaseOperateCallback callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {

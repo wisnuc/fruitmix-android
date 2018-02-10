@@ -2,6 +2,7 @@ package com.winsun.fruitmix.group.view;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.SharedElementCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -11,14 +12,19 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.databinding.ActivityGroupContentBinding;
+import com.winsun.fruitmix.eventbus.MqttMessageEvent;
+import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.group.TestMqttActivity;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
@@ -30,12 +36,22 @@ import com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton;
 import com.winsun.fruitmix.group.view.customview.InputChatLayout;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.mediaModule.NewPicChooseActivity;
+import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.mqtt.MqttUseCase;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+import org.w3c.dom.Text;
+
+import java.util.List;
+import java.util.Map;
 
 public class GroupContentActivity extends BaseActivity implements GroupContentView, View.OnClickListener
         , InputChatLayout.ChatLayoutOnClickListener, InputChatLayout.EditTextFocusChangeListener, InputChatLayout.SendTextChatListener
@@ -67,6 +83,9 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
     private FloatingActionButton mFabBtn;
     private FloatingActionButton mSendFileBtn;
     private ImageView mSendMediaBtn;
+
+    private TextView mSendFileTextView;
+    private TextView mSendMediaTextView;
 
     private ImageView mMaskLayout;
 
@@ -119,6 +138,9 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         mFabBtn = mActivityGroupContentBinding.fab;
         mSendFileBtn = mActivityGroupContentBinding.sendFileBtn;
         mSendMediaBtn = mActivityGroupContentBinding.sendMedia;
+
+        mSendFileTextView = mActivityGroupContentBinding.sendFileHint;
+        mSendMediaTextView = mActivityGroupContentBinding.sendMediaHint;
 
         mFabBtn.setOnClickListener(this);
         mSendFileBtn.setOnClickListener(this);
@@ -298,6 +320,9 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         new AnimatorBuilder(getContext(), R.animator.fab_remote_restore, mFabBtn).startAnimator();
 
+        mSendMediaTextView.setVisibility(View.GONE);
+        mSendFileTextView.setVisibility(View.GONE);
+
         new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation_restore, mSendMediaBtn).addAdapter(new AnimatorListenerAdapter() {
 
             @Override
@@ -333,9 +358,27 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         mSendFileBtn.setVisibility(View.VISIBLE);
 
-        new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, mSendMediaBtn).startAnimator();
+        new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, mSendMediaBtn).addAdapter(new AnimatorListenerAdapter() {
 
-        new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation, mSendFileBtn).startAnimator();
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                mSendMediaTextView.setVisibility(View.VISIBLE);
+
+            }
+        }).startAnimator();
+
+        new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation, mSendFileBtn).addAdapter(new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+
+                mSendFileTextView.setVisibility(View.VISIBLE);
+
+            }
+        }).startAnimator();
 
 
     }
@@ -388,9 +431,11 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_NEW_PIC_CHOOSE_ACTIVITY && resultCode == RESULT_OK)
-            groupContentPresenter.refreshView();
-        else if (requestCode == REQUEST_CREATE_PING_ACTIVITY && resultCode == RESULT_OK)
+        if (requestCode == REQUEST_NEW_PIC_CHOOSE_ACTIVITY && resultCode == RESULT_OK) {
+
+//            groupContentPresenter.refreshView();
+
+        } else if (requestCode == REQUEST_CREATE_PING_ACTIVITY && resultCode == RESULT_OK)
             groupContentPresenter.refreshView();
         else if (requestCode == REQUEST_PIN_CONTENT && resultCode == RESULT_OK) {
             groupContentPresenter.refreshPin();
@@ -411,6 +456,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         }
 
     }
+
 
     @Override
     public void sendFileChat() {
@@ -470,4 +516,24 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         return true;
     }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void handleStickyOperationEvent(OperationEvent operationEvent) {
+
+        String action = operationEvent.getAction();
+
+        Log.i(TAG, "handleOperationEvent: action:" + action);
+
+        if (action.equals(MqttUseCase.MQTT_MESSAGE)) {
+
+            Log.d(TAG, "handleStickyOperationEvent: mqtt message retrieved");
+
+            EventBus.getDefault().removeStickyEvent(operationEvent);
+
+            groupContentPresenter.handleMqttMessage((MqttMessageEvent) operationEvent);
+
+        }
+
+    }
+
 }

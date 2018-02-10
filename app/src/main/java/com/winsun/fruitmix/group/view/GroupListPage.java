@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -17,6 +18,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.contact.ContactListActivity;
 import com.winsun.fruitmix.databinding.ActivityGroupListBinding;
+import com.winsun.fruitmix.eventbus.MqttMessageEvent;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
@@ -27,6 +29,8 @@ import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.logged.in.user.InjectLoggedInUser;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.mqtt.InjectMqttUseCase;
+import com.winsun.fruitmix.mqtt.MqttUseCase;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
@@ -44,6 +48,8 @@ import java.util.Map;
 
 public class GroupListPage implements Page, IShowHideFragmentListener, GroupListPageView {
 
+    public static final String TAG = GroupListPage.class.getSimpleName();
+
     private View view;
 
     private RecyclerView recyclerView;
@@ -57,6 +63,8 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
     public static final int CREATE_GROUP_REQUEST_CODE = 1;
 
     public static final int GROUP_CONTENT_REQUEST_CODE = 2;
+
+    private boolean startGroupContentActivity = false;
 
     public GroupListPage(Activity activity) {
 
@@ -98,9 +106,11 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         TokenDataSource tokenDataSource = InjectTokenRemoteDataSource.provideTokenDataSource(containerActivity);
 
+        MqttUseCase mqttUseCase = InjectMqttUseCase.provideInstance(containerActivity);
+
         groupListPresenter = new GroupListPresenter(this, currentUser, tokenDataSource,
                 groupRepository, loadingViewModel, noContentViewModel, groupListViewModel, userDataRepository,
-                systemSettingDataSource);
+                systemSettingDataSource, mqttUseCase);
 
         recyclerView = binding.groupRecyclerview;
 
@@ -117,6 +127,8 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
             @Override
             public void onRefresh() {
 
+                Log.d(TAG, "onRefresh: swipe refresh");
+
                 refreshView();
 
             }
@@ -126,6 +138,18 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
     @Override
     public View getView() {
         return view;
+    }
+
+    public void onResume() {
+
+        if (startGroupContentActivity) {
+
+            groupListPresenter.refreshGroupUsingMemoryCache();
+
+            startGroupContentActivity = false;
+
+        }
+
     }
 
     @Override
@@ -148,6 +172,12 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
     }
 
+    public void handleMqttMessage(MqttMessageEvent mqttMessageEvent) {
+
+        groupListPresenter.handleMqttMessageEvent(mqttMessageEvent);
+
+    }
+
     @Override
     public void onActivityReenter(int resultCode, Intent data) {
 
@@ -160,6 +190,7 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
     @Override
     public void onDestroy() {
+
         groupListPresenter.onDestroyView();
 
         containerActivity = null;
@@ -180,6 +211,8 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         Intent intent = new Intent(containerActivity, GroupContentActivity.class);
         intent.putExtra(GroupContentActivity.GROUP_UUID, groupUUID);
+
+        startGroupContentActivity = true;
 
         containerActivity.startActivityForResult(intent, GROUP_CONTENT_REQUEST_CODE);
 

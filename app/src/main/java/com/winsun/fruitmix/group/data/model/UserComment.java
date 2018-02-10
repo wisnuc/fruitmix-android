@@ -3,6 +3,8 @@ package com.winsun.fruitmix.group.data.model;
 import android.content.Context;
 import android.widget.TextView;
 
+import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.user.DefaultCommentUser;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 
@@ -26,7 +28,7 @@ public class UserComment {
 
     private String stationID;
 
-    public UserComment(String uuid, User creator, long time, String groupUUID,String stationID) {
+    public UserComment(String uuid, User creator, long time, String groupUUID, String stationID) {
 
         this.uuid = uuid;
         this.creator = creator;
@@ -74,6 +76,16 @@ public class UserComment {
     public void setCreator(User creator) {
         this.creator = creator;
     }
+
+    public String getCreateUserName(Context context) {
+
+        if (creator instanceof DefaultCommentUser)
+            return context.getString(R.string.quited_user);
+        else
+            return creator.getUserName();
+
+    }
+
 
     public String getDate(Context context) {
 

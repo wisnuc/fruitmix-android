@@ -168,6 +168,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private ThreadManager mThreadManager;
 
+    private boolean selectForCreateComment = false;
+
+    private int mSelectLocalMediaCount;
+
     public NewPhotoList(Activity activity) {
         containerActivity = activity;
 
@@ -287,6 +291,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     public void setPhotoListListener(IPhotoListListener listListener) {
         mPhotoListListener = listListener;
+    }
+
+    public void setSelectForCreateComment(boolean selectForCreateComment) {
+        this.selectForCreateComment = selectForCreateComment;
     }
 
     @Override
@@ -789,14 +797,26 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         int selectCount = 0;
 
+        int selectLocalMediaCount = 0;
+
         for (List<MediaViewModel> mediaViewModels : mMapKeyIsDate.values()) {
             for (MediaViewModel mediaViewModel : mediaViewModels) {
-                if (mediaViewModel.isSelected())
+                if (mediaViewModel.isSelected()) {
+
                     selectCount++;
+
+                    if (mediaViewModel.getMedia().isLocal())
+                        selectLocalMediaCount++;
+
+                }
+
             }
         }
 
         mSelectCount = selectCount;
+
+        mSelectLocalMediaCount = selectLocalMediaCount;
+
     }
 
     @Override
@@ -827,6 +847,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                 if (newSharedElement == null)
                     newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageSmallThumbUrl(containerActivity).getUrl());
+
+                if(newSharedElement == null)
+                    return;
 
                 names.clear();
                 sharedElements.clear();
@@ -1117,14 +1140,55 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                 int unSelectNumInList = 0;
 
+                int unSelectLocalMediaNum = 0;
+
                 for (MediaViewModel mediaViewModel : mediaViewModels) {
-                    if (!mediaViewModel.isSelected())
+                    if (!mediaViewModel.isSelected()) {
+
                         unSelectNumInList++;
+
+                        if (mediaViewModel.getMedia().isLocal())
+                            unSelectLocalMediaNum++;
+
+                    }
+
                 }
 
                 calcSelectedPhoto();
 
-                if (!selected && unSelectNumInList + mSelectCount > Util.MAX_PHOTO_SIZE) {
+                if (!selected && selectForCreateComment) {
+
+                    if (unSelectLocalMediaNum + mSelectLocalMediaCount > 1) {
+
+                        Toast.makeText(containerActivity, containerActivity.getString(R.string.only_support_upload_for_one_local_media), Toast.LENGTH_SHORT).show();
+
+                    }
+
+                    int newSelectLocalItemCount = mSelectLocalMediaCount;
+                    int newSelectLocalItemTotalCount = 1;
+
+                    for (MediaViewModel mediaViewModel : mediaViewModels) {
+
+                        if (!mediaViewModel.isSelected()) {
+
+                            if (mediaViewModel.getMedia().isLocal()) {
+
+                                if (newSelectLocalItemCount < newSelectLocalItemTotalCount) {
+
+                                    mediaViewModel.setSelected(true);
+
+                                    newSelectLocalItemCount++;
+
+                                }
+
+                            } else
+                                mediaViewModel.setSelected(true);
+
+                        }
+
+                    }
+
+                } else if (!selected && unSelectNumInList + mSelectCount > Util.MAX_PHOTO_SIZE) {
                     Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
 
                     int newSelectItemCount = 0;
@@ -1686,7 +1750,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                         intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
                         intent.setClass(containerActivity, PhotoSliderActivity.class);
 
-                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, mMediaViewModels,initialPhotoPosition);
+                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, mMediaViewModels, initialPhotoPosition);
 
                     }
 
@@ -1715,7 +1779,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         boolean selected = mediaViewModel.isSelected();
 
-        if (!selected && mSelectCount >= Util.MAX_PHOTO_SIZE) {
+        if (!selected && selectForCreateComment && mSelectLocalMediaCount + 1 > 1) {
+
+            Toast.makeText(containerActivity, containerActivity.getString(R.string.only_support_upload_for_one_local_media), Toast.LENGTH_SHORT).show();
+
+            return;
+
+        } else if (!selected && mSelectCount >= Util.MAX_PHOTO_SIZE) {
 
             Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
 

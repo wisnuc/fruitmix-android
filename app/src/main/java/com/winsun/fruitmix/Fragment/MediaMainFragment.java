@@ -37,13 +37,16 @@ import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.contact.ContactListActivity;
 import com.winsun.fruitmix.databinding.NavPagerMainBinding;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
+import com.winsun.fruitmix.eventbus.MqttMessageEvent;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveVideoThumbnailEvent;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
+import com.winsun.fruitmix.group.presenter.GroupContentPresenter;
 import com.winsun.fruitmix.group.setting.GroupSettingActivity;
+import com.winsun.fruitmix.group.view.GroupContentActivity;
 import com.winsun.fruitmix.group.view.GroupListPage;
 import com.winsun.fruitmix.inbox.view.InboxListPage;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
@@ -59,7 +62,9 @@ import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.OperationResultType;
+import com.winsun.fruitmix.mqtt.MqttUseCase;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
@@ -145,6 +150,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private User mCurrentUser;
 
+    private SystemSettingDataSource mSystemSettingDataSource;
+
     private boolean noMediaSelect = true;
     private boolean noFileSelect = true;
 
@@ -173,7 +180,9 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
 
-        String currentLoginUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(mContext).getCurrentLoginUserUUID();
+        mSystemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(mContext);
+
+        String currentLoginUserUUID = mSystemSettingDataSource.getCurrentLoginUserUUID();
 
         UserDataRepository userDataRepository = InjectUser.provideRepository(mContext);
 
@@ -315,6 +324,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         if (isHidden()) return;
 
         photoList.refreshView();
+
+        groupListPage.onResume();
 
 //        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && !mPhotoListRefresh) {
 //            pageList.get(PAGE_PHOTO).refreshDownloadItemView();
@@ -479,9 +490,15 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 //            pageList.get(PAGE_GROUP).refreshDownloadItemView();
         } else if (requestCode == CREATE_GROUP_REQUEST_CODE && resultCode == RESULT_OK) {
 
+            Log.d(TAG, "onActivityResult: create group,so refresh group");
+
             groupListPage.refreshView();
 
-        } else if (requestCode == GROUP_CONTENT_REQUEST_CODE && resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_INFO) {
+        }
+        else if (requestCode == GROUP_CONTENT_REQUEST_CODE && resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_INFO) {
+
+            Log.d(TAG, "onActivityResult: modify group info in setting,so refresh group ");
+            
             groupListPage.refreshView();
         }
 
@@ -633,6 +650,25 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         EventBus.getDefault().removeStickyEvent(taskStateChangedEvent);
 
         fileFragment.handleEvent(taskStateChangedEvent);
+
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void handleStickyOperationEvent(OperationEvent operationEvent) {
+
+        String action = operationEvent.getAction();
+
+        Log.i(TAG, "handleOperationEvent: action:" + action);
+
+        if (action.equals(MqttUseCase.MQTT_MESSAGE)) {
+
+            Log.d(TAG, "handleStickyOperationEvent: mqtt message retrieved");
+
+            EventBus.getDefault().removeStickyEvent(operationEvent);
+
+            groupListPage.handleMqttMessage((MqttMessageEvent) operationEvent);
+
+        }
 
     }
 
@@ -1395,7 +1431,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
                 toolbarViewModel.showSelect.set(false);
 
-                if (mCurrentUser.isAdmin()) {
+                if (mSystemSettingDataSource.getCurrentWAToken().length() != 0) {
 
                     toolbarViewModel.showMenu.set(true);
 
@@ -1420,6 +1456,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 }
 
                 if (groupListPage != null && isResumed() && !groupOnResume) {
+
+                    Log.d(TAG, "onDidAppear: groupOnResume " + groupOnResume);
 
                     groupListPage.refreshView();
 

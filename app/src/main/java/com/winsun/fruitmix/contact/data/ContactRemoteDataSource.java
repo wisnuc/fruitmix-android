@@ -24,7 +24,7 @@ public class ContactRemoteDataSource extends BaseRemoteDataSourceImpl implements
     public void getContacts(String currentUserGUID,BaseLoadDataCallback<User> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(CloudHttpRequestFactory.CLOUD_API_LEVEL
-        + "/users/" + currentUserGUID + "/interesting");
+        + "/users/" + currentUserGUID + "/interestingPerson");
 
         wrapper.loadCall(httpRequest,callback,new RemoteContactUserParser());
 
