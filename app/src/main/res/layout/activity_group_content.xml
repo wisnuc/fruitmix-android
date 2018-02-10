@@ -107,58 +107,66 @@
             android:orientation="vertical">
 
             <RelativeLayout
+                android:id="@+id/send_file_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:layout_marginRight="16dp"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/send_file_hint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:text="@string/send_file"
-                    android:textColor="@color/eighty_seven_percent_white"
-                    android:textSize="14dp"
-                    android:visibility="gone" />
-
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/send_file_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:src="@drawable/ic_file_download_white_24dp"
+                    android:src="@drawable/send_file_comment"
                     android:visibility="gone"
                     app:borderWidth="0dp"
                     app:fabSize="mini" />
+
+                <TextView
+                    android:id="@+id/send_file_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="8dp"
+                    android:layout_toLeftOf="@id/send_file_btn"
+                    android:text="@string/send_file"
+                    android:textColor="@color/eighty_seven_percent_white"
+                    android:textSize="14dp"
+                    android:visibility="gone" />
 
 
             </RelativeLayout>
 
             <RelativeLayout
+                android:id="@+id/send_media_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:layout_marginRight="16dp"
                 android:orientation="horizontal">
 
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/send_media_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:src="@drawable/send_media_comment"
+                    android:visibility="gone"
+                    app:borderWidth="0dp"
+                    app:fabSize="mini" />
+
                 <TextView
                     android:id="@+id/send_media_hint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
+                    android:layout_marginRight="8dp"
+                    android:layout_toLeftOf="@id/send_media_btn"
                     android:text="@string/send_media"
                     android:textColor="@color/eighty_seven_percent_white"
                     android:textSize="14dp"
-                    android:visibility="gone" />
-
-                <ImageView
-                    android:id="@+id/send_media"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_alignParentRight="true"
-                    android:src="@drawable/fab_share"
                     android:visibility="gone" />
 
             </RelativeLayout>

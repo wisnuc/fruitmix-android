@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.IImageLoadListener;
@@ -25,6 +26,8 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 
+import org.w3c.dom.Text;
+
 /**
  * Created by Administrator on 2017/9/19.
  */
@@ -35,6 +38,9 @@ public class UserAvatar extends FrameLayout {
 
     private ViewGroup avatarTextLayout;
     private NetworkImageView avatarImageView;
+
+    private ImageView avatarDefaultImageView;
+    private TextView avatarDefaultTextView;
 
     private UserAvatarBinding binding;
 
@@ -67,6 +73,10 @@ public class UserAvatar extends FrameLayout {
 
         avatarTextLayout = binding.avatarTextLayout;
         avatarImageView = binding.avatarImageview;
+
+        avatarDefaultImageView = binding.avatarDefaultImageView;
+        avatarDefaultTextView = binding.avatarTextview;
+
     }
 
     public void setUnregisterListenerWhenDetachFromWindow(boolean unregisterListenerWhenDetachFromWindow) {
@@ -81,12 +91,12 @@ public class UserAvatar extends FrameLayout {
 
             if(user instanceof DefaultCommentUser){
 
-                avatarImageView.setVisibility(VISIBLE);
-                avatarTextLayout.setVisibility(INVISIBLE);
+                avatarDefaultTextView.setText("");
 
-                avatarImageView.setImageResource(R.drawable.default_img);
+                avatarImageView.setBackgroundResource(R.drawable.del_user);
 
                 return;
+
             }
 
             avatarTextLayout.setVisibility(VISIBLE);

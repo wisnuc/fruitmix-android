@@ -589,7 +589,9 @@
     <string name="create_group_message">私友群已建立，你可以分享照片和文件给群友</string>
     <string name="add_user_message">%1$s邀请了%2$s加入群</string>
     <string name="change_group_name_message">%1$s将群名修改为\"%2$s\"</string>
-    
+
+    <string name="not_current_station_group_hint">不是本机的群，暂不支持发送图片和文件</string>
+
     <!-- group setting -->
     <string name="group_member">群成员</string>
     <string name="check_more_group_members">查看更多群员</string>

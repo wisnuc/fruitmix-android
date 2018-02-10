@@ -7,6 +7,7 @@ import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.mock.MockApplication;
+import com.winsun.fruitmix.mqtt.MqttUseCase;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.User;
@@ -63,6 +64,9 @@ public class LogoutUseCaseTest {
     @Mock
     private FileTaskManager mFileTaskManager;
 
+    @Mock
+    private MqttUseCase mMqttUseCase;
+
     private String testToken = "testToken";
 
     private String testStationID = "testStationID";
@@ -74,7 +78,7 @@ public class LogoutUseCaseTest {
 
         logoutUseCase = LogoutUseCase.getInstance(systemSettingDataSource, loggedInUserDataSource,
                 uploadMediaUseCase, weChatUserDataSource, httpRequestFactory, "", mFileTool,
-                mStationFileRepository, mUserDataRepository, mFileTaskManager);
+                mStationFileRepository, mUserDataRepository, mFileTaskManager,mMqttUseCase);
 
         when(systemSettingDataSource.getCurrentLoginUserUUID()).thenReturn("");
 
@@ -182,6 +186,8 @@ public class LogoutUseCaseTest {
         verify(mUserDataRepository).clearAllUsersInDB();
 
         verify(mUserDataRepository).clearAllUsersInCache();
+
+        verify(mMqttUseCase).stopMqtt();
 
     }
 

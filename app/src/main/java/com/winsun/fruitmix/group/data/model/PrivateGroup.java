@@ -39,6 +39,9 @@ public class PrivateGroup {
     private long createTime;
     private long modifyTime;
 
+    private long lastReadCommentIndex = -1;
+
+
     public PrivateGroup(String uuid, String name, String ownerGUID) {
         this.uuid = uuid;
         this.name = name;
@@ -104,6 +107,10 @@ public class PrivateGroup {
         return ownerGUID;
     }
 
+    public void setOwnerGUID(String ownerGUID) {
+        this.ownerGUID = ownerGUID;
+    }
+
     public List<User> getUsers() {
         return users;
     }
@@ -138,12 +145,29 @@ public class PrivateGroup {
 
     public void setLastComment(UserComment lastComment) {
         this.lastComment = lastComment;
+
+        if (lastReadCommentIndex == -1)
+            lastReadCommentIndex = lastComment.getIndex();
+
     }
 
     public UserComment getLastComment() {
+
 //        return userComments.size() > 0 ? userComments.get(userComments.size() - 1) : null;
 
         return lastComment;
+
+    }
+
+    public long getLastCommentTime() {
+
+        return getLastComment() != null ? getLastComment().getTime() : -1;
+
+    }
+
+    public long getLastCommentIndex() {
+
+        return getLastComment() != null ? getLastComment().getIndex() : -1;
 
     }
 
@@ -151,13 +175,37 @@ public class PrivateGroup {
 
         UserComment userComment = getLastComment();
 
-        if (userComment instanceof SystemMessageTextComment)
-            return "";
-        else if (userComment != null) {
+        if (userComment instanceof SystemMessageTextComment) {
+
+            SystemMessageTextComment systemMessageTextComment = (SystemMessageTextComment) userComment;
+
+            if (systemMessageTextComment.showMessage()) {
+                return systemMessageTextComment.getDate(context);
+            } else
+                return "";
+
+        } else if (userComment != null) {
             return userComment.getDate(context);
         } else
             return "";
 
+    }
+
+    public void refreshLastReadCommentIndex() {
+
+        if (lastComment != null)
+            lastReadCommentIndex = lastComment.getIndex();
+        else
+            lastReadCommentIndex = 0;
+
+    }
+
+    public void setLastReadCommentIndex(long lastReadCommentIndex) {
+        this.lastReadCommentIndex = lastReadCommentIndex;
+    }
+
+    public long getLastReadCommentIndex() {
+        return lastReadCommentIndex;
     }
 
     public void setStationID(String stationID) {

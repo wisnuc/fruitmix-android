@@ -1,6 +1,8 @@
 package com.winsun.fruitmix.group.presenter;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +39,8 @@ import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -237,6 +241,8 @@ public class GroupListPresenter implements ActiveView {
 
         try {
 
+            Log.d(TAG, "handleMqttMessageEvent: refresh group in memory");
+
             List<PrivateGroup> newGroups = new RemoteGroupParser().parse(message);
 
             groupRepository.refreshGroupInMemory(newGroups);
@@ -253,7 +259,6 @@ public class GroupListPresenter implements ActiveView {
         groupListAdapter.setPrivateGroups(groupRepository.getAllGroupFromMemory());
         groupListAdapter.notifyDataSetChanged();
     }
-
 
     @Override
     public boolean isActive() {
@@ -273,6 +278,30 @@ public class GroupListPresenter implements ActiveView {
             mPrivateGroups.clear();
 
             mPrivateGroups.addAll(privateGroups);
+
+            Collections.sort(mPrivateGroups, new Comparator<PrivateGroup>() {
+                @Override
+                public int compare(PrivateGroup o1, PrivateGroup o2) {
+
+                    long o2Time = o2.getLastCommentTime();
+
+                    if (o2Time == -1)
+                        o2Time = o2.getModifyTime();
+
+                    long o1Time = o1.getLastCommentTime();
+
+                    if (o1Time == -1)
+                        o1Time = o1.getModifyTime();
+
+                    if (o2Time > o1Time)
+                        return 1;
+                    else if (o1Time > o2Time) {
+                        return -1;
+                    } else
+                        return 0;
+
+                }
+            });
 
         }
 
@@ -294,11 +323,32 @@ public class GroupListPresenter implements ActiveView {
 
             GroupListItemBinding binding = (GroupListItemBinding) holder.getViewDataBinding();
 
-            binding.lastCommentContent.setText(getLastCommentContent(privateGroup));
+            Context context = binding.getRoot().getContext();
+
+            binding.lastCommentContent.setText(getLastCommentContent(privateGroup, context));
+
+            long lastCommentIndex = privateGroup.getLastCommentIndex();
+
+            long difference = lastCommentIndex - privateGroup.getLastReadCommentIndex();
+
+            if (difference > 0) {
+
+                binding.newCommentCountTextview.setVisibility(View.VISIBLE);
+                binding.newCommentCountTextview.setText(difference + "");
+
+            } else if (lastCommentIndex == -1 && privateGroup.getLastReadCommentIndex() == -1) {
+
+                binding.newCommentCountTextview.setText("1");
+
+            } else {
+                binding.newCommentCountTextview.setVisibility(View.GONE);
+            }
 
             binding.groupListItemRootLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
+                    privateGroup.refreshLastReadCommentIndex();
 
                     groupListPageView.gotoGroupContentActivity(privateGroup.getUUID());
 
@@ -330,7 +380,7 @@ public class GroupListPresenter implements ActiveView {
 
     }
 
-    public String getLastCommentContent(PrivateGroup privateGroup) {
+    public String getLastCommentContent(PrivateGroup privateGroup, Context context) {
 
         UserComment userComment = privateGroup.getLastComment();
 
@@ -338,16 +388,25 @@ public class GroupListPresenter implements ActiveView {
 
             if (userComment instanceof MediaComment) {
 
-                return "[" + groupListPageView.getString(R.string.photo) + "]";
+                return userComment.getCreateUserName(context) + ":[" + groupListPageView.getString(R.string.photo) + "]";
 
             } else if (userComment instanceof FileComment) {
 
-                return "[" + groupListPageView.getString(R.string.files) + "]";
+                return userComment.getCreateUserName(context) + ":[" + groupListPageView.getString(R.string.files) + "]";
 
             } else {
 
-                if (userComment instanceof SystemMessageTextComment)
-                    return "";
+                if (userComment instanceof SystemMessageTextComment) {
+
+                    SystemMessageTextComment systemMessageTextComment = (SystemMessageTextComment) userComment;
+
+                    if (systemMessageTextComment.showMessage())
+                        return systemMessageTextComment.getFormatMessage(context);
+                    else
+                        return "";
+
+                }
+
 
                 TextComment textComment = (TextComment) userComment;
 

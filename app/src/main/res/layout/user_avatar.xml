@@ -22,6 +22,7 @@
             android:visibility="visible">
 
             <ImageView
+                android:id="@+id/avatar_default_image_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@{user.defaultAvatarBgColorResourceId,default=@drawable/share_portrait_bg}"

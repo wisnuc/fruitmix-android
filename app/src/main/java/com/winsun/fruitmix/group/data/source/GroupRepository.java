@@ -11,6 +11,7 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.SystemMessageTextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +60,7 @@ public class GroupRepository extends BaseDataRepository {
         super(threadManager);
         this.groupDataSource = groupDataSource;
 
-        mPrivateGroups = new HashMap<>();
+        mPrivateGroups = new LinkedHashMap<>();
     }
 
     public void setCurrentUser(User currentUser) {
@@ -94,9 +96,13 @@ public class GroupRepository extends BaseDataRepository {
                     @Override
                     public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
 
-                        mPrivateGroups.clear();
-
                         for (PrivateGroup privateGroup : data) {
+
+                            PrivateGroup preGroup = mPrivateGroups.get(privateGroup.getUUID());
+
+                            if (preGroup != null)
+                                privateGroup.setLastReadCommentIndex(preGroup.getLastReadCommentIndex());
+
                             mPrivateGroups.put(privateGroup.getUUID(), privateGroup);
                         }
 
@@ -123,29 +129,43 @@ public class GroupRepository extends BaseDataRepository {
         return mPrivateGroups.get(groupUUID);
     }
 
-    public List<PrivateGroup> getAllGroupFromMemory(){
+    public List<PrivateGroup> getAllGroupFromMemory() {
         return new ArrayList<>(mPrivateGroups.values());
     }
 
-    public void refreshGroupInMemory(List<PrivateGroup> newGroups){
+    public void refreshGroupInMemory(List<PrivateGroup> newGroups) {
 
-        for (PrivateGroup newGroup:newGroups){
+        for (PrivateGroup newGroup : newGroups) {
 
             String groupUUID = newGroup.getUUID();
 
             PrivateGroup currentGroup = mPrivateGroups.get(groupUUID);
 
-            if(currentGroup == null)
-                mPrivateGroups.put(groupUUID,newGroup);
-            else {
+            if (currentGroup == null) {
 
-                long currentGroupMTime = currentGroup.getModifyTime();
+                newGroup.setLastReadCommentIndex(-1);
 
-                long newGroupMTime = newGroup.getModifyTime();
+                mPrivateGroups.put(groupUUID, newGroup);
 
-                if(newGroupMTime > currentGroupMTime){
+            } else {
 
-                    mPrivateGroups.put(groupUUID,newGroup);
+                long currentGroupLastCommentIndex = currentGroup.getLastCommentIndex();
+
+                long newGroupLastCommentIndex = newGroup.getLastCommentIndex();
+
+                if (newGroupLastCommentIndex > currentGroupLastCommentIndex) {
+
+                    currentGroup.setOwnerGUID(newGroup.getOwnerGUID());
+                    currentGroup.setName(newGroup.getName());
+                    currentGroup.setStationName(newGroup.getStationName());
+                    currentGroup.setStationOnline(newGroup.isStationOnline());
+                    currentGroup.setLastComment(newGroup.getLastComment());
+                    currentGroup.setStationID(newGroup.getStationID());
+                    currentGroup.setModifyTime(newGroup.getModifyTime());
+                    currentGroup.setCreateTime(newGroup.getCreateTime());
+
+                    currentGroup.clearUsers();
+                    currentGroup.addUsers(newGroup.getUsers());
 
                 }
 
@@ -199,6 +219,9 @@ public class GroupRepository extends BaseDataRepository {
 
                             userComment.setGroupUUID(group.getUUID());
                             userComment.setStationID(group.getStationID());
+
+                            if (userComment instanceof SystemMessageTextComment)
+                                ((SystemMessageTextComment) userComment).fillAddOrDeleteUser(groupUsers);
 
                         }
 

@@ -2,6 +2,7 @@ package com.winsun.fruitmix.group.presenter;
 
 import android.databinding.ViewDataBinding;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +43,6 @@ import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +52,8 @@ import java.util.List;
  */
 
 public class GroupContentPresenter implements CustomArrowToggleButton.PingToggleListener, ActiveView {
+
+    public static final String TAG = GroupContentPresenter.class.getSimpleName();
 
     private PlayAudioUseCase playAudioUseCase;
 
@@ -85,6 +87,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     private PrivateGroup mPrivateGroup;
 
+    private SystemSettingDataSource mSystemSettingDataSource;
+
     public static final int RESULT_GROUP_REFRESH = 0x1001;
 
     public GroupContentPresenter(GroupContentView groupContentView, String groupUUID,
@@ -104,6 +108,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         this.groupContentViewModel = groupContentViewModel;
 
         mUserDataRepository = userDataRepository;
+
+        mSystemSettingDataSource = systemSettingDataSource;
 
         currentLoggedInUser = userDataRepository.getUserByUUID(systemSettingDataSource.getCurrentLoginUserUUID());
 
@@ -126,14 +132,22 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         return pingViewPageAdapter;
     }
 
+    public boolean checkCanSend() {
+
+        String currentStationID = mSystemSettingDataSource.getCurrentLoginStationID();
+
+        return currentStationID.equals(stationID);
+
+    }
+
     public void refreshView() {
 
-        refreshTitle();
+        refreshTitleFromMemory();
 
         refreshGroup();
     }
 
-    public void refreshTitle() {
+    public void refreshTitleFromMemory() {
 
         mPrivateGroup = groupRepository.getGroupFromMemory(groupUUID);
 
@@ -183,10 +197,25 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         if (userComments.size() == 0)
             return;
 
-        groupContentAdapter.setUserComments(userComments);
+        List<UserComment> showComments = new ArrayList<>();
+
+        for (UserComment userComment : userComments) {
+
+            if (userComment instanceof SystemMessageTextComment) {
+
+                if (((SystemMessageTextComment) userComment).showMessage())
+                    showComments.add(userComment);
+
+            } else
+                showComments.add(userComment);
+
+        }
+
+        groupContentAdapter.setUserComments(showComments);
         groupContentAdapter.notifyDataSetChanged();
 
-        smoothToChatListEnd();
+        smoothToChatListEnd(showComments);
+
     }
 
     public void handleMqttMessage(MqttMessageEvent mqttMessageEvent) {
@@ -197,21 +226,32 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
             List<PrivateGroup> newGroups = new RemoteGroupParser().parse(message);
 
-            for (PrivateGroup group : newGroups) {
+            long currentGroupIndex = mPrivateGroup.getLastCommentIndex();
 
-                groupRepository.refreshGroupInMemory(newGroups);
+            Log.d(TAG, "handleMqttMessage: currentGroupIndex:" + currentGroupIndex);
+
+            groupRepository.refreshGroupInMemory(newGroups);
+
+            for (PrivateGroup group : newGroups) {
 
                 if (group.getUUID().equals(groupUUID)) {
 
-                    refreshTitle();
+                    Log.d(TAG, "handleMqttMessage: currentGroup refresh title from memory");
 
-                    if (group.getLastComment().getIndex() > mPrivateGroup.getLastComment().getIndex()) {
+                    refreshTitleFromMemory();
+
+                    if (group.getLastCommentIndex() > currentGroupIndex) {
+
+                        Log.d(TAG, "handleMqttMessage: last group index is large than current group index,refresh group");
+
+                        mPrivateGroup.refreshLastReadCommentIndex();
 
                         refreshGroup();
 
                     }
 
                 }
+
 
             }
 
@@ -291,30 +331,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
             mUserComments.clear();
 
-            for (UserComment userComment : userComments) {
-
-                if (userComment instanceof SystemMessageTextComment) {
-
-                    SystemMessageTextComment systemMessageTextComment = (SystemMessageTextComment) userComment;
-
-                    try {
-                        JSONObject commentJson = new JSONObject(systemMessageTextComment.getText());
-
-                        String op = commentJson.optString("op");
-
-                        if (!op.equals("deleteUser")) {
-                            mUserComments.add(userComment);
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-
-                } else
-                    mUserComments.add(userComment);
-
-            }
+            mUserComments.addAll(userComments);
 
         }
 
@@ -422,7 +439,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
     }
 
 
-    public void smoothToChatListEnd() {
+    public void smoothToChatListEnd(List<UserComment> userComments) {
 
         if (userComments.size() == 0)
             return;

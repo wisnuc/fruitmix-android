@@ -2,7 +2,6 @@ package com.winsun.fruitmix.group.view;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.SharedElementCallback;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -14,6 +13,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -24,7 +24,6 @@ import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.databinding.ActivityGroupContentBinding;
 import com.winsun.fruitmix.eventbus.MqttMessageEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.group.TestMqttActivity;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.data.viewmodel.GroupContentViewModel;
@@ -36,7 +35,6 @@ import com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton;
 import com.winsun.fruitmix.group.view.customview.InputChatLayout;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.mediaModule.NewPicChooseActivity;
-import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mqtt.MqttUseCase;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.InjectUser;
@@ -48,10 +46,6 @@ import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.w3c.dom.Text;
-
-import java.util.List;
-import java.util.Map;
 
 public class GroupContentActivity extends BaseActivity implements GroupContentView, View.OnClickListener
         , InputChatLayout.ChatLayoutOnClickListener, InputChatLayout.EditTextFocusChangeListener, InputChatLayout.SendTextChatListener
@@ -82,7 +76,10 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
     private FloatingActionButton mFabBtn;
     private FloatingActionButton mSendFileBtn;
-    private ImageView mSendMediaBtn;
+    private FloatingActionButton mSendMediaBtn;
+
+    private ViewGroup mSendFileLayout;
+    private ViewGroup mSendMediaLayout;
 
     private TextView mSendFileTextView;
     private TextView mSendMediaTextView;
@@ -137,10 +134,13 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         mFabBtn = mActivityGroupContentBinding.fab;
         mSendFileBtn = mActivityGroupContentBinding.sendFileBtn;
-        mSendMediaBtn = mActivityGroupContentBinding.sendMedia;
+        mSendMediaBtn = mActivityGroupContentBinding.sendMediaBtn;
 
         mSendFileTextView = mActivityGroupContentBinding.sendFileHint;
         mSendMediaTextView = mActivityGroupContentBinding.sendMediaHint;
+
+        mSendFileLayout = mActivityGroupContentBinding.sendFileLayout;
+        mSendMediaLayout = mActivityGroupContentBinding.sendMediaLayout;
 
         mFabBtn.setOnClickListener(this);
         mSendFileBtn.setOnClickListener(this);
@@ -171,7 +171,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         chatRecyclerView.setAdapter(groupContentPresenter.getGroupContentAdapter());
 
-        chatRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+/*        chatRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
 
@@ -180,7 +180,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
                 }
 
             }
-        });
+        });*/
 
     }
 
@@ -268,7 +268,12 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
                 break;
 
             case R.id.fab:
-                refreshFabState();
+
+                if (checkCanSend()) {
+                    refreshFabState();
+                } else
+                    showToast(getString(R.string.not_current_station_group_hint));
+
                 break;
 
             case R.id.send_file_btn:
@@ -278,7 +283,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
                 collapseFab();
 
                 break;
-            case R.id.send_media:
+            case R.id.send_media_btn:
 
                 sendPhotoChat();
 
@@ -296,6 +301,13 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
     }
 
     private boolean sMenuUnfolding = false;
+
+
+    private boolean checkCanSend() {
+
+        return groupContentPresenter.checkCanSend();
+
+    }
 
     private void refreshFabState() {
         if (sMenuUnfolding) {
@@ -323,7 +335,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         mSendMediaTextView.setVisibility(View.GONE);
         mSendFileTextView.setVisibility(View.GONE);
 
-        new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation_restore, mSendMediaBtn).addAdapter(new AnimatorListenerAdapter() {
+        new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation_restore, mSendMediaLayout).addAdapter(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -334,7 +346,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
             }
         }).startAnimator();
 
-        new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation_restore, mSendFileBtn).addAdapter(new AnimatorListenerAdapter() {
+        new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation_restore, mSendFileLayout).addAdapter(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -358,7 +370,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         mSendFileBtn.setVisibility(View.VISIBLE);
 
-        new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, mSendMediaBtn).addAdapter(new AnimatorListenerAdapter() {
+        new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, mSendMediaLayout).addAdapter(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -369,7 +381,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
             }
         }).startAnimator();
 
-        new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation, mSendFileBtn).addAdapter(new AnimatorListenerAdapter() {
+        new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation, mSendFileLayout).addAdapter(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -441,13 +453,13 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
             groupContentPresenter.refreshPin();
         } else if (requestCode == REQUEST_GROUP_SETTING_ACTIVITY) {
 
-            setResult(GroupSettingActivity.RESULT_MODIFY_GROUP_INFO);
-
             if (resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_INFO) {
 
-                groupContentPresenter.refreshTitle();
+                groupContentPresenter.refreshTitleFromMemory();
 
             } else if (resultCode == GroupSettingActivity.RESULT_DELETE_OR_QUIT_GROUP) {
+
+                setResult(GroupSettingActivity.RESULT_DELETE_OR_QUIT_GROUP);
 
                 finishView();
 

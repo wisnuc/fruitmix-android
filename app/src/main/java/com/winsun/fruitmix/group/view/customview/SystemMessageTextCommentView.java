@@ -53,13 +53,11 @@ public class SystemMessageTextCommentView extends UserCommentView {
 
         SystemMessageTextComment systemMessageTextComment = (SystemMessageTextComment) data;
 
-        formatSystemMessageTextComment(systemMessageTextComment, context);
+        mSystemMessageTextCommentBinding.systemMessageTextview.setText(systemMessageTextComment.getFormatMessage(context));
 
     }
 
-
     private void formatSystemMessageTextComment(SystemMessageTextComment systemMessageTextComment, Context context) {
-
 
         String formattedMessage = "";
 
@@ -84,8 +82,7 @@ public class SystemMessageTextCommentView extends UserCommentView {
                     String oldName = value.getString(0);
                     String newName = value.getString(1);
 
-
-                    mSystemMessageTextCommentBinding.getRoot().setVisibility(View.VISIBLE);
+                    mSystemMessageTextCommentBinding.rootLayout.setVisibility(View.VISIBLE);
 
                     formattedMessage = context.getString(R.string.change_group_name_message, creatorUserName, newName);
 
@@ -95,7 +92,7 @@ public class SystemMessageTextCommentView extends UserCommentView {
 
                 case "addUser":
 
-                    mSystemMessageTextCommentBinding.getRoot().setVisibility(View.VISIBLE);
+                    mSystemMessageTextCommentBinding.rootLayout.setVisibility(View.VISIBLE);
 
                     StringBuilder addUserNameBuilder = new StringBuilder();
 
@@ -114,6 +111,14 @@ public class SystemMessageTextCommentView extends UserCommentView {
 
                     int length = addUserNameBuilder.length();
 
+                    if(length == 0){
+
+                        mSystemMessageTextCommentBinding.rootLayout.setVisibility(View.GONE);
+
+                        return;
+
+                    }
+
                     String addUserName = addUserNameBuilder.toString().substring(0, length - 1);
 
                     formattedMessage = context.getString(R.string.add_user_message, creatorUserName, addUserName);
@@ -124,15 +129,14 @@ public class SystemMessageTextCommentView extends UserCommentView {
 
                 case "deleteUser":
 
-                    mSystemMessageTextCommentBinding.getRoot().setVisibility(View.GONE);
+                    mSystemMessageTextCommentBinding.rootLayout.setVisibility(View.GONE);
 
                     break;
                 case "createBox":
 
-                    mSystemMessageTextCommentBinding.getRoot().setVisibility(View.VISIBLE);
+                    mSystemMessageTextCommentBinding.rootLayout.setVisibility(View.VISIBLE);
 
                     mSystemMessageTextCommentBinding.systemMessageTextview.setText(context.getString(R.string.create_group_message));
-
 
                     break;
             }

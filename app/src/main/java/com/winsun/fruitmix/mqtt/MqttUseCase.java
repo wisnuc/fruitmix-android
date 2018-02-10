@@ -69,7 +69,7 @@ public class MqttUseCase {
 
         String clientID = "client_android_" + currentUserGUID;
 
-        Log.d(TAG, "initMqttClient: clientID" + clientID);
+        Log.d(TAG, "initMqttClient: clientID: " + clientID);
 
         mMqttAndroidClient = new MqttAndroidClient(context, serverUri, clientID);
 
@@ -98,6 +98,10 @@ public class MqttUseCase {
 
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
+
+                String messageStr = new String(message.getPayload());
+
+                Log.d(TAG, "callback messageArrived: topic: " + topic + " message: " + messageStr);
 
             }
 
@@ -144,7 +148,7 @@ public class MqttUseCase {
 
     private void subscribeToTopic(String currentUserGUID) {
 
-        subscriptionTopic = "user/" + currentUserGUID + "/box";
+        subscriptionTopic = "client/user/" + currentUserGUID + "/box";
 
         try {
             mMqttAndroidClient.subscribe(subscriptionTopic, 0, new IMqttMessageListener() {

@@ -492,14 +492,19 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
             Log.d(TAG, "onActivityResult: create group,so refresh group");
 
-            groupListPage.refreshView();
+//            groupListPage.refreshView();
 
-        }
-        else if (requestCode == GROUP_CONTENT_REQUEST_CODE && resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_INFO) {
+        } else if (requestCode == GROUP_CONTENT_REQUEST_CODE && resultCode == GroupSettingActivity.RESULT_MODIFY_GROUP_INFO) {
 
             Log.d(TAG, "onActivityResult: modify group info in setting,so refresh group ");
-            
+
+//            groupListPage.refreshView();
+        } else if (requestCode == GROUP_CONTENT_REQUEST_CODE && resultCode == GroupSettingActivity.RESULT_DELETE_OR_QUIT_GROUP) {
+
+            Log.d(TAG, "onActivityResult: delete or quit group in setting,so refresh group ");
+
             groupListPage.refreshView();
+
         }
 
 

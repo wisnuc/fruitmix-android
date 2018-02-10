@@ -12,7 +12,7 @@
             name="pingToggleListener"
             type="com.winsun.fruitmix.group.view.customview.CustomArrowToggleButton.PingToggleListener" />
 
-        <import type="android.view.View"/>
+        <import type="android.view.View" />
 
     </data>
 
@@ -33,29 +33,34 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/select"
+            <FrameLayout
+                android:id="@+id/right_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="16dp"
                 android:layout_alignParentRight="true"
-                android:onClick="@{()->toolbarViewModel.toolbarSelectBtnOnClick()}"
-                android:text="@{toolbarViewModel.selectTextResID,default=@string/choose_text}"
-                android:textColor="@{toolbarViewModel.selectTextColorResID,default=@color/eighty_seven_percent_black}"
-                android:textSize="16dp"
-                android:visibility="@{toolbarViewModel.showSelect?View.VISIBLE:View.GONE,default=gone}" />
+                android:layout_centerVertical="true"
+                android:layout_marginRight="16dp">
 
-            <ImageView
-                android:id="@+id/menu"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="15dp"
-                android:onClick="@{()->toolbarViewModel.toolbarMenuBtnOnClick()}"
-                android:src="@drawable/ic_more_vert_black"
-                android:visibility="@{toolbarViewModel.showMenu?View.VISIBLE:View.GONE,default=gone}" />
+                <TextView
+                    android:id="@+id/select"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{()->toolbarViewModel.toolbarSelectBtnOnClick()}"
+                    android:text="@{toolbarViewModel.selectTextResID,default=@string/choose_text}"
+                    android:textColor="@{toolbarViewModel.selectTextColorResID,default=@color/eighty_seven_percent_black}"
+                    android:textSize="16dp"
+                    android:visibility="@{toolbarViewModel.showSelect?View.VISIBLE:View.GONE,default=gone}" />
+
+                <ImageView
+                    android:id="@+id/menu"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:onClick="@{()->toolbarViewModel.toolbarMenuBtnOnClick()}"
+                    android:src="@drawable/ic_more_vert_black"
+                    android:visibility="@{toolbarViewModel.showMenu?View.VISIBLE:View.GONE,default=gone}" />
+
+
+            </FrameLayout>
 
             <LinearLayout
                 android:id="@+id/toggle_layout"
@@ -63,7 +68,7 @@
                 android:layout_height="match_parent"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="16dp"
-                android:layout_toLeftOf="@id/menu"
+                android:layout_toLeftOf="@id/right_layout"
                 android:background="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:gravity="center_vertical"
@@ -94,7 +99,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_toLeftOf="@id/toggle_layout"
+                android:layout_marginRight="32dp"
+                android:layout_toLeftOf="@id/right_layout"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
                 android:maxLines="1"

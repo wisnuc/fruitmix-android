@@ -17,6 +17,8 @@ import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.BR;
@@ -204,7 +206,14 @@ public class FileListPresenter {
 
             final RemoteFile abstractRemoteFile = (RemoteFile) file;
 
-            binding.fileSize.setText(Formatter.formatFileSize(context, abstractRemoteFile.getSize()));
+            TextView fileSize = binding.fileSize;
+
+            RelativeLayout.LayoutParams fileSizeLayoutParams = (RelativeLayout.LayoutParams) fileSize.getLayoutParams();
+
+            fileSizeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            fileSizeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+
+            fileSize.setText(Formatter.formatFileSize(context, abstractRemoteFile.getSize()));
 
             FileItemViewModel fileItemViewModel = binding.getFileItemViewModel();
 

@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.parser;
 
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.SystemMessageTextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
@@ -78,9 +79,12 @@ public class RemoteOneGroupParser {
             lastComment.setGroupUUID(group.getUUID());
             lastComment.setStationID(group.getStationID());
 
-        }
+            if(lastComment instanceof SystemMessageTextComment)
+                ((SystemMessageTextComment) lastComment).fillAddOrDeleteUser(users);
 
-        group.setLastComment(lastComment);
+            group.setLastComment(lastComment);
+
+        }
 
         return group;
     }
