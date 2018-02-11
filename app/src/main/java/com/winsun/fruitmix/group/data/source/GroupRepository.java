@@ -103,8 +103,14 @@ public class GroupRepository extends BaseDataRepository {
                             if (preGroup != null)
                                 privateGroup.setLastReadCommentIndex(preGroup.getLastReadCommentIndex());
 
+                        }
+
+                        mPrivateGroups.clear();
+
+                        for (PrivateGroup privateGroup : data) {
                             mPrivateGroups.put(privateGroup.getUUID(), privateGroup);
                         }
+
 
                         runOnMainThreadCallback.onSucceed(data, operationResult);
                     }

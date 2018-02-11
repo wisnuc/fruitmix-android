@@ -13,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
@@ -237,4 +238,11 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
     public boolean canEnterSelectMode() {
         return false;
     }
+
+    public void showToast(String message){
+
+        Toast.makeText(containerActivity,message,Toast.LENGTH_SHORT).show();
+
+    }
+
 }

@@ -26,70 +26,76 @@
 
     </data>
 
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#F5F5F5">
+        android:layout_height="match_parent">
 
-        <include
-            android:id="@+id/group_content_toolbar"
-            layout="@layout/group_content_toolbar"
-            app:pingToggleListener="@{pingToggleListener}"
-            app:toolbarViewModel="@{toolbarViewModel}" />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/ping_recyclerview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/group_content_toolbar"
-            android:background="@color/white"
-            android:paddingBottom="16dp"
-            android:paddingTop="16dp"
-            android:visibility="@{groupContentViewModel.showPing?View.VISIBLE:View.GONE,default=visible}" />
-
-        <com.winsun.fruitmix.group.view.customview.InputChatLayout
-            android:id="@+id/input_chat_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:visibility="gone" />
-
-
-        <FrameLayout
-            android:id="@+id/chat_content_layout"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/input_chat_layout"
-            android:layout_below="@id/ping_recyclerview">
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/chat_recyclerview"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:paddingBottom="16dp"
-                android:paddingTop="16dp" />
+            android:background="#F5F5F5">
 
             <include
-                layout="@layout/new_loading_layout"
-                app:loadingViewModel="@{loadingViewModel}" />
+                android:id="@+id/group_content_toolbar"
+                layout="@layout/group_content_toolbar"
+                app:pingToggleListener="@{pingToggleListener}"
+                app:toolbarViewModel="@{toolbarViewModel}" />
 
-            <TextView
-                android:id="@+id/new_comment__count_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="28dp"
-                android:layout_gravity="right"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/comment_count_bg"
-                android:gravity="center_vertical"
-                android:text="125条评论"
-                android:textColor="#4caf50"
-                android:textSize="12dp"
-                android:visibility="gone"
-                tools:text="125条评论" />
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/ping_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/group_content_toolbar"
+                android:background="@color/white"
+                android:paddingBottom="16dp"
+                android:paddingTop="16dp"
+                android:visibility="@{groupContentViewModel.showPing?View.VISIBLE:View.GONE,default=visible}" />
 
-        </FrameLayout>
+            <com.winsun.fruitmix.group.view.customview.InputChatLayout
+                android:id="@+id/input_chat_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:visibility="gone" />
+
+
+            <FrameLayout
+                android:id="@+id/chat_content_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/input_chat_layout"
+                android:layout_below="@id/ping_recyclerview">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/chat_recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"
+                    android:paddingBottom="16dp"
+                    android:paddingTop="16dp" />
+
+                <include
+                    layout="@layout/new_loading_layout"
+                    app:loadingViewModel="@{loadingViewModel}" />
+
+                <TextView
+                    android:id="@+id/new_comment__count_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:layout_gravity="right"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/comment_count_bg"
+                    android:gravity="center_vertical"
+                    android:text="125条评论"
+                    android:textColor="#4caf50"
+                    android:textSize="12dp"
+                    android:visibility="gone"
+                    tools:text="125条评论" />
+
+            </FrameLayout>
+
+        </RelativeLayout>
 
         <ImageView
             android:id="@+id/mask_layout"
@@ -102,8 +108,7 @@
             android:id="@+id/btmenu"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
+            android:layout_gravity="right|bottom"
             android:orientation="vertical">
 
             <RelativeLayout
@@ -111,7 +116,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:layout_marginRight="16dp"
+                android:layout_marginRight="24dp"
                 android:orientation="horizontal">
 
                 <android.support.design.widget.FloatingActionButton
@@ -144,7 +149,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:layout_marginRight="16dp"
+                android:layout_marginRight="24dp"
                 android:orientation="horizontal">
 
                 <android.support.design.widget.FloatingActionButton
@@ -177,7 +182,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:layout_marginBottom="16dp"
-                android:layout_marginRight="8dp"
+                android:layout_marginRight="16dp"
                 android:src="@drawable/ic_add_white_24dp"
                 android:visibility="visible"
                 app:borderWidth="0dp"
@@ -185,7 +190,9 @@
 
         </LinearLayout>
 
-    </RelativeLayout>
+
+    </FrameLayout>
+
 
 </layout>
 

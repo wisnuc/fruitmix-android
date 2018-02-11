@@ -10,9 +10,11 @@ import com.winsun.fruitmix.interfaces.BaseView;
 
 public interface GroupListPageView {
 
+    void showToast(String message);
+
     String getString(int resID);
 
-    String getString(int resID,Object... formatArgs);
+    String getString(int resID, Object... formatArgs);
 
     void gotoGroupContentActivity(String groupUUID);
 

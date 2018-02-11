@@ -101,7 +101,7 @@
 
     <string name="getting_backup_progress">正在计算备份进度…</string>
 
-    <string name="select_count">%1$d项已选</string>
+    <string name="select_count">%1$d 项已选</string>
 
     <!-- 侧边栏 -->
     <string name="person_data">个人信息</string>
@@ -559,6 +559,9 @@
     <string name="running">运行中</string>
     <string name="stopped">已停止</string>
 
+    <string name="starting">正在启动</string>
+    <string name="stopping">正在停止</string>
+
     <string name="repacking">打包中</string>
     <string name="verifying">验证中</string>
 
@@ -591,6 +594,8 @@
     <string name="change_group_name_message">%1$s将群名修改为\"%2$s\"</string>
 
     <string name="not_current_station_group_hint">不是本机的群，暂不支持发送图片和文件</string>
+
+    <string name="group_offline_hint">群所在的station不在线，暂时不能访问</string>
 
     <!-- group setting -->
     <string name="group_member">群成员</string>

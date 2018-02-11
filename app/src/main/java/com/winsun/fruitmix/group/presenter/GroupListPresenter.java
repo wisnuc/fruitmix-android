@@ -338,19 +338,28 @@ public class GroupListPresenter implements ActiveView {
 
             } else if (lastCommentIndex == -1 && privateGroup.getLastReadCommentIndex() == -1) {
 
+                binding.newCommentCountTextview.setVisibility(View.VISIBLE);
                 binding.newCommentCountTextview.setText("1");
 
             } else {
-                binding.newCommentCountTextview.setVisibility(View.GONE);
+                binding.newCommentCountTextview.setVisibility(View.INVISIBLE);
             }
 
             binding.groupListItemRootLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    privateGroup.refreshLastReadCommentIndex();
+                    if (privateGroup.isStationOnline()) {
 
-                    groupListPageView.gotoGroupContentActivity(privateGroup.getUUID());
+                        privateGroup.refreshLastReadCommentIndex();
+
+                        groupListPageView.gotoGroupContentActivity(privateGroup.getUUID());
+
+                    } else {
+
+                        groupListPageView.showToast(groupListPageView.getString(R.string.group_offline_hint));
+
+                    }
 
                 }
             });

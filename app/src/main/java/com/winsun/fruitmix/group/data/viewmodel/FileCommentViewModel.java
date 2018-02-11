@@ -15,4 +15,5 @@ public class FileCommentViewModel {
 
     public final ObservableField<String> shareFileSize = new ObservableField<>();
 
+
 }

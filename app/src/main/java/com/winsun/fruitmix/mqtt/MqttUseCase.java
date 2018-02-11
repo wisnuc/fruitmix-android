@@ -4,8 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.winsun.fruitmix.eventbus.MqttMessageEvent;
-import com.winsun.fruitmix.eventbus.RequestEvent;
-import com.winsun.fruitmix.eventbus.StartMqttRequestEvent;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
@@ -30,7 +28,9 @@ public class MqttUseCase {
 
     private MqttAndroidClient mMqttAndroidClient;
 
-    private static final String serverUri = "tcp://test.siyouqun.com";
+    private static final String TEST_SERVER_URI = "tcp://test.siyouqun.com";
+
+    private static final String PRODUCTION_SERVER_URI = "tcp://mqtt.siyouqun.com";
 
     private String subscriptionTopic = "";
 
@@ -71,7 +71,7 @@ public class MqttUseCase {
 
         Log.d(TAG, "initMqttClient: clientID: " + clientID);
 
-        mMqttAndroidClient = new MqttAndroidClient(context, serverUri, clientID);
+        mMqttAndroidClient = new MqttAndroidClient(context, PRODUCTION_SERVER_URI, clientID);
 
         mMqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
@@ -195,6 +195,10 @@ public class MqttUseCase {
 
         } catch (MqttException e) {
             e.printStackTrace();
+        } catch (Exception e){
+
+            e.printStackTrace();
+
         }
 
     }

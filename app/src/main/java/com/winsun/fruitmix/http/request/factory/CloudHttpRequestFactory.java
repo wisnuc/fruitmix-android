@@ -11,6 +11,8 @@ public class CloudHttpRequestFactory extends BaseAbsHttpRequestFactory {
 
     private static final String TEST_CLOUD_DOMAIN_NAME = "test.siyouqun.org";
 
+    private static final String DEV_CLOUD_DOMAIN_NAME = "10.10.9.87";
+
 //    static final String CLOUD_DOMAIN_NAME = "10.10.9.59";
 
     private static final int DEBUG_CLOUD_PORT = 4000;

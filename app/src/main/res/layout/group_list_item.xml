@@ -95,6 +95,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_toLeftOf="@id/new_comment_count_textview"
+                    android:ellipsize="end"
+                    android:maxLines="1"
                     android:textColor="@color/fifty_four_percent_black"
                     android:textSize="14dp"
                     tools:text="[照片]" />

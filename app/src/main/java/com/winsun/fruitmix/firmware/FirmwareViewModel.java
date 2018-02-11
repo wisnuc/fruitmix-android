@@ -74,9 +74,9 @@ public class FirmwareViewModel {
                 enableStartStopBtn.set(false);
 
                 if (firmwareState == FirmwareState.STARTING)
-                    currentFirmwareState.set(context.getString(R.string.operating_title, context.getString(R.string.start)));
+                    currentFirmwareState.set(context.getString(R.string.starting));
                 else
-                    currentFirmwareState.set(context.getString(R.string.operating_title, context.getString(R.string.stop)));
+                    currentFirmwareState.set(context.getString(R.string.stopping));
 
             } else {
 
@@ -134,7 +134,7 @@ public class FirmwareViewModel {
 
             binding.newVersionIcon.setImageResource(R.drawable.firmware_done);
 
-            Util.setTopMargin(binding.divideTwo,Util.dip2px(context,8));
+            Util.setTopMargin(binding.divideTwo, Util.dip2px(context, 8));
 
         } else {
 
@@ -148,7 +148,7 @@ public class FirmwareViewModel {
 
             binding.newVersionIcon.setImageResource(R.drawable.new_releases);
 
-            Util.setTopMargin(binding.divideTwo,Util.dip2px(context,16));
+            Util.setTopMargin(binding.divideTwo, Util.dip2px(context, 16));
 
         }
 

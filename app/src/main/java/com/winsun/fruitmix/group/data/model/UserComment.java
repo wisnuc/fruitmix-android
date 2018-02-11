@@ -22,8 +22,6 @@ public class UserComment {
 
     private long time;
 
-    private String date;
-
     private String groupUUID;
 
     private String stationID;
@@ -95,13 +93,7 @@ public class UserComment {
 
     private String formatTime(Context context, long time) {
 
-        if (date == null) {
-
-            date = Util.formatShareTime(context, time, System.currentTimeMillis());
-
-            return date;
-        } else
-            return date;
+        return Util.formatShareTime(context, time, System.currentTimeMillis());
 
     }
 

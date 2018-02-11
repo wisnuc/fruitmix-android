@@ -45,6 +45,8 @@ import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -210,6 +212,24 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
                 showComments.add(userComment);
 
         }
+
+        Collections.sort(showComments, new Comparator<UserComment>() {
+            @Override
+            public int compare(UserComment o1, UserComment o2) {
+
+                long o1Time = o1.getTime();
+
+                long o2Time = o2.getTime();
+
+                if (o1Time > o2Time)
+                    return 1;
+                else if (o2Time > o1Time) {
+                    return -1;
+                } else
+                    return 0;
+            }
+        });
+
 
         groupContentAdapter.setUserComments(showComments);
         groupContentAdapter.notifyDataSetChanged();

@@ -20,6 +20,7 @@ import com.winsun.fruitmix.callback.BaseOperateCallbackWrapper;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.databinding.AddReduceGroupMemberItemBinding;
 import com.winsun.fruitmix.databinding.GroupMemberItemBinding;
+import com.winsun.fruitmix.databinding.ModifyGroupNameLayoutBinding;
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
@@ -217,18 +218,20 @@ public class GroupSettingPresenter implements ActiveView {
 
         }
 
-        final EditText editText = new EditText(mGroupSettingView.getContext());
+        ModifyGroupNameLayoutBinding binding = ModifyGroupNameLayoutBinding.inflate(LayoutInflater.from(mGroupSettingView.getContext()),null,false);
 
-        editText.setHint(mGroupSettingViewModel.groupName.get());
+        final EditText modifyGroupNameEditText = binding.modifyGroupNameEdittext;
+
+        modifyGroupNameEditText.setHint(mGroupSettingViewModel.groupName.get());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mGroupSettingView.getContext())
                 .setTitle(mGroupSettingView.getString(R.string.modify_group_name))
-                .setView(editText)
+                .setView(binding.getRoot())
                 .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        String newName = editText.getText().toString();
+                        String newName = modifyGroupNameEditText.getText().toString();
 
                         modifyGroupName(newName);
 

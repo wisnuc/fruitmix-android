@@ -93,7 +93,7 @@ public class UserAvatar extends FrameLayout {
 
                 avatarDefaultTextView.setText("");
 
-                avatarImageView.setBackgroundResource(R.drawable.del_user);
+                avatarImageView.setBackgroundResource(R.drawable.user_name);
 
                 return;
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.format.Formatter;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.winsun.fruitmix.databinding.MultiFileCommentBinding;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
@@ -99,7 +101,7 @@ public class MultiFileCommentView extends UserCommentView {
 
                 final Media media = medias.get(i);
 
-                HttpRequest httpRequest = media.getImageThumbUrl(context, new GroupRequestParam(data.getGroupUUID(),data.getStationID()));
+                HttpRequest httpRequest = media.getImageThumbUrl(context, new GroupRequestParam(data.getGroupUUID(), data.getStationID()));
 
                 httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
 
@@ -127,8 +129,8 @@ public class MultiFileCommentView extends UserCommentView {
                     @Override
                     public void onClick(View v) {
 
-                        PhotoSliderActivity.startPhotoSliderActivity(toolbar, (Activity) context,medias,data.getGroupUUID(),data.getStationID(),
-                                3,networkImageView,media);
+                        PhotoSliderActivity.startPhotoSliderActivity(toolbar, (Activity) context, medias, data.getGroupUUID(), data.getStationID(),
+                                3, networkImageView, media);
 
                     }
                 });
@@ -195,7 +197,18 @@ public class MultiFileCommentView extends UserCommentView {
             AbstractFile firstFile = files.get(0);
 
             fileCommentViewModel.fileResID.set(firstFile.getFileTypeResID());
-            fileCommentViewModel.shareFileSize.set("");
+
+            long totalFileSize = 0;
+
+            for (AbstractFile file : files) {
+
+                if (file instanceof AbstractRemoteFile)
+                    totalFileSize += ((AbstractRemoteFile) file).getSize();
+
+            }
+
+            if (totalFileSize != 0)
+                fileCommentViewModel.shareFileSize.set(Formatter.formatFileSize(context, totalFileSize));
 
             String formatName = firstFile.getFormatName(context);
 
