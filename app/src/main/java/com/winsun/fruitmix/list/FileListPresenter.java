@@ -35,6 +35,7 @@ import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.TaskState;
+import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
 import com.winsun.fruitmix.file.data.download.param.FileFromBoxDownloadParam;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
@@ -97,7 +98,7 @@ public class FileListPresenter {
 
     public FileListPresenter(FileComment fileComment, FileTaskManager fileTaskManager, Activity activity,
                              StationFileRepository stationFileRepository, NetworkStateManager networkStateManager,
-                             String currentUserUUID,String cloudToken) {
+                             String currentUserUUID, String cloudToken) {
         mAbstractFiles = fileComment.getFiles();
 
         groupUUID = fileComment.getGroupUUID();
@@ -254,9 +255,8 @@ public class FileListPresenter {
 
                     } else {
                         AbstractCommand macroCommand = new MacroCommand();
-                        AbstractCommand downloadFileCommand = new DownloadFileCommand(mFileTaskManager,
-                                abstractRemoteFile.getFileHash(),abstractRemoteFile, mStationFileRepository,
-                                mNetworkStateManager, currentUserUUID, groupUUID,stationID,cloudToken);
+                        AbstractCommand downloadFileCommand = new DownloadFileCommand(mFileTaskManager, abstractRemoteFile, mStationFileRepository,
+                                mNetworkStateManager, currentUserUUID, createFileDownloadParam(abstractRemoteFile));
                         macroCommand.addCommand(downloadFileCommand);
                         macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
 
@@ -277,7 +277,7 @@ public class FileListPresenter {
 
                     if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName())) {
 
-                        if (!abstractRemoteFile.openAbstractRemoteFile(context, "")) {
+                        if (!abstractRemoteFile.openAbstractRemoteFile(context)) {
                             Toast.makeText(context, context.getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
                         }
 
@@ -286,7 +286,7 @@ public class FileListPresenter {
                         if (FileUtil.checkFileIsVideo(abstractRemoteFile.getName())) {
 
                             PlayVideoActivity.startPlayVideoActivity(mActivity,
-                                    new FileFromBoxDownloadParam(groupUUID, stationID,abstractRemoteFile.getFileHash(),cloudToken));
+                                    createFileDownloadParam(abstractRemoteFile));
 
                             return;
                         }
@@ -339,8 +339,8 @@ public class FileListPresenter {
 
         }
 
-        mCurrentDownloadFileCommand = new DownloadFileCommand(mFileTaskManager, abstractRemoteFile.getFileHash(),abstractRemoteFile, mStationFileRepository,
-                mNetworkStateManager, currentUserUUID, groupUUID,stationID,cloudToken);
+        mCurrentDownloadFileCommand = new DownloadFileCommand(mFileTaskManager, abstractRemoteFile, mStationFileRepository,
+                mNetworkStateManager, currentUserUUID, createFileDownloadParam(abstractRemoteFile));
 
         currentDownloadFileProgressDialog = new ProgressDialog(activity);
 
@@ -444,12 +444,18 @@ public class FileListPresenter {
 
         MacroCommand macroCommand = new MacroCommand();
 
-        AbstractCommand downloadFileCommand = new DownloadFileCommand(mFileTaskManager, abstractRemoteFile.getFileHash(),abstractRemoteFile, mStationFileRepository,
-                mNetworkStateManager, currentUserUUID, groupUUID,stationID,cloudToken);
+        AbstractCommand downloadFileCommand = new DownloadFileCommand(mFileTaskManager, abstractRemoteFile, mStationFileRepository,
+                mNetworkStateManager, currentUserUUID, createFileDownloadParam(abstractRemoteFile));
         macroCommand.addCommand(downloadFileCommand);
         macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
 
         return macroCommand;
+    }
+
+    private FileDownloadParam createFileDownloadParam(RemoteFile file) {
+
+        return new FileFromBoxDownloadParam(groupUUID, stationID, file.getFileHash(), cloudToken);
+
     }
 
     public void handleEvent(TaskStateChangedEvent taskStateChangedEvent) {

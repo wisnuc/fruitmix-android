@@ -85,6 +85,8 @@ public class PlayVideoActivity extends Activity {
         else if (mDriveRootUUID != null || remoteFile != null) {
             mDriveRootUUID = null;
             remoteFile = null;
+        }else if(mFileDownloadParam != null){
+            mFileDownloadParam = null;
         }
 
     }

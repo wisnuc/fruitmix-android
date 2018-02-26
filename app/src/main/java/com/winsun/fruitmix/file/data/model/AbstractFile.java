@@ -63,8 +63,8 @@ public abstract class AbstractFile {
 
         StringBuilder name = new StringBuilder();
 
-        if (fileName.length() > 10) {
-            name.append(fileName.substring(0, 10));
+        if (fileName.length() > 4) {
+            name.append(fileName.substring(0, 4));
 
             name.append(context.getString(R.string.android_ellipsize));
         } else

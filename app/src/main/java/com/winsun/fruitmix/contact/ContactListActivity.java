@@ -137,7 +137,7 @@ public class ContactListActivity extends BaseToolbarActivity implements ContactL
     protected String getToolbarTitle() {
 
         if (purpose == CREATE_GROUP)
-            return getString(R.string.select_contact);
+            return getString(R.string.create_group);
         else
             return getString(R.string.group_setting);
     }
@@ -163,6 +163,8 @@ public class ContactListActivity extends BaseToolbarActivity implements ContactL
         if (selectedItemCount > 0) {
 
             toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(mContext, R.color.eighty_seven_percent_black));
+
+            toolbarViewModel.selectTextEnable.set(true);
 
             toolbarViewModel.setToolbarSelectBtnOnClickListener(new ToolbarViewModel.ToolbarSelectBtnOnClickListener() {
                 @Override
@@ -191,12 +193,7 @@ public class ContactListActivity extends BaseToolbarActivity implements ContactL
 
             toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(mContext, R.color.twenty_six_percent_black));
 
-            toolbarViewModel.setToolbarSelectBtnOnClickListener(new ToolbarViewModel.ToolbarSelectBtnOnClickListener() {
-                @Override
-                public void onClick() {
-
-                }
-            });
+            toolbarViewModel.selectTextEnable.set(false);
 
         }
 

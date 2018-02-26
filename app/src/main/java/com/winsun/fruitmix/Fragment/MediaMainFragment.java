@@ -34,6 +34,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.SharpCurveInterpolator;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.command.AbstractCommand;
+import com.winsun.fruitmix.component.FabMenuLayoutViewComponent;
 import com.winsun.fruitmix.contact.ContactListActivity;
 import com.winsun.fruitmix.databinding.NavPagerMainBinding;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
@@ -41,6 +42,10 @@ import com.winsun.fruitmix.eventbus.MqttMessageEvent;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveVideoThumbnailEvent;
+import com.winsun.fruitmix.file.data.FileFragmentViewDataSource;
+import com.winsun.fruitmix.file.data.FileListViewDataSource;
+import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
@@ -86,7 +91,8 @@ import static android.app.Activity.RESULT_OK;
 import static com.winsun.fruitmix.group.view.GroupListPage.CREATE_GROUP_REQUEST_CODE;
 import static com.winsun.fruitmix.group.view.GroupListPage.GROUP_CONTENT_REQUEST_CODE;
 
-public class MediaMainFragment extends Fragment implements View.OnClickListener, IPhotoListListener, HandleFileListOperateCallback, FileListSelectModeListener {
+public class MediaMainFragment extends Fragment implements IPhotoListListener,
+        HandleFileListOperateCallback, FileListSelectModeListener, FabMenuLayoutViewComponent.FabMenuItemOnClickListener {
 
     public static final String TAG = "MediaMainFragment";
 
@@ -94,13 +100,13 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private Toolbar revealToolbar;
 
-    private FloatingActionButton fab;
+//    private FloatingActionButton fab;
 
     private ViewPager viewPager;
 
-    private ImageView systemShareBtn;
-
-    private FloatingActionButton downloadFileBtn;
+//    private ImageView systemShareBtn;
+//
+//    private FloatingActionButton downloadFileBtn;
 
     private ImageView mAlbumBalloon;
 
@@ -113,7 +119,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private InboxListPage mInboxListPage;
 
-    private boolean sMenuUnfolding = false;
+//    private boolean sMenuUnfolding = false;
 
     private Context mContext;
 
@@ -154,6 +160,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
     private boolean noMediaSelect = true;
     private boolean noFileSelect = true;
+
+    private FabMenuLayoutViewComponent mFabMenuLayoutViewComponent;
 
     public MediaMainFragment() {
         // Required empty public constructor
@@ -201,13 +209,15 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         revealToolbar = binding.revealToolbarLayout.revealToolbar;
 
-        fab = binding.fab;
+        mFabMenuLayoutViewComponent = new FabMenuLayoutViewComponent(binding.fabMenuLayout, false, this);
 
         viewPager = binding.viewPager;
 
+/*        fab = binding.fab;
+
         systemShareBtn = binding.systemShare;
 
-        downloadFileBtn = binding.downloadFileBtn;
+        downloadFileBtn = binding.downloadFileBtn;*/
 
         mAlbumBalloon = binding.albumBalloon;
 
@@ -226,9 +236,9 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         viewPager.setCurrentItem(PAGE_PHOTO);
         onPageSelect(PAGE_PHOTO);
 
-        systemShareBtn.setOnClickListener(this);
+  /*      systemShareBtn.setOnClickListener(this);
         downloadFileBtn.setOnClickListener(this);
-        fab.setOnClickListener(this);
+        fab.setOnClickListener(this);*/
 
         photoList.setPhotoListListener(this);
 
@@ -281,19 +291,19 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
             @Override
             public void onClick() {
 
-                if (viewPager.getCurrentItem() == PAGE_PHOTO) {
-
-                    if (!photoList.canEnterSelectMode()) {
-                        return;
-                    }
-
-                } else if (viewPager.getCurrentItem() == PAGE_FILE) {
-
-                    if (!fileFragment.canEnterSelectMode()) {
-                        return;
-                    }
-
-                }
+//                if (viewPager.getCurrentItem() == PAGE_PHOTO) {
+//
+//                    if (!photoList.canEnterSelectMode()) {
+//                        return;
+//                    }
+//
+//                } else if (viewPager.getCurrentItem() == PAGE_FILE) {
+//
+//                    if (!fileFragment.canEnterSelectMode()) {
+//                        return;
+//                    }
+//
+//                }
 
                 enterSelectMode();
 
@@ -590,7 +600,12 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         groupListPage = new GroupListPage(getActivity());
         photoList = new NewPhotoList(getActivity());
-        fileFragment = new FileFragment(getActivity(), this, this);
+
+        StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(getContext());
+
+        FileListViewDataSource fileListViewDataSource = new FileFragmentViewDataSource(getActivity(), stationFileRepository);
+
+        fileFragment = new FileFragment(getActivity(), this, this, fileListViewDataSource);
 
         pageList = new ArrayList<>();
 
@@ -783,7 +798,7 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         revealToolbarViewModel.selectCountTitleText.set(text);
 
-        if (selectCount > 0 && fab.getVisibility() != View.VISIBLE)
+        if (selectCount > 0)
             showFab();
 
     }
@@ -880,36 +895,20 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     }
 
     private void collapseFab() {
-        if (sMenuUnfolding) {
-            sMenuUnfolding = false;
-            collapseFabAnimation();
-        }
+
+        mFabMenuLayoutViewComponent.collapseFab();
+
     }
 
     private void showFab() {
 
-        new AnimatorBuilder(getContext(), R.animator.fab_translation, fab).addAdapter(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                super.onAnimationStart(animation);
-
-                fab.setVisibility(View.VISIBLE);
-            }
-        }).setInterpolator(new LinearOutSlowInInterpolator()).startAnimator();
+        mFabMenuLayoutViewComponent.showFab();
 
     }
 
     private void dismissFab() {
 
-        new AnimatorBuilder(getContext(), R.animator.fab_translation_restore, fab).addAdapter(new AnimatorListenerAdapter() {
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-
-                fab.setVisibility(View.GONE);
-            }
-        }).setInterpolator(SharpCurveInterpolator.getSharpCurveInterpolator()).startAnimator();
+        mFabMenuLayoutViewComponent.dismissFab();
 
     }
 
@@ -1060,11 +1059,15 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
             toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(context, R.color.twenty_six_percent_black));
 
+            toolbarViewModel.selectTextEnable.set(false);
+
         } else if (!noPhotoItem && currentItem == PAGE_PHOTO) {
 
             toolbarViewModel.showSelect.set(true);
 
             toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(context, R.color.eighty_seven_percent_black));
+
+            toolbarViewModel.selectTextEnable.set(true);
 
         }
 
@@ -1105,60 +1108,6 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     @Override
     public Toolbar getToolbar() {
         return toolbar;
-    }
-
-    @Override
-    public void onClick(View v) {
-
-        switch (v.getId()) {
-            case R.id.system_share:
-
-                if (!Util.isNetworkConnected(mContext)) {
-                    Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                AbstractCommand shareInAppCommand = new AbstractCommand() {
-                    @Override
-                    public void execute() {
-                    }
-
-                    @Override
-                    public void unExecute() {
-                    }
-                };
-
-                AbstractCommand shareToOtherAppCommand = new AbstractCommand() {
-                    @Override
-                    public void execute() {
-                        handleShareToOtherApp();
-
-                        quitSelectMode();
-                    }
-
-                    @Override
-                    public void unExecute() {
-                    }
-                };
-
-                new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(mContext).show();
-
-                break;
-
-            case R.id.download_file_btn:
-
-                fileFragment.downloadSelectItems();
-
-                quitSelectMode();
-
-                break;
-
-            case R.id.fab:
-                refreshFabState();
-                break;
-
-            default:
-        }
     }
 
     private void handleShareToOtherApp() {
@@ -1211,103 +1160,6 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
     private void shareFileToOtherApp() {
 
         fileFragment.shareSelectFilesToOtherApp();
-
-    }
-
-
-    private void refreshFabState() {
-        if (sMenuUnfolding) {
-            sMenuUnfolding = false;
-            collapseFabAnimation();
-        } else {
-            sMenuUnfolding = true;
-            extendFabAnimation();
-        }
-    }
-
-    private void collapseFabAnimation() {
-
-        new AnimatorBuilder(getContext(), R.animator.fab_remote_restore, fab).startAnimator();
-
-        if (systemShareBtn.getVisibility() == View.VISIBLE) {
-            new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation_restore, systemShareBtn).addAdapter(new AnimatorListenerAdapter() {
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-
-                    systemShareBtn.setVisibility(View.GONE);
-
-                }
-            }).startAnimator();
-
-            if (downloadFileBtn.getVisibility() == View.VISIBLE) {
-
-                new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation_restore, downloadFileBtn).addAdapter(new AnimatorListenerAdapter() {
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-
-                        downloadFileBtn.setVisibility(View.GONE);
-
-                    }
-                }).startAnimator();
-            }
-        } else {
-
-            if (downloadFileBtn.getVisibility() == View.VISIBLE) {
-
-                new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation_restore, downloadFileBtn).addAdapter(new AnimatorListenerAdapter() {
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-
-                        downloadFileBtn.setVisibility(View.GONE);
-
-                    }
-                }).startAnimator();
-            }
-
-        }
-
-
-    }
-
-    private void extendFabAnimation() {
-
-        new AnimatorBuilder(getContext(), R.animator.fab_remote, fab).startAnimator();
-
-        if (viewPager.getCurrentItem() == PAGE_PHOTO) {
-
-            downloadFileBtn.setVisibility(View.GONE);
-
-            systemShareBtn.setVisibility(View.VISIBLE);
-
-            new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, systemShareBtn).startAnimator();
-
-        } else {
-
-            systemShareBtn.setVisibility(View.GONE);
-
-            downloadFileBtn.setVisibility(View.VISIBLE);
-
-            if (systemShareBtn.getVisibility() == View.VISIBLE) {
-
-                new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, systemShareBtn).startAnimator();
-
-                if (downloadFileBtn.getVisibility() == View.VISIBLE)
-                    new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation, downloadFileBtn).startAnimator();
-
-            } else {
-
-                if (downloadFileBtn.getVisibility() == View.VISIBLE)
-                    new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, downloadFileBtn).startAnimator();
-
-            }
-
-        }
 
     }
 
@@ -1382,6 +1234,8 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
         if (currentItem == PAGE_FILE) {
             toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(getContext(), R.color.eighty_seven_percent_black));
+
+            toolbarViewModel.selectTextEnable.set(true);
         }
 
         noFileSelect = false;
@@ -1396,8 +1250,13 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
         if (context == null)
             return;
 
-        if (viewPager.getCurrentItem() == PAGE_FILE)
+        if (viewPager.getCurrentItem() == PAGE_FILE){
+
             toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(getContext(), R.color.twenty_six_percent_black));
+
+            toolbarViewModel.selectTextEnable.set(false);
+
+        }
 
         noFileSelect = true;
 
@@ -1430,9 +1289,9 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
                 toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
 
-                fab.setVisibility(View.GONE);
-                systemShareBtn.setVisibility(View.GONE);
-                downloadFileBtn.setVisibility(View.GONE);
+                mFabMenuLayoutViewComponent.setShowDownloadFileBtn(false);
+
+                mFabMenuLayoutViewComponent.hideFabMenuItem();
 
                 toolbarViewModel.showSelect.set(false);
 
@@ -1497,13 +1356,13 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
                 setCurrentItem(photoList);
 
+                mFabMenuLayoutViewComponent.setShowDownloadFileBtn(false);
+
                 toolbarViewModel.titleText.set(getString(R.string.photo));
                 toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
                 toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
 
-                fab.setVisibility(View.GONE);
-                systemShareBtn.setVisibility(View.GONE);
-                downloadFileBtn.setVisibility(View.GONE);
+                mFabMenuLayoutViewComponent.hideFabMenuItem();
 
                 toolbarViewModel.showSelect.set(true);
                 toolbarViewModel.showMenu.set(false);
@@ -1517,9 +1376,9 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
 
                 setCurrentItem(fileFragment);
 
-                fab.setVisibility(View.GONE);
-                systemShareBtn.setVisibility(View.GONE);
-                downloadFileBtn.setVisibility(View.GONE);
+                mFabMenuLayoutViewComponent.setShowDownloadFileBtn(true);
+
+                mFabMenuLayoutViewComponent.hideFabMenuItem();
 
                 toolbarViewModel.showSelect.set(true);
                 toolbarViewModel.showMenu.set(false);
@@ -1541,6 +1400,51 @@ public class MediaMainFragment extends Fragment implements View.OnClickListener,
                 break;
             default:
         }
+
+    }
+
+    @Override
+    public void systemShareBtnOnClick() {
+
+        if (!Util.isNetworkConnected(mContext)) {
+            Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AbstractCommand shareInAppCommand = new AbstractCommand() {
+            @Override
+            public void execute() {
+            }
+
+            @Override
+            public void unExecute() {
+            }
+        };
+
+        AbstractCommand shareToOtherAppCommand = new AbstractCommand() {
+            @Override
+            public void execute() {
+                handleShareToOtherApp();
+
+                quitSelectMode();
+            }
+
+            @Override
+            public void unExecute() {
+            }
+        };
+
+        new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(mContext).show();
+
+
+    }
+
+    @Override
+    public void downloadFileBtnOnClick() {
+
+        fileFragment.downloadSelectItems();
+
+        quitSelectMode();
 
     }
 

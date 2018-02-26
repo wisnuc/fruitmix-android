@@ -23,6 +23,8 @@ public class ToolbarViewModel {
 
     public final ObservableInt selectTextColorResID = new ObservableInt();
 
+    public final ObservableBoolean selectTextEnable = new ObservableBoolean(true);
+
     public final ObservableBoolean showSelect = new ObservableBoolean(false);
 
     public final ObservableBoolean showMenu = new ObservableBoolean(false);

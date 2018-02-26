@@ -129,7 +129,7 @@ public class MultiFileCommentView extends UserCommentView {
                     @Override
                     public void onClick(View v) {
 
-                        PhotoSliderActivity.startPhotoSliderActivity(toolbar, (Activity) context, medias, data.getGroupUUID(), data.getStationID(),
+                        PhotoSliderActivity.startPhotoSliderActivityWithMedias(toolbar, (Activity) context, medias, data.getGroupUUID(), data.getStationID(),
                                 3, networkImageView, media);
 
                     }
@@ -210,23 +210,21 @@ public class MultiFileCommentView extends UserCommentView {
             if (totalFileSize != 0)
                 fileCommentViewModel.shareFileSize.set(Formatter.formatFileSize(context, totalFileSize));
 
-            String formatName = firstFile.getFormatName(context);
+//            String formatName = firstFile.getFormatName(context);
 
             String name = context.getString(R.string.share) +
-                    "\"" +
-                    formatName +
-                    "\"" +
-                    context.getString(R.string.more, context.getResources().getQuantityString(R.plurals.file, totalSize, totalSize));
+                    context.getString(R.string.file) + " " +
+                    totalSize + context.getString(R.string.file_unit);
 
-            int start = name.indexOf(formatName);
+//            int start = name.indexOf(formatName);
+//
+//            int end = start + formatName.length();
+//
+//            SpannableString spannableString = new SpannableString(name);
+//
+//            spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(context, R.color.blue)), start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
-            int end = start + formatName.length();
-
-            SpannableString spannableString = new SpannableString(name);
-
-            spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(context, R.color.blue)), start, end, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-
-            fileCommentViewModel.shareText.set(spannableString.toString());
+            fileCommentViewModel.shareText.set(name);
 
             fileTweetGroupItemBinding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override

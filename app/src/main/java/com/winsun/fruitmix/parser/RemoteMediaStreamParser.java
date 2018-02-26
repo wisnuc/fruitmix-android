@@ -39,7 +39,11 @@ public class RemoteMediaStreamParser implements RemoteDataStreamParser<Media> {
                     String name = jsonReader.nextName();
                     if (name.equals("data")) {
 
-                        readMedia(jsonReader, medias);
+                        JsonToken dataToken = jsonReader.peek();
+
+                        if (dataToken == JsonToken.BEGIN_ARRAY)
+                            readMedia(jsonReader, medias);
+
                     } else
                         jsonReader.skipValue();
 

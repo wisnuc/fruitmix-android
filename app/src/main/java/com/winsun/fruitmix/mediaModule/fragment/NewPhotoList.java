@@ -848,7 +848,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 if (newSharedElement == null)
                     newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageSmallThumbUrl(containerActivity).getUrl());
 
-                if(newSharedElement == null)
+                if (newSharedElement == null)
                     return;
 
                 names.clear();
@@ -1479,7 +1479,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     }
 
-    private class PhotoHolder extends BaseMediaHolder {
+    public class PhotoHolder extends BaseMediaHolder {
 
         NetworkImageView mPhotoIv;
 
@@ -1635,7 +1635,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         return initialPhotoPosition;
     }
 
-    private class VideoViewHolder extends BaseMediaHolder {
+    public class VideoViewHolder extends BaseMediaHolder {
 
         VideoItemBinding binding;
 
@@ -1655,7 +1655,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             durationTv = binding.duration;
         }
 
-        void refreshView(final int position) {
+        public void refreshView(final int position) {
 
             durationTv.setTypeface(mTypeface);
 

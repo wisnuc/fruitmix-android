@@ -43,7 +43,11 @@ import com.winsun.fruitmix.databinding.RemoteFolderItemLayoutBinding;
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.file.data.FileFragmentViewDataSource;
+import com.winsun.fruitmix.file.data.FileListViewDataSource;
 import com.winsun.fruitmix.file.data.download.TaskState;
+import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
+import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloadParam;
 import com.winsun.fruitmix.file.data.model.FinishedTaskItemWrapper;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
@@ -98,12 +102,12 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
     private boolean remoteFileLoaded = false;
 
-    private String currentFolderUUID;
-    private String currentFolderName;
-
-    private List<String> retrievedFolderUUIDList;
-
-    private List<String> retrievedFolderNameList;
+//    private String currentFolderUUID;
+//    private String currentFolderName;
+//
+//    private List<String> retrievedFolderUUIDList;
+//
+//    private List<String> retrievedFolderNameList;
 
     private boolean selectMode = false;
 
@@ -115,11 +119,11 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
     private AbstractCommand nullCommand;
 
-    private String rootUUID;
-
-    private String driveRootUUID;
-
-    private List<AbstractRemoteFile> sharedDriveFiles;
+//    private String rootUUID;
+//
+//    private String driveRootUUID;
+//
+//    private List<AbstractRemoteFile> sharedDriveFiles;
 
     private List<String> alreadyDownloadedFilePathForShare;
 
@@ -166,10 +170,12 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
     private boolean canEnterFolderWhenSelectMode = false;
 
+    private FileListViewDataSource mFileListViewDataSource;
+
     public FilePresenter(final Activity activity, FileView fileView, FileListSelectModeListener fileListSelectModeListener, StationFileRepository stationFileRepository,
                          NetworkStateManager networkStateManager, NoContentViewModel noContentViewModel, LoadingViewModel loadingViewModel, FileViewModel fileViewModel,
                          HandleFileListOperateCallback handleFileListOperateCallback, UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
-                         FileTaskManager fileTaskManager) {
+                         FileTaskManager fileTaskManager, FileListViewDataSource fileListViewDataSource) {
         this.activity = activity;
         this.fileView = fileView;
         this.fileListSelectModeListener = fileListSelectModeListener;
@@ -202,29 +208,31 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         fileRecyclerViewAdapter = new FileRecyclerViewAdapter();
 
         init();
+
+        mFileListViewDataSource = fileListViewDataSource;
     }
 
     private void initCurrentUserUUIDAndRootUUID(UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource) {
         currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 //        rootUUID = userDataRepository.getUserByUUID(currentUserUUID).getHome();
 
-        rootUUID = ROOT_DRIVE_UUID;
+//        rootUUID = ROOT_DRIVE_UUID;
     }
 
     private void init() {
         abstractRemoteFiles = new ArrayList<>();
 
-        retrievedFolderUUIDList = new ArrayList<>();
-        retrievedFolderNameList = new ArrayList<>();
+//        retrievedFolderUUIDList = new ArrayList<>();
+//        retrievedFolderNameList = new ArrayList<>();
 
         selectedFiles = new ArrayList<>();
 
-        currentFolderUUID = rootUUID;
-        currentFolderName = activity.getString(R.string.files);
-
-        driveRootUUID = "";
-
-        sharedDriveFiles = new ArrayList<>();
+//        currentFolderUUID = rootUUID;
+//        currentFolderName = activity.getString(R.string.files);
+//
+//        driveRootUUID = "";
+//
+//        sharedDriveFiles = new ArrayList<>();
     }
 
 
@@ -294,11 +302,17 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         MacroCommand macroCommand = new MacroCommand();
 
         AbstractCommand downloadFileCommand = new DownloadFileCommand(fileTaskManager, abstractRemoteFile, stationFileRepository,
-                networkStateManager, currentUserUUID, driveRootUUID);
+                networkStateManager, currentUserUUID, createFileDownloadParam(abstractRemoteFile));
         macroCommand.addCommand(downloadFileCommand);
         macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
 
         return macroCommand;
+    }
+
+    private FileDownloadParam createFileDownloadParam(AbstractRemoteFile abstractRemoteFile) {
+
+        return mFileListViewDataSource.createFileDownloadParam(abstractRemoteFile);
+
     }
 
 
@@ -315,15 +329,25 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
             initCurrentUserUUIDAndRootUUID(userDataRepository, systemSettingDataSource);
 
-            if (force)
+            mFileListViewDataSource.setCurrentUserUUID(currentUserUUID);
+
+            if (force) {
+
                 init();
 
-            if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
-                retrievedFolderUUIDList.add(currentFolderUUID);
-                retrievedFolderNameList.add(currentFolderName);
+                mFileListViewDataSource.reset(activity);
+
             }
 
             getFile();
+
+
+//            if (!retrievedFolderUUIDList.contains(currentFolderUUID)) {
+//                retrievedFolderUUIDList.add(currentFolderUUID);
+//                retrievedFolderNameList.add(currentFolderName);
+//            }
+//
+//            getFile();
 
         }
 
@@ -333,12 +357,47 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
         fileViewModel.swipeRefreshEnabled.set(true);
 
-        getFileInThread();
+        mFileListViewDataSource.getFilesInCurrentFolder(activity, new BaseLoadDataCallbackWrapper<AbstractRemoteFile>(
+                new BaseLoadDataCallback<AbstractRemoteFile>() {
+                    @Override
+                    public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
+                        handleGetFileSucceed(data);
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        handleGetFileFail();
+
+                    }
+                }, this
+        ));
 
     }
 
     private void getFile() {
 
+        preHandleBeforeGetFile();
+
+        mFileListViewDataSource.getFilesInCurrentFolder(activity, new BaseLoadDataCallbackWrapper<AbstractRemoteFile>(
+                new BaseLoadDataCallback<AbstractRemoteFile>() {
+                    @Override
+                    public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
+
+                        handleGetFileSucceed(data);
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        handleGetFileFail();
+                    }
+                }, this));
+
+    }
+
+    private void preHandleBeforeGetFile() {
         noContentViewModel.showNoContent.set(false);
 
         loadingViewModel.showLoading.set(true);
@@ -346,13 +405,37 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         fileViewModel.swipeRefreshEnabled.set(false);
 
         fileListSelectModeListener.onFileSelectOperationUnavailable();
+    }
 
-        getFileInThread();
+    private void getFile(AbstractRemoteFile parentFolder) {
+
+        preHandleBeforeGetFile();
+
+        mFileListViewDataSource.getFilesInFolder(activity, parentFolder, new BaseLoadDataCallbackWrapper<>(
+                new BaseLoadDataCallback<AbstractRemoteFile>() {
+                    @Override
+                    public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
+
+                        handleGetFileSucceed(data);
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        handleGetFileFail();
+
+                    }
+                }, this));
 
     }
 
+
     private void getFileInThread() {
 
+
+
+/*
         if (currentFolderUUID.equals(ROOT_DRIVE_UUID)) {
 
             stationFileRepository.getRootDrive(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<AbstractRemoteFile>() {
@@ -397,9 +480,11 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
             }, this));
 
         }
+*/
 
     }
 
+/*
     private List<AbstractRemoteFile> handleRootDriveUUID(List<AbstractRemoteFile> data) {
 
         sharedDriveFiles.clear();
@@ -438,6 +523,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         return result;
 
     }
+*/
 
     private void handleGetFileFail() {
 
@@ -453,7 +539,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         fileListSelectModeListener.onFileSelectOperationUnavailable();
     }
 
-    private void handleGetFileSucceed(List<AbstractRemoteFile> files, boolean needSort) {
+    private void handleGetFileSucceed(List<AbstractRemoteFile> files) {
 
         loadingViewModel.showLoading.set(false);
 
@@ -481,9 +567,6 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
             abstractRemoteFiles.clear();
             abstractRemoteFiles.addAll(files);
 
-            if (needSort)
-                sortFile(abstractRemoteFiles);
-
             fileRecyclerViewAdapter.notifyDataSetChanged();
 
             if (canEnterSelectMode())
@@ -494,44 +577,6 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         }
     }
 
-
-    private void sortFile(List<AbstractRemoteFile> abstractRemoteFiles) {
-
-        List<AbstractRemoteFile> files = new ArrayList<>();
-        List<AbstractRemoteFile> folders = new ArrayList<>();
-
-        for (AbstractRemoteFile abstractRemoteFile : abstractRemoteFiles) {
-            if (abstractRemoteFile.isFolder())
-                folders.add(abstractRemoteFile);
-            else
-                files.add(abstractRemoteFile);
-        }
-
-        Comparator<AbstractRemoteFile> comparator = new Comparator<AbstractRemoteFile>() {
-            @Override
-            public int compare(AbstractRemoteFile lhs, AbstractRemoteFile rhs) {
-
-                long lhsTime = lhs.getTime();
-                long rhsTime = rhs.getTime();
-
-                if (lhsTime > rhsTime)
-                    return 1;
-                else if (rhsTime > lhsTime)
-                    return -1;
-                else
-                    return 0;
-
-            }
-        };
-
-        Collections.sort(folders, comparator);
-        Collections.sort(files, comparator);
-
-        abstractRemoteFiles.clear();
-        abstractRemoteFiles.addAll(folders);
-        abstractRemoteFiles.addAll(files);
-
-    }
 
     @Override
     public boolean isActive() {
@@ -686,7 +731,9 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
     }
 
     public String getCurrentFolderName() {
-        return currentFolderName;
+//        return currentFolderName;
+
+        return mFileListViewDataSource.getCurrentFolderName();
     }
 
     public boolean handleBackPressedOrNot() {
@@ -695,7 +742,9 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
     public boolean notRootFolder() {
 
-        return !currentFolderUUID.equals(rootUUID);
+//        return !currentFolderUUID.equals(rootUUID);
+
+        return mFileListViewDataSource.checkCanGoToUpperLevel();
 
     }
 
@@ -715,7 +764,28 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         if (loadingViewModel.showLoading.get() && !noContentViewModel.showNoContent.get())
             return;
 
-        retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
+        mFileListViewDataSource.getFilesInParentFolder(activity,
+                new BaseLoadDataCallbackWrapper<>(
+                        new BaseLoadDataCallback<AbstractRemoteFile>() {
+                            @Override
+                            public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
+
+                                handleGetFileSucceed(data);
+
+                            }
+
+                            @Override
+                            public void onFail(OperationResult operationResult) {
+
+                                handleGetFileFail();
+                            }
+                        }, this
+                )
+        );
+
+        handleFileListOperateCallback.handleFileListOperate(mFileListViewDataSource.getCurrentFolderName());
+
+ /*       retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
         currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
 
         retrievedFolderNameList.remove(retrievedFolderNameList.size() - 1);
@@ -723,7 +793,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
         getFile();
 
-        handleFileListOperateCallback.handleFileListOperate(currentFolderName);
+        handleFileListOperateCallback.handleFileListOperate(currentFolderName);*/
     }
 
     public void setCanEnterFolderWhenSelectMode(boolean canEnterFolderWhenSelectMode) {
@@ -883,7 +953,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         }
 
         mCurrentDownloadFileCommand = new DownloadFileCommand(fileTaskManager, file, stationFileRepository,
-                networkStateManager, currentUserUUID, driveRootUUID);
+                networkStateManager, currentUserUUID, createFileDownloadParam(file));
 
         currentDownloadFileProgressDialog = new ProgressDialog(activity);
 
@@ -992,7 +1062,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         for (AbstractRemoteFile abstractRemoteFile : files) {
 
             AbstractCommand abstractCommand = new DownloadFileCommand(fileTaskManager, abstractRemoteFile, stationFileRepository,
-                    networkStateManager, currentUserUUID, driveRootUUID);
+                    networkStateManager, currentUserUUID, createFileDownloadParam(abstractRemoteFile));
             macroCommand.addCommand(abstractCommand);
 
         }
@@ -1103,6 +1173,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                     if (selectMode && !canEnterFolderWhenSelectMode)
                         return;
 
+/*
                     currentFolderUUID = abstractRemoteFile.getUuid();
 
                     retrievedFolderUUIDList.add(currentFolderUUID);
@@ -1117,10 +1188,11 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                         driveRootUUID = currentFolderUUID;
                     else if (abstractRemoteFile instanceof RemoteBuiltInDrive)
                         driveRootUUID = currentFolderUUID;
+*/
 
-                    getFile();
+                    getFile(abstractRemoteFile);
 
-                    handleFileListOperateCallback.handleFileListOperate(currentFolderName);
+                    handleFileListOperateCallback.handleFileListOperate(mFileListViewDataSource.getCurrentFolderName());
                 }
             });
 
@@ -1164,6 +1236,22 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
             }
 
             final RemoteFile abstractRemoteFile = (RemoteFile) abstractRemoteFiles.get(position);
+
+            TextView fileSize = binding.fileSize;
+
+            RelativeLayout.LayoutParams fileSizeLayoutParams = (RelativeLayout.LayoutParams) fileSize.getLayoutParams();
+
+            if (abstractRemoteFile.getTimeText().isEmpty()) {
+
+                fileSizeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                fileSizeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+
+            } else {
+
+                fileSizeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                fileSizeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+
+            }
 
             fileSizeTv.setText(Formatter.formatFileSize(activity, abstractRemoteFile.getSize()));
 
@@ -1225,7 +1313,8 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                         } else {
                             AbstractCommand macroCommand = new MacroCommand();
                             AbstractCommand downloadFileCommand = new DownloadFileCommand(fileTaskManager,
-                                    abstractRemoteFile, stationFileRepository, networkStateManager, currentUserUUID, driveRootUUID);
+                                    abstractRemoteFile, stationFileRepository, networkStateManager, currentUserUUID,
+                                    createFileDownloadParam(abstractRemoteFile));
                             macroCommand.addCommand(downloadFileCommand);
                             macroCommand.addCommand(new ChangeToDownloadPageCommand(changeToDownloadPageCallback));
 
@@ -1246,7 +1335,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                         if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName())) {
 
-                            if (!abstractRemoteFile.openAbstractRemoteFile(activity, driveRootUUID)) {
+                            if (!abstractRemoteFile.openAbstractRemoteFile(activity)) {
                                 Toast.makeText(activity, activity.getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
                             }
 
@@ -1254,7 +1343,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                             if (FileUtil.checkFileIsVideo(abstractRemoteFile.getName())) {
 
-                                PlayVideoActivity.startPlayVideoActivity(activity, driveRootUUID, abstractRemoteFile);
+                                PlayVideoActivity.startPlayVideoActivity(activity, createFileDownloadParam(abstractRemoteFile));
 
                                 return;
                             }

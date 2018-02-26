@@ -127,6 +127,8 @@ public class RemoteOneCommentParser {
 
                         RemoteFile abstractFile = new RemoteFile();
 
+                        abstractFile.setUuid(Util.createLocalUUid());
+
                         abstractFile.setFileHash(hash);
                         abstractFile.setName(name);
 

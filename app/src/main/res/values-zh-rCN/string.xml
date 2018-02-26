@@ -576,7 +576,7 @@
     <!-- group -->
     <string name="group">私友群</string>
 
-    <string name="create_group">创建群</string>
+    <string name="create_group">新建群</string>
     <string name="group_name">群名</string>
 
     <string name="group_chat">群聊(%1$d)</string>
@@ -596,6 +596,11 @@
     <string name="not_current_station_group_hint">不是本机的群，暂不支持发送图片和文件</string>
 
     <string name="group_offline_hint">群所在的station不在线，暂时不能访问</string>
+
+    <string name="file_unit">个</string>
+
+    <string name="file_tweet_title">%1$s 分享了文件 %2$s</string>
+
 
     <!-- group setting -->
     <string name="group_member">群成员</string>
@@ -633,7 +638,7 @@
     <string name="group_come_from">来自 \"%1$s\" 群,</string>
     <string name="share_something">分享了 %1$s</string>
 
-    <string name="share">分享</string>
+    <string name="share">分享了</string>
 
     <string name="show_all">显示全部</string>
     <string name="user_application">用户申请</string>

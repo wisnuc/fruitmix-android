@@ -15,8 +15,12 @@ import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.databinding.NewActivityAlbumPicChooseBinding;
+import com.winsun.fruitmix.file.data.FileFragmentViewDataSource;
+import com.winsun.fruitmix.file.data.FileListViewDataSource;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.LocalFileFragment;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
@@ -142,7 +146,11 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 //
 //            mMainFrameLayout.addView(localFileFragment.getView());
 
-            mFileFragment = new FileFragment(this, this, this);
+            StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(this);
+
+            FileListViewDataSource fileListViewDataSource  = new FileFragmentViewDataSource(this,stationFileRepository);
+
+            mFileFragment = new FileFragment(this, this, this,fileListViewDataSource);
 
             mFileFragment.setCanEnterFolderWhenSelectMode(true);
 

@@ -18,6 +18,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.PlayVideoFragmentBinding;
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
 import com.winsun.fruitmix.file.data.download.param.FileFromBoxDownloadParam;
+import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloadParam;
 import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
@@ -140,24 +141,34 @@ public class PlayVideoFragment {
         startPlayVideo(getHttpRequest(driveRootUUID, remoteFile));
     }
 
-    public void startPlayVideo(FileDownloadParam fileDownloadParam){
+    public void startPlayVideo(FileDownloadParam fileDownloadParam) {
 
-        if (fileDownloadParam instanceof FileFromBoxDownloadParam) {
 
-            try {
+        try {
+
+            if (fileDownloadParam instanceof FileFromBoxDownloadParam) {
+
+
 //                HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),
 //                        Util.KEY_JWT_HEAD + ((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken());
 
+
                 HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequestByCloudAPIWithWrap(
-                        fileDownloadParam.getFileDownloadPath(),((FileFromBoxDownloadParam) fileDownloadParam).getStationID());
+                        fileDownloadParam.getFileDownloadPath(), ((FileFromBoxDownloadParam) fileDownloadParam).getStationID());
 
                 startPlayVideo(httpRequest);
 
-            } catch (UnsupportedEncodingException e) {
+            } else if (fileDownloadParam instanceof FileFromStationFolderDownloadParam) {
 
-                e.printStackTrace();
+                FileFromStationFolderDownloadParam fileFromStationFolderDownloadParam = (FileFromStationFolderDownloadParam) fileDownloadParam;
+
+                startPlayVideo(getHttpRequest(fileFromStationFolderDownloadParam));
 
             }
+
+        } catch (UnsupportedEncodingException e) {
+
+            e.printStackTrace();
 
         }
 
@@ -200,8 +211,12 @@ public class PlayVideoFragment {
         }
 
         videoView.start();
+
     }
 
+    private HttpRequest getHttpRequest(FileFromStationFolderDownloadParam fileFromStationFolderDownloadParam) throws UnsupportedEncodingException {
+        return httpRequestFactory.createHttpGetFileRequest(fileFromStationFolderDownloadParam.getFileDownloadPath());
+    }
 
     private HttpRequest getHttpRequest(String driveRootUUID, RemoteFile remoteFile) {
 

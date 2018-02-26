@@ -37,7 +37,7 @@ public class RemoteFile extends AbstractRemoteFile {
         return false;
     }
 
-    public boolean openAbstractRemoteFile(Context context,String rootUUID) {
+    public boolean openAbstractRemoteFile(Context context) {
 
         return FileUtil.openAbstractRemoteFile(context, getName());
 

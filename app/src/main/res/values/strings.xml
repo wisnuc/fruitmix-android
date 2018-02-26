@@ -625,6 +625,11 @@
 
     <string name="group_offline_hint">Station where the group is not online, temporarily unable to visit</string>
     
+    <string name="file_unit"></string>
+
+    <string name="file_tweet_title">%1$s share file %2$s</string>
+
+
     <!-- group setting -->
     <string name="group_member">Group Members</string>
     <string name="check_more_group_members">Check more group members</string>

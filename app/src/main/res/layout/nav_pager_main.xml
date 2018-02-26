@@ -55,45 +55,50 @@
             app:itemTextColor="@drawable/bottom_navigation_text_bg"
             app:menu="@menu/media_bottom_menu" />
 
+        <include
+            android:id="@+id/fab_menu_layout"
+            layout="@layout/fab_menu_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-        <LinearLayout
-            android:id="@+id/btmenu"
-            android:layout_width="88dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="56dp"
-            android:gravity="center"
-            android:orientation="vertical">
+        <!--        <LinearLayout
+                    android:id="@+id/btmenu"
+                    android:layout_width="88dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginBottom="56dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/download_file_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:src="@drawable/ic_file_download_white_24dp"
-                android:visibility="visible"
-                app:borderWidth="0dp"
-                app:fabSize="mini" />
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/download_file_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:src="@drawable/ic_file_download_white_24dp"
+                        android:visibility="visible"
+                        app:borderWidth="0dp"
+                        app:fabSize="mini" />
 
-            <ImageView
-                android:id="@+id/system_share"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginBottom="16dp"
-                android:src="@drawable/fab_share"
-                android:visibility="visible" />
+                    <ImageView
+                        android:id="@+id/system_share"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginBottom="16dp"
+                        android:src="@drawable/fab_share"
+                        android:visibility="visible" />
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:src="@drawable/ic_add_white_24dp"
-                android:visibility="visible"
-                app:borderWidth="0dp"
-                app:fabSize="normal" />
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/fab"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:src="@drawable/ic_add_white_24dp"
+                        android:visibility="visible"
+                        app:borderWidth="0dp"
+                        app:fabSize="normal" />
 
-        </LinearLayout>
+                </LinearLayout>-->
 
         <ImageView
             android:id="@+id/album_balloon"

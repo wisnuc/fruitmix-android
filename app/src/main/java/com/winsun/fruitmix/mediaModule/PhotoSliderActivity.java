@@ -230,10 +230,20 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         return httpRequest;
     }
 
-    public static void startPhotoSliderActivity(View toolbar, Activity activity, List<Media> transitionMedias,
+    public static void startPhotoSliderActivity(View toolbar, Activity activity, List<MediaViewModel> transitionMediasViewModels,
                                                 String groupUUID, String stationID, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
-        int initialPhotoPosition = getMediaPosition(transitionMedias, currentMedia);
+        int initialPhotoPosition = getMediaPosition(transitionMediasViewModels, currentMedia);
+
+        PhotoSliderActivity.startPhotoSliderActivity(toolbar, activity, transitionMediasViewModels,
+                groupUUID, stationID, initialPhotoPosition, initialPhotoPosition, spanCount, transitionView, currentMedia);
+
+    }
+
+    public static void startPhotoSliderActivityWithMedias(View toolbar, Activity activity, List<Media> transitionMedias,
+                                                String groupUUID, String stationID, int spanCount, NetworkImageView transitionView, Media currentMedia) {
+
+        int initialPhotoPosition = getMediaPositionInMedias(transitionMedias, currentMedia);
 
         List<MediaViewModel> mediaViewModels = new ArrayList<>(transitionMedias.size());
 
@@ -246,13 +256,30 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     }
 
-    private static int getMediaPosition(List<Media> medias, Media media) {
+    private static int getMediaPositionInMedias(List<Media> medias, Media media) {
 
         int position = 0;
         int size = medias.size();
 
         for (int i = 0; i < size; i++) {
             Media media1 = medias.get(i);
+
+            if (media.getKey().equals(media1.getKey())) {
+                position = i;
+                break;
+            }
+        }
+        return position;
+    }
+
+
+    private static int getMediaPosition(List<MediaViewModel> medias, Media media) {
+
+        int position = 0;
+        int size = medias.size();
+
+        for (int i = 0; i < size; i++) {
+            Media media1 = medias.get(i).getMedia();
 
             if (media.getKey().equals(media1.getKey())) {
                 position = i;

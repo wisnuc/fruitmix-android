@@ -9,6 +9,7 @@ import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloa
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.FinishedTaskItemWrapper;
+import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.network.NetworkStateManager;
 
@@ -47,6 +48,8 @@ public class DownloadFileCommand extends AbstractCommand {
 
     private FileTaskManager fileTaskManager;
 
+    private FileDownloadParam mFileDownloadParam;
+
     public DownloadFileCommand(FileTaskManager fileTaskManager, AbstractRemoteFile abstractRemoteFile,
                                StationFileRepository stationFileRepository, NetworkStateManager networkStateManager,
                                String currentUserUUID, String driveUUID) {
@@ -60,9 +63,24 @@ public class DownloadFileCommand extends AbstractCommand {
 
     }
 
+    public DownloadFileCommand(FileTaskManager fileTaskManager, AbstractRemoteFile abstractRemoteFile,
+                               StationFileRepository stationFileRepository, NetworkStateManager networkStateManager,
+                               String currentUserUUID, FileDownloadParam fileDownloadParam) {
+
+        this.abstractRemoteFile = abstractRemoteFile;
+        this.fileTaskManager = fileTaskManager;
+
+        this.stationFileRepository = stationFileRepository;
+        this.networkStateManager = networkStateManager;
+        this.currentUserUUID = currentUserUUID;
+
+        mFileDownloadParam = fileDownloadParam;
+
+    }
+
     public DownloadFileCommand(FileTaskManager fileTaskManager, String fileHash, AbstractRemoteFile abstractRemoteFile,
                                StationFileRepository stationFileRepository, NetworkStateManager networkStateManager,
-                               String currentUserUUID, String boxUUID, String stationID,String cloudToken) {
+                               String currentUserUUID, String boxUUID, String stationID, String cloudToken) {
         this.fileHash = fileHash;
         this.abstractRemoteFile = abstractRemoteFile;
         this.fileTaskManager = fileTaskManager;
@@ -79,22 +97,35 @@ public class DownloadFileCommand extends AbstractCommand {
     @Override
     public void execute() {
 
-        if (boxUUID != null) {
+//        if (boxUUID != null) {
+//
+//            FileDownloadParam fileDownloadParam = new FileFromBoxDownloadParam(boxUUID, stationID,fileHash, cloudToken);
+//
+//            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), abstractRemoteFile.getSize(), fileHash,
+//                    fileDownloadParam);
+//
+//        } else {
+//
+//            FileDownloadParam fileDownloadParam = new FileFromStationFolderDownloadParam(abstractRemoteFile.getUuid(),
+//                    abstractRemoteFile.getParentFolderUUID(), driveUUID, abstractRemoteFile.getName());
+//
+//            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), abstractRemoteFile.getSize(), abstractRemoteFile.getUuid(),
+//                    fileDownloadParam);
+//
+//        }
 
-            FileDownloadParam fileDownloadParam = new FileFromBoxDownloadParam(boxUUID, stationID,fileHash, cloudToken);
+        if (mFileDownloadParam instanceof FileFromBoxDownloadParam) {
 
-            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), abstractRemoteFile.getSize(), fileHash,
-                    fileDownloadParam);
+            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), abstractRemoteFile.getSize(),
+                    ((RemoteFile) abstractRemoteFile).getFileHash(), mFileDownloadParam);
 
         } else {
 
-            FileDownloadParam fileDownloadParam = new FileFromStationFolderDownloadParam(abstractRemoteFile.getUuid(),
-                    abstractRemoteFile.getParentFolderUUID(), driveUUID, abstractRemoteFile.getName());
-
-            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), abstractRemoteFile.getSize(), abstractRemoteFile.getUuid(),
-                    fileDownloadParam);
+            fileDownloadItem = new FileDownloadItem(abstractRemoteFile.getName(), abstractRemoteFile.getSize(),
+                    abstractRemoteFile.getUuid(), mFileDownloadParam);
 
         }
+
 
         fileTaskManager.addFileDownloadItem(fileDownloadItem, stationFileRepository,
                 networkStateManager, currentUserUUID);

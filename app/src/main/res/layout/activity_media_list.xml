@@ -7,6 +7,14 @@
             name="loadingViewModel"
             type="com.winsun.fruitmix.viewmodel.LoadingViewModel" />
 
+        <variable
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
+
+        <variable
+            name="revealToolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.RevealToolbarViewModel" />
+
     </data>
 
     <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -17,15 +25,44 @@
         tools:context="com.winsun.fruitmix.list.TweetContentListActivity">
 
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/media_recycler_view"
+        <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="?android:attr/actionBarSize"
+            android:stateListAnimator="@animator/appbar_elevation">
+
+            <include
+                android:id="@+id/toolbar_layout"
+                layout="@layout/toolbar_layout"
+                app:toolbarViewModel="@{toolbarViewModel}" />
+
+            <include
+                android:id="@+id/reveal_toolbar_layout"
+                layout="@layout/reveal_toolbar_layout"
+                app:revealToolbarViewModel="@{revealToolbarViewModel}" />
+
+        </android.support.design.widget.AppBarLayout>
+
+        <FrameLayout
+            android:id="@+id/container_layout"
+            android:layout_marginTop="?android:attr/actionBarSize"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/media_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <include
+                layout="@layout/new_loading_layout"
+                android:visibility="gone"
+                app:loadingViewModel="@{loadingViewModel}" />
+
+        </FrameLayout>
 
         <include
-            layout="@layout/new_loading_layout"
-            android:visibility="gone"
-            app:loadingViewModel="@{loadingViewModel}" />
+            android:id="@+id/fab_menu_layout"
+            layout="@layout/fab_menu_layout" />
 
 
     </FrameLayout>
