@@ -14,6 +14,7 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.InboxMediaItemBinding;
 import com.winsun.fruitmix.databinding.InboxPhotoItemBinding;
 import com.winsun.fruitmix.group.data.model.MediaComment;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.list.TweetContentListActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
@@ -130,7 +131,8 @@ public class InboxMediaPresenter {
 
                 view = binding.getRoot();
 
-                MediaUtil.setMediaImageUrl(media, binding.photoNetworkImageview, media.getImageThumbUrl(view.getContext()), mImageLoader);
+                MediaUtil.setMediaImageUrl(media, binding.photoNetworkImageview,
+                        media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(view.getContext())), mImageLoader);
 
             }
 

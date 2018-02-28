@@ -28,6 +28,8 @@ import com.winsun.fruitmix.databinding.VideoItemBinding;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
@@ -73,6 +75,7 @@ public class MediaListPresenter {
 
     private List<MediaViewModel> mMediaViewModels;
 
+    private HttpRequestFactory mHttpRequestFactory;
 
     public MediaListPresenter(ToolbarLayoutBinding toolbarLayoutBinding, MediaComment mediaComment,
                               ImageLoader imageLoader, Activity activity, IPhotoListListener photoListListener) {
@@ -84,6 +87,8 @@ public class MediaListPresenter {
         stationID = mediaComment.getStationID();
 
         mImageLoader = imageLoader;
+
+        mHttpRequestFactory = InjectHttp.provideHttpRequestFactory(mToolbarLayoutBinding.getRoot().getContext());
 
         mMediaListAdapter = new MediaListAdapter();
 
@@ -219,6 +224,7 @@ public class MediaListPresenter {
         }
 
         public void setMedias(List<MediaViewModel> mediaViewModels) {
+
             mMediaViewModels.clear();
 
             mMediaViewModels.addAll(mediaViewModels);
@@ -308,7 +314,7 @@ public class MediaListPresenter {
 
             Context context = binding.getRoot().getContext();
 
-            MediaUtil.setMediaImageUrl(media, binding.photoIv, media.getImageThumbUrl(context, new GroupRequestParam(groupUUID, stationID)), mImageLoader);
+            MediaUtil.setMediaImageUrl(media, binding.photoIv, media.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID)), mImageLoader);
 
             int temporaryPosition = 0;
 
@@ -386,6 +392,7 @@ public class MediaListPresenter {
                 photoItemViewModel = prePhotoItemViewModel;
 
             } else {
+
                 photoItemViewModel = new PhotoItemViewModel();
 
             }
@@ -415,7 +422,6 @@ public class MediaListPresenter {
             photoItemViewModel.showCloudOff.set(false);
 
         }
-
 
     }
 
@@ -481,7 +487,7 @@ public class MediaListPresenter {
                 }
             });
 
-            MediaUtil.setMediaImageUrl(currentMedia, binding.photoIv, currentMedia.getImageThumbUrl(context, new GroupRequestParam(groupUUID, stationID)), mImageLoader);
+            MediaUtil.setMediaImageUrl(currentMedia, binding.photoIv, currentMedia.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID)), mImageLoader);
 
             int temporaryPosition = 0;
 
@@ -588,7 +594,7 @@ public class MediaListPresenter {
 
             HttpRequest httpRequest;
 
-            httpRequest = video.getImageThumbUrl(containerActivity, new GroupRequestParam(groupUUID, stationID));
+            httpRequest = video.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID));
 
             networkImageView.registerImageLoadListener(new IImageLoadListener() {
                 @Override
@@ -615,7 +621,6 @@ public class MediaListPresenter {
                     } else {
 
 //                        PlayVideoActivity.startPlayVideoActivity(containerActivity, video);
-
 
                         PhotoSliderActivity.startPhotoSliderActivity(mToolbarLayoutBinding.toolbar, containerActivity, mediaViewModels,
                                 groupUUID, stationID, SPAN_COUNT, networkImageView, video);

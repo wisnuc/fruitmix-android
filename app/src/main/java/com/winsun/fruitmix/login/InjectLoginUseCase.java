@@ -16,7 +16,7 @@ import com.winsun.fruitmix.logout.InjectLogoutUseCase;
 import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
-import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
+import com.winsun.fruitmix.mediaModule.model.NewMediaListDataLoader;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.stations.InjectStation;
@@ -86,7 +86,7 @@ public class InjectLoginUseCase {
 
         return LoginUseCase.getInstance(loggedInUserDataSource, tokenDataSource, httpRequestFactory, checkMediaIsUploadStrategy, uploadMediaUseCase,
                 userDataRepository, mediaDataSourceRepository, stationFileRepository, systemSettingDataSource, imageGifLoaderInstance, EventBus.getDefault(),
-                ThreadManagerImpl.getInstance(), NewPhotoListDataLoader.getInstance(), InjectStation.provideStationDataSource(context),
+                ThreadManagerImpl.getInstance(), NewMediaListDataLoader.getInstance(), InjectStation.provideStationDataSource(context),
                 getAllBindingLocalUserUseCase, InjectWeChatUserDataSource.provideWeChatUserDataSource(context), loginNewUserCallbackWrapper);
 
     }

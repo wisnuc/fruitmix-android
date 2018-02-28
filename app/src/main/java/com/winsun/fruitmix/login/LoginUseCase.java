@@ -7,7 +7,6 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
-import com.winsun.fruitmix.equipment.search.data.Equipment;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
@@ -15,7 +14,7 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
-import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
+import com.winsun.fruitmix.mediaModule.model.NewMediaListDataLoader;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
 import com.winsun.fruitmix.model.operationResult.OperationMoreThanOneStation;
@@ -34,14 +33,11 @@ import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
 import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -77,7 +73,7 @@ public class LoginUseCase extends BaseDataRepository {
 
     private ImageGifLoaderInstance imageGifLoaderInstance;
 
-    private NewPhotoListDataLoader newPhotoListDataLoader;
+    private NewMediaListDataLoader newPhotoListDataLoader;
 
     private EventBus eventBus;
 
@@ -98,7 +94,7 @@ public class LoginUseCase extends BaseDataRepository {
                          HttpRequestFactory httpRequestFactory, CheckMediaIsUploadStrategy checkMediaIsUploadStrategy, UploadMediaUseCase uploadMediaUseCase,
                          UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository, StationFileRepository stationFileRepository,
                          SystemSettingDataSource systemSettingDataSource, ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus,
-                         ThreadManager threadManager, NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
+                         ThreadManager threadManager, NewMediaListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
                          GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase, WeChatUserDataSource weChatUserDataSource,
                          LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper) {
 
@@ -128,7 +124,7 @@ public class LoginUseCase extends BaseDataRepository {
                                            UploadMediaUseCase uploadMediaUseCase, UserDataRepository userDataRepository, MediaDataSourceRepository mediaDataSourceRepository,
                                            StationFileRepository stationFileRepository, SystemSettingDataSource systemSettingDataSource,
                                            ImageGifLoaderInstance imageGifLoaderInstance, EventBus eventBus, ThreadManager threadManager,
-                                           NewPhotoListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
+                                           NewMediaListDataLoader newPhotoListDataLoader, StationsDataSource stationsDataSource,
                                            GetAllBindingLocalUserUseCase getAllBindingLocalUserUseCase, WeChatUserDataSource weChatUserDataSource,
                                            LoginNewUserCallbackWrapper<Boolean> loginNewUserCallbackWrapper) {
 

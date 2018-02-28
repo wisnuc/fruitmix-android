@@ -21,9 +21,9 @@ import java.util.concurrent.Future;
  * Created by Administrator on 2016/12/19.
  */
 
-public class NewPhotoListDataLoader {
+public class NewMediaListDataLoader implements MediaListConverter {
 
-    public static final String TAG = NewPhotoListDataLoader.class.getSimpleName();
+    public static final String TAG = NewMediaListDataLoader.class.getSimpleName();
 
     private List<String> mPhotoDateGroups;
 
@@ -39,11 +39,11 @@ public class NewPhotoListDataLoader {
 
     private boolean needRefreshData = true;
 
-    private static NewPhotoListDataLoader instance;
+    private static NewMediaListDataLoader instance;
 
     private boolean isOperate = false;
 
-    private NewPhotoListDataLoader() {
+    private NewMediaListDataLoader() {
 
         mPhotoDateGroups = new ArrayList<>();
         mMapKeyIsDateList = new HashMap<>();
@@ -54,9 +54,9 @@ public class NewPhotoListDataLoader {
         mMediaViewModels = new ArrayList<>();
     }
 
-    public static NewPhotoListDataLoader getInstance() {
+    public static NewMediaListDataLoader getInstance() {
         if (instance == null)
-            instance = new NewPhotoListDataLoader();
+            instance = new NewMediaListDataLoader();
 
         return instance;
     }
@@ -67,10 +67,6 @@ public class NewPhotoListDataLoader {
 
     public void setNeedRefreshData(boolean needRefreshData) {
         this.needRefreshData = needRefreshData;
-    }
-
-    public List<String> getPhotoDateGroups() {
-        return Collections.unmodifiableList(mPhotoDateGroups);
     }
 
     public Map<String, List<MediaViewModel>> getMapKeyIsDateList() {
@@ -97,11 +93,13 @@ public class NewPhotoListDataLoader {
         return mAdapterItemTotalCount;
     }
 
-    public interface OnPhotoListDataListener {
-        void onDataLoadFinished();
+    @Override
+    public void convertData(OnPhotoListDataListener listener, List<Media> medias) {
+
+        retrieveData(listener,medias);
     }
 
-    public void retrieveData(final OnPhotoListDataListener listener, final List<Media> medias) {
+    private void retrieveData(final OnPhotoListDataListener listener, final List<Media> medias) {
 
         if (isOperate)
             return;

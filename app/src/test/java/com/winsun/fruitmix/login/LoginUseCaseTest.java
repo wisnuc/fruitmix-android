@@ -14,7 +14,7 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUserDataSource;
 import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
-import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
+import com.winsun.fruitmix.mediaModule.model.NewMediaListDataLoader;
 import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.model.operationResult.OperationFail;
@@ -102,7 +102,7 @@ public class LoginUseCaseTest {
     private EventBus eventBus;
 
     @Mock
-    private NewPhotoListDataLoader newPhotoListDataLoader;
+    private NewMediaListDataLoader newPhotoListDataLoader;
 
     @Captor
     private ArgumentCaptor<BaseLoadDataCallback<String>> loadTokenCallbackArgumentCaptor;

@@ -58,6 +58,7 @@ import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
@@ -156,6 +157,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private SystemSettingDataSource systemSettingDataSource;
 
+    private HttpRequestFactory mHttpRequestFactory;
+
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -215,18 +218,18 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private HttpRequest getMediaThumbHttpRequest(Media media) {
         HttpRequest httpRequest;
         if (groupUUID != null)
-            httpRequest = media.getImageThumbUrl(mContext, new GroupRequestParam(groupUUID, stationID));
+            httpRequest = media.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID));
         else
-            httpRequest = media.getImageThumbUrl(mContext);
+            httpRequest = media.getImageThumbUrl(mHttpRequestFactory);
         return httpRequest;
     }
 
     private HttpRequest getMediaOriginalHttpRequest(Media media) {
         HttpRequest httpRequest;
         if (groupUUID != null)
-            httpRequest = media.getImageOriginalUrl(mContext, new GroupRequestParam(groupUUID, stationID));
+            httpRequest = media.getImageOriginalUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID));
         else
-            httpRequest = media.getImageOriginalUrl(mContext);
+            httpRequest = media.getImageOriginalUrl(mHttpRequestFactory);
         return httpRequest;
     }
 
@@ -388,6 +391,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         checkMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
 
         systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(mContext);
+
+        mHttpRequestFactory = InjectHttp.provideHttpRequestFactory(mContext);
 
         ActivityPhotoSliderBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_photo_slider);
 
@@ -758,7 +763,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+
         finishActivity();
     }
 
@@ -1068,16 +1073,16 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         if (screenWidth / screenHeight > mediaWidth / mediaHeight) {
 
             if (groupUUID != null)
-                httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight, new GroupRequestParam(groupUUID, stationID));
+                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, -1, screenHeight, new GroupRequestParam(groupUUID, stationID));
             else
-                httpRequest = media.getImageThumbUrl(mContext, -1, screenHeight);
+                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, -1, screenHeight);
 
         } else {
 
             if (groupUUID != null)
-                httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1, new GroupRequestParam(groupUUID, stationID));
+                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, screenWidth, -1, new GroupRequestParam(groupUUID, stationID));
             else
-                httpRequest = media.getImageThumbUrl(mContext, screenWidth, -1);
+                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, screenWidth, -1);
 
         }
 

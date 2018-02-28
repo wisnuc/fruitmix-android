@@ -21,7 +21,7 @@ import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
+import com.winsun.fruitmix.mediaModule.model.NewMediaListDataLoader;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -113,14 +113,12 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
                 initImageLoader();
 
-                final NewPhotoListDataLoader loader = NewPhotoListDataLoader.getInstance();
+                final NewMediaListDataLoader loader = NewMediaListDataLoader.getInstance();
 
-                loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
+                loader.convertData(new NewMediaListDataLoader.OnPhotoListDataListener() {
                     @Override
                     public void onDataLoadFinished() {
                         doAfterReloadData(loader);
-
-
                     }
                 }, data);
 
@@ -134,9 +132,8 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
     }
 
-    private void doAfterReloadData(NewPhotoListDataLoader loader) {
+    private void doAfterReloadData(NewMediaListDataLoader loader) {
 
-        List<String> mPhotoDateGroups = loader.getPhotoDateGroups();
         mMapKeyIsDateValueIsPhotoList = loader.getMapKeyIsDateList();
         mMapKeyIsPhotoPositionValueIsPhotoDate = loader.getMapKeyIsPhotoPositionValueIsPhotoDate();
         mMapKeyIsPhotoPositionValueIsPhoto = loader.getMapKeyIsPhotoPosition();
@@ -151,7 +148,7 @@ public class TestPhotoListActivity extends AppCompatActivity {
         }
 
         mLoadingLayout.setVisibility(View.GONE);
-        if (mPhotoDateGroups.size() == 0) {
+        if (medias.size() == 0) {
             mNoContentLayout.setVisibility(View.VISIBLE);
             mRecyclerView.setVisibility(View.GONE);
 
@@ -397,11 +394,11 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
             if (!mIsFling) {
 
-                httpRequest = currentMedia.getImageThumbUrl(mContext);
+                httpRequest = currentMedia.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(mContext));
 
             } else {
 
-                httpRequest = currentMedia.getImageSmallThumbUrl(mContext);
+                httpRequest = currentMedia.getImageSmallThumbUrl(InjectHttp.provideHttpRequestFactory(mContext));
 
             }
 

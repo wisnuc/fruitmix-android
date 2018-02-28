@@ -167,7 +167,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
     }
 
     private void initPhotoList() {
-        mNewPhotoList = new NewPhotoList(this);
+        mNewPhotoList = new NewPhotoList(this,this);
 
         final List<String> alreadySelectedImageKeyArrayList = getIntent().getStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_KEY_ARRAYLIST);
 
@@ -180,7 +180,6 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         mNewPhotoList.setSelectForCreateComment(true);
 
-        mNewPhotoList.setPhotoListListener(this);
     }
 
     @Override

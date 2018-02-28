@@ -11,11 +11,9 @@ import java.util.Map;
  * Created by Administrator on 2018/2/25.
  */
 
-public interface PhotoListConverter {
+public interface MediaListConverter {
 
     void setNeedRefreshData(boolean needRefreshData);
-
-    List<String> getPhotoDateGroups();
 
     Map<String, List<MediaViewModel>> getMapKeyIsDateList();
 
@@ -34,6 +32,5 @@ public interface PhotoListConverter {
     void convertData(final OnPhotoListDataListener listener, final List<Media> medias);
 
     void calcPhotoPositionNumber();
-
 
 }

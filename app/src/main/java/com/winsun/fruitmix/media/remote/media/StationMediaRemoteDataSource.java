@@ -67,7 +67,7 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
      */
     boolean downloadMedia(Media media) throws MalformedURLException, IOException, SocketTimeoutException, NetworkException {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequest(media.getRemoteMediaRequestPath());
+        HttpRequest httpRequest = media.getImageOriginalUrl(httpRequestFactory);;
 
         if (!wrapper.checkUrl(httpRequest.getUrl())) {
             return false;

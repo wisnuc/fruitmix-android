@@ -240,8 +240,6 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
         downloadFileBtn.setOnClickListener(this);
         fab.setOnClickListener(this);*/
 
-        photoList.setPhotoListListener(this);
-
         Log.d(TAG, "onCreateView: ");
 
         return binding.getRoot();
@@ -599,7 +597,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 //        mInboxListPage = new InboxListPage((BaseActivity) getActivity());
 
         groupListPage = new GroupListPage(getActivity());
-        photoList = new NewPhotoList(getActivity());
+        photoList = new NewPhotoList(getActivity(),this);
 
         StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(getContext());
 

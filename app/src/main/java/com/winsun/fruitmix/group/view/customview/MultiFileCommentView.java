@@ -28,6 +28,7 @@ import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.group.data.viewmodel.FileCommentViewModel;
 import com.winsun.fruitmix.http.HttpRequest;
+import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.list.TweetContentListActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -101,7 +102,7 @@ public class MultiFileCommentView extends UserCommentView {
 
                 final Media media = medias.get(i);
 
-                HttpRequest httpRequest = media.getImageThumbUrl(context, new GroupRequestParam(data.getGroupUUID(), data.getStationID()));
+                HttpRequest httpRequest = media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(context), new GroupRequestParam(data.getGroupUUID(), data.getStationID()));
 
                 httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
 

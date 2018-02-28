@@ -5,10 +5,9 @@ import android.content.Intent;
 import android.content.Context;
 import android.util.Log;
 
-import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
+import com.winsun.fruitmix.mediaModule.model.NewMediaListDataLoader;
 import com.winsun.fruitmix.model.operationResult.OperationNoChanged;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.LocalCache;
@@ -17,7 +16,6 @@ import com.winsun.fruitmix.util.Util;
 import org.greenrobot.eventbus.EventBus;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -84,7 +82,7 @@ public class RetrieveNewLocalMediaInCameraService extends IntentService {
 
             Log.i(TAG, "handleActionRetrieveLocalMedia: media size:" + medias.size());
 
-            NewPhotoListDataLoader.getInstance().setNeedRefreshData(true);
+            NewMediaListDataLoader.getInstance().setNeedRefreshData(true);
 
             EventBus.getDefault().post(new OperationEvent(Util.NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED, new OperationSuccess()));
 

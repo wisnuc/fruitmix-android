@@ -5,14 +5,17 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.transition.Transition;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -21,6 +24,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
+import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.anim.SharpCurveInterpolator;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.command.AbstractCommand;
@@ -38,15 +42,20 @@ import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
 import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.list.data.FileInTweetViewDataSource;
-import com.winsun.fruitmix.media.InjectMedia;
+import com.winsun.fruitmix.list.data.MediaInTweetDataSourceRepository;
+import com.winsun.fruitmix.list.data.MediaInTweetListConverter;
+import com.winsun.fruitmix.list.data.MediaInTweetRemoteDataSource;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
+import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
@@ -59,16 +68,21 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class TweetContentListActivity extends BaseActivity implements FileListSelectModeListener,
         HandleFileListOperateCallback, FabMenuLayoutViewComponent.FabMenuItemOnClickListener, IPhotoListListener {
+
+    //TODO: share select function refactor
 
     private ActivityMediaListBinding mActivityMediaListBinding;
 
     private static UserComment mUserComment;
 
-    private MediaListPresenter mMediaListPresenter;
+//    private MediaListPresenter mMediaListPresenter;
 //    private FileListPresenter mFileListPresenter;
+
+    private NewPhotoList mNewPhotoList;
 
     private FileFragment mFileFragment;
 
@@ -98,6 +112,17 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
         Util.startActivity(context, TweetContentListActivity.class);
 
     }
+
+    private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
+        @Override
+        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+
+            if (currentItem == ITEM_FILE)
+                mFileFragment.onMapSharedElements(names, sharedElements);
+            else if (currentItem == ITEM_MEDIA)
+                mNewPhotoList.onMapSharedElements(names, sharedElements);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,7 +156,7 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
         if (userComment == null)
             return;
 
-        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mActivity);
+        setExitSharedElementCallback(sharedElementCallback);
 
         RecyclerView recyclerView = mActivityMediaListBinding.mediaRecyclerView;
 
@@ -141,12 +166,25 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
 
             currentItem = ITEM_MEDIA;
 
-            ImageLoader imageLoader = InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this);
+            GroupRequestParam groupRequestParam = new GroupRequestParam(userComment.getGroupUUID(), userComment.getStationID());
 
-            mMediaListPresenter = new MediaListPresenter(mActivityMediaListBinding.toolbarLayout, ((MediaComment) userComment), imageLoader,
+            mediaDataSourceRepository = new MediaInTweetDataSourceRepository(ThreadManagerImpl.getInstance(),
+                    (MediaComment) userComment, new MediaInTweetRemoteDataSource(InjectHttp.provideIHttpUtil(this),
+                    InjectHttp.provideHttpRequestFactory(this), groupRequestParam));
+
+            mNewPhotoList = new NewPhotoList(this, this, false, false, mediaDataSourceRepository,
+                    new MediaInTweetListConverter(), groupRequestParam);
+
+            mActivityMediaListBinding.containerLayout.removeAllViews();
+
+            mActivityMediaListBinding.containerLayout.addView(mNewPhotoList.getView());
+
+            mNewPhotoList.refreshView();
+
+/*            mMediaListPresenter = new MediaListPresenter(mActivityMediaListBinding.toolbarLayout, ((MediaComment) userComment), imageLoader,
                     this, this);
 
-            mMediaListPresenter.refreshView(this, recyclerView);
+            mMediaListPresenter.refreshView(this, recyclerView);*/
 
         } else if (userComment instanceof FileComment) {
 
@@ -205,20 +243,6 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
         toolbarViewModel.setToolbarSelectBtnOnClickListener(new ToolbarViewModel.ToolbarSelectBtnOnClickListener() {
             @Override
             public void onClick() {
-
-//                if (viewPager.getCurrentItem() == PAGE_PHOTO) {
-//
-//                    if (!photoList.canEnterSelectMode()) {
-//                        return;
-//                    }
-//
-//                } else if (viewPager.getCurrentItem() == PAGE_FILE) {
-//
-//                    if (!fileFragment.canEnterSelectMode()) {
-//                        return;
-//                    }
-//
-//                }
 
                 enterSelectMode();
 
@@ -302,9 +326,9 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
         sInChooseMode = selectMode;
 
         if (currentItem == ITEM_MEDIA) {
-//            photoList.setSelectMode(sInChooseMode);
+            mNewPhotoList.setSelectMode(sInChooseMode);
 
-            mMediaListPresenter.setSelectMode(sInChooseMode);
+//            mMediaListPresenter.setSelectMode(sInChooseMode);
 
             setSelectCountText(getString(R.string.select_photo), 0);
         } else if (currentItem == ITEM_FILE) {
@@ -385,10 +409,13 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
 
         mUserComment = null;
 
-        if (mMediaListPresenter != null)
+   /*     if (mMediaListPresenter != null)
             mMediaListPresenter.onDestroy();
-//        else if (mFileListPresenter != null)
-//            mFileListPresenter.onDestroy();
+        else if (mFileListPresenter != null)
+            mFileListPresenter.onDestroy();*/
+
+        if (mNewPhotoList != null)
+            mNewPhotoList.onDestroy();
         else if (mFileFragment != null)
             mFileFragment.onDestroy();
 
@@ -419,7 +446,6 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
         } else
             setSelectCountText(String.format(getString(R.string.select_count), selectItemCount), selectItemCount);
 
-
     }
 
     @Override
@@ -435,7 +461,6 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
     public void onFileSelectOperationUnavailable() {
 
         Log.d(TAG, "onFileSelectOperationUnavailable: ");
-
 
 /*        if (mActivity == null)
             return;
@@ -527,7 +552,7 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
 
     private void shareMediaToOtherApp() {
 
-        mSelectMedias = new ArrayList<>(mMediaListPresenter.getSelectedMedias());
+        mSelectMedias = new ArrayList<>(mNewPhotoList.getSelectedMedias());
 
         mSelectMediaOriginalPhotoPaths = new ArrayList<>(mSelectMedias.size());
 
@@ -644,6 +669,47 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
     public void onPhotoListScrollFinished() {
 
     }
+
+    @Override
+    public void onActivityReenter(int resultCode, Intent data) {
+
+        dismissToolbarBottomBarWhenSharedElementTransition();
+
+        if (currentItem == ITEM_FILE)
+            mFileFragment.onActivityReenter(resultCode, data);
+        else if (currentItem == ITEM_MEDIA)
+            mNewPhotoList.onActivityReenter(resultCode, data);
+
+    }
+
+    private void dismissToolbarBottomBarWhenSharedElementTransition() {
+        if (Util.checkRunningOnLollipopOrHigher()) {
+
+            if (mActivity == null)
+                return;
+
+            mActivity.getWindow().getSharedElementEnterTransition().addListener(new CustomTransitionListener() {
+
+                @Override
+                public void onTransitionStart(Transition transition) {
+                    super.onTransitionStart(transition);
+
+                    mToolbarViewModel.showToolbar.set(false);
+
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    super.onTransitionEnd(transition);
+
+                    mToolbarViewModel.showToolbar.set(true);
+
+                }
+            });
+
+        }
+    }
+
 
     @Override
     public View getToolbar() {

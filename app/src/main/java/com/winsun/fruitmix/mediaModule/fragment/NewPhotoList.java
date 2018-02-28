@@ -43,8 +43,10 @@ import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.NewPhotoLayoutBinding;
 import com.winsun.fruitmix.databinding.NewPhotoTitleItemBinding;
 import com.winsun.fruitmix.databinding.VideoItemBinding;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.InjectMedia;
@@ -54,9 +56,10 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.mediaModule.model.NewPhotoListDataLoader;
+import com.winsun.fruitmix.mediaModule.model.NewMediaListDataLoader;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.mediaModule.model.NewPhotoListViewModel;
+import com.winsun.fruitmix.mediaModule.model.MediaListConverter;
 import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
 import com.winsun.fruitmix.mediaModule.viewmodel.PhotoItemViewModel;
@@ -158,7 +161,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private Animator scaleAnimator;
 
-    private MediaDataSourceRepository mediaDataSourceRepository;
+    private MediaDataSourceRepository mMediaDataSourceRepository;
 
     private boolean hasCallStartUpload = false;
 
@@ -172,7 +175,60 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private int mSelectLocalMediaCount;
 
-    public NewPhotoList(Activity activity) {
+    private boolean mEnableSwipeRefreshLayout;
+
+    private MediaListConverter mMediaListConverter;
+
+    private GroupRequestParam mGroupRequestParam;
+
+    private HttpRequestFactory mHttpRequestFactory;
+
+    public NewPhotoList(Activity activity,IPhotoListListener photoListListener) {
+
+        mMediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(containerActivity);
+
+        mMediaListConverter = NewMediaListDataLoader.getInstance();
+
+        initField(activity);
+
+        initView();
+
+        mEnableSwipeRefreshLayout = true;
+
+        initSwipeRefreshLayout();
+
+        setupFastJumper(true);
+
+        setPhotoListListener(photoListListener);
+
+    }
+
+    public NewPhotoList(Activity activity,IPhotoListListener photoListListener, boolean showFastJumper, boolean enableSwipeRefreshLayout,
+                        MediaDataSourceRepository mediaDataSourceRepository, MediaListConverter mediaListConverter,
+                        GroupRequestParam groupRequestParam) {
+
+        mMediaDataSourceRepository = mediaDataSourceRepository;
+
+        mMediaListConverter = mediaListConverter;
+
+        mGroupRequestParam = groupRequestParam;
+
+        initField(activity);
+
+        initView();
+
+        mEnableSwipeRefreshLayout = enableSwipeRefreshLayout;
+
+        initSwipeRefreshLayout();
+
+        setupFastJumper(showFastJumper);
+
+        setPhotoListListener(photoListListener);
+
+    }
+
+    private void initField(Activity activity) {
+
         containerActivity = activity;
 
         mMediaViewModels = Collections.emptyList();
@@ -182,6 +238,36 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         mMapKeyIsPhotoPositionValueIsPhotoDate = Collections.emptyMap();
 
         mMapKeyIsPhotoPosition = new SparseArray<>();
+
+        mPinchScaleDetector = new ScaleGestureDetector(containerActivity, new PinchScaleListener());
+
+        mTypeface = Typeface.createFromAsset(containerActivity.getAssets(), "fonts/Roboto-Medium.ttf");
+
+        calcMediaDigestCallback = new CalcMediaDigestStrategy.CalcMediaDigestCallback() {
+            @Override
+            public void handleFinished() {
+
+                refreshViewForce();
+
+            }
+
+            @Override
+            public void handleNothing() {
+
+            }
+        };
+
+        mMediaDataSourceRepository.registerCalcDigestCallback(calcMediaDigestCallback);
+
+        mCheckMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
+
+        mThreadManager = ThreadManagerImpl.getInstance();
+
+        mHttpRequestFactory = InjectHttp.provideHttpRequestFactory(containerActivity);
+
+    }
+
+    private void initView() {
 
         NewPhotoLayoutBinding binding = NewPhotoLayoutBinding.inflate(LayoutInflater.from(containerActivity.getApplicationContext()), null, false);
 
@@ -203,13 +289,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         mSwipeRefreshLayout = binding.swipeRefreshLayout;
 
-        initSwipeRefreshLayout();
-
         mRecyclerView = binding.photoRecyclerview;
 
         calcScreenWidth();
 
-        mPinchScaleDetector = new ScaleGestureDetector(containerActivity, new PinchScaleListener());
+        calcPhotoItemWidth();
 
         mRecyclerView.addOnScrollListener(new NewPhotoListScrollListener());
 
@@ -225,37 +309,19 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         mPhotoRecycleAdapter = new PhotoRecycleAdapter();
 
-        setupFastJumper();
-
         setupRecyclerView();
-
-        mTypeface = Typeface.createFromAsset(containerActivity.getAssets(), "fonts/Roboto-Medium.ttf");
-
-        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(containerActivity);
-
-        calcMediaDigestCallback = new CalcMediaDigestStrategy.CalcMediaDigestCallback() {
-            @Override
-            public void handleFinished() {
-
-                refreshViewForce();
-
-            }
-
-            @Override
-            public void handleNothing() {
-
-            }
-        };
-
-        mediaDataSourceRepository.registerCalcDigestCallback(calcMediaDigestCallback);
-
-        mCheckMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
-
-        mThreadManager = ThreadManagerImpl.getInstance();
 
     }
 
     private void initSwipeRefreshLayout() {
+
+        if (!mEnableSwipeRefreshLayout) {
+
+            mSwipeRefreshLayout.setEnabled(false);
+
+            return;
+        }
+
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -267,6 +333,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     }
 
     private void finishSwipeRefreshAnimation() {
+
+        if (!mEnableSwipeRefreshLayout)
+            return;
+
         if (mSwipeRefreshLayout.isRefreshing())
             mSwipeRefreshLayout.setRefreshing(false);
     }
@@ -309,7 +379,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         if (mSelectMode) {
             clearSelectedPhoto();
 
-            mSwipeRefreshLayout.setEnabled(false);
+            if (mEnableSwipeRefreshLayout)
+                mSwipeRefreshLayout.setEnabled(false);
 
         } else {
 
@@ -328,7 +399,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private void refreshStationMediaForce() {
 
-        mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
+        mMediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
             @Override
             public void onSucceed(List<Media> data, OperationResult operationResult) {
 
@@ -350,7 +421,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     @Override
     public void refreshViewForce() {
 
-        mediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
+        mMediaDataSourceRepository.getStationMediaForceRefresh(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
             @Override
             public void onSucceed(List<Media> data, OperationResult operationResult) {
 
@@ -377,7 +448,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             if (mMediaViewModels.size() < totalLocalMediaCount) {
 
-                mediaDataSourceRepository.getLocalMedia(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
+                mMediaDataSourceRepository.getLocalMedia(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
                     @Override
                     public void onSucceed(List<Media> data, OperationResult operationResult) {
 
@@ -440,13 +511,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         if (loadingViewModel.showLoading.get() && mPhotoListListener != null)
             mPhotoListListener.onNoPhotoItem(true);
 
-        mediaDataSourceRepository.getMedia(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
+        mMediaDataSourceRepository.getMedia(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<Media>() {
             @Override
             public void onSucceed(final List<Media> data, final OperationResult operationResult) {
 
                 Log.d(TAG, "onSucceed: get media size: " + data.size());
 
-                if (!hasCallStartUpload) {
+                if (!hasCallStartUpload && mGroupRequestParam == null) {
 
                     hasCallStartUpload = true;
 
@@ -481,22 +552,20 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         initImageLoader();
 
-        final NewPhotoListDataLoader loader = NewPhotoListDataLoader.getInstance();
-
         boolean dataChanged = operationResult.getOperationResultType() == OperationResultType.MEDIA_DATA_CHANGED;
 
         if (dataChanged)
-            loader.setNeedRefreshData(true);
+            mMediaListConverter.setNeedRefreshData(true);
 
         if (!mIsLoaded || dataChanged) {
 
-            loader.retrieveData(new NewPhotoListDataLoader.OnPhotoListDataListener() {
+            mMediaListConverter.convertData(new NewMediaListDataLoader.OnPhotoListDataListener() {
                 @Override
                 public void onDataLoadFinished() {
 
                     Log.d(TAG, "onDataLoadFinished: ");
 
-                    doAfterReloadData(loader);
+                    doAfterReloadData(mMediaListConverter);
 
                 }
             }, data);
@@ -511,13 +580,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     }
 
-    private void doAfterReloadData(NewPhotoListDataLoader loader) {
+    private void doAfterReloadData(MediaListConverter loader) {
 
         mAdapterItemTotalCount = loader.getAdapterItemTotalCount();
 
         //fix crash:java.lang.IndexOutOfBoundsException: Inconsistency detected. Invalid item position 10(offset:10).state:611 at android.support.v7.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5202)
-
-        List<String> mPhotoDateGroups = new ArrayList<>(loader.getPhotoDateGroups());
         mMapKeyIsDate = new HashMap<>(loader.getMapKeyIsDateList());
         mMapKeyIsPhotoPositionValueIsPhotoDate = new HashMap<>(loader.getMapKeyIsPhotoPositionValueIsPhotoDate());
         mMapKeyIsPhotoPosition = loader.getMapKeyIsPhotoPosition();
@@ -527,7 +594,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         loadingViewModel.showLoading.set(false);
 
-        if (mPhotoDateGroups.size() == 0) {
+        if (mMediaViewModels.size() == 0) {
 
             noContentViewModel.showNoContent.set(true);
 
@@ -615,7 +682,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             if (media instanceof Video)
                 continue;
 
-            HttpRequest httpRequest = media.getImageSmallThumbUrl(containerActivity);
+            HttpRequest httpRequest = media.getImageSmallThumbUrl(mHttpRequestFactory);
 
             url = httpRequest.getUrl();
 
@@ -638,7 +705,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     }
 
-    private void setupFastJumper() {
+    private void initFastJumper() {
         mJumperCallback = new SpannableCallback() {
             @Override
             public boolean isSectionEnable() {
@@ -655,6 +722,27 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 return true;
             }
         };
+
+        mScrollCalculator = new LinearScrollCalculator(mRecyclerView) {
+
+            @Override
+            public int getItemHeight(int position) {
+                return mPhotoRecycleAdapter.getItemHeight(position);
+            }
+
+            @Override
+            public int getSpanSize(int position) {
+                return mPhotoRecycleAdapter.getSpanSize(position);
+            }
+
+            @Override
+            public int getSpanCount() {
+                return mSpanCount;
+            }
+        };
+
+        mJumperCallback.setScrollCalculator(mScrollCalculator);
+
         mFastJumper = new FastJumper(mJumperCallback);
 
         mFastJumper.addListener(new FastJumper.Listener() {
@@ -689,27 +777,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     }
 
-    private void setupGridLayoutManager() {
-
-        SpannableCallback.ScrollCalculator mLinearScrollCalculator = new LinearScrollCalculator(mRecyclerView) {
-
-            @Override
-            public int getItemHeight(int position) {
-                return mPhotoRecycleAdapter.getItemHeight(position);
-            }
-
-            @Override
-            public int getSpanSize(int position) {
-                return mPhotoRecycleAdapter.getSpanSize(position);
-            }
-
-            @Override
-            public int getSpanCount() {
-                return mSpanCount;
-            }
-        };
-
-        calcPhotoItemWidth();
+    private void initGridLayoutManager() {
 
         GridLayoutManager glm = new GridLayoutManager(containerActivity, mSpanCount);
         glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -724,18 +792,28 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         mLayoutManager = glm;
         ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
 
-        mScrollCalculator = mLinearScrollCalculator;
     }
 
     private void setupRecyclerView() {
-        mFastJumper.attachToRecyclerView(null);
-        setupGridLayoutManager();
+
+        initGridLayoutManager();
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mPhotoRecycleAdapter);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mJumperCallback.setScrollCalculator(mScrollCalculator);
-        mFastJumper.attachToRecyclerView(mRecyclerView);
-        mFastJumper.invalidate();
+
+    }
+
+    private void setupFastJumper(boolean needSetUpFastJumper) {
+
+        if (needSetUpFastJumper) {
+
+            initFastJumper();
+
+            mFastJumper.attachToRecyclerView(mRecyclerView);
+            mFastJumper.invalidate();
+
+        }
+
     }
 
     private void calcScreenWidth() {
@@ -756,22 +834,21 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         List<Media> selectedMedias = new ArrayList<>();
 
-        for (List<MediaViewModel> mediaList : mMapKeyIsDate.values()) {
-            for (MediaViewModel mediaViewModel : mediaList) {
-                if (mediaViewModel.isSelected()) {
+        for (MediaViewModel mediaViewModel : mMediaViewModels) {
+            if (mediaViewModel.isSelected()) {
 
-                    Media media = mediaViewModel.getMedia();
+                Media media = mediaViewModel.getMedia();
 
-                    String mediaUUID = media.getUuid();
-                    if (mediaUUID.isEmpty()) {
-                        mediaUUID = Util.calcSHA256OfFile(media.getOriginalPhotoPath());
-                        media.setUuid(mediaUUID);
-                    }
-
-                    selectedMedias.add(media);
+                String mediaUUID = media.getUuid();
+                if (mediaUUID.isEmpty()) {
+                    mediaUUID = Util.calcSHA256OfFile(media.getOriginalPhotoPath());
+                    media.setUuid(mediaUUID);
                 }
+
+                selectedMedias.add(media);
             }
         }
+
 
         return selectedMedias;
     }
@@ -799,19 +876,18 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         int selectLocalMediaCount = 0;
 
-        for (List<MediaViewModel> mediaViewModels : mMapKeyIsDate.values()) {
-            for (MediaViewModel mediaViewModel : mediaViewModels) {
-                if (mediaViewModel.isSelected()) {
+        for (MediaViewModel mediaViewModel : mMediaViewModels) {
+            if (mediaViewModel.isSelected()) {
 
-                    selectCount++;
+                selectCount++;
 
-                    if (mediaViewModel.getMedia().isLocal())
-                        selectLocalMediaCount++;
-
-                }
+                if (mediaViewModel.getMedia().isLocal())
+                    selectLocalMediaCount++;
 
             }
+
         }
+
 
         mSelectCount = selectCount;
 
@@ -843,10 +919,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                 if (currentMedia == null) return;
 
-                View newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageThumbUrl(containerActivity).getUrl());
+                View newSharedElement = mRecyclerView.findViewWithTag(createMediaThumbHttpRequest(currentMedia).getUrl());
 
                 if (newSharedElement == null)
-                    newSharedElement = mRecyclerView.findViewWithTag(currentMedia.getImageSmallThumbUrl(containerActivity).getUrl());
+                    newSharedElement = mRecyclerView.findViewWithTag(createMediaSmallThumbHttpRequest(currentMedia).getUrl());
 
                 if (newSharedElement == null)
                     return;
@@ -872,7 +948,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         containerActivity = null;
 
-        mediaDataSourceRepository.unregisterCalcDigestCallback(calcMediaDigestCallback);
+        mMediaDataSourceRepository.unregisterCalcDigestCallback(calcMediaDigestCallback);
     }
 
     @Override
@@ -1532,11 +1608,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             if (!mIsFling) {
 
-                httpRequest = currentMedia.getImageThumbUrl(containerActivity);
+                httpRequest = createMediaThumbHttpRequest(currentMedia);
 
             } else {
 
-                httpRequest = currentMedia.getImageSmallThumbUrl(containerActivity);
+                httpRequest = createMediaSmallThumbHttpRequest(currentMedia);
 
             }
 
@@ -1564,11 +1640,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                 Log.d(TAG, "refreshView: media list is null,currentMedia getDateWithoutHourMinSec:" + currentMedia.getDateWithoutHourMinSec());
 
-            } else {
-
-                temporaryPosition = getMediaPosition(mediaViewModels, currentMedia);
+                mediaViewModels = mMediaViewModels;
 
             }
+
+            temporaryPosition = getMediaPosition(mediaViewModels, currentMedia);
 
             setPhotoItemMargin(temporaryPosition, mImageLayout);
 
@@ -1588,15 +1664,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                     } else {
 
-                        if (mEnteringPhotoSlider)
-                            return;
-
-                        int initialPhotoPosition = getInitialPhotoPosition(currentMedia);
-
-                        PhotoSliderActivity.startPhotoSliderActivity(mPhotoListListener.getToolbar(), containerActivity, mMediaViewModels,
-                                initialPhotoPosition, mediaInListPosition, mSpanCount, mPhotoIv, currentMedia);
-
-                        mEnteringPhotoSlider = true;
+                        startPhotoSliderActivity(currentMedia, mPhotoIv, mediaInListPosition);
 
                     }
 
@@ -1689,11 +1757,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                 Log.d(TAG, "refreshView: media list is null,currentVideo getDateWithoutHourMinSec:" + video.getDateWithoutHourMinSec());
 
-            } else {
-
-                temporaryPosition = getMediaPosition(mediaViewModels, video);
-
+                mediaViewModels = mMediaViewModels;
             }
+
+            temporaryPosition = getMediaPosition(mediaViewModels, video);
 
             final int mediaInListPosition = temporaryPosition;
 
@@ -1708,11 +1775,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             if (!mIsFling) {
 
-                httpRequest = video.getImageThumbUrl(containerActivity);
+                httpRequest = createMediaThumbHttpRequest(video);
 
             } else {
 
-                httpRequest = video.getImageSmallThumbUrl(containerActivity);
+                httpRequest = createMediaSmallThumbHttpRequest(video);
 
             }
 
@@ -1743,14 +1810,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
 //                        PlayVideoActivity.startPlayVideoActivity(containerActivity, video);
 
-                        int initialPhotoPosition = getInitialPhotoPosition(video);
-
-                        Intent intent = new Intent();
-                        intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
-                        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
-                        intent.setClass(containerActivity, PhotoSliderActivity.class);
-
-                        PhotoSliderActivity.startPhotoSliderActivity(containerActivity, mMediaViewModels, initialPhotoPosition);
+                        startPhotoSliderActivity(video, networkImageView);
 
                     }
 
@@ -2034,7 +2094,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 if (mSpanCount > mSpanMinCount) {
                     mSpanCount--;
                     calcPhotoItemWidth();
-                    NewPhotoListDataLoader.getInstance().calcPhotoPositionNumber();
+                    mMediaListConverter.calcPhotoPositionNumber();
                     ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
                     mRecyclerView.setLayoutManager(mLayoutManager);
                     mPhotoRecycleAdapter.notifyItemRangeChanged(0, mPhotoRecycleAdapter.getItemCount());
@@ -2047,7 +2107,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 if (mSpanCount < mSpanMaxCount) {
                     mSpanCount++;
                     calcPhotoItemWidth();
-                    NewPhotoListDataLoader.getInstance().calcPhotoPositionNumber();
+                    mMediaListConverter.calcPhotoPositionNumber();
                     ((GridLayoutManager) mLayoutManager).setSpanCount(mSpanCount);
                     mRecyclerView.setLayoutManager(mLayoutManager);
                     mPhotoRecycleAdapter.notifyItemRangeChanged(0, mPhotoRecycleAdapter.getItemCount());
@@ -2058,5 +2118,71 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         }
     }
+
+    private HttpRequest createMediaThumbHttpRequest(Media media) {
+
+        if (mGroupRequestParam != null)
+            return media.getImageThumbUrl(mHttpRequestFactory, mGroupRequestParam);
+        else
+            return media.getImageThumbUrl(mHttpRequestFactory);
+
+    }
+
+    private HttpRequest createMediaSmallThumbHttpRequest(Media media) {
+
+        if (mGroupRequestParam != null)
+            return media.getImageSmallThumbUrl(mHttpRequestFactory, mGroupRequestParam);
+        else
+            return media.getImageSmallThumbUrl(mHttpRequestFactory);
+
+    }
+
+    private void startPhotoSliderActivity(Media media, NetworkImageView networkImageView, int mediaInListPosition) {
+
+        if (mGroupRequestParam != null) {
+
+            PhotoSliderActivity.startPhotoSliderActivity(mPhotoListListener.getToolbar(), containerActivity, mMediaViewModels,
+                    mGroupRequestParam.getGroupUUID(), mGroupRequestParam.getStationID(), mSpanCount, networkImageView, media);
+
+
+        } else {
+
+            if (mEnteringPhotoSlider)
+                return;
+
+            int initialPhotoPosition = getInitialPhotoPosition(media);
+
+            PhotoSliderActivity.startPhotoSliderActivity(mPhotoListListener.getToolbar(), containerActivity, mMediaViewModels,
+                    initialPhotoPosition, mediaInListPosition, mSpanCount, networkImageView, media);
+
+            mEnteringPhotoSlider = true;
+
+        }
+
+    }
+
+    private void startPhotoSliderActivity(Video video, NetworkImageView networkImageView) {
+
+        if (mGroupRequestParam != null) {
+
+            PhotoSliderActivity.startPhotoSliderActivity(mPhotoListListener.getToolbar(), containerActivity, mMediaViewModels,
+                    mGroupRequestParam.getGroupUUID(), mGroupRequestParam.getStationID(), mSpanCount, networkImageView, video);
+
+
+        } else {
+
+            int initialPhotoPosition = getInitialPhotoPosition(video);
+
+            Intent intent = new Intent();
+            intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
+            intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
+            intent.setClass(containerActivity, PhotoSliderActivity.class);
+
+            PhotoSliderActivity.startPhotoSliderActivity(containerActivity, mMediaViewModels, initialPhotoPosition);
+
+        }
+
+    }
+
 
 }

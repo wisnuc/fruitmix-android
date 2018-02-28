@@ -235,7 +235,7 @@ public class PlayVideoFragment {
 
     private HttpRequest getHttpRequest(Video video, Context context) {
 
-        return video.getImageOriginalUrl(context);
+        return video.getImageOriginalUrl(InjectHttp.provideHttpRequestFactory(context));
 
     }
 
