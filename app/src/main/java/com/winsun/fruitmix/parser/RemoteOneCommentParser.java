@@ -132,7 +132,6 @@ public class RemoteOneCommentParser {
                         abstractFile.setFileHash(hash);
                         abstractFile.setName(name);
 
-                        abstractFile.setFileTypeResID(FileUtil.getFileTypeResID(name));
                         abstractFile.setSize(size);
 
                         files.add(abstractFile);
@@ -160,7 +159,7 @@ public class RemoteOneCommentParser {
 
                         file.setName(name);
                         file.setFileHash(media.getUuid());
-                        file.setFileTypeResID(FileUtil.getFileTypeResID(name));
+
                         file.setSize(media.getSize());
 
                         files.add(file);

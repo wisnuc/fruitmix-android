@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.component;
+package com.winsun.fruitmix.component.fab.menu;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -8,15 +8,11 @@ import android.support.v4.view.animation.LinearOutSlowInInterpolator;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.anim.SharpCurveInterpolator;
-import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.databinding.FabMenuLayoutBinding;
-import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
-import com.winsun.fruitmix.util.Util;
 
 /**
  * Created by Administrator on 2018/2/25.
@@ -25,8 +21,6 @@ import com.winsun.fruitmix.util.Util;
 public class FabMenuLayoutViewComponent implements View.OnClickListener {
 
     public static final String TAG = FabMenuLayoutViewComponent.class.getSimpleName();
-
-    private FabMenuLayoutBinding mFabMenuLayoutBinding;
 
     private FloatingActionButton fab;
 
@@ -38,13 +32,12 @@ public class FabMenuLayoutViewComponent implements View.OnClickListener {
 
     private Context mContext;
 
-    private boolean showDownloadFileBtn;
+    private int currentItem;
 
     private FabMenuItemOnClickListener mFabMenuItemOnClickListener;
 
-    public FabMenuLayoutViewComponent(FabMenuLayoutBinding fabMenuLayoutBinding, boolean showDownloadFileBtn,
+    public FabMenuLayoutViewComponent(FabMenuLayoutBinding fabMenuLayoutBinding, int currentItem,
                                       FabMenuItemOnClickListener fabMenuItemOnClickListener) {
-        mFabMenuLayoutBinding = fabMenuLayoutBinding;
 
         fab = fabMenuLayoutBinding.fab;
         systemShareBtn = fabMenuLayoutBinding.systemShare;
@@ -56,13 +49,13 @@ public class FabMenuLayoutViewComponent implements View.OnClickListener {
         systemShareBtn.setOnClickListener(this);
         downloadFileBtn.setOnClickListener(this);
 
-        this.showDownloadFileBtn = showDownloadFileBtn;
+        this.currentItem = currentItem;
         mFabMenuItemOnClickListener = fabMenuItemOnClickListener;
 
     }
 
-    public void setShowDownloadFileBtn(boolean showDownloadFileBtn) {
-        this.showDownloadFileBtn = showDownloadFileBtn;
+    public void setCurrentItem(int currentItem) {
+        this.currentItem = currentItem;
     }
 
     public void hideFabMenuItem(){
@@ -70,14 +63,6 @@ public class FabMenuLayoutViewComponent implements View.OnClickListener {
         fab.setVisibility(View.GONE);
         systemShareBtn.setVisibility(View.GONE);
         downloadFileBtn.setVisibility(View.GONE);
-
-    }
-
-    public interface FabMenuItemOnClickListener {
-
-        void systemShareBtnOnClick();
-
-        void downloadFileBtnOnClick();
 
     }
 
@@ -92,13 +77,13 @@ public class FabMenuLayoutViewComponent implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.system_share:
 
-                mFabMenuItemOnClickListener.systemShareBtnOnClick();
+                mFabMenuItemOnClickListener.systemShareBtnOnClick(mContext,currentItem);
 
                 break;
 
             case R.id.download_file_btn:
 
-                mFabMenuItemOnClickListener.downloadFileBtnOnClick();
+                mFabMenuItemOnClickListener.downloadFileBtnOnClick(mContext);
 
                 break;
 
@@ -218,7 +203,7 @@ public class FabMenuLayoutViewComponent implements View.OnClickListener {
 
         new AnimatorBuilder(mContext, R.animator.fab_remote, fab).startAnimator();
 
-        if (!showDownloadFileBtn) {
+        if (currentItem != FabMenuItemOnClickDefaultListener.ITEM_FILE) {
 
             downloadFileBtn.setVisibility(View.GONE);
 

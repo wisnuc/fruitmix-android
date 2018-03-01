@@ -131,7 +131,6 @@ public class LocalFileFragment {
                 } else {
                     abstractLocalFile = new LocalFile();
 
-                    abstractLocalFile.setFileTypeResID(FileUtil.getFileTypeResID(file.getName()));
                 }
 
                 abstractLocalFile.setName(file.getName());

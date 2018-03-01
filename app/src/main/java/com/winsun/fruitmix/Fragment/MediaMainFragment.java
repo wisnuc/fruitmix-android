@@ -10,7 +10,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
@@ -34,7 +33,9 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.SharpCurveInterpolator;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.command.AbstractCommand;
-import com.winsun.fruitmix.component.FabMenuLayoutViewComponent;
+import com.winsun.fruitmix.component.fab.menu.FabMenuItemOnClickDefaultListener;
+import com.winsun.fruitmix.component.fab.menu.FabMenuItemOnClickListener;
+import com.winsun.fruitmix.component.fab.menu.FabMenuLayoutViewComponent;
 import com.winsun.fruitmix.contact.ContactListActivity;
 import com.winsun.fruitmix.databinding.NavPagerMainBinding;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
@@ -49,9 +50,7 @@ import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
-import com.winsun.fruitmix.group.presenter.GroupContentPresenter;
 import com.winsun.fruitmix.group.setting.GroupSettingActivity;
-import com.winsun.fruitmix.group.view.GroupContentActivity;
 import com.winsun.fruitmix.group.view.GroupListPage;
 import com.winsun.fruitmix.inbox.view.InboxListPage;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
@@ -92,7 +91,7 @@ import static com.winsun.fruitmix.group.view.GroupListPage.CREATE_GROUP_REQUEST_
 import static com.winsun.fruitmix.group.view.GroupListPage.GROUP_CONTENT_REQUEST_CODE;
 
 public class MediaMainFragment extends Fragment implements IPhotoListListener,
-        HandleFileListOperateCallback, FileListSelectModeListener, FabMenuLayoutViewComponent.FabMenuItemOnClickListener {
+        HandleFileListOperateCallback, FileListSelectModeListener {
 
     public static final String TAG = "MediaMainFragment";
 
@@ -209,8 +208,6 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
         revealToolbar = binding.revealToolbarLayout.revealToolbar;
 
-        mFabMenuLayoutViewComponent = new FabMenuLayoutViewComponent(binding.fabMenuLayout, false, this);
-
         viewPager = binding.viewPager;
 
 /*        fab = binding.fab;
@@ -233,14 +230,31 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
         initViewPager();
 
+        FabMenuItemOnClickListener fabMenuItemOnClickListener = new FabMenuItemOnClickDefaultListener(
+                photoList, fileFragment, mediaDataSourceRepository, new AbstractCommand() {
+            @Override
+            public void execute() {
+                quitSelectMode();
+            }
+
+            @Override
+            public void unExecute() {
+
+            }
+        }
+        );
+
+        mFabMenuLayoutViewComponent = new FabMenuLayoutViewComponent(binding.fabMenuLayout,
+                FabMenuItemOnClickDefaultListener.ITEM_MEDIA, fabMenuItemOnClickListener);
+
+        Log.d(TAG, "onCreateView: ");
+
         viewPager.setCurrentItem(PAGE_PHOTO);
         onPageSelect(PAGE_PHOTO);
 
   /*      systemShareBtn.setOnClickListener(this);
         downloadFileBtn.setOnClickListener(this);
         fab.setOnClickListener(this);*/
-
-        Log.d(TAG, "onCreateView: ");
 
         return binding.getRoot();
     }
@@ -597,7 +611,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 //        mInboxListPage = new InboxListPage((BaseActivity) getActivity());
 
         groupListPage = new GroupListPage(getActivity());
-        photoList = new NewPhotoList(getActivity(),this);
+        photoList = new NewPhotoList(getActivity(), this);
 
         StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(getContext());
 
@@ -1108,59 +1122,6 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
         return toolbar;
     }
 
-    private void handleShareToOtherApp() {
-
-        if (viewPager.getCurrentItem() == PAGE_PHOTO)
-            shareMediaToOtherApp();
-        else if (viewPager.getCurrentItem() == PAGE_FILE)
-            shareFileToOtherApp();
-
-    }
-
-    private void shareMediaToOtherApp() {
-        mSelectMedias = new ArrayList<>(photoList.getSelectedMedias());
-
-        mSelectMediaOriginalPhotoPaths = new ArrayList<>(mSelectMedias.size());
-
-        Iterator<Media> iterator = mSelectMedias.iterator();
-        while (iterator.hasNext()) {
-            Media media = iterator.next();
-            String originalPhotoPath = media.getOriginalPhotoPath();
-
-            if (originalPhotoPath.length() != 0) {
-                mSelectMediaOriginalPhotoPaths.add(originalPhotoPath);
-                iterator.remove();
-            }
-        }
-
-        if (mSelectMedias.size() == 0) {
-            FileUtil.sendShareToOtherApp(getContext(), mSelectMediaOriginalPhotoPaths);
-        } else {
-
-            mDialog = ProgressDialog.show(mContext, null, String.format(getString(R.string.operating_title), getString(R.string.download_original_photo)), true, true);
-            mDialog.setCanceledOnTouchOutside(false);
-
-            mediaDataSourceRepository.downloadMedia(mSelectMedias, new BaseOperateDataCallbackImpl<Boolean>() {
-                @Override
-                public void onSucceed(Boolean data, OperationResult result) {
-                    super.onSucceed(data, result);
-
-                    handleDownloadMedia();
-
-                }
-            });
-
-//            EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, mSelectMedias));
-
-        }
-    }
-
-    private void shareFileToOtherApp() {
-
-        fileFragment.shareSelectFilesToOtherApp();
-
-    }
-
     @Override
     public void handleFileListOperate(String currentFolderName) {
 
@@ -1248,7 +1209,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
         if (context == null)
             return;
 
-        if (viewPager.getCurrentItem() == PAGE_FILE){
+        if (viewPager.getCurrentItem() == PAGE_FILE) {
 
             toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(getContext(), R.color.twenty_six_percent_black));
 
@@ -1287,7 +1248,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
                 toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
                 toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
 
-                mFabMenuLayoutViewComponent.setShowDownloadFileBtn(false);
+                mFabMenuLayoutViewComponent.setCurrentItem(FabMenuItemOnClickListener.ITEM_OTHER);
 
                 mFabMenuLayoutViewComponent.hideFabMenuItem();
 
@@ -1354,13 +1315,13 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
                 setCurrentItem(photoList);
 
-                mFabMenuLayoutViewComponent.setShowDownloadFileBtn(false);
+                mFabMenuLayoutViewComponent.setCurrentItem(FabMenuItemOnClickListener.ITEM_MEDIA);
+
+                mFabMenuLayoutViewComponent.hideFabMenuItem();
 
                 toolbarViewModel.titleText.set(getString(R.string.photo));
                 toolbarViewModel.navigationIconResId.set(R.drawable.menu_black);
                 toolbarViewModel.setToolbarNavigationOnClickListener(defaultListener);
-
-                mFabMenuLayoutViewComponent.hideFabMenuItem();
 
                 toolbarViewModel.showSelect.set(true);
                 toolbarViewModel.showMenu.set(false);
@@ -1374,7 +1335,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
                 setCurrentItem(fileFragment);
 
-                mFabMenuLayoutViewComponent.setShowDownloadFileBtn(true);
+                mFabMenuLayoutViewComponent.setCurrentItem(FabMenuItemOnClickListener.ITEM_FILE);
 
                 mFabMenuLayoutViewComponent.hideFabMenuItem();
 
@@ -1398,51 +1359,6 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
                 break;
             default:
         }
-
-    }
-
-    @Override
-    public void systemShareBtnOnClick() {
-
-        if (!Util.isNetworkConnected(mContext)) {
-            Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        AbstractCommand shareInAppCommand = new AbstractCommand() {
-            @Override
-            public void execute() {
-            }
-
-            @Override
-            public void unExecute() {
-            }
-        };
-
-        AbstractCommand shareToOtherAppCommand = new AbstractCommand() {
-            @Override
-            public void execute() {
-                handleShareToOtherApp();
-
-                quitSelectMode();
-            }
-
-            @Override
-            public void unExecute() {
-            }
-        };
-
-        new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(mContext).show();
-
-
-    }
-
-    @Override
-    public void downloadFileBtnOnClick() {
-
-        fileFragment.downloadSelectItems();
-
-        quitSelectMode();
 
     }
 

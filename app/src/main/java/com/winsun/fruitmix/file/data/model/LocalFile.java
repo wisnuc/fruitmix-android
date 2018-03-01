@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.file.data.model;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.text.SimpleDateFormat;
@@ -35,6 +36,14 @@ public class LocalFile extends AbstractLocalFile {
 
     public void setSize(String size) {
         this.size = size;
+    }
+
+    @Override
+    public void setName(String name) {
+        super.setName(name);
+
+        setFileTypeResID(FileUtil.getFileTypeResID(getName()));
+
     }
 
     @Override

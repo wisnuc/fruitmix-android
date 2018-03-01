@@ -7,7 +7,6 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.group.data.model.MediaComment;
-import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;

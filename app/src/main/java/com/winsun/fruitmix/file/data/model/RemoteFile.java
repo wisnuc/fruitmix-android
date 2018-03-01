@@ -33,6 +33,13 @@ public class RemoteFile extends AbstractRemoteFile {
     }
 
     @Override
+    public void setName(String name) {
+        super.setName(name);
+
+        setFileTypeResID(FileUtil.getFileTypeResID(getName()));
+    }
+
+    @Override
     public boolean isFolder() {
         return false;
     }

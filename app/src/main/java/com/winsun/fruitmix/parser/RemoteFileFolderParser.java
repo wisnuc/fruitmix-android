@@ -43,8 +43,6 @@ public class RemoteFileFolderParser extends BaseRemoteDataParser implements Remo
             if (type.equals("file")) {
                 abstractRemoteFile = new RemoteFile();
 
-                abstractRemoteFile.setFileTypeResID(FileUtil.getFileTypeResID(fileName));
-
                 ((RemoteFile) abstractRemoteFile).setFileHash(jsonObject.optString("hash"));
 
             } else {
