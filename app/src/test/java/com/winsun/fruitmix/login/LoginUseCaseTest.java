@@ -25,8 +25,8 @@ import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.stations.StationsDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.token.LoadTokenParam;
-import com.winsun.fruitmix.token.TokenDataSource;
+import com.winsun.fruitmix.token.param.StationTokenParam;
+import com.winsun.fruitmix.token.data.TokenDataSource;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
@@ -416,11 +416,11 @@ public class LoginUseCaseTest {
     @Test
     public void testLoginWithLoadTokenParam_succeed() {
 
-        LoadTokenParam loadTokenParam = new LoadTokenParam(testGateway, testUserUUID, testUserPwd, testEquipmentName);
+        StationTokenParam stationTokenParam = new StationTokenParam(testGateway, testUserUUID, testUserPwd, testEquipmentName);
 
-        loginUseCase.loginWithLoadTokenParam(loadTokenParam, callback);
+        loginUseCase.loginWithLoadTokenParam(stationTokenParam, callback);
 
-        verify(tokenDataSource).getToken(any(LoadTokenParam.class), loadTokenCallbackArgumentCaptor.capture());
+        verify(tokenDataSource).getStationToken(any(StationTokenParam.class), loadTokenCallbackArgumentCaptor.capture());
 
         loadTokenCallbackArgumentCaptor.getValue().onSucceed(Collections.singletonList(testToken), new OperationSuccess());
 
@@ -510,13 +510,13 @@ public class LoginUseCaseTest {
     @Test
     public void testLoginWithLoadTokenParam_fail() {
 
-        LoadTokenParam loadTokenParam = new LoadTokenParam(testGateway, testUserUUID, testUserPwd, testEquipmentName);
+        StationTokenParam stationTokenParam = new StationTokenParam(testGateway, testUserUUID, testUserPwd, testEquipmentName);
 
         BaseOperateDataCallback<Boolean> callback = Mockito.mock(BaseOperateDataCallback.class);
 
-        loginUseCase.loginWithLoadTokenParam(loadTokenParam, callback);
+        loginUseCase.loginWithLoadTokenParam(stationTokenParam, callback);
 
-        verify(tokenDataSource).getToken(any(LoadTokenParam.class), loadTokenCallbackArgumentCaptor.capture());
+        verify(tokenDataSource).getStationToken(any(StationTokenParam.class), loadTokenCallbackArgumentCaptor.capture());
 
         loadTokenCallbackArgumentCaptor.getValue().onFail(new OperationIOException());
 
@@ -602,7 +602,7 @@ public class LoginUseCaseTest {
 
         ArgumentCaptor<BaseLoadDataCallback<WeChatTokenUserWrapper>> captor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
 
-        verify(tokenDataSource).getToken(anyString(), captor.capture());
+        verify(tokenDataSource).getCloudToken(anyString(), captor.capture());
 
         captor.getValue().onSucceed(Collections.singletonList(weChatTokenUserWrapper), new OperationSuccess());
 

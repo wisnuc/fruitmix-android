@@ -105,7 +105,7 @@ public class ContactListActivity extends BaseToolbarActivity implements ContactL
         mContactListPresenter = new ContactListPresenter(InjectContactDataSource.provideInstance(this),
                 InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this),
                 loadingViewModel, noContentViewModel, this, InjectGroupDataSource.provideGroupRepository(this),
-                currentUser, purpose, groupUUID);
+                currentUser, InjectSystemSettingDataSource.provideSystemSettingDataSource(this), purpose, groupUUID);
 
         toolbarViewModel.showSelect.set(true);
 

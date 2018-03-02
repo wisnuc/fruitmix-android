@@ -29,7 +29,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.mqtt.MqttUseCase;
 import com.winsun.fruitmix.parser.RemoteGroupParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.token.TokenDataSource;
+import com.winsun.fruitmix.token.data.TokenDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
@@ -101,46 +101,6 @@ public class GroupListPresenter implements ActiveView {
         return groupListAdapter;
     }
 
-    public void refreshView() {
-
-        if (mSystemSettingDataSource.getLoginWithWechatCodeOrNot()) {
-
-            groupRepository.setCloudToken(mSystemSettingDataSource.getCurrentWAToken());
-
-            refreshGroups();
-
-        } else {
-
-            mTokenDataSource.getWATokenThroughStationToken(mCurrentUser.getAssociatedWeChatGUID(),
-                    new BaseLoadDataCallbackWrapper<>(
-                            new BaseLoadDataCallback<String>() {
-                                @Override
-                                public void onSucceed(List<String> data, OperationResult operationResult) {
-
-                                    groupRepository.setCloudToken(data.get(0));
-
-                                    refreshGroups();
-
-                                }
-
-                                @Override
-                                public void onFail(OperationResult operationResult) {
-
-                                    loadingViewModel.showLoading.set(false);
-                                    noContentViewModel.showNoContent.set(true);
-
-                                    groupListViewModel.showRecyclerView.set(false);
-                                    groupListViewModel.showAddFriendsFAB.set(false);
-
-                                }
-                            }, this
-                    )
-
-            );
-
-        }
-
-    }
 
     public void refreshGroups() {
 

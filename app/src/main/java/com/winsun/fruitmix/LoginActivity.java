@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -17,10 +16,9 @@ import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginPresenter;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.login.LoginViewModel;
-import com.winsun.fruitmix.token.LoadTokenParam;
+import com.winsun.fruitmix.token.param.StationTokenParam;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 public class LoginActivity extends BaseActivity implements LoginPresenter {
 
@@ -153,14 +151,14 @@ public class LoginActivity extends BaseActivity implements LoginPresenter {
 
         showProgressDialog(getString(R.string.operating_title, getString(R.string.login)));
 
-        final LoadTokenParam loadTokenParam = new LoadTokenParam(mGateway, mUserUUid, mPwd, mEquipmentGroupName);
+        final StationTokenParam stationTokenParam = new StationTokenParam(mGateway, mUserUUid, mPwd, mEquipmentGroupName);
 
-        loginInThread(loadTokenParam);
+        loginInThread(stationTokenParam);
 
     }
 
-    private void loginInThread(LoadTokenParam loadTokenParam) {
-        loginUseCase.loginWithLoadTokenParam(loadTokenParam, new BaseOperateDataCallbackWrapper<>(new BaseOperateDataCallback<Boolean>() {
+    private void loginInThread(StationTokenParam stationTokenParam) {
+        loginUseCase.loginWithLoadTokenParam(stationTokenParam, new BaseOperateDataCallbackWrapper<>(new BaseOperateDataCallback<Boolean>() {
             @Override
             public void onSucceed(Boolean data, OperationResult operationResult) {
 

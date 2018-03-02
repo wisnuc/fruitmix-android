@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.token;
+package com.winsun.fruitmix.token.data;
 
 import android.content.Context;
 

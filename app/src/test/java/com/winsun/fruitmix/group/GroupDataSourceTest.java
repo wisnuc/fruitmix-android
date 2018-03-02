@@ -44,7 +44,7 @@ public class GroupDataSourceTest {
     @Test
     public void testAddGroup() {
 
-        PrivateGroup privateGroup = new PrivateGroup(testGroupUuid, testGroupName1,"testOwnerGUID", Collections.<User>emptyList());
+        PrivateGroup privateGroup = new PrivateGroup(testGroupUuid, testGroupName1,"testOwnerGUID",testStationId, Collections.<User>emptyList());
 
         groupDataSource.addGroup(privateGroup, new BaseOperateCallback() {
             @Override

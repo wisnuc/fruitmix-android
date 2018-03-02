@@ -32,14 +32,11 @@ public class FileInTweetViewDataSource implements FileListViewDataSource {
 
     private String stationID;
 
-    private String cloudToken;
-
     public FileInTweetViewDataSource(Context context, StationFileRepository stationFileRepository,
-                                     FileComment fileComment, String cloudToken, String currentUserUUID) {
+                                     FileComment fileComment, String currentUserUUID) {
         mStationFileRepository = stationFileRepository;
         this.groupUUID = fileComment.getGroupUUID();
         this.stationID = fileComment.getStationID();
-        this.cloudToken = cloudToken;
 
         reset(context);
 
@@ -97,7 +94,7 @@ public class FileInTweetViewDataSource implements FileListViewDataSource {
 
     @Override
     public FileDownloadParam createFileDownloadParam(AbstractRemoteFile abstractRemoteFile) {
-        return new FileFromBoxDownloadParam(groupUUID, stationID, ((RemoteFile) abstractRemoteFile).getFileHash(), cloudToken);
+        return new FileFromBoxDownloadParam(groupUUID, stationID, ((RemoteFile) abstractRemoteFile).getFileHash());
     }
 
 }

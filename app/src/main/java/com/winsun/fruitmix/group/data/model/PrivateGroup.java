@@ -41,11 +41,12 @@ public class PrivateGroup {
 
     private long lastReadCommentIndex = -1;
 
-
-    public PrivateGroup(String uuid, String name, String ownerGUID) {
+    public PrivateGroup(String uuid, String name, String ownerGUID,String stationID) {
         this.uuid = uuid;
         this.name = name;
         this.ownerGUID = ownerGUID;
+
+        this.stationID = stationID;
 
         userComments = new ArrayList<>();
 
@@ -54,10 +55,11 @@ public class PrivateGroup {
         users = new ArrayList<>();
     }
 
-    public PrivateGroup(String uuid, String name, String ownerGUID, List<User> users) {
+    public PrivateGroup(String uuid, String name, String ownerGUID, String stationID,List<User> users) {
         this.uuid = uuid;
         this.name = name;
         this.ownerGUID = ownerGUID;
+        this.stationID = stationID;
         this.users = users;
 
         userComments = new ArrayList<>();
@@ -291,7 +293,7 @@ public class PrivateGroup {
 
     public PrivateGroup cloneSelf() {
 
-        PrivateGroup privateGroup = new PrivateGroup(getUUID(), getName(), getOwnerGUID(), new ArrayList<>(getUsers()));
+        PrivateGroup privateGroup = new PrivateGroup(getUUID(), getName(), getOwnerGUID(), getStationID(),new ArrayList<>(getUsers()));
 
         privateGroup.addUserComments(getUserComments());
 

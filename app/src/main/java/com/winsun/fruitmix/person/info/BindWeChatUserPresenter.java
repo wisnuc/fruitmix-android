@@ -3,7 +3,6 @@ package com.winsun.fruitmix.person.info;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.R;
@@ -16,7 +15,7 @@ import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.token.TokenDataSource;
+import com.winsun.fruitmix.token.data.TokenDataSource;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
@@ -96,7 +95,7 @@ public class BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetWeChat
 
         personInfoView.showProgressDialog(personInfoView.getString(R.string.operating_title,personInfoView.getString(R.string.get_wechat_user_info)));
 
-        mTokenDataSource.getToken(code, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<WeChatTokenUserWrapper>() {
+        mTokenDataSource.getCloudToken(code, new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<WeChatTokenUserWrapper>() {
             @Override
             public void onSucceed(List<WeChatTokenUserWrapper> data, OperationResult operationResult) {
 

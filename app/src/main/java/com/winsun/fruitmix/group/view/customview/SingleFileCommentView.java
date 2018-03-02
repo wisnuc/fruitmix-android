@@ -82,7 +82,8 @@ public class SingleFileCommentView extends UserCommentView {
 
             final Media media = comment.getMedias().get(0);
 
-            HttpRequest httpRequest = media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(context), new GroupRequestParam(data.getGroupUUID(), data.getStationID()));
+            HttpRequest httpRequest = media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(context),
+                    new GroupRequestParam(data.getGroupUUID(), data.getStationID()),"");
 
             httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
 

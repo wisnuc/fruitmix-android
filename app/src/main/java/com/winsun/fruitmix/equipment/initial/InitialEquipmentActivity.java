@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
@@ -28,13 +26,12 @@ import com.winsun.fruitmix.person.info.BindWeChatUserPresenter;
 import com.winsun.fruitmix.person.info.InjectPersonInfoDataSource;
 import com.winsun.fruitmix.person.info.PersonInfoView;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
-import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
-import com.winsun.fruitmix.token.LoadTokenParam;
+import com.winsun.fruitmix.token.data.InjectTokenRemoteDataSource;
+import com.winsun.fruitmix.token.param.StationTokenParam;
 import com.winsun.fruitmix.user.OperateUserViewModel;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -334,9 +331,9 @@ public class InitialEquipmentActivity extends BaseActivity implements PersonInfo
 
     private void login() {
 
-        LoadTokenParam loadTokenParam = new LoadTokenParam(ip, firstUser.getUuid(), userPwd, equipmentName);
+        StationTokenParam stationTokenParam = new StationTokenParam(ip, firstUser.getUuid(), userPwd, equipmentName);
 
-        mLoginUseCase.loginWithLoadTokenParam(loadTokenParam, new BaseOperateDataCallback<Boolean>() {
+        mLoginUseCase.loginWithLoadTokenParam(stationTokenParam, new BaseOperateDataCallback<Boolean>() {
             @Override
             public void onSucceed(Boolean data, OperationResult result) {
 

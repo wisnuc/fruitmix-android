@@ -1,17 +1,17 @@
-package com.winsun.fruitmix.token;
+package com.winsun.fruitmix.token.param;
 
 /**
  * Created by Administrator on 2017/2/7.
  */
 
-public class LoadTokenParam {
+public class StationTokenParam implements TokenParam{
 
     private String gateway;
     private String userUUID;
     private String userPassword;
     private String equipmentName;
 
-    public LoadTokenParam(String gateway, String userUUID, String userPassword,String equipmentName) {
+    public StationTokenParam(String gateway, String userUUID, String userPassword, String equipmentName) {
         this.gateway = gateway;
         this.userUUID = userUUID;
         this.userPassword = userPassword;

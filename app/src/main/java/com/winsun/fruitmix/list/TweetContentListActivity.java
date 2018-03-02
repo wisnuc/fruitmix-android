@@ -205,8 +205,7 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
             StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(this);
 
             FileListViewDataSource fileListViewDataSource = new FileInTweetViewDataSource(this, stationFileRepository,
-                    (FileComment) mUserComment, InjectGroupDataSource.provideGroupRepository(this).getCloudToken(),
-                    InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginUserUUID());
+                    (FileComment) mUserComment, InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginUserUUID());
 
             mFileFragment = new FileFragment(this, this, this,
                     fileListViewDataSource);

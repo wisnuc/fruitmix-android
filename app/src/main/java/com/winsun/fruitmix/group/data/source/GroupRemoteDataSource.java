@@ -4,7 +4,9 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.winsun.fruitmix.base.data.SCloudTokenContainer;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -41,12 +43,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Administrator on 2018/1/19.
  */
 
-public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements GroupDataSource {
+public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements GroupDataSource, SCloudTokenContainer {
 
     public static final String TAG = GroupRemoteDataSource.class.getSimpleName();
 
@@ -57,7 +61,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
     private static GroupDataSource instance;
 
-    private String cloudToken;
+    private String mSCloudToken;
 
     private SystemSettingDataSource mSystemSettingDataSource;
 
@@ -78,12 +82,13 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
         instance = null;
     }
 
-    public void setCloudToken(String cloudToken) {
-        this.cloudToken = cloudToken;
+    @Override
+    public synchronized void setCloudToken(String sCloudToken) {
+        this.mSCloudToken = sCloudToken;
     }
 
     @Override
-    public void addGroup(PrivateGroup group, BaseOperateCallback callback) {
+    public synchronized void addGroup(PrivateGroup group, BaseOperateCallback callback) {
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("name", group.getName());
@@ -98,7 +103,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         jsonObject.add("users", jsonArray);
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(BOXES, jsonObject.toString(), getAuthorizationValue());
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequest(BOXES, jsonObject.toString(), group.getStationID(), mSCloudToken);
 
         wrapper.operateCall(httpRequest, callback);
 
@@ -107,28 +112,15 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
     @Override
     public void getAllGroups(BaseLoadDataCallback<PrivateGroup> callback) {
 
-        String authorizationValue = getAuthorizationValue();
-
         HttpRequest httpRequest;
 
         if (mSystemSettingDataSource.getCurrentWAToken().length() != 0) {
             httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithoutWrap(CloudHttpRequestFactory.CLOUD_API_LEVEL + BOXES);
-        } else
-            httpRequest = httpRequestFactory.createHttpGetRequest(BOXES, authorizationValue);
 
-        wrapper.loadCall(httpRequest, callback, new RemoteGroupParser());
+            wrapper.loadCall(httpRequest, callback, new RemoteGroupParser());
 
-    }
-
-    @NonNull
-    private String getAuthorizationValue() {
-        String token = httpRequestFactory.getTokenForHeaderValue();
-
-        if (token.startsWith(Util.KEY_JWT_HEAD)) {
-            token = token.substring(4, token.length());
         }
 
-        return Util.KEY_JWT_HEAD + cloudToken + " " + token;
     }
 
     @Override
@@ -137,50 +129,48 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
     }
 
     @Override
-    public void deleteGroup(GroupRequestParam groupRequestParam, BaseOperateCallback callback) {
-
-        String authorizationValue = getAuthorizationValue();
+    public synchronized void deleteGroup(GroupRequestParam groupRequestParam, BaseOperateCallback callback) {
 
         HttpRequest httpRequest;
 
-        httpRequest = httpRequestFactory.createHttpDeleteRequestByCloudAPIWithWrap(BOXES + "/" + groupRequestParam.getGroupUUID(), "",
-                groupRequestParam.getStationID());
+        httpRequest = httpRequestFactory.createHttpDeleteRequest(BOXES + "/" + groupRequestParam.getGroupUUID(), "",
+                groupRequestParam.getStationID(), mSCloudToken);
+
+/*        httpRequest = httpRequestFactory.createHttpDeleteRequestByCloudAPIWithWrap(BOXES + "/" + groupRequestParam.getGroupUUID(), "",
+                groupRequestParam.getStationID());*/
 
         wrapper.operateCall(httpRequest, callback);
 
     }
 
+    //TODO:modify create http request
+
     @Override
-    public void quitGroup(GroupRequestParam groupRequestParam, String currentUserGUID, BaseOperateCallback callback) {
+    public synchronized void quitGroup(GroupRequestParam groupRequestParam, String currentUserGUID, BaseOperateCallback callback) {
 
         JsonObject root = getAddDeleteUserBody("delete", Collections.singletonList(currentUserGUID));
 
-        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID();
-
-        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequestByCloudAPIWithWrap(httpPath, root.toString(), groupRequestParam.getStationID());
-
-        wrapper.operateCall(httpRequest, callback);
+        operateUserInGroup(groupRequestParam, callback, root);
 
     }
 
     @Override
-    public void getAllUserCommentByGroupUUID(GroupRequestParam groupRequestParam, BaseLoadDataCallback<UserComment> callback) {
+    public synchronized void getAllUserCommentByGroupUUID(GroupRequestParam groupRequestParam, BaseLoadDataCallback<UserComment> callback) {
 
         String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS + METADATA_TRUE;
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequestByCloudAPIWithWrap(httpPath, groupRequestParam.getStationID());
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(httpPath, groupRequestParam.getStationID(), mSCloudToken);
 
         wrapper.loadCall(httpRequest, callback, new RemoteUserCommentParser());
 
     }
 
     @Override
-    public void insertUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, final BaseOperateCallback callback) {
+    public synchronized void insertUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, final BaseOperateCallback callback) {
 
         if (userComment instanceof MediaComment) {
 
-            insertMediaCommentWhenWechatLogin(groupRequestParam, (MediaComment) userComment, callback);
-//            insertMediaCommentWhenWechatLogin(groupUUID, (MediaComment) userComment, callback);
+            insertMediaComment(groupRequestParam, (MediaComment) userComment, callback);
 
             /*List<Media> medias = ((MediaComment) userComment).getMedias();
 
@@ -224,125 +214,10 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         } else if (userComment instanceof FileComment) {
 
-//            insertFileCommentSrcFromNas(groupRequestParam, userComment, callback);
-
-            insertFileCommentSrcFromNasWhenWechatLogin(groupRequestParam, userComment, callback);
+            insertFileCommentSrcFromNas(groupRequestParam, userComment, callback);
 
         }
 
-
-    }
-
-    private void insertMediaCommentWhenWechatLogin(GroupRequestParam groupRequestParam, MediaComment mediaComment, final BaseOperateCallback callback) {
-
-        List<Media> medias = mediaComment.getMedias();
-
-        List<Media> localMedias = new ArrayList<>();
-        final List<Media> remoteMedias = new ArrayList<>();
-
-        for (Media media : medias) {
-
-            if (media.isLocal())
-                localMedias.add(media);
-            else
-                remoteMedias.add(media);
-
-        }
-
-        String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
-
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostRequestByCloudAPIWithWrap(path, "", groupRequestParam.getStationID());
-
-        JsonObject jsonObject = new JsonObject();
-        try {
-            JSONObject body = new JSONObject(httpRequest.getBody());
-
-            Iterator<String> keys = body.keys();
-            while (keys.hasNext()) {
-
-                String key = keys.next();
-
-                jsonObject.addProperty(key, body.getString(key));
-
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        jsonObject.addProperty("comment", "");
-        jsonObject.addProperty("type", "list");
-
-        JsonArray localMediaJsonArray = new JsonArray();
-
-        List<FileFormData> fileFormDatas = new ArrayList<>();
-
-        for (Media media : localMedias) {
-
-            JsonObject item = new JsonObject();
-
-            File file = new File(media.getOriginalPhotoPath());
-
-            item.addProperty("size", file.length());
-            item.addProperty("sha256", media.getUuid());
-
-            FileFormData fileFormData = new FileFormData(file.getName(), item.toString(), file);
-
-            fileFormDatas.add(fileFormData);
-
-            item.addProperty("filename", file.getName());
-
-            localMediaJsonArray.add(item);
-
-        }
-
-        if (localMediaJsonArray.size() != 0)
-            jsonObject.add("list", localMediaJsonArray);
-
-        JsonArray remoteMediaJsonArray = new JsonArray();
-
-        for (Media media : remoteMedias) {
-
-            JsonObject item = new JsonObject();
-
-            item.addProperty("type", "media");
-            item.addProperty("sha256", media.getUuid());
-
-            remoteMediaJsonArray.add(item);
-
-        }
-
-        if (remoteMediaJsonArray.size() != 0)
-            jsonObject.add("indrive", remoteMediaJsonArray);
-
-
-        String jsonObj = jsonObject.toString();
-
-        TextFormData textFormData = new TextFormData(Util.MANIFEST_STRING, jsonObj);
-
-        Log.d(TAG, "insertMediaComment: manifest jsonObject:" + jsonObj);
-
-        wrapper.operateCall(httpRequest, Collections.singletonList(textFormData), fileFormDatas,
-                new BaseOperateDataCallback<Void>() {
-                    @Override
-                    public void onSucceed(Void data, OperationResult result) {
-
-                        callback.onSucceed();
-
-                    }
-
-                    @Override
-                    public void onFail(OperationResult operationResult) {
-
-                        callback.onFail(operationResult);
-
-                    }
-                }, new RemoteDataParser<Void>() {
-                    @Override
-                    public Void parse(String json) throws JSONException {
-                        return null;
-                    }
-                });
 
     }
 
@@ -364,11 +239,9 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", getAuthorizationValue());
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", groupRequestParam.getStationID(), mSCloudToken);
 
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("comment", "");
-        jsonObject.addProperty("type", "list");
 
         JsonArray localMediaJsonArray = new JsonArray();
 
@@ -412,40 +285,16 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
         if (remoteMediaJsonArray.size() != 0)
             jsonObject.add("indrive", remoteMediaJsonArray);
 
-        String jsonObj = jsonObject.toString();
 
-        TextFormData textFormData = new TextFormData("list", jsonObj);
-
-        Log.d(TAG, "insertMediaComment: list jsonObject:" + jsonObj);
-
-        wrapper.operateCall(httpRequest, Collections.singletonList(textFormData), fileFormDatas,
-                new BaseOperateDataCallback<Void>() {
-                    @Override
-                    public void onSucceed(Void data, OperationResult result) {
-
-                        callback.onSucceed();
-
-                    }
-
-                    @Override
-                    public void onFail(OperationResult operationResult) {
-
-                        callback.onFail(operationResult);
-
-                    }
-                }, new RemoteDataParser<Void>() {
-                    @Override
-                    public Void parse(String json) throws JSONException {
-                        return null;
-                    }
-                });
+        insertUserComment(httpRequest, jsonObject, fileFormDatas, callback);
 
     }
+
 
     private void insertUserCommentSrcFromPhone(String groupUUID, UserComment userComment, final BaseOperateCallback callback) {
         String path = BOXES + "/" + groupUUID + TWEETS;
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", getAuthorizationValue());
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", userComment.getStationID(), "");
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("comment", "");
@@ -533,170 +382,95 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
                 });
     }
 
-    private void insertFileCommentSrcFromNasWhenWechatLogin(GroupRequestParam groupRequestParam, UserComment userComment, final BaseOperateCallback callback) {
-
-        String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
-
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequestByCloudAPIWithWrap(path, "", groupRequestParam.getStationID());
-
-        JsonObject jsonObject = new JsonObject();
-
-        try {
-            JSONObject body = new JSONObject(httpRequest.getBody());
-
-            Iterator<String> keys = body.keys();
-            while (keys.hasNext()) {
-
-                String key = keys.next();
-
-                jsonObject.addProperty(key, body.getString(key));
-
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        jsonObject.addProperty("comment", "");
-        jsonObject.addProperty("type", "list");
-
-        JsonArray jsonArray = new JsonArray();
-
-        if (userComment instanceof MediaComment) {
-
-            List<Media> medias = ((MediaComment) userComment).getMedias();
-
-            for (Media media : medias) {
-
-                JsonObject item = new JsonObject();
-
-                item.addProperty("type", "media");
-                item.addProperty("sha256", media.getUuid());
-
-                jsonArray.add(item);
-
-
-            }
-
-        } else if (userComment instanceof FileComment) {
-
-            List<AbstractFile> files = ((FileComment) userComment).getFiles();
-
-            for (AbstractFile file : files) {
-
-                AbstractRemoteFile abstractRemoteFile = (AbstractRemoteFile) file;
-
-                JsonObject item = new JsonObject();
-
-                item.addProperty("type", "file");
-
-                item.addProperty("filename", abstractRemoteFile.getName());
-
-                item.addProperty("driveUUID", abstractRemoteFile.getRootFolderUUID());
-
-                item.addProperty("dirUUID", abstractRemoteFile.getParentFolderUUID());
-
-                jsonArray.add(item);
-
-            }
-
-        }
-
-        jsonObject.add("indrive", jsonArray);
-
-        String jsonObj = jsonObject.toString();
-
-        TextFormData textFormData = new TextFormData(Util.MANIFEST_STRING, jsonObj);
-
-        Log.d(TAG, "insertFileComment: manifest jsonObject:" + jsonObj);
-
-        wrapper.operateCall(httpRequest, Collections.singletonList(textFormData), Collections.<FileFormData>emptyList(),
-                new BaseOperateDataCallback<Void>() {
-                    @Override
-                    public void onSucceed(Void data, OperationResult result) {
-
-                        callback.onSucceed();
-
-                    }
-
-                    @Override
-                    public void onFail(OperationResult operationResult) {
-
-                        callback.onFail(operationResult);
-
-                    }
-                }, new RemoteDataParser<Void>() {
-                    @Override
-                    public Void parse(String json) throws JSONException {
-                        return null;
-                    }
-                });
-
-
-    }
-
     private void insertFileCommentSrcFromNas(GroupRequestParam groupRequestParam, UserComment userComment, final BaseOperateCallback callback) {
 
         String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", getAuthorizationValue());
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", groupRequestParam.getStationID(), mSCloudToken);
 
         JsonObject jsonObject = new JsonObject();
+
+        JsonArray jsonArray = new JsonArray();
+
+        List<AbstractFile> files = ((FileComment) userComment).getFiles();
+
+        for (AbstractFile file : files) {
+
+            AbstractRemoteFile abstractRemoteFile = (AbstractRemoteFile) file;
+
+            JsonObject item = new JsonObject();
+
+            item.addProperty("type", "file");
+
+            item.addProperty("filename", abstractRemoteFile.getName());
+
+            item.addProperty("driveUUID", abstractRemoteFile.getRootFolderUUID());
+
+            item.addProperty("dirUUID", abstractRemoteFile.getParentFolderUUID());
+
+            jsonArray.add(item);
+
+        }
+
+
+        jsonObject.add("indrive", jsonArray);
+
+        insertUserComment(httpRequest, jsonObject, Collections.<FileFormData>emptyList(), callback);
+
+
+    }
+
+    private void insertUserComment(HttpRequest httpRequest, JsonObject textFormDataContentBody,
+                                   List<FileFormData> fileFormDatas, final BaseOperateCallback callback) {
+
+        JsonObject jsonObject = new JsonObject();
+
+        boolean isUsingCloudApi;
+
+        if (httpRequest.getBody().length() > 0) {
+
+            try {
+                JSONObject body = new JSONObject(httpRequest.getBody());
+
+                Iterator<String> keys = body.keys();
+                while (keys.hasNext()) {
+
+                    String key = keys.next();
+
+                    jsonObject.addProperty(key, body.getString(key));
+
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            isUsingCloudApi = true;
+
+        } else
+            isUsingCloudApi = false;
 
         jsonObject.addProperty("comment", "");
         jsonObject.addProperty("type", "list");
 
-        JsonArray jsonArray = new JsonArray();
+        for (Map.Entry<String, JsonElement> entry : textFormDataContentBody.entrySet()) {
 
-        if (userComment instanceof MediaComment) {
-
-            List<Media> medias = ((MediaComment) userComment).getMedias();
-
-            for (Media media : medias) {
-
-                JsonObject item = new JsonObject();
-
-                item.addProperty("type", "media");
-                item.addProperty("sha256", media.getUuid());
-
-                jsonArray.add(item);
-
-
-            }
-
-        } else if (userComment instanceof FileComment) {
-
-            List<AbstractFile> files = ((FileComment) userComment).getFiles();
-
-            for (AbstractFile file : files) {
-
-                AbstractRemoteFile abstractRemoteFile = (AbstractRemoteFile) file;
-
-                JsonObject item = new JsonObject();
-
-                item.addProperty("type", "file");
-
-                item.addProperty("filename", abstractRemoteFile.getName());
-
-                item.addProperty("driveUUID", abstractRemoteFile.getRootFolderUUID());
-
-                item.addProperty("dirUUID", abstractRemoteFile.getParentFolderUUID());
-
-                jsonArray.add(item);
-
-            }
+            jsonObject.add(entry.getKey(), entry.getValue());
 
         }
 
-        jsonObject.add("indrive", jsonArray);
+        String textFormDataBody = jsonObject.toString();
 
-        String jsonObj = jsonObject.toString();
+        TextFormData textFormData;
 
-        TextFormData textFormData = new TextFormData("list", jsonObj);
+        if (isUsingCloudApi)
+            textFormData = new TextFormData(Util.MANIFEST_STRING, textFormDataBody);
+        else
+            textFormData = new TextFormData("list", textFormDataBody);
 
-        Log.d(TAG, "insertFileComment: list jsonObject:" + jsonObj);
+        Log.d(TAG, "insertUserComment: jsonObject:" + textFormDataBody);
 
-        wrapper.operateCall(httpRequest, Collections.singletonList(textFormData), Collections.<FileFormData>emptyList(),
+        wrapper.operateCall(httpRequest, Collections.singletonList(textFormData), fileFormDatas,
                 new BaseOperateDataCallback<Void>() {
                     @Override
                     public void onSucceed(Void data, OperationResult result) {
@@ -718,36 +492,45 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
                     }
                 });
 
-
     }
 
     @Override
-    public void updateGroupProperty(GroupRequestParam groupRequestParam, String property, String newValue, BaseOperateCallback callback) {
+    public synchronized void updateGroupProperty(GroupRequestParam groupRequestParam, String property, String newValue, BaseOperateCallback callback) {
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(property, newValue);
 
-        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID();
-
-        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequestByCloudAPIWithWrap(httpPath, jsonObject.toString(), groupRequestParam.getStationID());
-
-        wrapper.operateCall(httpRequest, callback);
+        operateUserInGroup(groupRequestParam, callback, jsonObject);
 
     }
 
     @Override
-    public void addUsersInGroup(GroupRequestParam groupRequestParam, List<String> userGUIDs, BaseOperateCallback callback) {
+    public synchronized void addUsersInGroup(GroupRequestParam groupRequestParam, List<String> userGUIDs, BaseOperateCallback callback) {
 
         JsonObject root = getAddDeleteUserBody("add", userGUIDs);
 
-        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID();
-
-        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequestByCloudAPIWithWrap(httpPath, root.toString(), groupRequestParam.getStationID());
-
-        wrapper.operateCall(httpRequest, callback);
+        operateUserInGroup(groupRequestParam, callback, root);
 
     }
 
+
+    @Override
+    public synchronized void deleteUsersInGroup(GroupRequestParam groupRequestParam, List<String> userGUIDs, BaseOperateCallback callback) {
+
+        JsonObject root = getAddDeleteUserBody("delete", userGUIDs);
+
+        operateUserInGroup(groupRequestParam, callback, root);
+
+    }
+
+    private void operateUserInGroup(GroupRequestParam groupRequestParam, BaseOperateCallback callback, JsonObject body) {
+        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID();
+
+        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(httpPath, body.toString(),
+                groupRequestParam.getStationID(), mSCloudToken);
+
+        wrapper.operateCall(httpRequest, callback);
+    }
 
     @NonNull
     private JsonObject getAddDeleteUserBody(String op, List<String> userGUIDs) {
@@ -766,20 +549,6 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         root.add("users", users);
         return root;
-    }
-
-
-    @Override
-    public void deleteUsersInGroup(GroupRequestParam groupRequestParam, List<String> userGUIDs, BaseOperateCallback callback) {
-
-        JsonObject root = getAddDeleteUserBody("delete", userGUIDs);
-
-        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID();
-
-        HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequestByCloudAPIWithWrap(httpPath, root.toString(), groupRequestParam.getStationID());
-
-        wrapper.operateCall(httpRequest, callback);
-
     }
 
     @Override

@@ -94,18 +94,14 @@ public class FileListPresenter {
 
     private DownloadFileCommand mCurrentDownloadFileCommand;
 
-    private String cloudToken;
-
     public FileListPresenter(FileComment fileComment, FileTaskManager fileTaskManager, Activity activity,
                              StationFileRepository stationFileRepository, NetworkStateManager networkStateManager,
-                             String currentUserUUID, String cloudToken) {
+                             String currentUserUUID) {
         mAbstractFiles = fileComment.getFiles();
 
         groupUUID = fileComment.getGroupUUID();
 
         stationID = fileComment.getStationID();
-
-        this.cloudToken = cloudToken;
 
         mFileTaskManager = fileTaskManager;
 
@@ -454,7 +450,7 @@ public class FileListPresenter {
 
     private FileDownloadParam createFileDownloadParam(RemoteFile file) {
 
-        return new FileFromBoxDownloadParam(groupUUID, stationID, file.getFileHash(), cloudToken);
+        return new FileFromBoxDownloadParam(groupUUID, stationID, file.getFileHash());
 
     }
 

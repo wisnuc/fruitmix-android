@@ -218,7 +218,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private HttpRequest getMediaThumbHttpRequest(Media media) {
         HttpRequest httpRequest;
         if (groupUUID != null)
-            httpRequest = media.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID));
+            httpRequest = media.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID),"");
         else
             httpRequest = media.getImageThumbUrl(mHttpRequestFactory);
         return httpRequest;
@@ -227,7 +227,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private HttpRequest getMediaOriginalHttpRequest(Media media) {
         HttpRequest httpRequest;
         if (groupUUID != null)
-            httpRequest = media.getImageOriginalUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID));
+            httpRequest = media.getImageOriginalUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID),"");
         else
             httpRequest = media.getImageOriginalUrl(mHttpRequestFactory);
         return httpRequest;
@@ -1073,14 +1073,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         if (screenWidth / screenHeight > mediaWidth / mediaHeight) {
 
             if (groupUUID != null)
-                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, -1, screenHeight, new GroupRequestParam(groupUUID, stationID));
+                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, -1, screenHeight, new GroupRequestParam(groupUUID, stationID),"");
             else
                 httpRequest = media.getImageThumbUrl(mHttpRequestFactory, -1, screenHeight);
 
         } else {
 
             if (groupUUID != null)
-                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, screenWidth, -1, new GroupRequestParam(groupUUID, stationID));
+                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, screenWidth, -1, new GroupRequestParam(groupUUID, stationID),"");
             else
                 httpRequest = media.getImageThumbUrl(mHttpRequestFactory, screenWidth, -1);
 

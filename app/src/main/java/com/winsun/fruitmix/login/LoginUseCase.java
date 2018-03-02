@@ -25,8 +25,8 @@ import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.stations.StationsDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.token.LoadTokenParam;
-import com.winsun.fruitmix.token.TokenDataSource;
+import com.winsun.fruitmix.token.param.StationTokenParam;
+import com.winsun.fruitmix.token.data.TokenDataSource;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
@@ -396,27 +396,27 @@ public class LoginUseCase extends BaseDataRepository {
 
     }
 
-    public void loginWithLoadTokenParam(final LoadTokenParam loadTokenParam, final BaseOperateDataCallback<Boolean> callback) {
+    public void loginWithLoadTokenParam(final StationTokenParam stationTokenParam, final BaseOperateDataCallback<Boolean> callback) {
 
         mBooleanLoginNewUserCallbackWrapper.setCallback(callback);
 
-        tokenDataSource.getToken(loadTokenParam, new BaseLoadDataCallback<String>() {
+        tokenDataSource.getStationToken(stationTokenParam, new BaseLoadDataCallback<String>() {
             @Override
             public void onSucceed(List<String> data, OperationResult operationResult) {
 
                 String token = data.get(0);
 
-                Log.d(TAG, "loginWithLoadTokenParam: http request factory set current data token:" + token + " gateway: " + loadTokenParam.getGateway());
+                Log.d(TAG, "loginWithLoadTokenParam: http request factory set current data token:" + token + " gateway: " + stationTokenParam.getGateway());
 
                 mToken = token;
-                mGateway = loadTokenParam.getGateway();
+                mGateway = stationTokenParam.getGateway();
 
                 httpRequestFactory.setCurrentData(mToken, mGateway);
 
                 userDataRepository.clearAllUsersInDB();
                 userDataRepository.clearAllUsersInCache();
 
-                getUsers(loadTokenParam, token, mBooleanLoginNewUserCallbackWrapper);
+                getUsers(stationTokenParam, token, mBooleanLoginNewUserCallbackWrapper);
 
             }
 
@@ -429,17 +429,17 @@ public class LoginUseCase extends BaseDataRepository {
 
     }
 
-    private void getUsers(final LoadTokenParam loadTokenParam, final String token, final BaseOperateDataCallback<Boolean> callback) {
+    private void getUsers(final StationTokenParam stationTokenParam, final String token, final BaseOperateDataCallback<Boolean> callback) {
 
         systemSettingDataSource.setLoginWithWechatCodeOrNot(false);
 
         userDataRepository.setCacheDirty();
-        userDataRepository.getUsers(loadTokenParam.getUserUUID(), new BaseLoadDataCallbackImpl<User>() {
+        userDataRepository.getUsers(stationTokenParam.getUserUUID(), new BaseLoadDataCallbackImpl<User>() {
             @Override
             public void onSucceed(final List<User> users, OperationResult operationResult) {
 
                 for (final User user : users) {
-                    if (user.getUuid().equals(loadTokenParam.getUserUUID())) {
+                    if (user.getUuid().equals(stationTokenParam.getUserUUID())) {
 
                         userDataRepository.getCurrentUserHome(new BaseLoadDataCallback<String>() {
                             @Override
@@ -453,13 +453,13 @@ public class LoginUseCase extends BaseDataRepository {
 
                                 systemSettingDataSource.setShowAutoUploadDialog(true);
 
-                                LoggedInUser loggedInUser = new LoggedInUser(user.getLibrary(), token, loadTokenParam.getGateway(), loadTokenParam.getEquipmentName(), user);
+                                LoggedInUser loggedInUser = new LoggedInUser(user.getLibrary(), token, stationTokenParam.getGateway(), stationTokenParam.getEquipmentName(), user);
 
                                 boolean result = loggedInUserDataSource.insertLoggedInUsers(Collections.singletonList(loggedInUser));
 
                                 Log.d(TAG, "onSucceed: insert result :" + result);
 
-                                initSystemState(token, loadTokenParam.getGateway(), loadTokenParam.getUserUUID());
+                                initSystemState(token, stationTokenParam.getGateway(), stationTokenParam.getUserUUID());
 
                                 systemSettingDataSource.setCurrentLoginStationID("");
 
@@ -618,7 +618,7 @@ public class LoginUseCase extends BaseDataRepository {
 
         mBooleanLoginNewUserCallbackWrapper.setCallback(runOnMainThreadCallback);
 
-        tokenDataSource.getToken(code, new BaseLoadDataCallback<WeChatTokenUserWrapper>() {
+        tokenDataSource.getCloudToken(code, new BaseLoadDataCallback<WeChatTokenUserWrapper>() {
             @Override
             public void onSucceed(List<WeChatTokenUserWrapper> data, OperationResult operationResult) {
 

@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.token;
+package com.winsun.fruitmix.token.data;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
@@ -8,6 +8,8 @@ import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.http.request.factory.CloudHttpRequestFactory;
 import com.winsun.fruitmix.parser.RemoteTokenParser;
 import com.winsun.fruitmix.parser.RemoteWeChatTokenParser;
+import com.winsun.fruitmix.token.param.StationTokenParam;
+import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 
 /**
  * Created by Administrator on 2017/7/13.
@@ -24,16 +26,16 @@ public class TokenRemoteDataSource extends BaseRemoteDataSourceImpl implements T
      * get token by user uuid and password
      */
     @Override
-    public void getToken(LoadTokenParam loadTokenParam, BaseLoadDataCallback<String> callback) {
+    public void getStationToken(StationTokenParam stationTokenParam, BaseLoadDataCallback<String> callback) {
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetTokenRequest(loadTokenParam);
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetTokenRequest(stationTokenParam);
 
         wrapper.loadCall(httpRequest, callback, new RemoteTokenParser());
 
     }
 
     @Override
-    public void getToken(String wechatCode, BaseLoadDataCallback<WeChatTokenUserWrapper> callback) {
+    public void getCloudToken(String wechatCode, BaseLoadDataCallback<WeChatTokenUserWrapper> callback) {
 
         String path = CloudHttpRequestFactory.CLOUD_API_LEVEL + "/token?code=" + wechatCode + "&platform=mobile";
 
@@ -44,7 +46,7 @@ public class TokenRemoteDataSource extends BaseRemoteDataSourceImpl implements T
     }
 
     @Override
-    public void getTokenThroughWAToken(BaseLoadDataCallback<String> callback) {
+    public void getStationTokenThroughCloudToken(BaseLoadDataCallback<String> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest("/token");
 
@@ -53,7 +55,7 @@ public class TokenRemoteDataSource extends BaseRemoteDataSourceImpl implements T
     }
 
     @Override
-    public void getWATokenThroughStationToken(String userGUID, BaseLoadDataCallback<String> callback) {
+    public void getSCloudTokenThroughStationTokenWithoutThreadChange(String userGUID, BaseLoadDataCallback<String> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest("/cloudToken?guid=" + userGUID);
 

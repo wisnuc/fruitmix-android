@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.winsun.fruitmix.BaseDataRepository;
-import com.winsun.fruitmix.callback.BaseDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -24,7 +23,6 @@ import com.winsun.fruitmix.util.Util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +38,6 @@ public class GroupRepository extends BaseDataRepository {
     private static GroupRepository ourInstance;
 
     private GroupDataSource groupDataSource;
-
-    private String cloudToken;
 
     private Map<String, PrivateGroup> mPrivateGroups;
 
@@ -67,21 +63,6 @@ public class GroupRepository extends BaseDataRepository {
 
         if (groupDataSource instanceof FakeGroupDataSource)
             ((FakeGroupDataSource) groupDataSource).setCurrentUser(currentUser);
-    }
-
-    public void setCloudToken(String cloudToken) {
-
-        this.cloudToken = cloudToken;
-
-        if (groupDataSource instanceof GroupRemoteDataSource)
-            ((GroupRemoteDataSource) groupDataSource).setCloudToken(cloudToken);
-
-    }
-
-    public String getCloudToken() {
-
-        return cloudToken;
-
     }
 
     public void getGroupList(BaseLoadDataCallback<PrivateGroup> callback) {

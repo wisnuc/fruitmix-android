@@ -22,6 +22,7 @@ import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewholder.BindingViewHolder;
@@ -58,6 +59,8 @@ public class ContactListPresenter implements ActiveView {
     private int mPurpose;
     private String mGroupUUID;
 
+    private SystemSettingDataSource mSystemSettingDataSource;
+
     private PrivateGroup mPrivateGroup;
 
     private List<User> mSelectedUsers;
@@ -67,6 +70,7 @@ public class ContactListPresenter implements ActiveView {
     public ContactListPresenter(ContactDataSource contactDataSource, ImageLoader imageLoader,
                                 LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel,
                                 ContactListView contactListView, GroupRepository groupRepository, User currentUser,
+                                SystemSettingDataSource systemSettingDataSource,
                                 int purpose, String groupUUID) {
         mContactDataSource = contactDataSource;
         mImageLoader = imageLoader;
@@ -76,6 +80,8 @@ public class ContactListPresenter implements ActiveView {
 
         mGroupRepository = groupRepository;
         mCurrentUser = currentUser;
+
+        mSystemSettingDataSource = systemSettingDataSource;
 
         mPurpose = purpose;
         mGroupUUID = groupUUID;
@@ -102,7 +108,8 @@ public class ContactListPresenter implements ActiveView {
         List<User> groupUser = new ArrayList<>(mSelectedUsers);
         groupUser.add(mCurrentUser);
 
-        PrivateGroup group = new PrivateGroup(Util.createLocalUUid(), "", mCurrentUser.getUuid(), groupUser);
+        PrivateGroup group = new PrivateGroup(Util.createLocalUUid(), "", mCurrentUser.getAssociatedWeChatGUID(),
+                mSystemSettingDataSource.getCurrentLoginStationID(),groupUser);
 
         mContactListView.showProgressDialog(mContactListView.getString(R.string.operating_title, mContactListView.getString(R.string.create_group)));
 

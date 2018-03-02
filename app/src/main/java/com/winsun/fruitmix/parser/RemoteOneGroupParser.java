@@ -57,12 +57,10 @@ public class RemoteOneGroupParser {
 
         JSONObject lastCommentJson = jsonObject.optJSONObject("tweet");
 
-        PrivateGroup group = new PrivateGroup(uuid, name, ownerGUID, users);
+        PrivateGroup group = new PrivateGroup(uuid, name, ownerGUID, stationId,users);
 
         group.setCreateTime(createTime);
         group.setModifyTime(mTime);
-
-        group.setStationID(stationId);
 
         JSONObject stations = jsonObject.optJSONObject("station");
 

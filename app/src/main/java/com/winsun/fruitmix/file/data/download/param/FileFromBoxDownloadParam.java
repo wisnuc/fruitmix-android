@@ -14,21 +14,14 @@ public class FileFromBoxDownloadParam extends FileDownloadParam {
 
     private String fileHash;
 
-    private String cloudToken;
-
-    public FileFromBoxDownloadParam(String boxUUID,String stationID, String fileHash, String cloudToken) {
+    public FileFromBoxDownloadParam(String boxUUID,String stationID, String fileHash) {
         this.boxUUID = boxUUID;
         this.stationID = stationID;
         this.fileHash = fileHash;
-        this.cloudToken = cloudToken;
     }
 
     public String getStationID() {
         return stationID;
-    }
-
-    public String getCloudToken() {
-        return cloudToken;
     }
 
     @Override
@@ -37,4 +30,5 @@ public class FileFromBoxDownloadParam extends FileDownloadParam {
         return "/boxes/" + boxUUID + "/files/" + fileHash;
 
     }
+
 }

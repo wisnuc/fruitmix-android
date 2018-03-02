@@ -4,7 +4,7 @@ import android.util.Base64;
 
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.token.LoadTokenParam;
+import com.winsun.fruitmix.token.param.StationTokenParam;
 import com.winsun.fruitmix.util.Util;
 
 /**
@@ -45,12 +45,12 @@ public class NoWrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl imp
 
 
     @Override
-    public HttpRequest createHttpGetTokenRequest(LoadTokenParam loadTokenParam) {
+    public HttpRequest createHttpGetTokenRequest(StationTokenParam stationTokenParam) {
 
-        String url = loadTokenParam.getGateway() + ":" + getPort() + Util.TOKEN_PARAMETER;
+        String url = stationTokenParam.getGateway() + ":" + getPort() + Util.TOKEN_PARAMETER;
 
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((loadTokenParam.getUserUUID() + ":" + loadTokenParam.getUserPassword()).getBytes(), Base64.NO_WRAP));
+        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((stationTokenParam.getUserUUID() + ":" + stationTokenParam.getUserPassword()).getBytes(), Base64.NO_WRAP));
 
         return httpRequest;
 

@@ -11,10 +11,9 @@ import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.token.TokenDataSource;
+import com.winsun.fruitmix.token.data.TokenDataSource;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileTool;
-import com.winsun.fruitmix.wxapi.WXEntryActivity;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;

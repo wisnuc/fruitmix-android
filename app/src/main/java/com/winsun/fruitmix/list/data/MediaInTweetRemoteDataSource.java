@@ -23,6 +23,8 @@ public class MediaInTweetRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     private GroupRequestParam mGroupRequestParam;
 
+
+
     public MediaInTweetRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, GroupRequestParam groupRequestParam) {
         super(iHttpUtil, httpRequestFactory);
         mGroupRequestParam = groupRequestParam;
@@ -30,7 +32,7 @@ public class MediaInTweetRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     boolean downloadMedia(Media media) throws MalformedURLException, IOException, SocketTimeoutException, NetworkException {
 
-        HttpRequest httpRequest = media.getImageOriginalUrl(httpRequestFactory, mGroupRequestParam);
+        HttpRequest httpRequest = media.getImageOriginalUrl(httpRequestFactory, mGroupRequestParam,"");
 
         if (!wrapper.checkUrl(httpRequest.getUrl())) {
             return false;

@@ -97,7 +97,8 @@ public class MultiFileCommentView extends UserCommentView {
 
                 final Media media = medias.get(i);
 
-                HttpRequest httpRequest = media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(context), new GroupRequestParam(data.getGroupUUID(), data.getStationID()));
+                HttpRequest httpRequest = media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(context),
+                        new GroupRequestParam(data.getGroupUUID(), data.getStationID()),"");
 
                 httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
 

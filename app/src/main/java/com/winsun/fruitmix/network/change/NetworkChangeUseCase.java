@@ -14,7 +14,7 @@ import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.stations.StationInfoCallByStationAPI;
 import com.winsun.fruitmix.stations.StationsDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.token.TokenDataSource;
+import com.winsun.fruitmix.token.data.TokenDataSource;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -158,7 +158,7 @@ public class NetworkChangeUseCase {
 
                 if (stationInfoCallByStationAPI.getId().equals(stationID)) {
 
-                    tokenDataSource.getTokenThroughWAToken(new BaseLoadDataCallbackImpl<String>() {
+                    tokenDataSource.getStationTokenThroughCloudToken(new BaseLoadDataCallbackImpl<String>() {
                         @Override
                         public void onSucceed(List<String> data, OperationResult operationResult) {
 

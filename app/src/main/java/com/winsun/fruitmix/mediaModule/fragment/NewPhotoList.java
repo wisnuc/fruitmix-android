@@ -2122,7 +2122,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     private HttpRequest createMediaThumbHttpRequest(Media media) {
 
         if (mGroupRequestParam != null)
-            return media.getImageThumbUrl(mHttpRequestFactory, mGroupRequestParam);
+            return media.getImageThumbUrl(mHttpRequestFactory, mGroupRequestParam,"");
         else
             return media.getImageThumbUrl(mHttpRequestFactory);
 
@@ -2131,7 +2131,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     private HttpRequest createMediaSmallThumbHttpRequest(Media media) {
 
         if (mGroupRequestParam != null)
-            return media.getImageSmallThumbUrl(mHttpRequestFactory, mGroupRequestParam);
+            return media.getImageSmallThumbUrl(mHttpRequestFactory, mGroupRequestParam,"");
         else
             return media.getImageSmallThumbUrl(mHttpRequestFactory);
 

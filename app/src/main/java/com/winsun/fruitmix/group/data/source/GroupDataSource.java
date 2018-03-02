@@ -15,7 +15,7 @@ import java.util.List;
  * Created by Administrator on 2017/7/20.
  */
 
-public interface GroupDataSource {
+public interface GroupDataSource extends PinDataSource{
 
     void addGroup(PrivateGroup group, BaseOperateCallback callback);
 
@@ -37,18 +37,5 @@ public interface GroupDataSource {
 
     void deleteUsersInGroup(GroupRequestParam groupRequestParam,List<String> userGUIDs,BaseOperateCallback callback);
 
-    Pin insertPin(String groupUUID, Pin pin);
-
-    boolean modifyPin(String groupUUID, String pinName,String pinUUID);
-
-    boolean deletePin(String groupUUID,String pinUUID);
-
-    boolean insertMediaToPin(Collection<Media> medias, String groupUUID, String pinUUID);
-
-    boolean insertFileToPin(Collection<AbstractFile> files, String groupUUID, String pinUUID);
-
-    boolean updatePinInGroup(Pin pin, String groupUUID);
-
-    Pin getPinInGroup(String pinUUID, String groupUUID);
 
 }

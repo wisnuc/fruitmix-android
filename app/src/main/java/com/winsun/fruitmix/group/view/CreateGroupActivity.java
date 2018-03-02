@@ -88,7 +88,8 @@ public class CreateGroupActivity extends BaseToolbarActivity implements CreateGr
         List<User> groupUser = new ArrayList<>(mUsers);
         groupUser.add(currentUser);
 
-        PrivateGroup group = new PrivateGroup(Util.createLocalUUid(), createGroupViewModel.getGroupName(),currentUser.getAssociatedWeChatGUID(), groupUser);
+        PrivateGroup group = new PrivateGroup(Util.createLocalUUid(), createGroupViewModel.getGroupName(),currentUser.getAssociatedWeChatGUID(),
+                InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginStationID(),groupUser);
 
         showProgressDialog(getString(R.string.operating_title,getString(R.string.create_group)));
 

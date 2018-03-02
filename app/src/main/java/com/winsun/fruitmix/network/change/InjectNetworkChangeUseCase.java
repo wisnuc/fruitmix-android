@@ -7,7 +7,7 @@ import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.stations.InjectStation;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
-import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
+import com.winsun.fruitmix.token.data.InjectTokenRemoteDataSource;
 
 /**
  * Created by Administrator on 2017/9/28.

@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
@@ -18,12 +16,10 @@ import com.winsun.fruitmix.person.info.PersonInfoPresenter;
 import com.winsun.fruitmix.person.info.PersonInfoView;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
-import com.winsun.fruitmix.token.InjectTokenRemoteDataSource;
+import com.winsun.fruitmix.token.data.InjectTokenRemoteDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.FileTool;
-import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 public class PersonInfoActivity extends BaseActivity implements PersonInfoView, View.OnClickListener {
 

@@ -15,6 +15,11 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.base.data.BaseDataOperator;
+import com.winsun.fruitmix.base.data.InjectBaseDataOperator;
+import com.winsun.fruitmix.base.data.SCloudTokenContainer;
+import com.winsun.fruitmix.base.data.retry.RefreshTokenRetryStrategy;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.databinding.PlayVideoFragmentBinding;
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
 import com.winsun.fruitmix.file.data.download.param.FileFromBoxDownloadParam;
@@ -24,6 +29,9 @@ import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.token.manager.InjectSCloudTokenManager;
+import com.winsun.fruitmix.token.manager.TokenManager;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.UnsupportedEncodingException;
@@ -36,7 +44,7 @@ import java.util.Map;
  * Created by Administrator on 2017/11/2.
  */
 
-public class PlayVideoFragment {
+public class PlayVideoFragment implements SCloudTokenContainer {
 
     public static final String TAG = PlayVideoFragment.class.getSimpleName();
 
@@ -54,7 +62,13 @@ public class PlayVideoFragment {
 
     private boolean mIsPlaying = false;
 
+    private Context mContext;
+
+    private String mSCloudToken;
+
     public PlayVideoFragment(Context context) {
+
+        mContext = context;
 
         initVideoView(context);
 
@@ -141,22 +155,55 @@ public class PlayVideoFragment {
         startPlayVideo(getHttpRequest(driveRootUUID, remoteFile));
     }
 
-    public void startPlayVideo(FileDownloadParam fileDownloadParam) {
+    public void startPlayVideo(final FileDownloadParam fileDownloadParam) {
 
 
         try {
 
             if (fileDownloadParam instanceof FileFromBoxDownloadParam) {
 
-
 //                HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),
 //                        Util.KEY_JWT_HEAD + ((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken());
 
+                TokenManager tokenManager = InjectSCloudTokenManager.provideInstance(mContext);
 
-                HttpRequest httpRequest = httpRequestFactory.createHttpGetFileRequestByCloudAPIWithWrap(
-                        fileDownloadParam.getFileDownloadPath(), ((FileFromBoxDownloadParam) fileDownloadParam).getStationID());
+                BaseDataOperator baseDataOperator = InjectBaseDataOperator.provideInstance(mContext,
+                        tokenManager, this, new RefreshTokenRetryStrategy(tokenManager));
 
-                startPlayVideo(httpRequest);
+                tokenManager.resetToken();
+
+                baseDataOperator.preConditionCheck(new BaseOperateCallback() {
+                    @Override
+                    public void onSucceed() {
+
+                        HttpRequest httpRequest = null;
+                        try {
+                            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
+                                    ((FileFromBoxDownloadParam) fileDownloadParam).getStationID(), mSCloudToken);
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+
+                        startPlayVideo(httpRequest);
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        HttpRequest httpRequest = null;
+                        try {
+                            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
+                                    ((FileFromBoxDownloadParam) fileDownloadParam).getStationID(), mSCloudToken);
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+
+                        startPlayVideo(httpRequest);
+
+                    }
+                });
+
 
             } else if (fileDownloadParam instanceof FileFromStationFolderDownloadParam) {
 
@@ -251,8 +298,15 @@ public class PlayVideoFragment {
 
     public void onDestroy() {
 
+        mContext = null;
 
     }
 
 
+    @Override
+    public void setCloudToken(String sCloudToken) {
+
+        mSCloudToken = sCloudToken;
+
+    }
 }

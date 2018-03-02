@@ -3,6 +3,7 @@ package com.winsun.fruitmix.file.data.station;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.winsun.fruitmix.base.data.SCloudTokenContainer;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.exception.NetworkException;
@@ -52,7 +53,7 @@ import okhttp3.ResponseBody;
  * Created by Administrator on 2017/7/19.
  */
 
-public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implements StationFileDataSource {
+public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implements StationFileDataSource, SCloudTokenContainer {
 
     private static final String ROOT_DRIVE_PARAMETER = "/drives";
 
@@ -64,6 +65,8 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     private IHttpFileUtil iHttpFileUtil;
 
     private static StationFileDataSource instance;
+
+    private String mSCloudToken;
 
     public static StationFileDataSource getInstance(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, IHttpFileUtil iHttpFileUtil) {
 
@@ -126,6 +129,8 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         HttpRequest httpRequest;
 
+        //TODO:refactor http request factory get media and file in tweet,local and cloud api change
+
         if (fileDownloadParam instanceof FileFromBoxDownloadParam) {
 
 //            httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),
@@ -134,8 +139,8 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 //            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
 //                    getAuthorizationValue(((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken()));
 
-            httpRequest = httpRequestFactory.createHttpGetFileRequestByCloudAPIWithWrap(
-                    fileDownloadParam.getFileDownloadPath(),((FileFromBoxDownloadParam) fileDownloadParam).getStationID());
+            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
+                    ((FileFromBoxDownloadParam) fileDownloadParam).getStationID(), mSCloudToken);
 
         } else {
 
@@ -176,17 +181,6 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         }
 
     }
-
-    private String getAuthorizationValue(String cloudToken) {
-        String token = httpRequestFactory.getTokenForHeaderValue();
-
-        if (token.startsWith(Util.KEY_JWT_HEAD)) {
-            token = token.substring(4, token.length());
-        }
-
-        return Util.KEY_JWT_HEAD + cloudToken + " " + token;
-    }
-
 
     /*
      * WISNUC API:POST DIRENTRY LIST
@@ -401,4 +395,10 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         return requestBody;
     }
 
+    @Override
+    public void setCloudToken(String sCloudToken) {
+
+        mSCloudToken = sCloudToken;
+
+    }
 }

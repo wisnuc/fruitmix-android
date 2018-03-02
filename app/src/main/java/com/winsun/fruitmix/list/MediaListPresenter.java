@@ -312,7 +312,9 @@ public class MediaListPresenter {
 
             Context context = binding.getRoot().getContext();
 
-            MediaUtil.setMediaImageUrl(media, binding.photoIv, media.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID)), mImageLoader);
+            MediaUtil.setMediaImageUrl(media, binding.photoIv,
+                    media.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID),""),
+                    mImageLoader);
 
             int temporaryPosition = 0;
 
@@ -485,7 +487,8 @@ public class MediaListPresenter {
                 }
             });
 
-            MediaUtil.setMediaImageUrl(currentMedia, binding.photoIv, currentMedia.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID)), mImageLoader);
+            MediaUtil.setMediaImageUrl(currentMedia, binding.photoIv,
+                    currentMedia.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID),""), mImageLoader);
 
             int temporaryPosition = 0;
 
@@ -592,7 +595,7 @@ public class MediaListPresenter {
 
             HttpRequest httpRequest;
 
-            httpRequest = video.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID));
+            httpRequest = video.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID),"");
 
             networkImageView.registerImageLoadListener(new IImageLoadListener() {
                 @Override

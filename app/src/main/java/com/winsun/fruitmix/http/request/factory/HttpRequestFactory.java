@@ -6,7 +6,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.token.LoadTokenParam;
+import com.winsun.fruitmix.token.param.StationTokenParam;
 import com.winsun.fruitmix.util.Util;
 
 /**
@@ -262,11 +262,11 @@ public class HttpRequestFactory {
 
     }
 
-    public HttpRequest createHttpGetTokenRequest(LoadTokenParam loadTokenParam) {
+    public HttpRequest createHttpGetTokenRequest(StationTokenParam stationTokenParam) {
 
-        HttpHeader httpHeader = new HttpHeader(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((loadTokenParam.getUserUUID() + ":" + loadTokenParam.getUserPassword()).getBytes(), Base64.NO_WRAP));
+        HttpHeader httpHeader = new HttpHeader(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((stationTokenParam.getUserUUID() + ":" + stationTokenParam.getUserPassword()).getBytes(), Base64.NO_WRAP));
 
-        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(loadTokenParam.getGateway(), httpHeader);
+        BaseAbsHttpRequestFactory factory = new StationHttpRequestFactory(stationTokenParam.getGateway(), httpHeader);
 
         return factory.createHttpGetRequest(Util.TOKEN_PARAMETER, false);
 
@@ -467,59 +467,89 @@ public class HttpRequestFactory {
 
     }
 
-    public synchronized HttpRequest createHttpGetRequest(String httpPath, String authorizationValue) {
+    public synchronized HttpRequest createHttpGetRequest(String httpPath, String operateStationID, String sCloudToken) {
 
-        BaseAbsHttpRequestFactory factory = getFactoryForBox(authorizationValue);
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
 
         return factory.createHttpGetRequest(httpPath, false);
 
     }
 
-    public synchronized HttpRequest createHttpGetFileRequest(String httpPath, String authorizationValue) {
+    public synchronized HttpRequest createHttpGetFileRequest(String httpPath, String operateStationID, String sCloudToken) {
 
-        BaseAbsHttpRequestFactory factory = getFactoryForBox(authorizationValue);
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
 
         return factory.createHttpGetRequest(httpPath, true);
 
     }
 
 
-    public synchronized HttpRequest createHttpPostRequest(String httpPath, String body, String authorizationValue) {
+    public synchronized HttpRequest createHttpPostRequest(String httpPath, String body, String operateStationID, String sCloudToken) {
 
-        BaseAbsHttpRequestFactory factory = getFactoryForBox(authorizationValue);
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
 
         return factory.createHttpPostRequest(httpPath, body, false);
 
     }
 
-    @NonNull
-    private BaseAbsHttpRequestFactory getFactoryForBox(String authorizationValue) {
-        BaseAbsHttpRequestFactory factory;
+    public synchronized HttpRequest createHttpPostFileRequest(String httpPath, String body, String operateStationID, String sCloudToken) {
 
-        if (systemSettingDataSource.getCurrentWAToken().length() > 0) {
-            factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), getStationID());
-        } else
-            factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, authorizationValue));
-        return factory;
-    }
-
-    public synchronized HttpRequest createHttpPostFileRequest(String httpPath, String body, String authorizationValue) {
-
-        BaseAbsHttpRequestFactory factory = getFactoryForBox(authorizationValue);
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
 
         return factory.createHttpPostRequest(httpPath, body, true);
 
     }
 
-    public synchronized HttpRequest createHttpDeleteRequest(String httpPath, String body, String authorizationValue) {
+    public synchronized HttpRequest createHttpPatchRequest(String httpPath, String body, String operateStationID, String sCloudToken) {
 
-        BaseAbsHttpRequestFactory factory = getFactoryForBox(authorizationValue);
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
+
+        return factory.createHttpPatchRequest(httpPath, body);
+
+    }
+
+    public synchronized HttpRequest createHttpDeleteRequest(String httpPath, String body, String operateStationID, String sCloudToken) {
+
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
 
         return factory.createHttpDeleteRequest(httpPath, body);
 
     }
 
+    @NonNull
+    private BaseAbsHttpRequestFactory getFactoryForBox(String operateStationID, String sCloudToken) {
+        BaseAbsHttpRequestFactory factory;
 
+        if (!checkIsLoginWithWeChatCode() && operateStationID.equals(systemSettingDataSource.getCurrentLoginStationID())) {
+
+            if (sCloudToken != null && sCloudToken.length() > 0) {
+
+                factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, getAuthorizationValue(sCloudToken)));
+
+            } else {
+
+                factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), operateStationID);
+
+            }
+
+        } else {
+
+            factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), operateStationID);
+
+        }
+
+        return factory;
+    }
+
+    private String getAuthorizationValue(String cloudToken) {
+        String token = getTokenForHeaderValue();
+
+        if (token.startsWith(Util.KEY_JWT_HEAD)) {
+            token = token.substring(4, token.length());
+        }
+
+        return Util.KEY_JWT_HEAD + cloudToken + " " + token;
+    }
 
 
     private String getTokenWithPrefix() {
