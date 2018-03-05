@@ -71,7 +71,15 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
 
         HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(equipmentIP, BOOT);
 
+        int totalCount = 3;
+        int currentCount = 0;
+
         while (true) {
+
+            if (currentCount < totalCount) {
+                currentCount++;
+            } else
+                break;
 
             try {
                 Thread.sleep(1000);
@@ -80,6 +88,8 @@ public class EquipmentRemoteDataSource extends BaseRemoteDataSourceImpl implemen
             }
 
             OperationResult operationResult = wrapper.loadEquipmentBootInfo(httpRequest, new RemoteEquipmentBootInfoParser());
+
+            Log.d(TAG, "checkEquipmentState: ");
 
             if (operationResult.getOperationResultType() != OperationResultType.SUCCEED) {
 

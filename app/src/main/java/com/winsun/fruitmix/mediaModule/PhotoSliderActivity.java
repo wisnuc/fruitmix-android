@@ -45,6 +45,11 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.base.data.BaseDataOperator;
+import com.winsun.fruitmix.base.data.InjectBaseDataOperator;
+import com.winsun.fruitmix.base.data.SCloudTokenContainer;
+import com.winsun.fruitmix.base.data.retry.RefreshTokenRetryStrategy;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
@@ -70,6 +75,8 @@ import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.token.manager.InjectSCloudTokenManager;
+import com.winsun.fruitmix.token.manager.TokenManager;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.MediaUtil;
@@ -82,7 +89,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PhotoSliderActivity extends BaseActivity implements IImageLoadListener {
+public class PhotoSliderActivity extends BaseActivity implements IImageLoadListener, SCloudTokenContainer {
 
     public static final String TAG = "PhotoSliderActivity";
 
@@ -93,6 +100,11 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private ViewPager mViewPager;
 
     private ImageButton mShareBtn;
+
+    @Override
+    public void setSCloudToken(String sCloudToken) {
+        mSCloudToken = sCloudToken;
+    }
 
     public class PhotoSliderViewModel {
 
@@ -159,6 +171,10 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private HttpRequestFactory mHttpRequestFactory;
 
+    private String mSCloudToken;
+
+    private BaseDataOperator mBaseDataOperator;
+
     private SharedElementCallback sharedElementCallback = new SharedElementCallback() {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
@@ -172,20 +188,20 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                 String imageTag;
 
-                imageTag = getMediaThumbHttpRequest(media).getUrl();
+                imageTag = getMediaThumbHttpRequest(media, "").getUrl();
 
                 PinchImageView view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
 
                 if (view == null) {
 
-                    imageTag = getMediaOriginalHttpRequest(media).getUrl();
+                    imageTag = getMediaOriginalHttpRequest(media, "").getUrl();
 
                     view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
                 }
 
                 if (view == null) {
 
-                    imageTag = getLargeImageHttpRequest(media).getUrl();
+                    imageTag = getLargeImageHttpRequest(media, "").getUrl();
 
                     view = (PinchImageView) mViewPager.findViewWithTag(imageTag);
 
@@ -215,24 +231,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
     };
 
-    private HttpRequest getMediaThumbHttpRequest(Media media) {
-        HttpRequest httpRequest;
-        if (groupUUID != null)
-            httpRequest = media.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID),"");
-        else
-            httpRequest = media.getImageThumbUrl(mHttpRequestFactory);
-        return httpRequest;
-    }
-
-    private HttpRequest getMediaOriginalHttpRequest(Media media) {
-        HttpRequest httpRequest;
-        if (groupUUID != null)
-            httpRequest = media.getImageOriginalUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID),"");
-        else
-            httpRequest = media.getImageOriginalUrl(mHttpRequestFactory);
-        return httpRequest;
-    }
-
     public static void startPhotoSliderActivity(View toolbar, Activity activity, List<MediaViewModel> transitionMediasViewModels,
                                                 String groupUUID, String stationID, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
@@ -244,7 +242,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     }
 
     public static void startPhotoSliderActivityWithMedias(View toolbar, Activity activity, List<Media> transitionMedias,
-                                                String groupUUID, String stationID, int spanCount, NetworkImageView transitionView, Media currentMedia) {
+                                                          String groupUUID, String stationID, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
         int initialPhotoPosition = getMediaPositionInMedias(transitionMedias, currentMedia);
 
@@ -483,6 +481,11 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 //        initShareBtn();
 
 //        registerForContextMenu(mViewPager);
+
+        TokenManager tokenManager = InjectSCloudTokenManager.provideInstance(this);
+
+        mBaseDataOperator = InjectBaseDataOperator.provideInstance(this,
+                tokenManager, this, new RefreshTokenRetryStrategy(tokenManager));
 
     }
 
@@ -1002,28 +1005,47 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
     }
 
-    private void startLoadingOriginalPhotoOrLargePhoto(View view, Media media) {
+    private void startLoadingOriginalPhotoOrLargePhoto(View view, final Media media) {
 
         if (media instanceof Video)
             return;
 
-        String remoteUrl;
+        final GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view;
+
+        final boolean isGif = MediaUtil.checkMediaIsGif(media);
+
+        mBaseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+            @Override
+            public void onSucceed() {
+
+                handleGetSCloudTokenAfterLoadThumb(media, mainPic, isGif);
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                handleGetSCloudTokenAfterLoadThumb(media, mainPic, isGif);
+            }
+        });
+
+
+    }
+
+    private void handleGetSCloudTokenAfterLoadThumb(Media media, GifTouchNetworkImageView mainPic, boolean isGif) {
 
         HttpRequest httpRequest;
-
-        GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view;
-
-        boolean isGif = MediaUtil.checkMediaIsGif(media);
+        String remoteUrl;
 
         if (systemSettingDataSource.getLoginWithWechatCodeOrNot() && !isGif && !media.isLocal()) {
 
-            httpRequest = getLargeImageHttpRequest(media);
+            httpRequest = getLargeImageHttpRequest(media, mSCloudToken);
 
             remoteUrl = httpRequest.getUrl();
 
         } else {
 
-            httpRequest = getMediaOriginalHttpRequest(media);
+            httpRequest = getMediaOriginalHttpRequest(media, mSCloudToken);
 
             remoteUrl = httpRequest.getUrl();
 
@@ -1046,10 +1068,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             mainPic.setImageUrl(remoteUrl, mImageLoader);
         }
-
     }
 
-    private HttpRequest getLargeImageHttpRequest(Media media) {
+    private HttpRequest getLargeImageHttpRequest(Media media, String sCloudToken) {
         HttpRequest httpRequest;
         DisplayMetrics displayMetrics = Util.getDisplayMetrics(this);
 
@@ -1072,21 +1093,43 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         if (screenWidth / screenHeight > mediaWidth / mediaHeight) {
 
-            if (groupUUID != null)
-                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, -1, screenHeight, new GroupRequestParam(groupUUID, stationID),"");
-            else
-                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, -1, screenHeight);
+            httpRequest = getMediaThumbHttpRequest(media, -1, screenHeight, sCloudToken);
 
         } else {
 
-            if (groupUUID != null)
-                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, screenWidth, -1, new GroupRequestParam(groupUUID, stationID),"");
-            else
-                httpRequest = media.getImageThumbUrl(mHttpRequestFactory, screenWidth, -1);
+            httpRequest = getMediaThumbHttpRequest(media, screenWidth, -1, sCloudToken);
 
         }
 
 
+        return httpRequest;
+    }
+
+    private HttpRequest getMediaThumbHttpRequest(Media media, int width, int height, String sCloudToken) {
+        HttpRequest httpRequest;
+        if (groupUUID != null)
+            httpRequest = media.getImageThumbUrl(mHttpRequestFactory, width, height, new GroupRequestParam(groupUUID, stationID), sCloudToken);
+        else
+            httpRequest = media.getImageThumbUrl(mHttpRequestFactory);
+        return httpRequest;
+    }
+
+
+    private HttpRequest getMediaThumbHttpRequest(Media media, String sCloudToken) {
+        HttpRequest httpRequest;
+        if (groupUUID != null)
+            httpRequest = media.getImageThumbUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID), sCloudToken);
+        else
+            httpRequest = media.getImageThumbUrl(mHttpRequestFactory);
+        return httpRequest;
+    }
+
+    private HttpRequest getMediaOriginalHttpRequest(Media media, String sCloudToken) {
+        HttpRequest httpRequest;
+        if (groupUUID != null)
+            httpRequest = media.getImageOriginalUrl(mHttpRequestFactory, new GroupRequestParam(groupUUID, stationID), sCloudToken);
+        else
+            httpRequest = media.getImageOriginalUrl(mHttpRequestFactory);
         return httpRequest;
     }
 
@@ -1163,13 +1206,13 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         }
 
         @NonNull
-        private View getViewForMedia(int position, MediaViewModel mediaViewModel) {
+        private View getViewForMedia(final int position, MediaViewModel mediaViewModel) {
             View view;
             view = LayoutInflater.from(mContext).inflate(R.layout.photo_slider_cell, null);
 
-            GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
+            final GifTouchNetworkImageView mainPic = (GifTouchNetworkImageView) view.findViewById(R.id.mainPic);
 
-            Media media = mediaViewModel.getMedia();
+            final Media media = mediaViewModel.getMedia();
 
             Log.d(TAG, "instantiateItem: orientationNumber:" + media.getOrientationNumber());
 
@@ -1182,48 +1225,21 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             mainPic.setCurrentMediaViewModel(mediaViewModel);
 
-            HttpRequest httpRequest = getMediaThumbHttpRequest(media);
+            mBaseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+                @Override
+                public void onSucceed() {
 
-            ArrayMap<String, String> header = new ArrayMap<>();
-            header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
+                    handleGetSCloudTokenWhenInitItem(position, mainPic, media);
 
-            if (transitionMediaNeedShowThumb && !media.isLocal()) {
-
-                if (position == initialPhotoPosition)
-                    ViewCompat.setTransitionName(mainPic, media.getKey());
-
-                String thumbImageUrl = httpRequest.getUrl();
-
-                mImageLoader.setHeaders(header);
-
-                mainPic.setTag(thumbImageUrl);
-
-                mainPic.setImageUrl(thumbImageUrl, mImageLoader);
-
-            } else {
-
-                if (position == initialPhotoPosition)
-                    ViewCompat.setTransitionName(mainPic, media.getKey());
-
-                mainPic.setOrientationNumber(media.getOrientationNumber());
-
-                String imageThumbUrl = httpRequest.getUrl();
-
-                mainPic.setTag(imageThumbUrl);
-
-                if (imageThumbUrl.endsWith(".gif")) {
-
-                    mGifLoader.setHeaders(header);
-
-                    mainPic.setGifUrl(imageThumbUrl, mGifLoader);
-                } else {
-
-                    mImageLoader.setHeaders(header);
-
-                    mainPic.setImageUrl(imageThumbUrl, mImageLoader);
                 }
 
-            }
+                @Override
+                public void onFail(OperationResult operationResult) {
+
+                    handleGetSCloudTokenWhenInitItem(position, mainPic, media);
+
+                }
+            });
 
             mainPic.setUserTouchListener(new CustomTouchListener());
             mainPic.setUserDoubleTapListener(new CustomTapListener(mainPic));
@@ -1444,6 +1460,51 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         @Override
         public boolean isViewFromObject(View arg0, Object arg1) {
             return arg0 == arg1;
+        }
+    }
+
+    private void handleGetSCloudTokenWhenInitItem(int position, GifTouchNetworkImageView mainPic, Media media) {
+        HttpRequest httpRequest = getMediaThumbHttpRequest(media, mSCloudToken);
+
+        ArrayMap<String, String> header = new ArrayMap<>();
+        header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
+
+        if (transitionMediaNeedShowThumb && !media.isLocal()) {
+
+            if (position == initialPhotoPosition)
+                ViewCompat.setTransitionName(mainPic, media.getKey());
+
+            String thumbImageUrl = httpRequest.getUrl();
+
+            mImageLoader.setHeaders(header);
+
+            mainPic.setTag(thumbImageUrl);
+
+            mainPic.setImageUrl(thumbImageUrl, mImageLoader);
+
+        } else {
+
+            if (position == initialPhotoPosition)
+                ViewCompat.setTransitionName(mainPic, media.getKey());
+
+            mainPic.setOrientationNumber(media.getOrientationNumber());
+
+            String imageThumbUrl = httpRequest.getUrl();
+
+            mainPic.setTag(imageThumbUrl);
+
+            if (imageThumbUrl.endsWith(".gif")) {
+
+                mGifLoader.setHeaders(header);
+
+                mainPic.setGifUrl(imageThumbUrl, mGifLoader);
+            } else {
+
+                mImageLoader.setHeaders(header);
+
+                mainPic.setImageUrl(imageThumbUrl, mImageLoader);
+            }
+
         }
     }
 

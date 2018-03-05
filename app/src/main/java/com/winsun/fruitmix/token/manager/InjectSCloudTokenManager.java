@@ -7,6 +7,7 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.token.data.InjectTokenRemoteDataSource;
 import com.winsun.fruitmix.token.data.TokenDataSource;
 import com.winsun.fruitmix.token.param.SCloudTokenParam;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 
 /**
@@ -15,17 +16,19 @@ import com.winsun.fruitmix.user.datasource.InjectUser;
 
 public class InjectSCloudTokenManager {
 
-    public static SCloudTokenManager provideInstance(Context context){
+    public static SCloudTokenManager provideInstance(Context context) {
 
         SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(context);
 
         String currentUserUUID = systemSettingDataSource.getCurrentLoginUserUUID();
 
-        String currentUserGUID = InjectUser.provideRepository(context).getUserByUUID(currentUserUUID).getAssociatedWeChatGUID();
+        User currentUser = InjectUser.provideRepository(context).getUserByUUID(currentUserUUID);
+
+        String currentUserGUID = currentUser != null ? currentUser.getAssociatedWeChatGUID() : "";
 
         TokenDataSource tokenDataSource = InjectTokenRemoteDataSource.provideTokenDataSource(context);
 
-        return new SCloudTokenManager(new SCloudTokenParam(currentUserGUID),tokenDataSource);
+        return new SCloudTokenManager(new SCloudTokenParam(currentUserGUID), tokenDataSource);
 
     }
 

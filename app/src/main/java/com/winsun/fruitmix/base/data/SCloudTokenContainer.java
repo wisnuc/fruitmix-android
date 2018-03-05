@@ -6,6 +6,6 @@ package com.winsun.fruitmix.base.data;
 
 public interface SCloudTokenContainer {
 
-    void setCloudToken(String sCloudToken);
+    void setSCloudToken(String sCloudToken);
 
 }

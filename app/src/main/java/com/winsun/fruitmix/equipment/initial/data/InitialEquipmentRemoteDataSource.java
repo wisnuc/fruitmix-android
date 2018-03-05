@@ -247,6 +247,8 @@ public class InitialEquipmentRemoteDataSource extends BaseRemoteDataSourceImpl i
 
             HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(ip,BOOT);
 
+            Log.d(TAG, "checkInstallSucceed: ");
+
             OperationResult operationResult = wrapper.loadEquipmentBootInfo(httpRequest,new RemoteEquipmentBootInfoParser());
 
             if(operationResult.getOperationResultType() != OperationResultType.SUCCEED){

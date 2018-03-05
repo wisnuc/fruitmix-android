@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.group.data.model.MediaComment;
@@ -11,29 +12,35 @@ import com.winsun.fruitmix.media.CalcMediaDigestStrategy;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Administrator on 2018/2/27.
  */
 
-public class MediaInTweetDataSourceRepository extends BaseDataRepository implements MediaDataSourceRepository {
+public class MediaInTweetDataRepository extends BaseDataRepository implements MediaDataSourceRepository {
 
-    public static final String TAG = MediaInTweetDataSourceRepository.class.getSimpleName();
+    public static final String TAG = MediaInTweetDataRepository.class.getSimpleName();
 
     private MediaComment mMediaComment;
 
-    private MediaInTweetRemoteDataSource mMediaInTweetRemoteDataSource;
+    private MediaInTweetDataSource mMediaInTweetDataSource;
 
-    public MediaInTweetDataSourceRepository(ThreadManager threadManager, MediaComment mediaComment,
-                                            MediaInTweetRemoteDataSource mediaInTweetRemoteDataSource) {
+    private AtomicInteger downloadItemCount;
+
+    public MediaInTweetDataRepository(ThreadManager threadManager, MediaComment mediaComment,
+                                      MediaInTweetDataSource mediaInTweetDataSource) {
         super(threadManager);
         mMediaComment = mediaComment;
-        mMediaInTweetRemoteDataSource = mediaInTweetRemoteDataSource;
+        mMediaInTweetDataSource = mediaInTweetDataSource;
+
+        downloadItemCount = new AtomicInteger(0);
     }
 
     @Override
@@ -48,6 +55,8 @@ public class MediaInTweetDataSourceRepository extends BaseDataRepository impleme
 
         final BaseOperateDataCallback<Boolean> runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
+        downloadItemCount.set(medias.size());
+
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
@@ -58,23 +67,43 @@ public class MediaInTweetDataSourceRepository extends BaseDataRepository impleme
 
                     Log.d(TAG, "call: media uuid:" + media.getUuid());
 
-                    try {
-                        mMediaInTweetRemoteDataSource.downloadMedia(media);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (NetworkException e) {
-                        e.printStackTrace();
-                    }
+                    mMediaInTweetDataSource.downloadMedia(media, new BaseOperateCallback() {
+                        @Override
+                        public void onSucceed() {
+
+                            int count = downloadItemCount.decrementAndGet();
+
+                            checkCallback(count, runOnMainThreadCallback);
+
+                        }
+
+                        @Override
+                        public void onFail(OperationResult operationResult) {
+
+                            int count = downloadItemCount.decrementAndGet();
+
+                            checkCallback(count, runOnMainThreadCallback);
+
+                        }
+                    });
+
 
                 }
 
-                Log.d(TAG, "call: finish retrieve original photo task in tweet");
-
-                runOnMainThreadCallback.onSucceed(true, new OperationSuccess());
 
             }
         });
     }
+
+    private void checkCallback(int count, BaseOperateDataCallback<Boolean> callback) {
+
+        Log.d(TAG, "call: finish retrieve original photo task in tweet");
+
+        if (count == 0)
+            callback.onSucceed(true, new OperationSuccess());
+
+    }
+
 
     @Override
     public void updateMedia(Media media) {

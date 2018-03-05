@@ -215,21 +215,21 @@ public class Media extends AbstractFile {
 
     public HttpRequest getImageSmallThumbUrl(HttpRequestFactory httpRequestFactory) {
 
-        return getImageSmallThumbUrl(httpRequestFactory, "","");
+        return getImageSmallThumbUrl(httpRequestFactory, null, "");
 
     }
 
     //TODO: create image thumb original url with sCloudToken
 
-    public HttpRequest getImageSmallThumbUrl(HttpRequestFactory httpRequestFactory, GroupRequestParam groupRequestParam,String sCloudToken) {
+    public HttpRequest getImageSmallThumbUrl(HttpRequestFactory httpRequestFactory, GroupRequestParam groupRequestParam, String sCloudToken) {
 
-        HttpRequest httpRequest = getImageSmallThumbUrl(httpRequestFactory, groupRequestParam.getStationID(),sCloudToken);
+        HttpRequest httpRequest = actualGetImageSmallThumbUrl(httpRequestFactory, groupRequestParam, sCloudToken);
 
         return addGroupUUIDToUrl(groupRequestParam.getGroupUUID(), httpRequest);
 
     }
 
-    private HttpRequest getImageSmallThumbUrl(HttpRequestFactory httpRequestFactory, String stationID,String sCloudToken) {
+    private HttpRequest actualGetImageSmallThumbUrl(HttpRequestFactory httpRequestFactory, GroupRequestParam groupRequestParam, String sCloudToken) {
 
         String imageUrl;
 
@@ -254,10 +254,10 @@ public class Media extends AbstractFile {
 
             String httpPath = getRemoteMediaThumbHttpPath(64, 64);
 
-            if (stationID.isEmpty())
+            if (groupRequestParam == null)
                 httpRequest = generateUrl(httpRequestFactory, httpPath);
             else
-                httpRequest = generateUrl(httpRequestFactory, httpPath, stationID,sCloudToken);
+                httpRequest = generateUrl(httpRequestFactory, httpPath, groupRequestParam, sCloudToken);
 
             Log.d(TAG, "media uuid: " + getUuid() + " getImageSmallThumbUrl: " + httpRequest.getUrl());
 
@@ -267,15 +267,15 @@ public class Media extends AbstractFile {
     }
 
 
-    public HttpRequest getImageThumbUrl(HttpRequestFactory httpRequestFactory, GroupRequestParam groupRequestParam,String sCloudToken) {
+    public HttpRequest getImageThumbUrl(HttpRequestFactory httpRequestFactory, GroupRequestParam groupRequestParam, String sCloudToken) {
 
-        return getImageThumbUrl(httpRequestFactory, 200, 200, groupRequestParam,sCloudToken);
+        return getImageThumbUrl(httpRequestFactory, 200, 200, groupRequestParam, sCloudToken);
 
     }
 
-    public HttpRequest getImageThumbUrl(HttpRequestFactory httpRequestFactory, int width, int height, GroupRequestParam groupRequestParam,String sCloudToken) {
+    public HttpRequest getImageThumbUrl(HttpRequestFactory httpRequestFactory, int width, int height, GroupRequestParam groupRequestParam, String sCloudToken) {
 
-        HttpRequest httpRequest = getImageThumbUrl(httpRequestFactory, width, height, groupRequestParam.getStationID(),sCloudToken);
+        HttpRequest httpRequest = actualGetImageThumbUrl(httpRequestFactory, width, height, groupRequestParam, sCloudToken);
 
         return addGroupUUIDToUrl(groupRequestParam.getGroupUUID(), httpRequest);
 
@@ -289,11 +289,12 @@ public class Media extends AbstractFile {
 
     public HttpRequest getImageThumbUrl(HttpRequestFactory httpRequestFactory, int width, int height) {
 
-        return getImageThumbUrl(httpRequestFactory, width, height, "","");
+        return actualGetImageThumbUrl(httpRequestFactory, width, height, null, "");
 
     }
 
-    private HttpRequest getImageThumbUrl(HttpRequestFactory httpRequestFactory, int width, int height, String stationID,String sCloudToken) {
+    private HttpRequest actualGetImageThumbUrl(HttpRequestFactory httpRequestFactory, int width, int height,
+                                         GroupRequestParam groupRequestParam, String sCloudToken) {
 
         String imageUrl;
 
@@ -314,10 +315,10 @@ public class Media extends AbstractFile {
 
             String httpPath = getRemoteMediaThumbHttpPath(width, height);
 
-            if (stationID.isEmpty())
+            if (groupRequestParam == null)
                 httpRequest = generateUrl(httpRequestFactory, httpPath);
             else
-                httpRequest = generateUrl(httpRequestFactory, httpPath, stationID,sCloudToken);
+                httpRequest = generateUrl(httpRequestFactory, httpPath, groupRequestParam, sCloudToken);
 
             Log.d(TAG, "media uuid: " + getUuid() + " getImageThumbUrl: " + httpRequest.getUrl());
 
@@ -334,9 +335,11 @@ public class Media extends AbstractFile {
 
     }
 
-    private HttpRequest generateUrl(HttpRequestFactory httpRequestFactory, String req, String stationID,String sCloudToken) {
+    private HttpRequest generateUrl(HttpRequestFactory httpRequestFactory, String req,
+                                    GroupRequestParam groupRequestParam, String sCloudToken) {
 
-        return httpRequestFactory.createHttpGetFileRequest(req, stationID,sCloudToken);
+        return httpRequestFactory.createHttpGetFileRequest(req, groupRequestParam.getGroupUUID(),
+                groupRequestParam.getStationID(), sCloudToken);
 
     }
 
@@ -362,17 +365,17 @@ public class Media extends AbstractFile {
 
     public HttpRequest getImageOriginalUrl(HttpRequestFactory httpRequestFactory) {
 
-        return getImageOriginalUrl(httpRequestFactory, "","");
+        return actualGetImageOriginalUrl(httpRequestFactory, null, "");
     }
 
-    public HttpRequest getImageOriginalUrl(HttpRequestFactory httpRequestFactory, GroupRequestParam groupRequestParam,String sCloudToken) {
+    public HttpRequest getImageOriginalUrl(HttpRequestFactory httpRequestFactory, GroupRequestParam groupRequestParam, String sCloudToken) {
 
-        HttpRequest httpRequest = getImageOriginalUrl(httpRequestFactory, groupRequestParam.getStationID(),sCloudToken);
+        HttpRequest httpRequest = actualGetImageOriginalUrl(httpRequestFactory, groupRequestParam, sCloudToken);
 
         return addGroupUUIDToUrl(groupRequestParam.getGroupUUID(), httpRequest);
     }
 
-    private HttpRequest getImageOriginalUrl(HttpRequestFactory httpRequestFactory, String stationID,String sCloudToken) {
+    private HttpRequest actualGetImageOriginalUrl(HttpRequestFactory httpRequestFactory, GroupRequestParam groupRequestParam, String sCloudToken) {
 
         String imageUrl;
 
@@ -385,10 +388,10 @@ public class Media extends AbstractFile {
 
         } else {
 
-            if (stationID.isEmpty())
+            if (groupRequestParam == null)
                 httpRequest = generateUrl(httpRequestFactory, getRemoteMediaRequestPath());
             else
-                httpRequest = generateUrl(httpRequestFactory, getRemoteMediaRequestPath(), stationID,sCloudToken);
+                httpRequest = generateUrl(httpRequestFactory, getRemoteMediaRequestPath(), groupRequestParam, sCloudToken);
         }
 
         Log.d(TAG, "media uuid: " + getUuid() + " getImageOriginalUrl: " + httpRequest.getUrl());

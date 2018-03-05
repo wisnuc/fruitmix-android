@@ -11,6 +11,11 @@ import android.widget.FrameLayout;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.base.data.BaseDataOperator;
+import com.winsun.fruitmix.base.data.InjectBaseDataOperator;
+import com.winsun.fruitmix.base.data.SCloudTokenContainer;
+import com.winsun.fruitmix.base.data.retry.RefreshTokenRetryStrategy;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.databinding.FileTweetGroupItemBinding;
 import com.winsun.fruitmix.databinding.MorePhotoMaskBinding;
 import com.winsun.fruitmix.databinding.MultiFileCommentBinding;
@@ -27,6 +32,9 @@ import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.list.TweetContentListActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.token.manager.InjectSCloudTokenManager;
+import com.winsun.fruitmix.token.manager.TokenManager;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 
@@ -36,11 +44,13 @@ import java.util.List;
  * Created by Administrator on 2017/8/8.
  */
 
-public class MultiFileCommentView extends UserCommentView {
+public class MultiFileCommentView extends UserCommentView implements SCloudTokenContainer{
 
     private MultiFileCommentBinding binding;
 
     private ImageLoader imageLoader;
+
+    private String mSCloudToken = "";
 
     public MultiFileCommentView(ImageLoader imageLoader) {
         this.imageLoader = imageLoader;
@@ -97,11 +107,6 @@ public class MultiFileCommentView extends UserCommentView {
 
                 final Media media = medias.get(i);
 
-                HttpRequest httpRequest = media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(context),
-                        new GroupRequestParam(data.getGroupUUID(), data.getStationID()),"");
-
-                httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
-
                 View root;
                 final NetworkImageView networkImageView;
 
@@ -112,8 +117,6 @@ public class MultiFileCommentView extends UserCommentView {
                 networkImageView = singlePhotoBinding.coverImg;
 
                 frameLayouts[layoutNum].addView(root);
-
-                MediaUtil.setMediaImageUrl(media, singlePhotoBinding.coverImg, httpRequest, imageLoader);
 
 /*                final NewPhotoGridlayoutItemBinding newPhotoGridlayoutItemBinding = NewPhotoGridlayoutItemBinding.inflate(LayoutInflater.from(context),
                         frameLayouts[layoutNum],false);
@@ -131,6 +134,29 @@ public class MultiFileCommentView extends UserCommentView {
 
                     }
                 });
+
+
+                TokenManager tokenManager = InjectSCloudTokenManager.provideInstance(context);
+
+                BaseDataOperator baseDataOperator = InjectBaseDataOperator.provideInstance(context,
+                        tokenManager, this, new RefreshTokenRetryStrategy(tokenManager));
+
+                baseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+                    @Override
+                    public void onSucceed() {
+
+                        handleGetSCloudToken(context, data, media, singlePhotoBinding);
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        handleGetSCloudToken(context, data, media, singlePhotoBinding);
+
+                    }
+                });
+
 
                 layoutNum++;
 
@@ -237,6 +263,15 @@ public class MultiFileCommentView extends UserCommentView {
 
     }
 
+    private void handleGetSCloudToken(Context context, UserComment data, Media media, SinglePhotoBinding singlePhotoBinding) {
+        HttpRequest httpRequest = media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(context),
+                new GroupRequestParam(data.getGroupUUID(), data.getStationID()),mSCloudToken);
+
+        httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
+
+        MediaUtil.setMediaImageUrl(media, singlePhotoBinding.coverImg, httpRequest, imageLoader);
+    }
+
     private void handleLayout(Context context, FrameLayout[] frameLayouts, int size) {
 
         if (size == 2) {
@@ -320,5 +355,10 @@ public class MultiFileCommentView extends UserCommentView {
             }
 
         }
+    }
+
+    @Override
+    public void setSCloudToken(String sCloudToken) {
+        mSCloudToken = sCloudToken;
     }
 }

@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.callback;
 
+import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 
 import java.io.IOException;

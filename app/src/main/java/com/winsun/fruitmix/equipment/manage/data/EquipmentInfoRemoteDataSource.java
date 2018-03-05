@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.equipment.manage.data;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.equipment.manage.model.BaseEquipmentInfo;
@@ -33,6 +35,8 @@ import java.util.List;
  */
 
 public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl implements EquipmentInfoDataSource {
+
+    public static final String TAG = EquipmentInfoRemoteDataSource.class.getSimpleName();
 
     private static final String EQUIPMENT_CONTROL_SYSTEM = "/control/system";
 
@@ -105,6 +109,8 @@ public class EquipmentInfoRemoteDataSource extends BaseRemoteDataSourceImpl impl
     private void getBoot(final EquipmentInfoInControlSystem equipmentInfoInControlSystem, final BaseLoadDataCallback<BaseEquipmentInfo> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createGetRequestByPathWithoutToken(MANAGE_EQUIPMENT);
+
+        Log.d(TAG, "getBoot: ");
 
         wrapper.loadCall(httpRequest, new BaseLoadDataCallback<Boot>() {
 

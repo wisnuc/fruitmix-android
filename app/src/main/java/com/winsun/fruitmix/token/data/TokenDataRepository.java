@@ -56,6 +56,18 @@ public class TokenDataRepository extends BaseDataRepository implements TokenData
     }
 
     @Override
+    public void getSCloudTokenThroughStationTokenWithThreadChange(final String userGUID, final BaseLoadDataCallback<String> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                tokenRemoteDataSource.getSCloudTokenThroughStationTokenWithThreadChange(userGUID, createLoadCallbackRunOnMainThread(callback));
+            }
+        });
+
+    }
+
+    @Override
     public void getSCloudTokenThroughStationTokenWithoutThreadChange(final String userGUID, final BaseLoadDataCallback<String> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {

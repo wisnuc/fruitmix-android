@@ -29,25 +29,45 @@ public class SCloudTokenManager extends TokenManager<SCloudTokenParam> {
     }
 
     @Override
-    public synchronized void getToken(final BaseLoadDataCallback<String> callback) {
+    public synchronized void getToken(boolean changeThread, final BaseLoadDataCallback<String> callback) {
 
-        if (mSCloudToken == null || mSCloudToken.isEmpty()) {
+        String currentUserGUID = mTokenParam.getCurrentUserGUID();
 
-            mTokenDataSource.getSCloudTokenThroughStationTokenWithoutThreadChange(mTokenParam.getCurrentUserGUID(), new BaseLoadDataCallback<String>() {
-                @Override
-                public void onSucceed(List<String> data, OperationResult operationResult) {
+        if ((currentUserGUID != null && currentUserGUID.length() > 0) && (mSCloudToken == null || mSCloudToken.isEmpty())) {
 
-                    callback.onSucceed(data, operationResult);
+            if (changeThread) {
 
-                }
+                mTokenDataSource.getSCloudTokenThroughStationTokenWithThreadChange(currentUserGUID, new BaseLoadDataCallback<String>() {
+                    @Override
+                    public void onSucceed(List<String> data, OperationResult operationResult) {
+                        callback.onSucceed(data, operationResult);
+                    }
 
-                @Override
-                public void onFail(OperationResult operationResult) {
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+                        callback.onFail(operationResult);
+                    }
+                });
 
-                    callback.onFail(operationResult);
+            } else {
 
-                }
-            });
+                mTokenDataSource.getSCloudTokenThroughStationTokenWithoutThreadChange(currentUserGUID, new BaseLoadDataCallback<String>() {
+                    @Override
+                    public void onSucceed(List<String> data, OperationResult operationResult) {
+
+                        callback.onSucceed(data, operationResult);
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        callback.onFail(operationResult);
+
+                    }
+                });
+
+            }
 
 
         } else {

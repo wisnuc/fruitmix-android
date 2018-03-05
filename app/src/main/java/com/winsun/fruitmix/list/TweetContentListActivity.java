@@ -10,9 +10,6 @@ import android.os.Bundle;
 import android.support.v4.app.SharedElementCallback;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.animation.LinearOutSlowInInterpolator;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Transition;
 import android.util.Log;
@@ -40,11 +37,11 @@ import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
-import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.list.data.FileInTweetViewDataSource;
-import com.winsun.fruitmix.list.data.MediaInTweetDataSourceRepository;
+import com.winsun.fruitmix.list.data.InjectMediaInTweetDataRepository;
+import com.winsun.fruitmix.list.data.MediaInTweetDataRepository;
 import com.winsun.fruitmix.list.data.MediaInTweetListConverter;
 import com.winsun.fruitmix.list.data.MediaInTweetRemoteDataSource;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
@@ -153,9 +150,7 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
 
             GroupRequestParam groupRequestParam = new GroupRequestParam(userComment.getGroupUUID(), userComment.getStationID());
 
-            mediaDataSourceRepository = new MediaInTweetDataSourceRepository(ThreadManagerImpl.getInstance(),
-                    (MediaComment) userComment, new MediaInTweetRemoteDataSource(InjectHttp.provideIHttpUtil(this),
-                    InjectHttp.provideHttpRequestFactory(this), groupRequestParam));
+            mediaDataSourceRepository = InjectMediaInTweetDataRepository.provideInstance(this, (MediaComment) mUserComment);
 
             mNewPhotoList = new NewPhotoList(this, this, false, false, mediaDataSourceRepository,
                     new MediaInTweetListConverter(), groupRequestParam);

@@ -36,9 +36,14 @@ import com.android.volley.toolbox.IImageLoadListener;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.BR;
+import com.winsun.fruitmix.base.data.BaseDataOperator;
+import com.winsun.fruitmix.base.data.InjectBaseDataOperator;
+import com.winsun.fruitmix.base.data.SCloudTokenContainer;
+import com.winsun.fruitmix.base.data.retry.RefreshTokenRetryStrategy;
 import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.NewPhotoLayoutBinding;
 import com.winsun.fruitmix.databinding.NewPhotoTitleItemBinding;
@@ -68,6 +73,8 @@ import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.token.manager.InjectSCloudTokenManager;
+import com.winsun.fruitmix.token.manager.TokenManager;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.util.MediaUtil;
@@ -90,7 +97,7 @@ import io.github.sin3hz.fastjumper.callback.SpannableCallback;
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView {
+public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView, SCloudTokenContainer {
 
     public static final String TAG = NewPhotoList.class.getSimpleName();
 
@@ -183,7 +190,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private HttpRequestFactory mHttpRequestFactory;
 
-    public NewPhotoList(Activity activity,IPhotoListListener photoListListener) {
+    private String mSCloudToken = "";
+
+    private BaseDataOperator mBaseDataOperator;
+
+    public NewPhotoList(Activity activity, IPhotoListListener photoListListener) {
 
         mMediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(containerActivity);
 
@@ -203,7 +214,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     }
 
-    public NewPhotoList(Activity activity,IPhotoListListener photoListListener, boolean showFastJumper, boolean enableSwipeRefreshLayout,
+    public NewPhotoList(Activity activity, IPhotoListListener photoListListener, boolean showFastJumper, boolean enableSwipeRefreshLayout,
                         MediaDataSourceRepository mediaDataSourceRepository, MediaListConverter mediaListConverter,
                         GroupRequestParam groupRequestParam) {
 
@@ -264,6 +275,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         mThreadManager = ThreadManagerImpl.getInstance();
 
         mHttpRequestFactory = InjectHttp.provideHttpRequestFactory(containerActivity);
+
+        TokenManager tokenManager = InjectSCloudTokenManager.provideInstance(containerActivity);
+
+        mBaseDataOperator = InjectBaseDataOperator.provideInstance(containerActivity,
+                tokenManager,this,new RefreshTokenRetryStrategy(tokenManager));
 
     }
 
@@ -919,10 +935,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                 if (currentMedia == null) return;
 
-                View newSharedElement = mRecyclerView.findViewWithTag(createMediaThumbHttpRequest(currentMedia).getUrl());
+                View newSharedElement = mRecyclerView.findViewWithTag(createMediaThumbHttpRequest(currentMedia,"").getUrl());
 
                 if (newSharedElement == null)
-                    newSharedElement = mRecyclerView.findViewWithTag(createMediaSmallThumbHttpRequest(currentMedia).getUrl());
+                    newSharedElement = mRecyclerView.findViewWithTag(createMediaSmallThumbHttpRequest(currentMedia,"").getUrl());
 
                 if (newSharedElement == null)
                     return;
@@ -1022,6 +1038,11 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         mPhotoRecycleAdapter.notifyItemChanged(key);
 
+    }
+
+    @Override
+    public void setSCloudToken(String sCloudToken) {
+        mSCloudToken = sCloudToken;
     }
 
     private class PhotoRecycleAdapter extends RecyclerView.Adapter<BindingViewHolder> {
@@ -1604,17 +1625,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             mImageLoader.setTag(position);
 
-            HttpRequest httpRequest;
 
-            if (!mIsFling) {
-
-                httpRequest = createMediaThumbHttpRequest(currentMedia);
-
-            } else {
-
-                httpRequest = createMediaSmallThumbHttpRequest(currentMedia);
-
-            }
 
             mPhotoIv.registerImageLoadListener(new IImageLoadListener() {
                 @Override
@@ -1630,7 +1641,23 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 }
             });
 
-            MediaUtil.setMediaImageUrl(currentMedia, mPhotoIv, httpRequest, mImageLoader);
+            mBaseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+                @Override
+                public void onSucceed() {
+
+                    handleGetSCloudToken(currentMedia,mPhotoIv);
+
+
+                }
+
+                @Override
+                public void onFail(OperationResult operationResult) {
+
+                    handleGetSCloudToken(currentMedia,mPhotoIv);
+
+                }
+            });
+
 
             List<MediaViewModel> mediaViewModels = mMapKeyIsDate.get(currentMedia.getDateWithoutHourMinSec());
 
@@ -1703,6 +1730,23 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         return initialPhotoPosition;
     }
 
+    private void handleGetSCloudToken(Media currentMedia,NetworkImageView mPhotoIv) {
+        HttpRequest httpRequest;
+
+        if (!mIsFling) {
+
+            httpRequest = createMediaThumbHttpRequest(currentMedia,mSCloudToken);
+
+        } else {
+
+            httpRequest = createMediaSmallThumbHttpRequest(currentMedia,mSCloudToken);
+
+        }
+
+        MediaUtil.setMediaImageUrl(currentMedia, mPhotoIv, httpRequest, mImageLoader);
+
+    }
+
     public class VideoViewHolder extends BaseMediaHolder {
 
         VideoItemBinding binding;
@@ -1771,18 +1815,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             mImageLoader.setTag(position);
 
-            HttpRequest httpRequest;
-
-            if (!mIsFling) {
-
-                httpRequest = createMediaThumbHttpRequest(video);
-
-            } else {
-
-                httpRequest = createMediaSmallThumbHttpRequest(video);
-
-            }
-
             networkImageView.registerImageLoadListener(new IImageLoadListener() {
                 @Override
                 public void onImageLoadFinish(String url, View view) {
@@ -1795,8 +1827,19 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 }
             });
 
+            mBaseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+                @Override
+                public void onSucceed() {
 
-            MediaUtil.setMediaImageUrl(video, networkImageView, httpRequest, mImageLoader);
+                    handleGetSCloudToken(video,networkImageView);
+                }
+
+                @Override
+                public void onFail(OperationResult operationResult) {
+
+                    handleGetSCloudToken(video,networkImageView);
+                }
+            });
 
             viewGroup.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -2119,19 +2162,19 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         }
     }
 
-    private HttpRequest createMediaThumbHttpRequest(Media media) {
+    private HttpRequest createMediaThumbHttpRequest(Media media,String sCloudToken) {
 
         if (mGroupRequestParam != null)
-            return media.getImageThumbUrl(mHttpRequestFactory, mGroupRequestParam,"");
+            return media.getImageThumbUrl(mHttpRequestFactory, mGroupRequestParam, sCloudToken);
         else
             return media.getImageThumbUrl(mHttpRequestFactory);
 
     }
 
-    private HttpRequest createMediaSmallThumbHttpRequest(Media media) {
+    private HttpRequest createMediaSmallThumbHttpRequest(Media media, String sCloudToken) {
 
         if (mGroupRequestParam != null)
-            return media.getImageSmallThumbUrl(mHttpRequestFactory, mGroupRequestParam,"");
+            return media.getImageSmallThumbUrl(mHttpRequestFactory, mGroupRequestParam, sCloudToken);
         else
             return media.getImageSmallThumbUrl(mHttpRequestFactory);
 
@@ -2143,7 +2186,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             PhotoSliderActivity.startPhotoSliderActivity(mPhotoListListener.getToolbar(), containerActivity, mMediaViewModels,
                     mGroupRequestParam.getGroupUUID(), mGroupRequestParam.getStationID(), mSpanCount, networkImageView, media);
-
 
         } else {
 

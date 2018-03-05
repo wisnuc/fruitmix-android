@@ -83,7 +83,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
     }
 
     @Override
-    public synchronized void setCloudToken(String sCloudToken) {
+    public synchronized void setSCloudToken(String sCloudToken) {
         this.mSCloudToken = sCloudToken;
     }
 
@@ -134,7 +134,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
         HttpRequest httpRequest;
 
         httpRequest = httpRequestFactory.createHttpDeleteRequest(BOXES + "/" + groupRequestParam.getGroupUUID(), "",
-                groupRequestParam.getStationID(), mSCloudToken);
+                groupRequestParam.getGroupUUID(),groupRequestParam.getStationID(), mSCloudToken);
 
 /*        httpRequest = httpRequestFactory.createHttpDeleteRequestByCloudAPIWithWrap(BOXES + "/" + groupRequestParam.getGroupUUID(), "",
                 groupRequestParam.getStationID());*/
@@ -159,7 +159,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS + METADATA_TRUE;
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(httpPath, groupRequestParam.getStationID(), mSCloudToken);
+        HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(httpPath, groupRequestParam.getGroupUUID(),groupRequestParam.getStationID(), mSCloudToken);
 
         wrapper.loadCall(httpRequest, callback, new RemoteUserCommentParser());
 
@@ -239,7 +239,8 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", groupRequestParam.getStationID(), mSCloudToken);
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "",
+                groupRequestParam.getGroupUUID(),groupRequestParam.getStationID(), mSCloudToken);
 
         JsonObject jsonObject = new JsonObject();
 
@@ -294,7 +295,8 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
     private void insertUserCommentSrcFromPhone(String groupUUID, UserComment userComment, final BaseOperateCallback callback) {
         String path = BOXES + "/" + groupUUID + TWEETS;
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", userComment.getStationID(), "");
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "",
+                userComment.getGroupUUID(),userComment.getStationID(), "");
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("comment", "");
@@ -386,7 +388,8 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
 
-        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "", groupRequestParam.getStationID(), mSCloudToken);
+        HttpRequest httpRequest = httpRequestFactory.createHttpPostFileRequest(path, "",
+                groupRequestParam.getGroupUUID(),groupRequestParam.getStationID(), mSCloudToken);
 
         JsonObject jsonObject = new JsonObject();
 
@@ -527,7 +530,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
         String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID();
 
         HttpRequest httpRequest = httpRequestFactory.createHttpPatchRequest(httpPath, body.toString(),
-                groupRequestParam.getStationID(), mSCloudToken);
+                groupRequestParam.getGroupUUID(),groupRequestParam.getStationID(), mSCloudToken);
 
         wrapper.operateCall(httpRequest, callback);
     }

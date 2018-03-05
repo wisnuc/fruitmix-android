@@ -10,26 +10,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by Administrator on 2017/10/9.
+ * Created by Administrator on 2018/3/5.
  */
 
-class CloudHttpRequestForStationAPIFactory extends CloudHttpRequestFactory {
+public class CloudHttpRequestForStationBoxAPIFactory extends CloudHttpRequestForStationAPIFactory {
+
+    private String groupUUID;
+
+    public CloudHttpRequestForStationBoxAPIFactory(HttpHeader httpHeader, String stationID, String groupUUID) {
+        super(httpHeader, stationID);
+        this.groupUUID = groupUUID;
+    }
 
     public static final String TAG = CloudHttpRequestForStationAPIFactory.class.getSimpleName();
-
-     String stationID;
-
-     static final String CALL_STATION_THROUGH_CLOUD_PRE = "/stations/";
 
     private static final String CALL_STATION_THROUGH_CLOUD_END_FOR_JSON = "/json";
 
     private static final String CALL_STATION_THROUGH_CLOUD_END_FOR_PIPE = "/pipe";
 
-    CloudHttpRequestForStationAPIFactory(HttpHeader httpHeader, String stationID) {
-        super(httpHeader);
-
-        this.stationID = stationID;
-    }
 
     @Override
     public HttpRequest createHttpGetRequest(String httpPath, boolean isGetStream) {
@@ -125,6 +123,9 @@ class CloudHttpRequestForStationAPIFactory extends CloudHttpRequestFactory {
     }
 
     String getBaseUrlPathBeforePipeOrJson() {
-        return CLOUD_API_LEVEL + CALL_STATION_THROUGH_CLOUD_PRE + stationID;
+
+        return CLOUD_API_LEVEL + "/boxes/" + groupUUID + CALL_STATION_THROUGH_CLOUD_PRE + stationID;
+
     }
+
 }

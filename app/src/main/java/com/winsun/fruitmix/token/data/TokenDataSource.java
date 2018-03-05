@@ -16,6 +16,8 @@ public interface TokenDataSource {
 
     void getStationTokenThroughCloudToken(BaseLoadDataCallback<String> callback);
 
+    void getSCloudTokenThroughStationTokenWithThreadChange(String userGUID, BaseLoadDataCallback<String> callback);
+
     void getSCloudTokenThroughStationTokenWithoutThreadChange(String userGUID, BaseLoadDataCallback<String> callback);
 
 }

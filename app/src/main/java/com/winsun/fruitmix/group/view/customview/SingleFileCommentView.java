@@ -11,6 +11,11 @@ import android.widget.FrameLayout;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.base.data.BaseDataOperator;
+import com.winsun.fruitmix.base.data.InjectBaseDataOperator;
+import com.winsun.fruitmix.base.data.SCloudTokenContainer;
+import com.winsun.fruitmix.base.data.retry.RefreshTokenRetryStrategy;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.databinding.FileTweetGroupItemBinding;
 import com.winsun.fruitmix.databinding.SingleFileCommentBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
@@ -26,6 +31,9 @@ import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.list.TweetContentListActivity;
 import com.winsun.fruitmix.mediaModule.PhotoSliderActivity;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.token.manager.InjectSCloudTokenManager;
+import com.winsun.fruitmix.token.manager.TokenManager;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 
@@ -35,7 +43,7 @@ import java.util.Collections;
  * Created by Administrator on 2017/8/8.
  */
 
-public class SingleFileCommentView extends UserCommentView {
+public class SingleFileCommentView extends UserCommentView implements SCloudTokenContainer{
 
     private ImageLoader imageLoader;
 
@@ -45,6 +53,7 @@ public class SingleFileCommentView extends UserCommentView {
 
     private SingleFileCommentBinding binding;
 
+    private String mSCloudToken = "";
 
     @Override
     protected View generateContentView(Context context, ViewGroup parent) {
@@ -82,19 +91,33 @@ public class SingleFileCommentView extends UserCommentView {
 
             final Media media = comment.getMedias().get(0);
 
-            HttpRequest httpRequest = media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(context),
-                    new GroupRequestParam(data.getGroupUUID(), data.getStationID()),"");
-
-            httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
-
-            MediaUtil.setMediaImageUrl(media, networkImageView, httpRequest, imageLoader);
-
             rootView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
                     PhotoSliderActivity.startPhotoSliderActivityWithMedias(toolbar, (Activity) context, Collections.singletonList(media), data.getGroupUUID(),
                             data.getStationID(), 3, networkImageView, media);
+
+                }
+            });
+
+            TokenManager tokenManager = InjectSCloudTokenManager.provideInstance(context);
+
+            BaseDataOperator baseDataOperator = InjectBaseDataOperator.provideInstance(context,
+                    tokenManager, this, new RefreshTokenRetryStrategy(tokenManager));
+
+            baseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+                @Override
+                public void onSucceed() {
+
+                    handleGetSCloudToken(context, data, networkImageView, media);
+
+                }
+
+                @Override
+                public void onFail(OperationResult operationResult) {
+
+                    handleGetSCloudToken(context, data, networkImageView, media);
 
                 }
             });
@@ -170,4 +193,17 @@ public class SingleFileCommentView extends UserCommentView {
 
     }
 
+    private void handleGetSCloudToken(Context context, UserComment data, NetworkImageView networkImageView, Media media) {
+        HttpRequest httpRequest = media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(context),
+                new GroupRequestParam(data.getGroupUUID(), data.getStationID()),mSCloudToken);
+
+        httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
+
+        MediaUtil.setMediaImageUrl(media, networkImageView, httpRequest, imageLoader);
+    }
+
+    @Override
+    public void setSCloudToken(String sCloudToken) {
+        mSCloudToken = sCloudToken;
+    }
 }

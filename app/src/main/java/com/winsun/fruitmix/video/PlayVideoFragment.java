@@ -172,14 +172,17 @@ public class PlayVideoFragment implements SCloudTokenContainer {
 
                 tokenManager.resetToken();
 
-                baseDataOperator.preConditionCheck(new BaseOperateCallback() {
+                baseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
 
                         HttpRequest httpRequest = null;
+
+                        FileFromBoxDownloadParam fileFromBoxDownloadParam = (FileFromBoxDownloadParam) fileDownloadParam;
+
                         try {
                             httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
-                                    ((FileFromBoxDownloadParam) fileDownloadParam).getStationID(), mSCloudToken);
+                                    fileFromBoxDownloadParam.getBoxUUID(),fileFromBoxDownloadParam.getStationID(), mSCloudToken);
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                         }
@@ -192,9 +195,12 @@ public class PlayVideoFragment implements SCloudTokenContainer {
                     public void onFail(OperationResult operationResult) {
 
                         HttpRequest httpRequest = null;
+
+                        FileFromBoxDownloadParam fileFromBoxDownloadParam = (FileFromBoxDownloadParam) fileDownloadParam;
+
                         try {
                             httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
-                                    ((FileFromBoxDownloadParam) fileDownloadParam).getStationID(), mSCloudToken);
+                                    fileFromBoxDownloadParam.getBoxUUID(),fileFromBoxDownloadParam.getStationID(), mSCloudToken);
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                         }
@@ -304,7 +310,7 @@ public class PlayVideoFragment implements SCloudTokenContainer {
 
 
     @Override
-    public void setCloudToken(String sCloudToken) {
+    public void setSCloudToken(String sCloudToken) {
 
         mSCloudToken = sCloudToken;
 

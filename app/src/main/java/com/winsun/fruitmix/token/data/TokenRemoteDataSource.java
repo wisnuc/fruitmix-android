@@ -55,11 +55,21 @@ public class TokenRemoteDataSource extends BaseRemoteDataSourceImpl implements T
     }
 
     @Override
+    public void getSCloudTokenThroughStationTokenWithThreadChange(String userGUID, BaseLoadDataCallback<String> callback) {
+
+        getSCloudToken(userGUID,callback);
+    }
+
+    @Override
     public void getSCloudTokenThroughStationTokenWithoutThreadChange(String userGUID, BaseLoadDataCallback<String> callback) {
 
+        getSCloudToken(userGUID, callback);
+
+    }
+
+    private void getSCloudToken(String userGUID, BaseLoadDataCallback<String> callback) {
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest("/cloudToken?guid=" + userGUID);
 
         wrapper.loadCall(httpRequest, callback, new RemoteTokenParser());
-
     }
 }

@@ -3,7 +3,6 @@ package com.winsun.fruitmix.base.data;
 import com.winsun.fruitmix.base.data.retry.DefaultHttpRetryStrategy;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
-import com.winsun.fruitmix.http.RetryStrategy;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.token.manager.TokenManager;
@@ -32,7 +31,7 @@ public class BaseDataOperator {
         mDefaultHttpRetryStrategy = defaultHttpRetryStrategy;
     }
 
-    public void preConditionCheck(final BaseOperateCallback callback) {
+    public void preConditionCheck(boolean changeThread,final BaseOperateCallback callback) {
 
         if (mSystemSettingDataSource.getLoginWithWechatCodeOrNot()) {
 
@@ -40,11 +39,11 @@ public class BaseDataOperator {
 
         } else {
 
-            mTokenManager.getToken(new BaseLoadDataCallback<String>() {
+            mTokenManager.getToken(changeThread,new BaseLoadDataCallback<String>() {
                 @Override
                 public void onSucceed(List<String> data, OperationResult operationResult) {
 
-                    mSCloudTokenContainer.setCloudToken(data.get(0));
+                    mSCloudTokenContainer.setSCloudToken(data.get(0));
 
                     callback.onSucceed();
 
@@ -53,7 +52,7 @@ public class BaseDataOperator {
                 @Override
                 public void onFail(OperationResult operationResult) {
 
-                    mSCloudTokenContainer.setCloudToken("");
+                    mSCloudTokenContainer.setSCloudToken("");
 
                     callback.onFail(operationResult);
 

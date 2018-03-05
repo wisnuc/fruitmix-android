@@ -21,6 +21,6 @@ public abstract class TokenManager<T extends TokenParam>{
 
     public abstract void resetToken();
 
-    public abstract void getToken(BaseLoadDataCallback<String> callback);
+    public abstract void getToken(boolean changeThread,BaseLoadDataCallback<String> callback);
 
 }

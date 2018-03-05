@@ -139,8 +139,10 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 //            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
 //                    getAuthorizationValue(((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken()));
 
+            FileFromBoxDownloadParam fileFromBoxDownloadParam = (FileFromBoxDownloadParam) fileDownloadParam;
+
             httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
-                    ((FileFromBoxDownloadParam) fileDownloadParam).getStationID(), mSCloudToken);
+                    fileFromBoxDownloadParam.getBoxUUID(),fileFromBoxDownloadParam.getStationID(), mSCloudToken);
 
         } else {
 
@@ -396,7 +398,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     }
 
     @Override
-    public void setCloudToken(String sCloudToken) {
+    public void setSCloudToken(String sCloudToken) {
 
         mSCloudToken = sCloudToken;
 

@@ -24,6 +24,10 @@ public class FileFromBoxDownloadParam extends FileDownloadParam {
         return stationID;
     }
 
+    public String getBoxUUID() {
+        return boxUUID;
+    }
+
     @Override
     public String getFileDownloadPath() throws UnsupportedEncodingException {
 

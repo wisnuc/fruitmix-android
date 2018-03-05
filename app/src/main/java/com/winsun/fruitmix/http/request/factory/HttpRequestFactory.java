@@ -467,22 +467,21 @@ public class HttpRequestFactory {
 
     }
 
-    public synchronized HttpRequest createHttpGetRequest(String httpPath, String operateStationID, String sCloudToken) {
+    public synchronized HttpRequest createHttpGetRequest(String httpPath, String operateGroupUUID,String operateStationID, String sCloudToken) {
 
-        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateGroupUUID,operateStationID, sCloudToken);
 
         return factory.createHttpGetRequest(httpPath, false);
 
     }
 
-    public synchronized HttpRequest createHttpGetFileRequest(String httpPath, String operateStationID, String sCloudToken) {
+    public synchronized HttpRequest createHttpGetFileRequest(String httpPath, String operateGroupUUID,String operateStationID, String sCloudToken) {
 
-        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateGroupUUID,operateStationID, sCloudToken);
 
         return factory.createHttpGetRequest(httpPath, true);
 
     }
-
 
     public synchronized HttpRequest createHttpPostRequest(String httpPath, String body, String operateStationID, String sCloudToken) {
 
@@ -492,25 +491,25 @@ public class HttpRequestFactory {
 
     }
 
-    public synchronized HttpRequest createHttpPostFileRequest(String httpPath, String body, String operateStationID, String sCloudToken) {
+    public synchronized HttpRequest createHttpPostFileRequest(String httpPath, String body,String operateGroupUUID, String operateStationID, String sCloudToken) {
 
-        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateGroupUUID,operateStationID, sCloudToken);
 
         return factory.createHttpPostRequest(httpPath, body, true);
 
     }
 
-    public synchronized HttpRequest createHttpPatchRequest(String httpPath, String body, String operateStationID, String sCloudToken) {
+    public synchronized HttpRequest createHttpPatchRequest(String httpPath, String body,String operateGroupUUID, String operateStationID, String sCloudToken) {
 
-        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateGroupUUID,operateStationID, sCloudToken);
 
         return factory.createHttpPatchRequest(httpPath, body);
 
     }
 
-    public synchronized HttpRequest createHttpDeleteRequest(String httpPath, String body, String operateStationID, String sCloudToken) {
+    public synchronized HttpRequest createHttpDeleteRequest(String httpPath, String body,String operateGroupUUID, String operateStationID, String sCloudToken) {
 
-        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
+        BaseAbsHttpRequestFactory factory = getFactoryForBox(operateGroupUUID,operateStationID, sCloudToken);
 
         return factory.createHttpDeleteRequest(httpPath, body);
 
@@ -535,6 +534,33 @@ public class HttpRequestFactory {
         } else {
 
             factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), operateStationID);
+
+        }
+
+        return factory;
+    }
+
+    @NonNull
+    private BaseAbsHttpRequestFactory getFactoryForBox(String operateGroupUUID,String operateStationID, String sCloudToken) {
+        BaseAbsHttpRequestFactory factory;
+
+        if (!checkIsLoginWithWeChatCode() && operateStationID.equals(systemSettingDataSource.getCurrentLoginStationID())) {
+
+            if (sCloudToken != null && sCloudToken.length() > 0) {
+
+                factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, getAuthorizationValue(sCloudToken)));
+
+            } else {
+
+                factory = new CloudHttpRequestForStationBoxAPIFactory(createTokenHeaderUsingCloudToken(), operateStationID,
+                        operateGroupUUID);
+
+            }
+
+        } else {
+
+            factory = new CloudHttpRequestForStationBoxAPIFactory(createTokenHeaderUsingCloudToken(), operateStationID,
+                    operateGroupUUID);
 
         }
 

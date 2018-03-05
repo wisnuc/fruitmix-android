@@ -53,7 +53,7 @@ public class StationFileDataSourceConditionCheckWrapper implements StationFileDa
     @Override
     public void downloadFile(final FileDownloadState fileDownloadState, final BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException {
 
-        mBaseDataOperator.preConditionCheck(new BaseOperateCallback() {
+        mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 

@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.equipment.maintenance.data;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
@@ -29,6 +31,8 @@ import java.util.List;
 
 public class MaintenanceRemoteDataSource extends BaseRemoteDataSourceImpl implements MaintenanceDataSource {
 
+    public static final String TAG = MaintenanceRemoteDataSource.class.getSimpleName();
+    
     public static final String STORAGE_VOLUMES = "/storage/volumes";
 
     public static final String BOOT = "/boot";
@@ -114,6 +118,8 @@ public class MaintenanceRemoteDataSource extends BaseRemoteDataSourceImpl implem
 
         HttpRequest httpRequest = httpRequestFactory.createGetRequestWithoutToken(ip, BOOT);
 
+        Log.d(TAG, "handleVolumeStates: ");
+        
         wrapper.loadCall(httpRequest, new BaseLoadDataCallback<String>() {
             @Override
             public void onSucceed(List<String> data, OperationResult operationResult) {
@@ -148,12 +154,13 @@ public class MaintenanceRemoteDataSource extends BaseRemoteDataSourceImpl implem
         }
     }
 
-
     @Override
     public void startSystem(String ip, String volumeUUID, BaseOperateDataCallback<Void> callback) {
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("current", volumeUUID);
+
+        Log.d(TAG, "startSystem: ");
 
         HttpRequest httpRequest = httpRequestFactory.createPatchRequestWithoutToken(ip, BOOT, jsonObject.toString());
 

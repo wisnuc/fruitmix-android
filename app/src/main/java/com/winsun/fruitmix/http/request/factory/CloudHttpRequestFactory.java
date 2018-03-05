@@ -9,7 +9,7 @@ public class CloudHttpRequestFactory extends BaseAbsHttpRequestFactory {
 
     static final String CLOUD_DOMAIN_NAME = "www.siyouqun.com";
 
-    private static final String TEST_CLOUD_DOMAIN_NAME = "test.siyouqun.org";
+    private static final String TEST_CLOUD_DOMAIN_NAME = "test.siyouqun.com";
 
     private static final String DEV_CLOUD_DOMAIN_NAME = "10.10.9.87";
 
@@ -24,9 +24,9 @@ public class CloudHttpRequestFactory extends BaseAbsHttpRequestFactory {
     CloudHttpRequestFactory(HttpHeader httpHeader) {
         super(httpHeader);
 
-        setGateway(CLOUD_DOMAIN_NAME);
+        setGateway(TEST_CLOUD_DOMAIN_NAME);
 
-        setPort(RELEASE_CLOUD_PORT);
+        setPort(DEBUG_CLOUD_PORT);
 
     }
 

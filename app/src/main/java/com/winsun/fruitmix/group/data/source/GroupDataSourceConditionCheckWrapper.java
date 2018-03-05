@@ -31,7 +31,7 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
     @Override
     public void addGroup(final PrivateGroup group, final BaseOperateCallback callback) {
 
-        mBaseDataOperator.preConditionCheck(new BaseOperateCallback() {
+        mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
@@ -74,7 +74,7 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
     @Override
     public void deleteGroup(final GroupRequestParam groupRequestParam, final BaseOperateCallback callback) {
 
-        mBaseDataOperator.preConditionCheck(new BaseOperateCallback() {
+        mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
@@ -110,7 +110,7 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
     @Override
     public void quitGroup(final GroupRequestParam groupRequestParam, final String currentUserGUID, final BaseOperateCallback callback) {
 
-        mBaseDataOperator.preConditionCheck(new BaseOperateCallback() {
+        mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
@@ -151,7 +151,7 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
     @Override
     public void getAllUserCommentByGroupUUID(final GroupRequestParam groupRequestParam, final BaseLoadDataCallback<UserComment> callback) {
 
-        mBaseDataOperator.preConditionCheck(new BaseOperateCallback() {
+        mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
@@ -187,7 +187,7 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
     @Override
     public void insertUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, final BaseOperateCallback callback) {
 
-        mBaseDataOperator.preConditionCheck(new BaseOperateCallback() {
+        mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
@@ -224,7 +224,7 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
     @Override
     public void updateGroupProperty(final GroupRequestParam groupRequestParam, final String property, final String newValue, final BaseOperateCallback callback) {
 
-        mBaseDataOperator.preConditionCheck(new BaseOperateCallback() {
+        mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
@@ -261,7 +261,7 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
     @Override
     public void addUsersInGroup(final GroupRequestParam groupRequestParam, final List<String> userGUIDs, final BaseOperateCallback callback) {
 
-        mBaseDataOperator.preConditionCheck(new BaseOperateCallback() {
+        mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
@@ -298,7 +298,7 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
     @Override
     public void deleteUsersInGroup(final GroupRequestParam groupRequestParam, final List<String> userGUIDs, final BaseOperateCallback callback) {
 
-        mBaseDataOperator.preConditionCheck(new BaseOperateCallback() {
+        mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
