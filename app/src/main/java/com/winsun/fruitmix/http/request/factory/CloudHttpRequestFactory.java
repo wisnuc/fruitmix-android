@@ -7,7 +7,7 @@ package com.winsun.fruitmix.http.request.factory;
 
 public class CloudHttpRequestFactory extends BaseAbsHttpRequestFactory {
 
-    static final String CLOUD_DOMAIN_NAME = "www.siyouqun.com";
+    private static final String CLOUD_DOMAIN_NAME = "www.siyouqun.com";
 
     private static final String TEST_CLOUD_DOMAIN_NAME = "test.siyouqun.com";
 
@@ -21,12 +21,14 @@ public class CloudHttpRequestFactory extends BaseAbsHttpRequestFactory {
 
     public static final String CLOUD_API_LEVEL = "/c/v1";
 
+    static String CURRENT_DOMAIN_NAME = CLOUD_DOMAIN_NAME;
+
     CloudHttpRequestFactory(HttpHeader httpHeader) {
         super(httpHeader);
 
-        setGateway(TEST_CLOUD_DOMAIN_NAME);
+        setGateway(CLOUD_DOMAIN_NAME);
 
-        setPort(DEBUG_CLOUD_PORT);
+        setPort(RELEASE_CLOUD_PORT);
 
     }
 

@@ -17,7 +17,7 @@ public class HttpRequestFactory {
 
     public static final String TAG = HttpRequestFactory.class.getSimpleName();
 
-    public static final String CLOUD_IP = Util.HTTP + CloudHttpRequestFactory.CLOUD_DOMAIN_NAME;
+    public static String CLOUD_IP = Util.HTTP + CloudHttpRequestFactory.CURRENT_DOMAIN_NAME;
 
     public static HttpRequestFactory instance;
 
@@ -292,7 +292,7 @@ public class HttpRequestFactory {
 
     public synchronized HttpRequest createHttpGetRequestByCloudAPIWithWrap(String httpPath, String stationID) {
 
-        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+        BaseAbsHttpRequestFactory factory = createCloudHttpRequestForStationAPIFactory(stationID);
 
         return factory.createHttpGetRequest(httpPath, false);
 
@@ -300,7 +300,7 @@ public class HttpRequestFactory {
 
     public synchronized HttpRequest createHttpGetFileRequestByCloudAPIWithWrap(String httpPath, String stationID) {
 
-        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+        BaseAbsHttpRequestFactory factory = createCloudHttpRequestForStationAPIFactory(stationID);
 
         return factory.createHttpGetRequest(httpPath, true);
 
@@ -308,7 +308,7 @@ public class HttpRequestFactory {
 
     public synchronized HttpRequest createHttpPostRequestByCloudAPIWithWrap(String httpPath, String body, String stationID) {
 
-        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+        BaseAbsHttpRequestFactory factory = createCloudHttpRequestForStationAPIFactory(stationID);
 
         return factory.createHttpPostRequest(httpPath, body, true);
 
@@ -316,7 +316,7 @@ public class HttpRequestFactory {
 
     public synchronized HttpRequest createHttpPostFileRequestByCloudAPIWithWrap(String httpPath, String body, String stationID) {
 
-        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+        BaseAbsHttpRequestFactory factory = createCloudHttpRequestForStationAPIFactory(stationID);
 
         return factory.createHttpPostRequest(httpPath, body, true);
 
@@ -324,7 +324,7 @@ public class HttpRequestFactory {
 
     public synchronized HttpRequest createHttpPatchRequestByCloudAPIWithWrap(String httpPath, String body, String stationID) {
 
-        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+        BaseAbsHttpRequestFactory factory = createCloudHttpRequestForStationAPIFactory(stationID);
 
         return factory.createHttpPatchRequest(httpPath, body);
 
@@ -332,7 +332,7 @@ public class HttpRequestFactory {
 
     public synchronized HttpRequest createHttpPutRequestByCloudAPIWithWrap(String httpPath, String body, String stationID) {
 
-        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+        BaseAbsHttpRequestFactory factory = createCloudHttpRequestForStationAPIFactory(stationID);
 
         return factory.createHttpPutRequest(httpPath, body);
 
@@ -340,7 +340,7 @@ public class HttpRequestFactory {
 
     public synchronized HttpRequest createHttpDeleteRequestByCloudAPIWithWrap(String httpPath, String body, String stationID) {
 
-        BaseAbsHttpRequestFactory factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), stationID);
+        BaseAbsHttpRequestFactory factory = createCloudHttpRequestForStationAPIFactory(stationID);
 
         return factory.createHttpDeleteRequest(httpPath, body);
 
@@ -386,7 +386,7 @@ public class HttpRequestFactory {
 
         } else {
 
-            currentDefaultHttpRequestFactory = new StationHttpRequestFactory(getGateway(), createTokenHeaderForStationAPI());
+            currentDefaultHttpRequestFactory = createStationHttpRequestFactory();
 
         }
 
@@ -483,6 +483,14 @@ public class HttpRequestFactory {
 
     }
 
+    public synchronized HttpRequest createHttpGetFileRequest(String httpPath, String operateGroupUUID,String operateStationID) {
+
+        BaseAbsHttpRequestFactory factory = getFactoryForBoxWithoutSCloudToken(operateGroupUUID,operateStationID);
+
+        return factory.createHttpGetRequest(httpPath, true);
+
+    }
+
     public synchronized HttpRequest createHttpPostRequest(String httpPath, String body, String operateStationID, String sCloudToken) {
 
         BaseAbsHttpRequestFactory factory = getFactoryForBox(operateStationID, sCloudToken);
@@ -519,23 +527,7 @@ public class HttpRequestFactory {
     private BaseAbsHttpRequestFactory getFactoryForBox(String operateStationID, String sCloudToken) {
         BaseAbsHttpRequestFactory factory;
 
-        if (!checkIsLoginWithWeChatCode() && operateStationID.equals(systemSettingDataSource.getCurrentLoginStationID())) {
-
-            if (sCloudToken != null && sCloudToken.length() > 0) {
-
-                factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, getAuthorizationValue(sCloudToken)));
-
-            } else {
-
-                factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), operateStationID);
-
-            }
-
-        } else {
-
-            factory = new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), operateStationID);
-
-        }
+        factory = new BaseBoxWithSCloudTokenWithoutBoxUUIDFactory(this,sCloudToken).createFactoryForBox(operateStationID);
 
         return factory;
     }
@@ -544,27 +536,44 @@ public class HttpRequestFactory {
     private BaseAbsHttpRequestFactory getFactoryForBox(String operateGroupUUID,String operateStationID, String sCloudToken) {
         BaseAbsHttpRequestFactory factory;
 
-        if (!checkIsLoginWithWeChatCode() && operateStationID.equals(systemSettingDataSource.getCurrentLoginStationID())) {
-
-            if (sCloudToken != null && sCloudToken.length() > 0) {
-
-                factory = new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, getAuthorizationValue(sCloudToken)));
-
-            } else {
-
-                factory = new CloudHttpRequestForStationBoxAPIFactory(createTokenHeaderUsingCloudToken(), operateStationID,
-                        operateGroupUUID);
-
-            }
-
-        } else {
-
-            factory = new CloudHttpRequestForStationBoxAPIFactory(createTokenHeaderUsingCloudToken(), operateStationID,
-                    operateGroupUUID);
-
-        }
+        factory = new BaseBoxWithSCloudTokenAndBoxUUIDFactory(this,sCloudToken,operateGroupUUID).createFactoryForBox(operateStationID);
 
         return factory;
+    }
+
+    @NonNull
+    private BaseAbsHttpRequestFactory getFactoryForBoxWithoutSCloudToken(String operateGroupUUID,String operateStationID) {
+        BaseAbsHttpRequestFactory factory;
+
+        factory = new BaseBoxWithoutSCloudTokenFactory(this,operateGroupUUID).createFactoryForBox(operateStationID);
+
+        return factory;
+    }
+
+    @NonNull
+    CloudHttpRequestForStationAPIFactory createCloudHttpRequestForStationAPIFactory(String operateStationID) {
+        return new CloudHttpRequestForStationAPIFactory(createTokenHeaderUsingCloudToken(), operateStationID);
+    }
+
+    @NonNull
+    StationHttpRequestFactory createStationHttpRequestFactory(String sCloudToken) {
+        return new StationHttpRequestFactory(getGateway(), new HttpHeader(Util.KEY_AUTHORIZATION, getAuthorizationValue(sCloudToken)));
+    }
+
+
+    @NonNull
+    CloudHttpRequestForStationBoxAPIFactory createCloudHttpRequestForStationBoxAPIFactory(String operateGroupUUID, String operateStationID) {
+        return new CloudHttpRequestForStationBoxAPIFactory(createTokenHeaderUsingCloudToken(), operateStationID,
+                operateGroupUUID);
+    }
+
+    @NonNull
+    StationHttpRequestFactory createStationHttpRequestFactory() {
+        return new StationHttpRequestFactory(getGateway(), createTokenHeaderForStationAPI());
+    }
+
+    boolean checkLocalBoxAPIAvailable(String operateStationID) {
+        return !checkIsLoginWithWeChatCode() && operateStationID.equals(systemSettingDataSource.getCurrentLoginStationID());
     }
 
     private String getAuthorizationValue(String cloudToken) {

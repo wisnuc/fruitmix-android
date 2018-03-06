@@ -215,7 +215,7 @@ public class Media extends AbstractFile {
 
     public HttpRequest getImageSmallThumbUrl(HttpRequestFactory httpRequestFactory) {
 
-        return getImageSmallThumbUrl(httpRequestFactory, null, "");
+        return actualGetImageSmallThumbUrl(httpRequestFactory, null, "");
 
     }
 
@@ -294,7 +294,7 @@ public class Media extends AbstractFile {
     }
 
     private HttpRequest actualGetImageThumbUrl(HttpRequestFactory httpRequestFactory, int width, int height,
-                                         GroupRequestParam groupRequestParam, String sCloudToken) {
+                                               GroupRequestParam groupRequestParam, String sCloudToken) {
 
         String imageUrl;
 
@@ -339,7 +339,7 @@ public class Media extends AbstractFile {
                                     GroupRequestParam groupRequestParam, String sCloudToken) {
 
         return httpRequestFactory.createHttpGetFileRequest(req, groupRequestParam.getGroupUUID(),
-                groupRequestParam.getStationID(), sCloudToken);
+                groupRequestParam.getStationID());
 
     }
 
@@ -408,6 +408,8 @@ public class Media extends AbstractFile {
     private HttpRequest addGroupUUIDToUrl(String groupUUID, HttpRequest httpRequest) {
         if (!isLocal() && groupUUID.length() > 1)
             httpRequest.setUrl(httpRequest.getUrl() + BOX_UUID + groupUUID);
+
+        Log.d(TAG, "addGroupUUIDToUrl: url: " + httpRequest.getUrl());
 
         return httpRequest;
 

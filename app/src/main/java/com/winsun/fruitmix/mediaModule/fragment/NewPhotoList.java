@@ -1626,7 +1626,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             mImageLoader.setTag(position);
 
 
-
             mPhotoIv.registerImageLoadListener(new IImageLoadListener() {
                 @Override
                 public void onImageLoadFinish(String url, View view) {
@@ -1646,7 +1645,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 public void onSucceed() {
 
                     handleGetSCloudToken(currentMedia,mPhotoIv);
-
 
                 }
 

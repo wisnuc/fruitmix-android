@@ -182,7 +182,7 @@ public class PlayVideoFragment implements SCloudTokenContainer {
 
                         try {
                             httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
-                                    fileFromBoxDownloadParam.getBoxUUID(),fileFromBoxDownloadParam.getStationID(), mSCloudToken);
+                                    fileFromBoxDownloadParam.getBoxUUID(),fileFromBoxDownloadParam.getStationID());
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                         }
@@ -200,7 +200,7 @@ public class PlayVideoFragment implements SCloudTokenContainer {
 
                         try {
                             httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
-                                    fileFromBoxDownloadParam.getBoxUUID(),fileFromBoxDownloadParam.getStationID(), mSCloudToken);
+                                    fileFromBoxDownloadParam.getBoxUUID(),fileFromBoxDownloadParam.getStationID());
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                         }
