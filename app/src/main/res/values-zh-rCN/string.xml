@@ -601,6 +601,7 @@
 
     <string name="file_tweet_title">%1$s 分享了文件 %2$s</string>
 
+    <string name="me">我</string>
 
     <!-- group setting -->
     <string name="group_member">群成员</string>

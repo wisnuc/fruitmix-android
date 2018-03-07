@@ -57,4 +57,8 @@ public class AnimatorBuilder {
         animator.start();
     }
 
+    public void cancelAnimator(){
+        animator.cancel();
+    }
+
 }

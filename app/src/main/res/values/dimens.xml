@@ -20,5 +20,6 @@
 
     <item name="max_user_name" format="integer" type="dimen">16</item>
     <item name="max_user_password" format="integer" type="dimen">30</item>
+    <item name="max_group_name" format="integer" type="dimen">20</item>
 
 </resources>

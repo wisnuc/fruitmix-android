@@ -8,78 +8,96 @@
 
     </data>
 
-    <android.support.constraint.ConstraintLayout
-        android:layout_width="269dp"
-        android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/first_line_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <FrameLayout
+                android:id="@+id/pic0"
+                android:layout_width="89dp"
+                android:layout_height="89dp"
+                app:layout_constraintRight_toLeftOf="@id/pic1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/pic1"
+                android:layout_width="89dp"
+                android:layout_height="89dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginStart="1dp"
+                app:layout_constraintRight_toLeftOf="@id/pic2"
+                app:layout_constraintStart_toEndOf="@+id/pic0"
+                app:layout_constraintTop_toTopOf="parent">
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/pic2"
+                android:layout_width="89dp"
+                android:layout_height="89dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginStart="1dp"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/pic1"
+                app:layout_constraintTop_toTopOf="parent">
+
+            </FrameLayout>
+
+        </android.support.constraint.ConstraintLayout>
 
 
-        <FrameLayout
-            android:id="@+id/pic0"
-            android:layout_width="89dp"
-            android:layout_height="89dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp">
 
-        </FrameLayout>
+            <FrameLayout
+                android:id="@+id/pic0_second_row"
+                android:layout_width="89dp"
+                android:layout_height="89dp"
+                app:layout_constraintRight_toLeftOf="@id/pic1_second_row"
+                app:layout_constraintStart_toStartOf="parent">
 
-        <FrameLayout
-            android:id="@+id/pic1"
-            android:layout_width="89dp"
-            android:layout_height="89dp"
-            android:layout_marginLeft="1dp"
-            android:layout_marginStart="1dp"
-            app:layout_constraintStart_toEndOf="@+id/pic0"
-            app:layout_constraintTop_toTopOf="parent">
+            </FrameLayout>
 
-        </FrameLayout>
+            <FrameLayout
+                android:id="@+id/pic1_second_row"
+                android:layout_width="89dp"
+                android:layout_height="89dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginStart="1dp"
+                app:layout_constraintRight_toLeftOf="@id/pic2_second_row"
+                app:layout_constraintStart_toEndOf="@+id/pic0_second_row">
 
-        <FrameLayout
-            android:id="@+id/pic2"
-            android:layout_width="89dp"
-            android:layout_height="89dp"
-            android:layout_marginLeft="1dp"
-            android:layout_marginStart="1dp"
-            app:layout_constraintStart_toEndOf="@+id/pic1"
-            app:layout_constraintTop_toTopOf="parent">
+            </FrameLayout>
 
-        </FrameLayout>
+            <FrameLayout
+                android:id="@+id/pic2_second_row"
+                android:layout_width="89dp"
+                android:layout_height="89dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginStart="1dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/pic1_second_row"
+                app:layout_constraintTop_toTopOf="@+id/pic1_second_row">
+
+            </FrameLayout>
 
 
-        <FrameLayout
-            android:id="@+id/pic0_second_row"
-            android:layout_width="89dp"
-            android:layout_height="89dp"
-            android:layout_marginTop="1dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pic0">
+        </android.support.constraint.ConstraintLayout>
 
-        </FrameLayout>
 
-        <FrameLayout
-            android:id="@+id/pic1_second_row"
-            android:layout_width="89dp"
-            android:layout_height="89dp"
-            android:layout_marginLeft="1dp"
-            android:layout_marginStart="1dp"
-            android:layout_marginTop="1dp"
-            app:layout_constraintStart_toEndOf="@+id/pic0_second_row"
-            app:layout_constraintTop_toBottomOf="@+id/pic1">
+    </LinearLayout>
 
-        </FrameLayout>
-
-        <FrameLayout
-            android:id="@+id/pic2_second_row"
-            android:layout_width="89dp"
-            android:layout_height="89dp"
-            android:layout_marginLeft="1dp"
-            android:layout_marginStart="1dp"
-            android:layout_marginTop="1dp"
-            app:layout_constraintStart_toEndOf="@+id/pic1_second_row"
-            app:layout_constraintTop_toBottomOf="@+id/pic2">
-
-        </FrameLayout>
-
-    </android.support.constraint.ConstraintLayout>
 
 </layout>
 

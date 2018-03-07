@@ -80,6 +80,8 @@ public abstract class UserCommentView {
             commentContentLayoutLayoutParams.addRule(RelativeLayout.RIGHT_OF, R.id.user_avatar);
             commentContentLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, 0);
 
+            commentContentLayoutLayoutParams.addRule(RelativeLayout.BELOW,R.id.user_info_layout);
+
             ImageLoader imageLoader = InjectHttp.provideImageGifLoaderInstance(context).getImageLoader(context);
 
             userAvatar.setUser(data.getCreator(),imageLoader);
@@ -96,7 +98,6 @@ public abstract class UserCommentView {
 //            userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
 //            userAvatarLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
-
             userInfoLayoutLayoutParams.addRule(RelativeLayout.RIGHT_OF, 0);
             userInfoLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, R.id.user_avatar);
 
@@ -104,6 +105,8 @@ public abstract class UserCommentView {
 //            commentContentLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, R.id.user_avatar);
 
             commentContentLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, R.id.current_user_icon);
+
+            commentContentLayoutLayoutParams.addRule(RelativeLayout.BELOW,R.id.current_user_info_layout);
 
         }
 

@@ -222,8 +222,6 @@ public class GroupSettingPresenter implements ActiveView {
 
         final EditText modifyGroupNameEditText = binding.modifyGroupNameEdittext;
 
-        modifyGroupNameEditText.setHint(mGroupSettingViewModel.groupName.get());
-
         AlertDialog.Builder builder = new AlertDialog.Builder(mGroupSettingView.getContext())
                 .setTitle(mGroupSettingView.getString(R.string.modify_group_name))
                 .setView(binding.getRoot())

@@ -326,7 +326,18 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         }
     }
 
+    private AnimatorBuilder mSendMediaAnimatorBuilder;
+    private AnimatorBuilder mSendFileAnimatorBuilder;
+
+
     private void collapseFabAnimation() {
+
+        //call cancelAnimator to fix bug:#200
+        if (mSendMediaAnimatorBuilder != null)
+            mSendMediaAnimatorBuilder.cancelAnimator();
+
+        if (mSendFileAnimatorBuilder != null)
+            mSendFileAnimatorBuilder.cancelAnimator();
 
         mMaskLayout.setVisibility(View.GONE);
 
@@ -335,7 +346,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         mSendMediaTextView.setVisibility(View.GONE);
         mSendFileTextView.setVisibility(View.GONE);
 
-        new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation_restore, mSendMediaLayout).addAdapter(new AnimatorListenerAdapter() {
+        mSendMediaAnimatorBuilder = new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation_restore, mSendMediaLayout).addAdapter(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -344,9 +355,11 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
                 mSendMediaBtn.setVisibility(View.GONE);
 
             }
-        }).startAnimator();
+        });
 
-        new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation_restore, mSendFileLayout).addAdapter(new AnimatorListenerAdapter() {
+        mSendMediaAnimatorBuilder.startAnimator();
+
+        mSendFileAnimatorBuilder = new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation_restore, mSendFileLayout).addAdapter(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -355,12 +368,19 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
                 mSendFileBtn.setVisibility(View.GONE);
 
             }
-        }).startAnimator();
+        });
 
+        mSendFileAnimatorBuilder.startAnimator();
 
     }
 
     private void extendFabAnimation() {
+
+        if (mSendMediaAnimatorBuilder != null)
+            mSendMediaAnimatorBuilder.cancelAnimator();
+
+        if (mSendFileAnimatorBuilder != null)
+            mSendFileAnimatorBuilder.cancelAnimator();
 
         mMaskLayout.setVisibility(View.VISIBLE);
 
@@ -370,7 +390,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         mSendFileBtn.setVisibility(View.VISIBLE);
 
-        new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, mSendMediaLayout).addAdapter(new AnimatorListenerAdapter() {
+        mSendMediaAnimatorBuilder = new AnimatorBuilder(getContext(), R.animator.first_btn_above_fab_translation, mSendMediaLayout).addAdapter(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -379,9 +399,11 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
                 mSendMediaTextView.setVisibility(View.VISIBLE);
 
             }
-        }).startAnimator();
+        });
 
-        new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation, mSendFileLayout).addAdapter(new AnimatorListenerAdapter() {
+        mSendMediaAnimatorBuilder.startAnimator();
+
+        mSendFileAnimatorBuilder = new AnimatorBuilder(getContext(), R.animator.second_btn_above_fab_translation, mSendFileLayout).addAdapter(new AnimatorListenerAdapter() {
 
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -390,8 +412,9 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
                 mSendFileTextView.setVisibility(View.VISIBLE);
 
             }
-        }).startAnimator();
+        });
 
+        mSendFileAnimatorBuilder.startAnimator();
 
     }
 
