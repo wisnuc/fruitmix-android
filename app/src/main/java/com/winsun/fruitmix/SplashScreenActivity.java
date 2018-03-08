@@ -134,6 +134,8 @@ public class SplashScreenActivity extends AppCompatActivity {
             @Override
             public void onFail(OperationResult result) {
 
+                Log.d(TAG, "onFail: " + result.getResultMessage(mContext));
+
                 loginWithNoParamResult = false;
 
                 welcome();

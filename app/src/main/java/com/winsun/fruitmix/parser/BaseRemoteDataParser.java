@@ -19,6 +19,7 @@ public class BaseRemoteDataParser {
             if (object instanceof JSONObject) {
 
                 JSONObject jsonObject = (JSONObject) object;
+
                 if (jsonObject.has("data"))
                     return jsonObject.optString("data");
                 else

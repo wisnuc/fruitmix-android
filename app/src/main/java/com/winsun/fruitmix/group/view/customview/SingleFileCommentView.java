@@ -43,7 +43,7 @@ import java.util.Collections;
  * Created by Administrator on 2017/8/8.
  */
 
-public class SingleFileCommentView extends UserCommentView implements SCloudTokenContainer{
+public class SingleFileCommentView extends UserCommentView implements SCloudTokenContainer {
 
     private ImageLoader imageLoader;
 
@@ -106,7 +106,7 @@ public class SingleFileCommentView extends UserCommentView implements SCloudToke
             BaseDataOperator baseDataOperator = InjectBaseDataOperator.provideInstance(context,
                     tokenManager, this, new RefreshTokenRetryStrategy(tokenManager));
 
-            baseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+            baseDataOperator.preConditionCheck(true, new BaseOperateCallback() {
                 @Override
                 public void onSucceed() {
 
@@ -195,9 +195,10 @@ public class SingleFileCommentView extends UserCommentView implements SCloudToke
 
     private void handleGetSCloudToken(Context context, UserComment data, NetworkImageView networkImageView, Media media) {
         HttpRequest httpRequest = media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(context),
-                new GroupRequestParam(data.getGroupUUID(), data.getStationID()),mSCloudToken);
+                new GroupRequestParam(data.getGroupUUID(), data.getStationID()), mSCloudToken);
 
-        httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
+        if (!media.isLocal())
+            httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
 
         MediaUtil.setMediaImageUrl(media, networkImageView, httpRequest, imageLoader);
     }

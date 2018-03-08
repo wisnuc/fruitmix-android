@@ -44,7 +44,7 @@ import java.util.List;
  * Created by Administrator on 2017/8/8.
  */
 
-public class MultiFileCommentView extends UserCommentView implements SCloudTokenContainer{
+public class MultiFileCommentView extends UserCommentView implements SCloudTokenContainer {
 
     private MultiFileCommentBinding binding;
 
@@ -141,7 +141,7 @@ public class MultiFileCommentView extends UserCommentView implements SCloudToken
                 BaseDataOperator baseDataOperator = InjectBaseDataOperator.provideInstance(context,
                         tokenManager, this, new RefreshTokenRetryStrategy(tokenManager));
 
-                baseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+                baseDataOperator.preConditionCheck(true, new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
 
@@ -265,9 +265,10 @@ public class MultiFileCommentView extends UserCommentView implements SCloudToken
 
     private void handleGetSCloudToken(Context context, UserComment data, Media media, SinglePhotoBinding singlePhotoBinding) {
         HttpRequest httpRequest = media.getImageThumbUrl(InjectHttp.provideHttpRequestFactory(context),
-                new GroupRequestParam(data.getGroupUUID(), data.getStationID()),mSCloudToken);
+                new GroupRequestParam(data.getGroupUUID(), data.getStationID()), mSCloudToken);
 
-        httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
+        if (!media.isLocal())
+            httpRequest.setUrl(httpRequest.getUrl() + "&randomUUID=" + Util.createLocalUUid());
 
         MediaUtil.setMediaImageUrl(media, singlePhotoBinding.coverImg, httpRequest, imageLoader);
     }

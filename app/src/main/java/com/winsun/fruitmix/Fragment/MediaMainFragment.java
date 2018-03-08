@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.PersonInfoActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.SharpCurveInterpolator;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
@@ -524,6 +525,12 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
         } else if (requestCode == GROUP_CONTENT_REQUEST_CODE && resultCode == GroupSettingActivity.RESULT_DELETE_OR_QUIT_GROUP) {
 
             Log.d(TAG, "onActivityResult: delete or quit group in setting,so refresh group ");
+
+            groupListPage.refreshView();
+
+        } else if (requestCode == PersonInfoActivity.START_PERSON_INFO && resultCode == RESULT_OK) {
+
+            Log.d(TAG, "onActivityResult: start person info result ok");
 
             groupListPage.refreshView();
 
@@ -1227,8 +1234,6 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
         showBottomNavAnim();
     }
 
-    private boolean groupOnResume = false;
-
     private void onDidAppear(int position) {
 
         if (sInChooseMode) {
@@ -1278,13 +1283,9 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
                 }
 
-                if (groupListPage != null && isResumed() && !groupOnResume) {
-
-                    Log.d(TAG, "onDidAppear: groupOnResume " + groupOnResume);
+                if (groupListPage != null && isResumed()) {
 
                     groupListPage.refreshView();
-
-                    groupOnResume = true;
 
                 }
 

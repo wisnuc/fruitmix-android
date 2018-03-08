@@ -7,6 +7,7 @@ import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
+import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.util.Util;
@@ -29,12 +30,15 @@ public class GroupRepositoryTest {
     @Mock
     private GroupDataSource groupDataSource;
 
+    @Mock
+    private MediaDataSourceRepository mMediaDataSourceRepository;
+
     @Before
     public void setup() {
 
         MockitoAnnotations.initMocks(this);
 
-        groupRepository = GroupRepository.getInstance(groupDataSource,new MockThreadManager());
+        groupRepository = GroupRepository.getInstance(groupDataSource,new MockThreadManager(),mMediaDataSourceRepository);
 
     }
 

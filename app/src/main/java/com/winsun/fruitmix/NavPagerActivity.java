@@ -89,6 +89,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static com.winsun.fruitmix.PersonInfoActivity.START_PERSON_INFO;
 import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.CREATE_FOLDER_FAIL;
 import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.GET_FOLDER_FAIL;
 import static com.winsun.fruitmix.upload.media.uploadMediaState.UploadMediaState.GET_MEDIA_COUNT_FAIL;
@@ -264,8 +265,6 @@ public class NavPagerActivity extends BaseActivity
 
     public static final int START_ACCOUNT_MANAGE = 0x1001;
 
-    public static final int START_PERSON_INFO = 0x1002;
-
     public static final int RESULT_REFRESH_LOGGED_IN_USER = 0x1002;
     public static final int RESULT_FINISH_ACTIVITY = 0x1003;
     public static final int RESULT_LOGOUT = 0x1004;
@@ -357,7 +356,9 @@ public class NavPagerActivity extends BaseActivity
         userAvatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivityForResult(new Intent(mContext, PersonInfoActivity.class), START_PERSON_INFO);
+
+                PersonInfoActivity.startPersonInfo(NavPagerActivity.this);
+
             }
         });
 
@@ -1001,6 +1002,8 @@ public class NavPagerActivity extends BaseActivity
             if (resultCode == RESULT_OK) {
 
                 refreshUserInNavigationView();
+
+                mediaMainFragment.onActivityResult(requestCode,resultCode,intent);
 
             } else if (resultCode == RESULT_FINISH_ACTIVITY) {
                 finish();

@@ -1,5 +1,6 @@
 package com.winsun.fruitmix;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -31,7 +32,15 @@ public class PersonInfoActivity extends BaseActivity implements PersonInfoView, 
 
     public static final int GO_TO_MODIFY_USERNAME = 0;
 
+    public static final int START_PERSON_INFO = 0x1002;
+
     private ActivityPersonInfoBinding binding;
+
+    public static void startPersonInfo(Activity activity){
+
+        activity.startActivityForResult(new Intent(activity, PersonInfoActivity.class), START_PERSON_INFO);
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

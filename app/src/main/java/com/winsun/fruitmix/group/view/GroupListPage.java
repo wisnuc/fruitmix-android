@@ -12,12 +12,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.PersonInfoActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.ActivityGroupListBinding;
 import com.winsun.fruitmix.eventbus.MqttMessageEvent;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.data.viewmodel.GroupListViewModel;
+import com.winsun.fruitmix.group.interfaces.GoToBindWeChatListener;
 import com.winsun.fruitmix.group.presenter.GroupListPresenter;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.interfaces.Page;
@@ -30,13 +32,14 @@ import com.winsun.fruitmix.token.data.TokenDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
 import java.util.List;
 import java.util.Map;
 
-public class GroupListPage implements Page, IShowHideFragmentListener, GroupListPageView {
+public class GroupListPage implements Page, IShowHideFragmentListener, GroupListPageView,GoToBindWeChatListener {
 
     public static final String TAG = GroupListPage.class.getSimpleName();
 
@@ -75,6 +78,8 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
         noContentViewModel.setNoContentText("没有内容");
 
         binding.setNoContentViewModel(noContentViewModel);
+
+        binding.setBindWeChatListener(this);
 
         final GroupListViewModel groupListViewModel = new GroupListViewModel();
 
@@ -234,4 +239,10 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
     }
 
+    @Override
+    public void toBindWeChat() {
+
+        PersonInfoActivity.startPersonInfo(containerActivity);
+
+    }
 }

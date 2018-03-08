@@ -234,11 +234,27 @@ public class LoginUseCaseTest {
 
         getUserByGUIDCaptor.getValue().onSucceed(Collections.singletonList(user), new OperationSuccess());
 
+        checkStationIsOnlineSucceed(testGUID);
+
         testAfterChooseStationID();
 
         initSystemStateAndVerify();
 
         verify(systemSettingDataSource).setCurrentLoginUserGUID(testGUID);
+    }
+
+    private void checkStationIsOnlineSucceed(String testGUID){
+
+        ArgumentCaptor<BaseLoadDataCallback<Station>> getStationByGUIDCaptor = ArgumentCaptor.forClass(BaseLoadDataCallback.class);
+
+        verify(stationsDataSource).getStationsByWechatGUID(eq(testGUID),getStationByGUIDCaptor.capture());
+
+        Station station = new Station();
+        station.setId(testStationID);
+        station.setOnline(true);
+
+        getStationByGUIDCaptor.getValue().onSucceed(Collections.singletonList(station),new OperationSuccess());
+
     }
 
     @Test

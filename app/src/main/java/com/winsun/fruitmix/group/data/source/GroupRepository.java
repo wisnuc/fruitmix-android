@@ -8,16 +8,19 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.SystemMessageTextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
+import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -39,11 +42,14 @@ public class GroupRepository extends BaseDataRepository {
 
     private GroupDataSource groupDataSource;
 
+    private MediaDataSourceRepository mMediaDataSourceRepository;
+
     private Map<String, PrivateGroup> mPrivateGroups;
 
-    public static GroupRepository getInstance(GroupDataSource groupDataSource, ThreadManager threadManager) {
+    public static GroupRepository getInstance(GroupDataSource groupDataSource, ThreadManager threadManager,
+                                              MediaDataSourceRepository mediaDataSourceRepository) {
         if (ourInstance == null)
-            ourInstance = new GroupRepository(threadManager, groupDataSource);
+            ourInstance = new GroupRepository(threadManager, groupDataSource, mediaDataSourceRepository);
 
         return ourInstance;
     }
@@ -52,11 +58,15 @@ public class GroupRepository extends BaseDataRepository {
         ourInstance = null;
     }
 
-    public GroupRepository(ThreadManager threadManager, GroupDataSource groupDataSource) {
+    public GroupRepository(ThreadManager threadManager, GroupDataSource groupDataSource,
+                           MediaDataSourceRepository mediaDataSourceRepository) {
         super(threadManager);
         this.groupDataSource = groupDataSource;
 
+        mMediaDataSourceRepository = mediaDataSourceRepository;
+
         mPrivateGroups = new LinkedHashMap<>();
+
     }
 
     public void setCurrentUser(User currentUser) {
@@ -194,8 +204,28 @@ public class GroupRepository extends BaseDataRepository {
             public void run() {
                 groupDataSource.getAllUserCommentByGroupUUID(groupRequestParam, new BaseLoadDataCallback<UserComment>() {
                     @Override
-                    public void onSucceed(List<UserComment> data, OperationResult operationResult) {
+                    public void onSucceed(final List<UserComment> data, OperationResult operationResult) {
 
+                        mMediaDataSourceRepository.getLocalMediaWithoutThreadChange(new BaseLoadDataCallback<Media>() {
+                            @Override
+                            public void onSucceed(List<Media> medias, OperationResult operationResult) {
+
+                                handleGetUserCommentSucceed(data, operationResult, medias);
+
+                            }
+
+                            @Override
+                            public void onFail(OperationResult operationResult) {
+
+                                handleGetUserCommentSucceed(data, operationResult, Collections.<Media>emptyList());
+
+                            }
+                        });
+
+                    }
+
+                    private void handleGetUserCommentSucceed(List<UserComment> data, OperationResult operationResult,
+                                                             List<Media> localMedias) {
                         PrivateGroup group = getGroupFromMemory(groupRequestParam.getGroupUUID());
 
                         List<User> groupUsers = group.getUsers();
@@ -209,11 +239,12 @@ public class GroupRepository extends BaseDataRepository {
 
                             if (userComment instanceof SystemMessageTextComment)
                                 ((SystemMessageTextComment) userComment).fillAddOrDeleteUser(groupUsers);
+                            else if (userComment instanceof MediaComment)
+                                checkMediaInCommentIsLocalAndHandle((MediaComment) userComment, localMedias);
 
                         }
 
                         runOnMainThreadCallback.onSucceed(data, operationResult);
-
                     }
 
                     @Override
@@ -225,6 +256,36 @@ public class GroupRepository extends BaseDataRepository {
         });
 
     }
+
+    private void checkMediaInCommentIsLocalAndHandle(MediaComment mediaComment, List<Media> localMedias) {
+
+        List<Media> mediasInComment = mediaComment.getMedias();
+
+        Map<String, Media> localMediaMaps = LocalCache.BuildMediaMapKeyIsUUID(localMedias);
+
+        for (Media media : mediasInComment) {
+
+            if (localMediaMaps.containsKey(media.getUuid())) {
+
+                handleMediaIsLocal(localMediaMaps, media);
+
+            }
+
+        }
+
+    }
+
+    private void handleMediaIsLocal(Map<String, Media> localMediaMaps, Media media) {
+        Media localMedia = localMediaMaps.get(media.getUuid());
+
+        media.setLocal(true);
+
+        media.setThumb(localMedia.getThumb());
+        media.setMiniThumbPath(localMedia.getMiniThumbPath());
+        media.setOriginalPhotoPath(localMedia.getOriginalPhotoPath());
+
+    }
+
 
     public void addGroup(final PrivateGroup privateGroup, BaseOperateCallback callback) {
 

@@ -6,6 +6,8 @@ import com.winsun.fruitmix.base.data.BaseDataOperator;
 import com.winsun.fruitmix.base.data.InjectBaseDataOperator;
 import com.winsun.fruitmix.base.data.retry.RefreshTokenRetryStrategy;
 import com.winsun.fruitmix.http.InjectHttp;
+import com.winsun.fruitmix.media.InjectMedia;
+import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
@@ -38,7 +40,9 @@ public class InjectGroupDataSource {
                 GroupDataSourceConditionCheckWrapper(groupRemoteDataSource,
                 baseDataOperator);
 
-        return GroupRepository.getInstance(groupDataSourceConditionCheckWrapper, ThreadManagerImpl.getInstance());
+        MediaDataSourceRepository mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(context);
+
+        return GroupRepository.getInstance(groupDataSourceConditionCheckWrapper, ThreadManagerImpl.getInstance(),mediaDataSourceRepository);
 
 //        GroupDataSource fakeGroupDataSource = FakeGroupDataSource.getInstance();
 //        return GroupRepository.getInstance(fakeGroupDataSource,ThreadManagerImpl.getInstance());

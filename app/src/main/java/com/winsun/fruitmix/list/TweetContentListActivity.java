@@ -46,6 +46,7 @@ import com.winsun.fruitmix.list.data.MediaInTweetListConverter;
 import com.winsun.fruitmix.list.data.MediaInTweetRemoteDataSource;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
+import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.Util;
@@ -61,10 +62,6 @@ import java.util.Map;
 
 public class TweetContentListActivity extends BaseActivity implements FileListSelectModeListener,
         HandleFileListOperateCallback, IPhotoListListener {
-
-    //TODO: share select function refactor
-
-    private ActivityTweetContentListBinding mActivityTweetContentListBinding;
 
     private static UserComment mUserComment;
 
@@ -121,19 +118,19 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
 
         mActivity = this;
 
-        mActivityTweetContentListBinding = DataBindingUtil.setContentView(this, R.layout.activity_tweet_content_list);
+        ActivityTweetContentListBinding activityTweetContentListBinding = DataBindingUtil.setContentView(this, R.layout.activity_tweet_content_list);
 
-        toolbar = mActivityTweetContentListBinding.toolbarLayout.toolbar;
+        toolbar = activityTweetContentListBinding.toolbarLayout.toolbar;
 
-        revealToolbar = mActivityTweetContentListBinding.revealToolbarLayout.revealToolbar;
+        revealToolbar = activityTweetContentListBinding.revealToolbarLayout.revealToolbar;
 
-        mToolbarViewModel = initToolBar(mActivityTweetContentListBinding, mActivityTweetContentListBinding.toolbarLayout, "");
+        mToolbarViewModel = initToolBar(activityTweetContentListBinding, activityTweetContentListBinding.toolbarLayout, "");
 
         initToolbarViewModel(mToolbarViewModel);
 
         mRevealToolbarViewModel = new RevealToolbarViewModel();
 
-        mActivityTweetContentListBinding.setRevealToolbarViewModel(mRevealToolbarViewModel);
+        activityTweetContentListBinding.setRevealToolbarViewModel(mRevealToolbarViewModel);
 
         initRevealToolbar(mRevealToolbarViewModel);
 
@@ -144,9 +141,17 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
 
         setExitSharedElementCallback(sharedElementCallback);
 
+        String creatorName = userComment.getCreateUserName(this);
+
         if (userComment instanceof MediaComment) {
 
             currentItem = ITEM_MEDIA;
+
+            List<Media> medias = ((MediaComment) userComment).getMedias();
+
+            String title = getString(R.string.media_tweet_title,creatorName,medias.size() + getString(R.string.file_unit));
+
+            mToolbarViewModel.titleText.set(title);
 
             GroupRequestParam groupRequestParam = new GroupRequestParam(userComment.getGroupUUID(), userComment.getStationID());
 
@@ -155,9 +160,9 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
             mNewPhotoList = new NewPhotoList(this, this, false, false, mediaDataSourceRepository,
                     new MediaInTweetListConverter(), groupRequestParam);
 
-            mActivityTweetContentListBinding.containerLayout.removeAllViews();
+            activityTweetContentListBinding.containerLayout.removeAllViews();
 
-            mActivityTweetContentListBinding.containerLayout.addView(mNewPhotoList.getView());
+            activityTweetContentListBinding.containerLayout.addView(mNewPhotoList.getView());
 
             mNewPhotoList.refreshView();
 
@@ -169,8 +174,6 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
         } else if (userComment instanceof FileComment) {
 
             currentItem = ITEM_FILE;
-
-            String creatorName = userComment.getCreateUserName(this);
 
             List<AbstractFile> files = ((FileComment) userComment).getFiles();
 
@@ -205,9 +208,9 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
             mFileFragment = new FileFragment(this, this, this,
                     fileListViewDataSource);
 
-            mActivityTweetContentListBinding.containerLayout.removeAllViews();
+            activityTweetContentListBinding.containerLayout.removeAllViews();
 
-            mActivityTweetContentListBinding.containerLayout.addView(mFileFragment.getView());
+            activityTweetContentListBinding.containerLayout.addView(mFileFragment.getView());
 
             mFileFragment.refreshView();
 
@@ -227,7 +230,7 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
         }
         );
 
-        mFabMenuLayoutViewComponent = new FabMenuLayoutViewComponent(mActivityTweetContentListBinding.fabMenuLayout,
+        mFabMenuLayoutViewComponent = new FabMenuLayoutViewComponent(activityTweetContentListBinding.fabMenuLayout,
                 currentItem == ITEM_MEDIA ? FabMenuItemOnClickDefaultListener.ITEM_MEDIA : FabMenuItemOnClickListener.ITEM_FILE
                 , fabMenuItemOnClickListener);
 

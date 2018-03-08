@@ -71,6 +71,8 @@ public class GroupListPresenter implements ActiveView {
 
     private MqttUseCase mMqttUseCase;
 
+    private boolean alreadyCallGetGroupList = false;
+
     public GroupListPresenter(GroupListPageView groupListPageView, User currentUser,
                               TokenDataSource tokenDataSource, GroupRepository groupRepository,
                               LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel,
@@ -104,18 +106,38 @@ public class GroupListPresenter implements ActiveView {
 
     public void refreshGroups() {
 
+        if(alreadyCallGetGroupList)
+            return;
+
         if (mSystemSettingDataSource.getCurrentWAToken().isEmpty()) {
 
             loadingViewModel.showLoading.set(false);
 
-            noContentViewModel.setNoContentText(groupListPageView.getString(R.string.login_with_wechat_to_use_group));
-            noContentViewModel.showNoContent.set(true);
+            groupListViewModel.showNoWATokenExplainLayout.set(true);
+
+            String currentUserGUID = mCurrentUser.getAssociatedWeChatGUID();
+
+            if (currentUserGUID != null && currentUserGUID.length() > 0) {
+
+                groupListViewModel.showGoToBindWeChatBtn.set(false);
+
+                groupListViewModel.explainTextField.set(groupListPageView.getString(R.string.login_with_wechat_to_use_group));
+
+            } else {
+
+                groupListViewModel.showGoToBindWeChatBtn.set(true);
+
+                groupListViewModel.explainTextField.set(groupListPageView.getString(R.string.bind_wechat_to_use_group));
+
+            }
 
             groupListViewModel.showRecyclerView.set(false);
             groupListViewModel.showAddFriendsFAB.set(false);
 
             return;
         }
+
+        alreadyCallGetGroupList = true;
 
         groupRepository.getGroupList(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<PrivateGroup>() {
             @Override
@@ -161,6 +183,8 @@ public class GroupListPresenter implements ActiveView {
 
                 }
 
+                groupListViewModel.showNoWATokenExplainLayout.set(false);
+
                 groupListViewModel.showAddFriendsFAB.set(false);
 
                 initMqttService();
@@ -173,7 +197,10 @@ public class GroupListPresenter implements ActiveView {
                 groupListPageView.finishSwipeRefreshAnimation();
 
                 loadingViewModel.showLoading.set(false);
+
                 noContentViewModel.showNoContent.set(true);
+
+                groupListViewModel.showNoWATokenExplainLayout.set(false);
 
                 groupListViewModel.showRecyclerView.set(false);
                 groupListViewModel.showAddFriendsFAB.set(false);

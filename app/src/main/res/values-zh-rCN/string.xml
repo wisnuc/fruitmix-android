@@ -601,7 +601,21 @@
 
     <string name="file_tweet_title">%1$s 分享了文件 %2$s</string>
 
+    <string name="media_tweet_title">%1$s 分享了媒体文件 %2$s</string>
+
     <string name="me">我</string>
+
+    <string name="login_with_wechat_to_use_group">请用微信登录以使用群功能</string>
+
+    <string name="bind_wechat_to_use_group">请绑定微信以使用群功能</string>
+
+    <string name="to_bind">去绑定</string>
+
+    <string name="station_offline">[离线]</string>
+
+    <string name="quited_user">退群用户</string>
+
+    <string name="only_support_upload_for_one_local_media">目前仅支持上传一张本地照片</string>
 
     <!-- group setting -->
     <string name="group_member">群成员</string>
@@ -625,14 +639,6 @@
     <string name="quit_group">退出群</string>
 
     <string name="no_operate_group_permission">只有群主可以操作</string>
-
-    <string name="login_with_wechat_to_use_group">请用微信登录以使用群功能</string>
-
-    <string name="station_offline">[离线]</string>
-
-    <string name="quited_user">退群用户</string>
-
-    <string name="only_support_upload_for_one_local_media">目前仅支持上传一张本地照片</string>
 
     <!-- inbox -->
     <string name="inbox">收件箱</string>

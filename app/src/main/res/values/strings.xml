@@ -631,6 +631,19 @@
 
     <string name="file_tweet_title">%1$s share file %2$s</string>
 
+    <string name="media_tweet_title">%1$s share media files %2$s</string>
+
+    <string name="login_with_wechat_to_use_group">Please log in with WeChat to use group</string>
+
+    <string name="bind_wechat_to_use_group">Please bind WeChat to use group</string>
+
+    <string name="to_bind">To bind</string>
+
+    <string name="station_offline">[Offline]</string>
+
+    <string name="quited_user">Quited user</string>
+
+    <string name="only_support_upload_for_one_local_media">Currently only support for uploading a local photo</string>
 
     <!-- group setting -->
     <string name="group_member">Group Members</string>
@@ -654,14 +667,6 @@
     <string name="quit_group">Quit group</string>
 
     <string name="no_operate_group_permission">Only owner can operate</string>
-
-    <string name="login_with_wechat_to_use_group">Please log in with WeChat to use group</string>
-
-    <string name="station_offline">[Offline]</string>
-
-    <string name="quited_user">Quited user</string>
-
-    <string name="only_support_upload_for_one_local_media">Currently only support for uploading a local photo</string>
 
     <!-- inbox -->
     <string name="inbox">Inbox</string>

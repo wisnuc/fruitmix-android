@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -15,6 +16,10 @@
         <variable
             name="groupListViewModel"
             type="com.winsun.fruitmix.group.data.viewmodel.GroupListViewModel" />
+
+        <variable
+            name="bindWeChatListener"
+            type="com.winsun.fruitmix.group.interfaces.GoToBindWeChatListener"/>
 
         <import type="android.view.View" />
 
@@ -31,14 +36,53 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:background="@color/white">
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/group_recyclerview"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/white"
                     android:visibility="@{groupListViewModel.showRecyclerView?View.VISIBLE:View.INVISIBLE,default=invisible}" />
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/no_wa_token_explain_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="@{groupListViewModel.showNoWATokenExplainLayout?View.VISIBLE:View.INVISIBLE}">
+
+                    <TextView
+                        android:id="@+id/explain_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@{groupListViewModel.explainTextField}"
+                        android:textColor="@color/eighty_seven_percent_black"
+                        android:textSize="20dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="TextView" />
+
+                    <Button
+                        android:id="@+id/bind_or_login_with_wechat_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:onClick="@{()->bindWeChatListener.toBindWeChat()}"
+                        android:background="@drawable/red_btn_bg"
+                        android:padding="4dp"
+                        android:text="@string/to_bind"
+                        android:textColor="@color/eighty_seven_percent_white"
+                        android:visibility="@{groupListViewModel.showGoToBindWeChatBtn?View.VISIBLE:View.INVISIBLE}"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/explain_textview"
+                        tools:text="@string/wechat_login" />
+
+                </android.support.constraint.ConstraintLayout>
 
                 <include
                     layout="@layout/new_no_content_layout"
@@ -62,6 +106,7 @@
 
         <include
             layout="@layout/new_loading_layout"
+            android:visibility="gone"
             app:loadingViewModel="@{loadingViewModel}" />
 
     </FrameLayout>

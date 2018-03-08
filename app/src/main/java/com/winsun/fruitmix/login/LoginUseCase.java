@@ -5,6 +5,7 @@ import android.util.Log;
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
@@ -33,6 +34,7 @@ import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.usecase.GetAllBindingLocalUserUseCase;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.wechat.user.WeChatUser;
 import com.winsun.fruitmix.wechat.user.WeChatUserDataSource;
 
@@ -302,11 +304,15 @@ public class LoginUseCase extends BaseDataRepository {
 
             httpRequestFactory.setCurrentData(mToken, mGateway);
 
+            Log.d(TAG, "loginWithWeChatUser: start getWeUserInfoByGUIDWithCloudAPI," + Util.getCurrentFormatTime());
+
             userDataRepository.getWeUserInfoByGUIDWithCloudAPI(weChatUser.getGuid(), new BaseLoadDataCallback<User>() {
                 @Override
                 public void onSucceed(final List<User> data, OperationResult operationResult) {
 
-                    WeChatTokenUserWrapper weChatTokenUserWrapper = new WeChatTokenUserWrapper();
+                    Log.d(TAG, "loginWithWeChatUser: finish getWeUserInfoByGUIDWithCloudAPI," + Util.getCurrentFormatTime());
+
+                    final WeChatTokenUserWrapper weChatTokenUserWrapper = new WeChatTokenUserWrapper();
 
                     User user = data.get(0);
 
@@ -315,20 +321,38 @@ public class LoginUseCase extends BaseDataRepository {
                     weChatTokenUserWrapper.setToken(weChatUser.getToken());
                     weChatTokenUserWrapper.setGuid(weChatUser.getGuid());
 
-                    getUsersAfterChooseStationID(weChatTokenUserWrapper, weChatUser.getStationID(), new BaseOperateDataCallbackImpl<Boolean>() {
+                    checkStationIsOnline(weChatTokenUserWrapper, weChatUser.getStationID(), new BaseOperateCallback() {
                         @Override
-                        public void onSucceed(Boolean data, OperationResult result) {
-                            super.onSucceed(data, result);
+                        public void onSucceed() {
 
-                            callback.onSucceed(data, result);
+                            Log.d(TAG, "checkStationIsOnline,onSucceed");
+
+                            getUsersAfterChooseStationID(weChatTokenUserWrapper, weChatUser.getStationID(), new BaseOperateDataCallbackImpl<Boolean>() {
+                                @Override
+                                public void onSucceed(Boolean data, OperationResult result) {
+                                    super.onSucceed(data, result);
+
+                                    callback.onSucceed(data, result);
+
+                                }
+
+                                @Override
+                                public void onFail(OperationResult result) {
+                                    super.onFail(result);
+
+                                    callback.onFail(result);
+
+                                }
+                            });
 
                         }
 
                         @Override
-                        public void onFail(OperationResult result) {
-                            super.onFail(result);
+                        public void onFail(OperationResult operationResult) {
 
-                            callback.onFail(result);
+                            Log.d(TAG, "checkStationIsOnline,onFail");
+
+                            callback.onFail(operationResult);
 
                         }
                     });
@@ -338,12 +362,58 @@ public class LoginUseCase extends BaseDataRepository {
                 @Override
                 public void onFail(OperationResult operationResult) {
 
+                    Log.d(TAG, "onFail: finish getWeUserInfoByGUIDWithCloudAPI");
+
                     callback.onFail(operationResult);
 
                 }
             });
 
         }
+    }
+
+    private void checkStationIsOnline(WeChatTokenUserWrapper weChatTokenUserWrapper, final String stationID, final BaseOperateCallback callback) {
+
+        stationsDataSource.getStationsByWechatGUID(weChatTokenUserWrapper.getGuid(), new BaseLoadDataCallback<Station>() {
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                Log.d(TAG, "getStationsByWechatGUID,onFail");
+
+                callback.onFail(operationResult);
+
+            }
+
+            @Override
+            public void onSucceed(List<Station> data, OperationResult operationResult) {
+
+                int stationSize = data.size();
+
+                int currentCount = 0;
+
+                for (int i = 0; i < stationSize; i++) {
+
+                    Station station = data.get(i);
+
+                    if (station.getId().equals(stationID)) {
+                        callback.onSucceed();
+                        break;
+                    }
+
+                    currentCount++;
+                }
+
+                if (currentCount >= stationSize) {
+
+                    Log.d(TAG, "getStationsByWechatGUID,onFail,station is offline");
+
+                    callback.onFail(new OperationFail("station is offline"));
+
+                }
+
+            }
+        });
+
     }
 
     private void getUsers(final String currentUserUUID, final BaseOperateDataCallback<Boolean> callback) {
@@ -753,9 +823,13 @@ public class LoginUseCase extends BaseDataRepository {
 
         httpRequestFactory.setStationID(stationID);
 
+        Log.d(TAG, "getUsersAfterChooseStationID: start getUsersByStationIDWithCloudAPI," + Util.getCurrentFormatTime());
+
         userDataRepository.getUsersByStationIDWithCloudAPI(stationID, new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
+
+                Log.d(TAG, "getUsersAfterChooseStationID,onSucceed: finishGetUsersByStationIDWithCloudAPI," + Util.getCurrentFormatTime());
 
                 User currentLocalUser = null;
 
@@ -805,6 +879,8 @@ public class LoginUseCase extends BaseDataRepository {
             @Override
             public void onFail(OperationResult operationResult) {
 
+                Log.d(TAG, "getUsersAfterChooseStationID,onFail: finishGetUsersByStationIDWithCloudAPI," + Util.getCurrentFormatTime());
+
                 callback.onFail(operationResult);
             }
         });
@@ -813,9 +889,13 @@ public class LoginUseCase extends BaseDataRepository {
 
     private void getUserByUserUUID(final String stationID, final User currentUser, final List<User> users, final BaseOperateDataCallback<Boolean> callback) {
 
+        Log.d(TAG, "getUserByUserUUID: start getUserDetailedInfoByUUID");
+
         userDataRepository.getUserDetailedInfoByUUID(currentUser.getUuid(), new BaseLoadDataCallback<User>() {
             @Override
             public void onSucceed(List<User> data, OperationResult operationResult) {
+
+                Log.d(TAG, "onSucceed: finish getUserDetailedInfoByUUID");
 
                 boolean findUser = false;
 
@@ -830,9 +910,13 @@ public class LoginUseCase extends BaseDataRepository {
                         currentUser.setAdmin(user.isAdmin());
                         currentUser.setFirstUser(user.isFirstUser());
 
+                        Log.d(TAG, "start getCurrentUserHome");
+
                         userDataRepository.getCurrentUserHome(new BaseLoadDataCallback<String>() {
                             @Override
                             public void onSucceed(List<String> data, OperationResult operationResult) {
+
+                                Log.d(TAG, "onSucceed: finish getCurrentUserHome");
 
                                 Log.d(TAG, "onSucceed: current User Home: " + data.get(0));
 
@@ -853,6 +937,8 @@ public class LoginUseCase extends BaseDataRepository {
                             @Override
                             public void onFail(OperationResult operationResult) {
 
+                                Log.d(TAG, "onFail: finish getCurrentUserHome");
+
                                 callback.onFail(operationResult);
 
                             }
@@ -870,6 +956,8 @@ public class LoginUseCase extends BaseDataRepository {
 
             @Override
             public void onFail(OperationResult operationResult) {
+
+                Log.d(TAG, "onFail: finish getUserDetailedInfoByUUID");
 
                 callback.onFail(operationResult);
 
