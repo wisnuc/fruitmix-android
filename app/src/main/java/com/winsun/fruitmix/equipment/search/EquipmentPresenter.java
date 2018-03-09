@@ -37,8 +37,7 @@ import com.winsun.fruitmix.model.operationResult.OperationMoreThanOneStation;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 
 import java.lang.ref.WeakReference;

@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.viewholder;
+package com.winsun.fruitmix.recyclerview;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

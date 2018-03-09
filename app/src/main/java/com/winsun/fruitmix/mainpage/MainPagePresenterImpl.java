@@ -31,7 +31,7 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 
 import java.util.ArrayList;
 import java.util.Iterator;

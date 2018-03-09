@@ -37,6 +37,7 @@ import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
+import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.list.data.FileInTweetViewDataSource;
@@ -49,6 +50,7 @@ import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
+import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -149,7 +151,7 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
 
             List<Media> medias = ((MediaComment) userComment).getMedias();
 
-            String title = getString(R.string.media_tweet_title,creatorName,medias.size() + getString(R.string.file_unit));
+            String title = getString(R.string.media_tweet_title, creatorName, medias.size() + getString(R.string.file_unit));
 
             mToolbarViewModel.titleText.set(title);
 
@@ -227,7 +229,8 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
             public void unExecute() {
 
             }
-        }
+        }, InjectSystemSettingDataSource.provideSystemSettingDataSource(mActivity), InjectGroupDataSource.provideGroupRepository(mActivity),
+                InjectUser.provideRepository(mActivity)
         );
 
         mFabMenuLayoutViewComponent = new FabMenuLayoutViewComponent(activityTweetContentListBinding.fabMenuLayout,

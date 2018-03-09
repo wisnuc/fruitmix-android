@@ -53,7 +53,7 @@ import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.video.PlayVideoActivity;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 
 import java.io.File;
 import java.util.ArrayList;

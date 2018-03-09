@@ -28,7 +28,7 @@ import com.winsun.fruitmix.equipment.maintenance.data.InjectMaintenanceDataSourc
 import com.winsun.fruitmix.equipment.maintenance.data.MaintenanceDataSource;
 import com.winsun.fruitmix.equipment.maintenance.data.VolumeState;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 

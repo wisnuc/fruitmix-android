@@ -29,7 +29,7 @@ import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.ViewItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.util.ArrayList;

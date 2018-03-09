@@ -8,7 +8,7 @@ import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.databinding.AddFriendItemBinding;
 import com.winsun.fruitmix.group.data.source.FakeGroupDataSource;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;

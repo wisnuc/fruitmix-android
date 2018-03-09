@@ -2,17 +2,31 @@ package com.winsun.fruitmix.component.fab.menu;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.command.AbstractCommand;
+import com.winsun.fruitmix.component.GroupShareMenuLayout;
 import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
+import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
+import com.winsun.fruitmix.group.data.model.FileComment;
+import com.winsun.fruitmix.group.data.model.MediaComment;
+import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.UserComment;
+import com.winsun.fruitmix.group.data.source.GroupRepository;
+import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
+import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
@@ -26,19 +40,32 @@ import java.util.List;
 
 public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickListener {
 
-    private NewPhotoList mNewPhotoList;
+    private SelectedMediasListener mSelectedMediasListener;
+
     private FileFragment mFileFragment;
 
     private MediaDataSourceRepository mediaDataSourceRepository;
 
     private AbstractCommand mQuitSelectModeCommand;
 
-    public FabMenuItemOnClickDefaultListener(NewPhotoList newPhotoList, FileFragment fileFragment,
+    private SystemSettingDataSource mSystemSettingDataSource;
+
+    private GroupRepository mGroupRepository;
+
+    private User currentUser;
+
+    public FabMenuItemOnClickDefaultListener(SelectedMediasListener selectedMediasListener, FileFragment fileFragment,
                                              MediaDataSourceRepository mediaDataSourceRepository,
-                                             AbstractCommand quitSelectModeCommand) {
-        mNewPhotoList = newPhotoList;
+                                             AbstractCommand quitSelectModeCommand, SystemSettingDataSource systemSettingDataSource,
+                                             GroupRepository groupRepository, UserDataRepository userDataRepository) {
+        mSelectedMediasListener = selectedMediasListener;
         mFileFragment = fileFragment;
         this.mediaDataSourceRepository = mediaDataSourceRepository;
+
+        mSystemSettingDataSource = systemSettingDataSource;
+        mGroupRepository = groupRepository;
+
+        currentUser = userDataRepository.getUserByUUID(mSystemSettingDataSource.getCurrentLoginUserUUID());
 
         mQuitSelectModeCommand = quitSelectModeCommand;
     }
@@ -47,7 +74,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
     public void systemShareBtnOnClick(final Context context, final int currentItem) {
 
         if (!Util.isNetworkConnected(context)) {
-            Toast.makeText(context,context.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, context.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -64,7 +91,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
         AbstractCommand shareToOtherAppCommand = new AbstractCommand() {
             @Override
             public void execute() {
-                handleShareToOtherApp(currentItem,context);
+                handleShareToOtherApp(currentItem, context);
 
                 mQuitSelectModeCommand.execute();
 
@@ -77,12 +104,26 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
             }
         };
 
-        new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(context).show();
+/*        if (mSystemSettingDataSource.getCurrentWAToken().isEmpty())
+            new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(context).show();
+        else
+            new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand,
+                    new GroupShareMenuLayout.GroupShareMenuItemOnClickListener() {
+                        @Override
+                        public void onClick(PrivateGroup item) {
 
+                            handleShareToGroup(currentItem, context, item);
+
+                            mQuitSelectModeCommand.execute();
+
+                        }
+                    }).createDialog(context).show();*/
+
+        new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(context).show();
 
     }
 
-    private void handleShareToOtherApp(int currentItem,Context context) {
+    private void handleShareToOtherApp(int currentItem, Context context) {
 
         if (currentItem == ITEM_MEDIA)
             shareMediaToOtherApp(context);
@@ -90,6 +131,76 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
             shareFileToOtherApp();
 
     }
+
+    private void handleShareToGroup(int currentItem, final Context context, PrivateGroup group) {
+
+        UserComment userComment;
+
+        String groupUUID = group.getUUID();
+        String stationID = group.getStationID();
+
+        if (currentItem == ITEM_MEDIA) {
+            userComment = createMediaComment(groupUUID, stationID);
+        } else {
+            userComment = createFileComment(groupUUID, stationID);
+        }
+
+        mDialog = ProgressDialog.show(context, null, context.getString(R.string.send), true, true);
+        mDialog.setCanceledOnTouchOutside(false);
+
+        GroupRequestParam groupRequestParam = new GroupRequestParam(groupUUID, stationID);
+
+        mGroupRepository.insertUserComment(groupRequestParam, userComment, new BaseOperateCallback() {
+            @Override
+            public void onSucceed() {
+
+                dismissDialog();
+
+                Toast.makeText(context, context.getString(R.string.success, context.getString(R.string.send)), Toast.LENGTH_SHORT)
+                        .show();
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                dismissDialog();
+
+                Toast.makeText(context, operationResult.getResultMessage(context), Toast.LENGTH_SHORT)
+                        .show();
+
+            }
+        });
+
+    }
+
+    @NonNull
+    private UserComment createFileComment(String groupUUID, String stationID) {
+        UserComment userComment;
+
+        List<AbstractRemoteFile> abstractRemoteFiles = mFileFragment.getSelectedFiles();
+
+        List<AbstractFile> files = new ArrayList<>(abstractRemoteFiles.size());
+
+        files.addAll(abstractRemoteFiles);
+
+        userComment = new FileComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID, stationID, files);
+
+        return userComment;
+    }
+
+    @NonNull
+    private UserComment createMediaComment(String groupUUID, String stationID) {
+        UserComment userComment;
+
+        List<Media> medias = mSelectedMediasListener.getSelectedMedias();
+
+        userComment = new MediaComment(Util.createLocalUUid(), currentUser, System.currentTimeMillis(), groupUUID, stationID, medias);
+
+        return userComment;
+
+    }
+
 
     private List<Media> mSelectMedias;
 
@@ -99,7 +210,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
 
     private void shareMediaToOtherApp(final Context context) {
 
-        mSelectMedias = new ArrayList<>(mNewPhotoList.getSelectedMedias());
+        mSelectMedias = new ArrayList<>(mSelectedMediasListener.getSelectedMedias());
 
         mSelectMediaOriginalPhotoPaths = new ArrayList<>(mSelectMedias.size());
 
@@ -180,8 +291,6 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
 //        quitSelectMode();
 
     }
-
-
 
 
 }

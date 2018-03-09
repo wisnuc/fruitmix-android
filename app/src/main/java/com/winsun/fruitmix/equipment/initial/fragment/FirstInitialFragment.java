@@ -16,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
@@ -32,7 +31,7 @@ import com.winsun.fruitmix.equipment.initial.viewmodel.DiskDetailViewModel;
 import com.winsun.fruitmix.equipment.initial.viewmodel.DiskVolumeViewModel;
 import com.winsun.fruitmix.equipment.initial.viewmodel.FirstInitialFragmentViewModel;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 
 import org.jetbrains.annotations.NotNull;
 

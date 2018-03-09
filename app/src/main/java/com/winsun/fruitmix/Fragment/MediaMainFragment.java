@@ -51,6 +51,7 @@ import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
+import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.setting.GroupSettingActivity;
 import com.winsun.fruitmix.group.view.GroupListPage;
 import com.winsun.fruitmix.inbox.view.InboxListPage;
@@ -242,7 +243,8 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
             public void unExecute() {
 
             }
-        }
+        }, mSystemSettingDataSource, InjectGroupDataSource.provideGroupRepository(mContext),
+                InjectUser.provideRepository(mContext)
         );
 
         mFabMenuLayoutViewComponent = new FabMenuLayoutViewComponent(binding.fabMenuLayout,

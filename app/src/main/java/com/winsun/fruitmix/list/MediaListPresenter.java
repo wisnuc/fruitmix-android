@@ -37,7 +37,7 @@ import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
 import com.winsun.fruitmix.mediaModule.viewmodel.PhotoItemViewModel;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;

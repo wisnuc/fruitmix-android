@@ -32,7 +32,8 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.token.data.TokenDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
+import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
@@ -106,10 +107,17 @@ public class GroupListPresenter implements ActiveView {
 
     public void refreshGroups() {
 
-        if(alreadyCallGetGroupList)
+        if (alreadyCallGetGroupList) {
+
+            groupListPageView.finishSwipeRefreshAnimation();
+
             return;
 
+        }
+
         if (mSystemSettingDataSource.getCurrentWAToken().isEmpty()) {
+
+            groupListPageView.finishSwipeRefreshAnimation();
 
             loadingViewModel.showLoading.set(false);
 
@@ -351,21 +359,7 @@ public class GroupListPresenter implements ActiveView {
                 }
             });
 
-            SImageView sImageView = binding.userIconView;
-
-            List<User> users = privateGroup.getUsers();
-
-            int size = users.size();
-
-            List<String> avatarUrls = new ArrayList<>(size);
-
-            for (User user : users) {
-
-                avatarUrls.add(user.getAvatar());
-
-            }
-
-            sImageView.setImageUrls(avatarUrls.toArray(new String[]{}));
+            Util.fillGroupUserAvatar(privateGroup, binding.userIconView);
 
         }
 

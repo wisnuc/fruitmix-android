@@ -46,11 +46,10 @@ import com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadedChildItemViewModel
 import com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadedGroupItemViewModel;
 import com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadingChildItemViewModel;
 import com.winsun.fruitmix.torrent.viewmodel.TorrentDownloadingGroupItemViewModel;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;

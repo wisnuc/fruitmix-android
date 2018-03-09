@@ -24,7 +24,7 @@ import com.winsun.fruitmix.file.data.model.LocalFile;
 import com.winsun.fruitmix.file.view.viewmodel.FileItemViewModel;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewholder.BaseBindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BaseBindingViewHolder;
 
 import java.io.File;
 import java.util.ArrayList;

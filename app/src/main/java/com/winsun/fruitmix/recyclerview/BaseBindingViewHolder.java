@@ -1,8 +1,6 @@
-package com.winsun.fruitmix.viewholder;
+package com.winsun.fruitmix.recyclerview;
 
 import android.databinding.ViewDataBinding;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
 
 /**
  * Created by Administrator on 2016/11/17.

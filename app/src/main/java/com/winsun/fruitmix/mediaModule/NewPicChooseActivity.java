@@ -397,6 +397,8 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
             @Override
             public void onSucceed() {
 
+                dismissDialog();
+
                 showToast(getString(R.string.success, getString(R.string.send)));
 
                 NewPicChooseActivity.this.setResult(RESULT_OK);
@@ -407,6 +409,8 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
             @Override
             public void onFail(OperationResult result) {
+
+                dismissDialog();
 
                 showToast(result.getResultMessage(NewPicChooseActivity.this));
 

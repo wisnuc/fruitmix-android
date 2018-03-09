@@ -25,16 +25,16 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:visibility="gone"
-        android:background="@color/divide_bg" />
+        android:background="@color/divide_bg"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/share_in_app_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clickable="true"
-        android:visibility="gone"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
 
         <ImageView
             android:layout_width="40dp"
@@ -50,6 +50,11 @@
             android:textSize="12dp" />
 
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/group_share_menu_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <View
         android:layout_width="match_parent"

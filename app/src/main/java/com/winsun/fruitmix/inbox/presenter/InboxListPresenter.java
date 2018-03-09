@@ -35,7 +35,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.ViewItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 

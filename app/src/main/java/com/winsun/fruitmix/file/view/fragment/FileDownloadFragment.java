@@ -51,7 +51,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.lang.ref.WeakReference;

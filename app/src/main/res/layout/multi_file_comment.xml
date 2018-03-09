@@ -48,7 +48,7 @@
                 android:layout_marginStart="1dp"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/pic1"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="@+id/pic1">
 
             </FrameLayout>
 

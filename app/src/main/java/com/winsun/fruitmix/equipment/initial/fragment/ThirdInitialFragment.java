@@ -15,10 +15,9 @@ import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.FragmentThirdInitialBinding;
 import com.winsun.fruitmix.databinding.InstallDiskItemBinding;
-import com.winsun.fruitmix.equipment.initial.data.EquipmentDiskVolume;
 import com.winsun.fruitmix.equipment.initial.viewmodel.DiskVolumeViewModel;
 import com.winsun.fruitmix.equipment.initial.viewmodel.ThirdInitialFragmentViewModel;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;

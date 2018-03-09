@@ -7,7 +7,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.R;
@@ -24,7 +23,7 @@ import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.HttpErrorBodyParser;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 
 import org.json.JSONException;
 

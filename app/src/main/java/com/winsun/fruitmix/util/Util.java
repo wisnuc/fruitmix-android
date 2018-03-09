@@ -25,8 +25,10 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import com.github.druk.rxdnssd.BonjourService;
+import com.szysky.customize.siv.SImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.GravityArcMotion;
+import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.user.DefaultCommentUser;
@@ -43,6 +45,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -1073,6 +1076,42 @@ public class Util {
 
             user.setDefaultAvatarBgColor(avatarBgColor);
         }
+    }
+
+    public static void fillGroupUserAvatar(PrivateGroup group, SImageView sImageView){
+
+        List<User> users = group.getUsers();
+
+        int size = users.size();
+
+        List<String> avatarUrls = new ArrayList<>(size);
+
+        for (User user : users) {
+
+            avatarUrls.add(user.getAvatar());
+
+        }
+
+        sImageView.setImageUrls(avatarUrls.toArray(new String[]{}));
+
+    }
+
+    public static <T> boolean checkItemIsInTheList(T item, List<T> list, ComparisonRule comparisonRule) {
+
+        int currentCount = 0;
+        int totalCount = list.size();
+
+        for (; currentCount < totalCount; currentCount++) {
+
+            T itemInList = list.get(currentCount);
+
+            if (comparisonRule.compare(item, itemInList) == 0)
+                break;
+
+        }
+
+        return currentCount < totalCount;
+
     }
 
 

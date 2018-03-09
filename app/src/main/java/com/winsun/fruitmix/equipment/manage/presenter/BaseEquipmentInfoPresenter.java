@@ -18,7 +18,7 @@ import com.winsun.fruitmix.equipment.manage.viewmodel.EquipmentInfoItem;
 import com.winsun.fruitmix.equipment.manage.viewmodel.EquipmentInfoViewModel;
 import com.winsun.fruitmix.equipment.manage.view.EquipmentInfoView;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 

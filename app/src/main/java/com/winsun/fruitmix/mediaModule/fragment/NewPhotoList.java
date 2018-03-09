@@ -44,6 +44,7 @@ import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.component.fab.menu.SelectedMediasListener;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.NewPhotoLayoutBinding;
 import com.winsun.fruitmix.databinding.NewPhotoTitleItemBinding;
@@ -81,7 +82,7 @@ import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewholder.BindingViewHolder;
+import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -97,7 +98,7 @@ import io.github.sin3hz.fastjumper.callback.SpannableCallback;
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView, SCloudTokenContainer {
+public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView, SCloudTokenContainer,SelectedMediasListener {
 
     public static final String TAG = NewPhotoList.class.getSimpleName();
 
