@@ -220,8 +220,6 @@ public class BindWeChatUserPresenter implements WXEntryActivity.WXEntryGetWeChat
         user.setAvatar(mWeChatTokenUserWrapper.getAvatarUrl());
         user.setAssociatedWeChatGUID(mWeChatTokenUserWrapper.getGuid());
 
-        systemSettingDataSource.setCurrentWAToken(mWeChatTokenUserWrapper.getToken());
-
         userDataRepository.updateUser(user);
 
         personInfoView.handleBindSucceed();

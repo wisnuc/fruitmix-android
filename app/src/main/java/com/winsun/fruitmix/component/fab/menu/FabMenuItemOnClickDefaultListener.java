@@ -104,7 +104,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
             }
         };
 
-/*        if (mSystemSettingDataSource.getCurrentWAToken().isEmpty())
+        if (mSystemSettingDataSource.getCurrentWAToken().isEmpty())
             new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(context).show();
         else
             new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand,
@@ -117,9 +117,9 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
                             mQuitSelectModeCommand.execute();
 
                         }
-                    }).createDialog(context).show();*/
+                    }).createDialog(context).show();
 
-        new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(context).show();
+//        new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(context).show();
 
     }
 

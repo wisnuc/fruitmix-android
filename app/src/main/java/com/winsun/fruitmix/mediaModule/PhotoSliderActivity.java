@@ -54,6 +54,9 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.component.PinchImageView;
+import com.winsun.fruitmix.component.fab.menu.FabMenuItemOnClickDefaultListener;
+import com.winsun.fruitmix.component.fab.menu.FabMenuItemOnClickListener;
+import com.winsun.fruitmix.component.fab.menu.SelectedMediasListener;
 import com.winsun.fruitmix.databinding.ActivityPhotoSliderBinding;
 import com.winsun.fruitmix.dialog.DialogFactory;
 import com.winsun.fruitmix.dialog.PhotoOperationAlertDialogFactory;
@@ -61,6 +64,7 @@ import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
+import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
@@ -78,6 +82,7 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.token.manager.InjectSCloudTokenManager;
 import com.winsun.fruitmix.token.manager.TokenManager;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
+import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
@@ -89,7 +94,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PhotoSliderActivity extends BaseActivity implements IImageLoadListener, SCloudTokenContainer {
+public class PhotoSliderActivity extends BaseActivity implements IImageLoadListener, SCloudTokenContainer,
+        SelectedMediasListener {
 
     public static final String TAG = "PhotoSliderActivity";
 
@@ -376,6 +382,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     public static final String KEY_STATION_ID = "key_station_id";
 
+    private FabMenuItemOnClickListener mFabMenuItemOnClickListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -487,6 +495,41 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         mBaseDataOperator = InjectBaseDataOperator.provideInstance(this,
                 tokenManager, this, new RefreshTokenRetryStrategy(tokenManager));
 
+        initFabMenuItemOnClickListener();
+
+    }
+
+    private void initFabMenuItemOnClickListener() {
+
+        mFabMenuItemOnClickListener = new FabMenuItemOnClickDefaultListener(
+                this, null, mediaDataSourceRepository, new AbstractCommand() {
+            @Override
+            public void execute() {
+
+            }
+
+            @Override
+            public void unExecute() {
+
+            }
+        }, systemSettingDataSource, InjectGroupDataSource.provideGroupRepository(this),
+                InjectUser.provideRepository(this)
+        );
+
+    }
+
+    @Override
+    public List<Media> getSelectedMedias() {
+
+        Media media = mediaViewModels.get(currentPhotoPosition).getMedia();
+
+        String mediaUUID = media.getUuid();
+        if (mediaUUID.isEmpty()) {
+            mediaUUID = Util.calcSHA256OfFile(media.getOriginalPhotoPath());
+            media.setUuid(mediaUUID);
+        }
+
+        return Collections.singletonList(media);
     }
 
     @Override
@@ -650,67 +693,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     }
 
     private void showCreateShareBottomDialog() {
-        if (!Util.isNetworkConnected(mContext)) {
-            Toast.makeText(mContext, getString(R.string.no_network), Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        final Media media = mediaViewModels.get(currentPhotoPosition).getMedia();
+        mFabMenuItemOnClickListener.systemShareBtnOnClick(mContext,FabMenuItemOnClickListener.ITEM_MEDIA);
 
-        String mediaUUID = media.getUuid();
-        if (mediaUUID.isEmpty()) {
-            mediaUUID = Util.calcSHA256OfFile(media.getOriginalPhotoPath());
-            media.setUuid(mediaUUID);
-        }
-
-        AbstractCommand shareInAppCommand = new AbstractCommand() {
-            @Override
-            public void execute() {
-
-            }
-
-            @Override
-            public void unExecute() {
-            }
-        };
-
-        AbstractCommand shareToOtherAppCommand = new AbstractCommand() {
-            @Override
-            public void execute() {
-
-                String originalPhotoPath = media.getOriginalPhotoPath();
-
-                if (originalPhotoPath.length() != 0) {
-
-                    FileUtil.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
-
-                } else {
-
-                    mDialog = showProgressDialog(String.format(getString(R.string.operating_title), getString(R.string.download_original_photo)));
-
-                    mDialog.setCanceledOnTouchOutside(false);
-
-                    mediaDataSourceRepository.downloadMedia(Collections.singletonList(media), new BaseOperateDataCallbackImpl<Boolean>() {
-                        @Override
-                        public void onSucceed(Boolean data, OperationResult result) {
-                            super.onSucceed(data, result);
-
-                            handleDownloadMedia();
-
-                        }
-                    });
-
-//                    EventBus.getDefault().post(new RetrieveMediaOriginalPhotoRequestEvent(OperationType.GET, OperationTargetType.MEDIA_ORIGINAL_PHOTO, Collections.singletonList(media)));
-                }
-
-            }
-
-            @Override
-            public void unExecute() {
-            }
-        };
-
-        new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(mContext).show();
     }
 
     @Override
@@ -724,7 +709,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             case Util.SHARED_PHOTO_THUMB_RETRIEVED:
 
-                handleDownloadMedia();
+//                handleDownloadMedia();
 
                 break;
         }
@@ -1014,7 +999,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         final boolean isGif = MediaUtil.checkMediaIsGif(media);
 
-        mBaseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+        mBaseDataOperator.preConditionCheck(true, new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
@@ -1225,7 +1210,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             mainPic.setCurrentMediaViewModel(mediaViewModel);
 
-            mBaseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+            mBaseDataOperator.preConditionCheck(true, new BaseOperateCallback() {
                 @Override
                 public void onSucceed() {
 

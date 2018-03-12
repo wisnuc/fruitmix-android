@@ -1,7 +1,10 @@
 package com.winsun.fruitmix.util;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -808,7 +811,7 @@ public class FileUtil {
         context.startActivity(filterIntent(context, intent));
     }
 
-    private static Intent filterIntent(Context context, Intent intent) {
+    private static Intent filterIntentForOpenFile(Context context,Intent intent){
 
         List<ResolveInfo> resolveInfos = context.getPackageManager().queryIntentActivities(intent, 0);
 
@@ -833,6 +836,83 @@ public class FileUtil {
             }
 
             Intent chooseIntent = targetIntents.remove(0);
+
+            if (chooseIntent == null)
+                return intent;
+
+            chooseIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, targetIntents.toArray(new Parcelable[]{}));
+            chooseIntent.addFlags(intent.getFlags());
+
+            return chooseIntent;
+
+        } else
+            return intent;
+
+    }
+
+    private static Intent filterIntent(Context context, Intent intent) {
+
+        PackageManager packageManager = context.getPackageManager();
+
+        List<ResolveInfo> resolveInfos = packageManager.queryIntentActivities(intent, 0);
+
+        if (resolveInfos.size() > 0) {
+
+            List<Intent> targetIntents = new ArrayList<>();
+
+            String originalIntentAction = intent.getAction();
+
+            for (ResolveInfo resolveInfo : resolveInfos) {
+
+                ActivityInfo activityInfo = resolveInfo.activityInfo;
+
+                String packageName = activityInfo.packageName.toLowerCase();
+
+                if (!packageName.contains("com.winsun.fruitmix")) {
+
+                    Intent targetIntent = new Intent();
+
+                    Log.d(TAG, "filterIntent: label: " + activityInfo.loadLabel(packageManager));
+
+                    Log.d(TAG, "resolve filterIntent: " + resolveInfo.loadLabel(packageManager));
+
+                    targetIntent.setComponent(new ComponentName(activityInfo.packageName, activityInfo.name));
+
+                    if (originalIntentAction != null) {
+
+                        targetIntent.setAction(originalIntentAction);
+
+                        switch (originalIntentAction) {
+                            case Intent.ACTION_SEND:
+
+                                targetIntent.putExtra(Intent.EXTRA_STREAM, intent.getParcelableExtra(Intent.EXTRA_STREAM));
+
+                                break;
+                            case Intent.ACTION_SEND_MULTIPLE:
+
+                                targetIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM));
+
+                                break;
+                            default:
+
+                        }
+
+                    }
+
+                    targetIntent.setDataAndType(intent.getData(), intent.getType());
+
+                    targetIntents.add(targetIntent);
+
+                }
+
+            }
+
+            Intent chooseIntent;
+
+            if (originalIntentAction != null && (originalIntentAction.equals(Intent.ACTION_SEND_MULTIPLE) || originalIntentAction.equals(Intent.ACTION_SEND)))
+                chooseIntent = Intent.createChooser(targetIntents.remove(0), context.getString(R.string.share_text));
+            else
+                chooseIntent = targetIntents.remove(0);
 
             if (chooseIntent == null)
                 return intent;
@@ -894,7 +974,10 @@ public class FileUtil {
         }
 
         intent.setType(shareType);
-        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_text)));
+
+//        context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_text)));
+
+        context.startActivity(filterIntent(context, intent));
 
     }
 

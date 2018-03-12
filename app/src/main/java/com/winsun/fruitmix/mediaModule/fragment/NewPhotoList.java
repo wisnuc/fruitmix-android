@@ -826,6 +826,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             initFastJumper();
 
+            mFastJumper.attachToRecyclerView(null);
+
             mFastJumper.attachToRecyclerView(mRecyclerView);
             mFastJumper.invalidate();
 
@@ -1625,7 +1627,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             binding.executePendingBindings();
 
             mImageLoader.setTag(position);
-
 
             mPhotoIv.registerImageLoadListener(new IImageLoadListener() {
                 @Override
