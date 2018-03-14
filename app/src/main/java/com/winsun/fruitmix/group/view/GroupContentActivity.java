@@ -102,7 +102,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         mActivityGroupContentBinding.setGroupContentViewModel(groupContentViewModel);
 
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
+        LoadingViewModel loadingViewModel = new LoadingViewModel(this);
 
         mActivityGroupContentBinding.setLoadingViewModel(loadingViewModel);
 

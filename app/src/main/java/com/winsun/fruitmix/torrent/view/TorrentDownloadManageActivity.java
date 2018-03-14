@@ -34,7 +34,7 @@ public class TorrentDownloadManageActivity extends BaseActivity implements BaseV
 
         initToolBar(binding);
 
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
+        LoadingViewModel loadingViewModel = new LoadingViewModel(this);
 
         binding.setLoadingViewModel(loadingViewModel);
 

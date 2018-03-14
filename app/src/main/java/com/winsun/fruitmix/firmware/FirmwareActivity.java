@@ -25,7 +25,7 @@ public class FirmwareActivity extends BaseActivity implements FirmwareView {
 
         toolbarViewModel.menuResID.set(R.drawable.refresh);
 
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
+        LoadingViewModel loadingViewModel = new LoadingViewModel(this);
 
         binding.setLoadingViewModel(loadingViewModel);
 

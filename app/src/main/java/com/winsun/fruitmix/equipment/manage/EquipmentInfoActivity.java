@@ -51,7 +51,7 @@ public class EquipmentInfoActivity extends BaseActivity implements EquipmentInfo
         super.onCreate(savedInstanceState);
         ActivityEquipmentInfoBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_equipment_info);
 
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
+        LoadingViewModel loadingViewModel = new LoadingViewModel(this);
 
         binding.setLoadingViewModel(loadingViewModel);
 

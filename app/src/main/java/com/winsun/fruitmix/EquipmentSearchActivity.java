@@ -93,7 +93,7 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
 
         binding.addIpBtn.setOnClickListener(this);
 
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
+        LoadingViewModel loadingViewModel = new LoadingViewModel(this);
 
         binding.setLoadingViewModel(loadingViewModel);
 

@@ -89,7 +89,7 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
         noContentViewModel.setNoContentText(activity.getString(R.string.no_files));
         noContentViewModel.setNoContentImgResId(R.drawable.no_file);
 
-        loadingViewModel = new LoadingViewModel();
+        loadingViewModel = new LoadingViewModel(activity);
 
         fileViewModel = new FileViewModel();
 

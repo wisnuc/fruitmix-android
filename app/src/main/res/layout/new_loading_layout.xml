@@ -15,7 +15,7 @@
         android:id="@+id/loading_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
+        android:background="@{loadingViewModel.background}"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="@{loadingViewModel.showLoading?View.VISIBLE:View.GONE,default=visible}">

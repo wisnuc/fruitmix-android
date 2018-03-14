@@ -33,4 +33,9 @@ public class CatchOnLayoutCrashRecyclerView extends RecyclerView {
         }
 
     }
+
+    @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
 }

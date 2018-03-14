@@ -53,7 +53,7 @@ public class ConfirmInviteUserActivity extends BaseActivity implements ConfirmIn
 
         binding.setToolbarViewModel(toolbarViewModel);
 
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
+        LoadingViewModel loadingViewModel = new LoadingViewModel(this);
 
         binding.setLoadingViewModel(loadingViewModel);
 

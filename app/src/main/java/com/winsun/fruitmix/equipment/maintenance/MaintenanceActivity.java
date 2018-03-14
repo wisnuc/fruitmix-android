@@ -78,7 +78,7 @@ public class MaintenanceActivity extends BaseActivity implements MaintenanceView
         ip = getIntent().getStringExtra(EQUIPMENT_IP_KEY);
         equipmentName = getIntent().getStringExtra(EQUIPMENT_NAME_KEY);
 
-        loadingViewModel = new LoadingViewModel();
+        loadingViewModel = new LoadingViewModel(this);
         binding.setLoadingViewModel(loadingViewModel);
 
         noContentViewModel = new NoContentViewModel();

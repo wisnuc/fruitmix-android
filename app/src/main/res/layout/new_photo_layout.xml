@@ -29,22 +29,25 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <FrameLayout
+            <!-- add recyclerview directly to fix issue:#205 -->
+            <com.winsun.fruitmix.component.CatchOnLayoutCrashRecyclerView
+                android:id="@+id/photo_recyclerview"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:visibility="@{newPhotoListViewModel.showContent?View.VISIBLE:View.GONE,default=gone}" />
 
-                <com.winsun.fruitmix.component.CatchOnLayoutCrashRecyclerView
-                    android:id="@+id/photo_recyclerview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/white"
-                    android:visibility="@{newPhotoListViewModel.showContent?View.VISIBLE:View.GONE,default=gone}" />
+        </android.support.v4.widget.SwipeRefreshLayout>
 
-                <include
-                    layout="@layout/new_no_content_layout"
-                    bind:noContentViewModel="@{noContentViewModel}" />
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/no_content_swipe_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="@{noContentViewModel.showNoContent?View.VISIBLE:View.GONE,default=visible}">
 
-            </FrameLayout>
+            <include
+                layout="@layout/new_no_content_layout"
+                bind:noContentViewModel="@{noContentViewModel}" />
 
         </android.support.v4.widget.SwipeRefreshLayout>
 

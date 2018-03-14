@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.databinding.ObservableBoolean;
 import android.databinding.ViewDataBinding;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -44,6 +45,7 @@ import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.component.CatchOnLayoutCrashRecyclerView;
 import com.winsun.fruitmix.component.fab.menu.SelectedMediasListener;
 import com.winsun.fruitmix.databinding.NewPhotoGridlayoutItemBinding;
 import com.winsun.fruitmix.databinding.NewPhotoLayoutBinding;
@@ -106,7 +108,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     private View view;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private RecyclerView mRecyclerView;
+
+    private SwipeRefreshLayout mNoContentSwipeRefreshLayout;
+
+    private CatchOnLayoutCrashRecyclerView mRecyclerView;
 
     private int mSpanCount = 4;
 
@@ -114,7 +119,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private FastJumper mFastJumper;
     private SpannableCallback mJumperCallback;
-    private SpannableCallback.ScrollCalculator mScrollCalculator;
     private RecyclerView.LayoutManager mLayoutManager;
 
     private int mItemWidth;
@@ -296,7 +300,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         binding.setNoContentViewModel(noContentViewModel);
 
-        loadingViewModel = new LoadingViewModel();
+        loadingViewModel = new LoadingViewModel(containerActivity);
 
         binding.setLoadingViewModel(loadingViewModel);
 
@@ -305,6 +309,8 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         binding.setNewPhotoListViewModel(newPhotoListViewModel);
 
         mSwipeRefreshLayout = binding.swipeRefreshLayout;
+
+        mNoContentSwipeRefreshLayout = binding.noContentSwipeLayout;
 
         mRecyclerView = binding.photoRecyclerview;
 
@@ -332,6 +338,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private void initSwipeRefreshLayout() {
 
+        mNoContentSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshStationMediaForce();
+            }
+        });
+
         if (!mEnableSwipeRefreshLayout) {
 
             mSwipeRefreshLayout.setEnabled(false);
@@ -350,6 +363,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
     }
 
     private void finishSwipeRefreshAnimation() {
+
+        if(mNoContentSwipeRefreshLayout.isRefreshing())
+            mNoContentSwipeRefreshLayout.setRefreshing(false);
 
         if (!mEnableSwipeRefreshLayout)
             return;
@@ -740,7 +756,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             }
         };
 
-        mScrollCalculator = new LinearScrollCalculator(mRecyclerView) {
+        SpannableCallback.ScrollCalculator scrollCalculator = new LinearScrollCalculator(mRecyclerView) {
 
             @Override
             public int getItemHeight(int position) {
@@ -758,7 +774,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             }
         };
 
-        mJumperCallback.setScrollCalculator(mScrollCalculator);
+        mJumperCallback.setScrollCalculator(scrollCalculator);
 
         mFastJumper = new FastJumper(mJumperCallback);
 
@@ -816,7 +832,6 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         initGridLayoutManager();
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mPhotoRecycleAdapter);
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
     }
 

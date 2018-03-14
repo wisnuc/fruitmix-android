@@ -48,7 +48,7 @@ public class PinContentActivity extends BaseToolbarActivity implements PinConten
         pinUUID = getIntent().getStringExtra(KEY_PIN_UUID);
         groupUUID = getIntent().getStringExtra(KEY_GROUP_UUID);
 
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
+        LoadingViewModel loadingViewModel = new LoadingViewModel(this);
 
         NoContentViewModel noContentViewModel = new NoContentViewModel();
         noContentViewModel.setNoContentText(getString(R.string.no_files));

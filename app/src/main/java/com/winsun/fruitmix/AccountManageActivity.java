@@ -50,7 +50,7 @@ public class AccountManageActivity extends BaseActivity implements AccountManage
 
         binding.setToolbarViewModel(toolbarViewModel);
 
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
+        LoadingViewModel loadingViewModel = new LoadingViewModel(this);
 
         binding.setLoadingViewModel(loadingViewModel);
 

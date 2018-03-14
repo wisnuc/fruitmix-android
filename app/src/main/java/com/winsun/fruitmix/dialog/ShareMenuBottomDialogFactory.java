@@ -75,6 +75,8 @@ public class ShareMenuBottomDialogFactory implements DialogFactory, View.OnClick
 
                             mGroupShareMenuItemOnClickListener.onClick(item);
 
+                            dialog.dismiss();
+
                         }
                     });
 

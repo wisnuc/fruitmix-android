@@ -6,6 +6,8 @@ import android.text.format.Formatter;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mock.MockApplication;
+import com.winsun.fruitmix.util.FilterRule;
+import com.winsun.fruitmix.util.ItemFilterKt;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 
@@ -290,6 +292,26 @@ public class StringUtilTest {
 
         assertTrue(Util.compareVersion(a3, b3) == 0);
 
+    }
+
+    @Test
+    public void testFilter() {
+
+        final String filterStr = "filterStr";
+
+        List<String> list = new ArrayList<>();
+        list.add(filterStr);
+        list.add("f");
+
+        List<String> result = ItemFilterKt.filterItem(list, new FilterRule<String>() {
+            @Override
+            public boolean isFiltered(String item) {
+                return item.equals(filterStr);
+            }
+        });
+
+        assertEquals(filterStr, result.get(0));
+        assertEquals(1,result.size());
     }
 
 

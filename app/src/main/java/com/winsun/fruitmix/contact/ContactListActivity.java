@@ -88,7 +88,7 @@ public class ContactListActivity extends BaseToolbarActivity implements ContactL
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
+        LoadingViewModel loadingViewModel = new LoadingViewModel(this);
 
         mActivityContactListBinding.setLoadingViewModel(loadingViewModel);
 

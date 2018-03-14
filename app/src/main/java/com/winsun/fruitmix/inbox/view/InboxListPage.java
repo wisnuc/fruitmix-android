@@ -49,7 +49,7 @@ public class InboxListPage implements Page, IShowHideFragmentListener, InboxView
 
         mView = binding.getRoot();
 
-        LoadingViewModel loadingViewModel = new LoadingViewModel();
+        LoadingViewModel loadingViewModel = new LoadingViewModel(mActivity);
 
         binding.setLoadingViewModel(loadingViewModel);
 

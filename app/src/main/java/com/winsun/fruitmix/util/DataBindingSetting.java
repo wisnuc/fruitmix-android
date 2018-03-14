@@ -1,8 +1,10 @@
 package com.winsun.fruitmix.util;
 
 import android.databinding.BindingAdapter;
+import android.databinding.BindingConversion;
 import android.databinding.BindingMethod;
 import android.databinding.BindingMethods;
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -53,6 +55,11 @@ public class DataBindingSetting {
         layoutParams.setMargins(layoutParams.leftMargin, layoutParams.topMargin,
                 layoutParams.rightMargin, Math.round(bottomMargin));
         view.setLayoutParams(layoutParams);
+    }
+
+    @BindingConversion
+    public static ColorDrawable convertColorToDrawable(int color) {
+        return new ColorDrawable(color);
     }
 
 }

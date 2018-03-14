@@ -146,7 +146,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
         }
 
         mDialog = ProgressDialog.show(context, null, context.getString(R.string.send), true, true);
-        mDialog.setCanceledOnTouchOutside(false);
+        mDialog.setCancelable(false);
 
         GroupRequestParam groupRequestParam = new GroupRequestParam(groupUUID, stationID);
 
@@ -230,7 +230,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
         } else {
 
             mDialog = ProgressDialog.show(context, null, String.format(context.getString(R.string.operating_title), context.getString(R.string.download_original_photo)), true, true);
-            mDialog.setCanceledOnTouchOutside(false);
+            mDialog.setCancelable(false);
 
             mediaDataSourceRepository.downloadMedia(mSelectMedias, new BaseOperateDataCallbackImpl<Boolean>() {
                 @Override

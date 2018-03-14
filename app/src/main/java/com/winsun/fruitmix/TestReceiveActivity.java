@@ -141,7 +141,6 @@ public class TestReceiveActivity extends AppCompatActivity {
         });
     }
 
-
     //TODO:consider alreadyLogin logic,init system and destroy instance will cause large gc?
 
     private boolean checkAppIsRunning(LoginUseCase loginUseCase) {

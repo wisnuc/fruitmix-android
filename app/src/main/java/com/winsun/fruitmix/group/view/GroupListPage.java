@@ -69,7 +69,7 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
         initSwipeRefreshLayout();
 
-        final LoadingViewModel loadingViewModel = new LoadingViewModel();
+        final LoadingViewModel loadingViewModel = new LoadingViewModel(containerActivity);
 
         binding.setLoadingViewModel(loadingViewModel);
 

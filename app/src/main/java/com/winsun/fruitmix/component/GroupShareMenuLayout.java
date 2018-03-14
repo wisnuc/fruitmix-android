@@ -2,6 +2,7 @@ package com.winsun.fruitmix.component;
 
 import android.content.Context;
 import android.databinding.ViewDataBinding;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -9,9 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.databinding.GroupShareMenuItemLayoutBinding;
 import com.winsun.fruitmix.databinding.GroupShareMenuLayoutBinding;
+import com.winsun.fruitmix.databinding.NewLoadingLayoutBinding;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
@@ -46,7 +49,8 @@ public class GroupShareMenuLayout {
         GroupShareMenuLayoutBinding binding = GroupShareMenuLayoutBinding
                 .inflate(LayoutInflater.from(context), root, false);
 
-        mLoadingViewModel = new LoadingViewModel();
+        mLoadingViewModel = new LoadingViewModel(context,android.R.color.transparent);
+
         binding.setLoadingViewModel(mLoadingViewModel);
 
         RecyclerView groupShareMenuRecyclerView = binding.groupMenuRecyclerView;
@@ -81,7 +85,7 @@ public class GroupShareMenuLayout {
                         ItemFilterKt.filterItem(data, new FilterRule<PrivateGroup>() {
                             @Override
                             public boolean isFiltered(PrivateGroup item) {
-                                return !item.isStationOnline();
+                                return item.isStationOnline();
                             }
                         });
 
