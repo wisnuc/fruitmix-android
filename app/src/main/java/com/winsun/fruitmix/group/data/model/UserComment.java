@@ -20,17 +20,21 @@ public class UserComment {
 
     private User creator;
 
-    private long time;
+    private long createTime;
+
+    private long storeTime;
 
     private String groupUUID;
 
     private String stationID;
 
-    public UserComment(String uuid, User creator, long time, String groupUUID, String stationID) {
+    private String contentJsonStr;
+
+    public UserComment(String uuid, User creator, long createTime, String groupUUID, String stationID) {
 
         this.uuid = uuid;
         this.creator = creator;
-        this.time = time;
+        this.createTime = createTime;
         this.groupUUID = groupUUID;
         this.stationID = stationID;
     }
@@ -47,8 +51,12 @@ public class UserComment {
         return index;
     }
 
-    public long getTime() {
-        return time;
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setStoreTime(long storeTime) {
+        this.storeTime = storeTime;
     }
 
     public String getGroupUUID() {
@@ -87,7 +95,7 @@ public class UserComment {
 
     public String getDate(Context context) {
 
-        return formatTime(context, time);
+        return formatTime(context, createTime);
 
     }
 
@@ -97,4 +105,11 @@ public class UserComment {
 
     }
 
+    public void setContentJsonStr(String contentJsonStr) {
+        this.contentJsonStr = contentJsonStr;
+    }
+
+    public String getContentJsonStr() {
+        return contentJsonStr;
+    }
 }

@@ -31,6 +31,9 @@ public class GroupRepositoryTest {
     private GroupDataSource groupDataSource;
 
     @Mock
+    private GroupDataSource groupLocalDataSource;
+
+    @Mock
     private MediaDataSourceRepository mMediaDataSourceRepository;
 
     @Before
@@ -38,7 +41,7 @@ public class GroupRepositoryTest {
 
         MockitoAnnotations.initMocks(this);
 
-        groupRepository = GroupRepository.getInstance(groupDataSource,new MockThreadManager(),mMediaDataSourceRepository);
+        groupRepository = GroupRepository.getInstance(groupDataSource,groupLocalDataSource,new MockThreadManager(),mMediaDataSourceRepository);
 
     }
 

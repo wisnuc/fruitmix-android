@@ -278,7 +278,7 @@ public class FakeGroupDataSource implements GroupDataSource {
     }
 
     @Override
-    public void addUsersInGroup(GroupRequestParam groupRequestParam, List<String> userGUIDs, BaseOperateCallback callback) {
+    public void addUsersInGroup(GroupRequestParam groupRequestParam, List<User> users, BaseOperateCallback callback) {
 
     }
 

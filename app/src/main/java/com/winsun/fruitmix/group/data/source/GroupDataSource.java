@@ -7,6 +7,7 @@ import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +34,7 @@ public interface GroupDataSource extends PinDataSource{
 
     void updateGroupProperty(GroupRequestParam groupRequestParam,String property,String newValue,BaseOperateCallback callback);
 
-    void addUsersInGroup(GroupRequestParam groupRequestParam,List<String> userGUIDs,BaseOperateCallback callback);
+    void addUsersInGroup(GroupRequestParam groupRequestParam, List<User> users, BaseOperateCallback callback);
 
     void deleteUsersInGroup(GroupRequestParam groupRequestParam,List<String> userGUIDs,BaseOperateCallback callback);
 

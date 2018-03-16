@@ -28,6 +28,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final int ADD_USER_IS_FIRST_USER_VERSION = 35;
 
+    public static final int ADD_GROUP_STATION_AND_COMMENT_VERSION = 36;
+
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
     public static final String USER_KEY_UUID = "user_uuid";
@@ -81,16 +83,38 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String LOGGED_IN_WECAHT_USER_TOKEN = "logged_in_wechat_user_token";
     public static final String LOGGED_IN_WECHAT_USER_STATION_ID = "logged_in_wechat_user_station_id";
 
+    public static final String GROUP_KEY_ID = "id";
+    public static final String GROUP_KEY_UUID = "group_key_uuid";
+    public static final String GROUP_KEY_NAME = "group_key_name";
+    public static final String GROUP_KEY_OWNER_GUID = "group_key_owner_guid";
+    public static final String GROUP_KEY_CREATE_TIME = "group_key_create_time";
+    public static final String GROUP_KEY_MODIFY_TIME = "group_key_modify_time";
+    public static final String GROUP_KEY_LAST_READ_COMMENT_INDEX = "group_key_last_read_comment_index";
+    public static final String GROUP_KEY_LOCATED_STATION_ID = "group_key_located_station_id";
+
+    public static final String STATION_KEY_ID = "station_key_id";
+    public static final String STATION_KEY_NAME = "station_key_name";
+
+    public static final String GROUP_USER_KEY_GROUP_UUID = "group_user_key_group_uuid";
+    public static final String GROUP_USER_ASSOCIATED_WECHAT_GUID = "user_associated_wechat_user_guid";
+
+    /*    public static final String GROUP_COMMENT_KEY_UUID = "group_comment_key_uuid";
+        public static final String GROUP_COMMENT_KEY_CREATE_TIME = "group_comment_key_create_time";
+        public static final String GROUP_COMMENT_KEY_STORE_TIME = "group_comment_key_store_time";
+        public static final String GROUP_COMMENT_KEY_CONTENT = "group_comment_key_content";
+        public static final String GROUP_COMMENT_KEY_GROUP_UUID = "group_comment_key_group_uuid";
+        public static final String GROUP_COMMENT_KEY_STATION_ID = "group_comment_key_station_id";
+        public static final String GROUP_COMMENT_KEY_INDEX = "group_comment_key_index";*/
+
+    public static final String GROUP_COMMENT_KEY_STORE_TIME = "group_comment_key_store_time";
+    public static final String GROUP_COMMENT_KEY_GROUP_UUID = "group_comment_key_group_uuid";
+    public static final String GROUP_COMMENT_KEY_STATION_ID = "group_comment_key_station_id";
+    public static final String GROUP_COMMENT_KEY_CONTENT = "group_comment_key_content";
+
     private static final String DB_NAME = "fruitmix";
-    private static final String REMOTE_COMMENT_TABLE_NAME = "remote_comment";
-    private static final String LOCAL_COMMENT_TABLE_NAME = "local_comment";
-    private static final String LOCAL_SHARE_TABLE_NAME = "local_share";
-    private static final String REMOTE_SHARE_TABLE_NAME = "remote_share";
     static final String REMOTE_USER_TABLE_NAME = "remote_user";
     static final String REMOTE_MEDIA_TABLE_NAME = "remote_media";
     static final String LOCAL_MEDIA_TABLE_NAME = "local_media";
-    private static final String REMOTE_MEDIA_SHARE_CONTENT_TABLE_NAME = "remote_media_share_content";
-    private static final String LOCAL_MEDIA_SHARE_CONTENT_TABLE_NAME = "local_media_share_content";
     static final String DOWNLOADED_FILE_TABLE_NAME = "downloaded_file";
     static final String LOGGED_IN_USER_TABLE_NAME = "logged_in_user";
     static final String LOGGED_IN_WECHAT_USER_TABLE_NAME = "logged_in_wechat_user";
@@ -98,7 +122,15 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String REMOTE_VIDEO_TABLE_NAME = "remote_video";
     static final String UPLOAD_FILE_TABLE_NAME = "upload_file";
 
-    private static final int DB_VERSION = ADD_USER_IS_FIRST_USER_VERSION;
+    static final String REMOTE_GROUP_TABLE_NAME = "remote_group";
+    static final String REMOTE_GROUP_USER_TABLE_NAME = "remote_group_user";
+
+    static final String REMOTE_GROUP_LAST_TWEET_TABLE_NAME = "remote_group_last_tweet";
+
+    static final String REMOTE_GROUP_TWEET_TABLE_NAME = "remote_group_tweet";
+    static final String REMOTE_STATION_TABLE_NAME = "remote_station";
+
+    private static final int DB_VERSION = ADD_GROUP_STATION_AND_COMMENT_VERSION;
 
     private static final String CREATE_TABLE = "create table if not exists ";
 
@@ -110,13 +142,19 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final String INTEGER_PRIMARY_KEY_AUTOINCREMENT = " integer primary key autoincrement,";
 
+    public static final String INTEGER_PRIMARY_KEY = " integer primary key,";
+
     public static final String TEXT_NOT_NULL = " text not null,";
 
     public static final String INTEGER_NOT_NULL = " integer not null,";
 
+    public static final String INTEGER = " integer,";
+
     public static final String INTEGER_WITHOUT_COMMA = " integer";
 
     public static final String TEXT = " text,";
+
+    public static final String TEXT_WITHOUT_COMMA = " text";
 
     public static final String TEXT_NOT_NULL_WITHOUT_COMMA = " text not null";
 
@@ -128,9 +166,9 @@ public class DBHelper extends SQLiteOpenHelper {
             + MEDIA_KEY_UUID + TEXT_NOT_NULL + MEDIA_KEY_FORMATTED_TIME + TEXT_NOT_NULL + MEDIA_KEY_WIDTH + TEXT_NOT_NULL
             + MEDIA_KEY_HEIGHT + TEXT_NOT_NULL + MEDIA_KEY_THUMB + TEXT + MEDIA_KEY_LOCAL + INTEGER_NOT_NULL
             + MEDIA_KEY_UPLOADED_USER_UUID + TEXT + MEDIA_KEY_SHARING + INTEGER_NOT_NULL
-            + MEDIA_KEY_ORIENTATION_NUMBER + " integer," + MEDIA_KEY_TYPE + TEXT
+            + MEDIA_KEY_ORIENTATION_NUMBER + INTEGER + MEDIA_KEY_TYPE + TEXT
             + MEDIA_KEY_MINI_THUMB + TEXT + MEDIA_KEY_ORIGINAL_PHOTO_PATH + TEXT
-            + MEDIA_KEY_LONGITUDE + TEXT + MEDIA_KEY_LATITUDE + " text";
+            + MEDIA_KEY_LONGITUDE + TEXT + MEDIA_KEY_LATITUDE + TEXT_WITHOUT_COMMA;
 
     private static final String DATABASE_REMOTE_MEDIA_CREATE = CREATE_TABLE + REMOTE_MEDIA_TABLE_NAME + DATABASE_MEDIA_CREATE + END_SQL;
 
@@ -142,7 +180,8 @@ public class DBHelper extends SQLiteOpenHelper {
             + USER_KEY_EMAIL + TEXT + USER_KEY_DEFAULT_AVATAR + TEXT_NOT_NULL + USER_KEY_DEFAULT_AVATAR_BG_COLOR + INTEGER_NOT_NULL
             + USER_KEY_HOME + TEXT_NOT_NULL + USER_KEY_LIBRARY + TEXT_NOT_NULL + USER_KEY_IS_ADMIN + INTEGER_NOT_NULL_WITHOUT_COMMA;
 
-    private static final String DATABASE_REMOTE_USER_CREATE = CREATE_TABLE + REMOTE_USER_TABLE_NAME + USER_FIELD_CREATE + COMMA + USER_KEY_IS_FIRST_USER + TEXT_NOT_NULL+ USER_ASSOCIATED_WECHAT_USER_NAME + " text" + END_SQL;
+    private static final String DATABASE_REMOTE_USER_CREATE = CREATE_TABLE + REMOTE_USER_TABLE_NAME + USER_FIELD_CREATE + COMMA
+            + USER_KEY_IS_FIRST_USER + TEXT_NOT_NULL + USER_ASSOCIATED_WECHAT_USER_NAME + TEXT_WITHOUT_COMMA + END_SQL;
 
     public static final String FILE_FIELD_CREATE = BEGIN_SQL + FILE_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT
             + FILE_KEY_NAME + TEXT + FILE_KEY_UUID + TEXT_NOT_NULL + FILE_KEY_TIME + TEXT + FILE_KEY_SIZE + TEXT + FILE_KEY_CREATOR_UUID + TEXT_NOT_NULL_WITHOUT_COMMA;
@@ -168,6 +207,37 @@ public class DBHelper extends SQLiteOpenHelper {
             + COMMA + VIDEO_KEY_NAME + TEXT + VIDEO_KEY_SIZE + INTEGER_WITHOUT_COMMA + COMMA
             + VIDEO_KEY_DURATION + INTEGER_WITHOUT_COMMA + END_SQL;
 
+    public static final String DATABASE_REMOTE_GROUP_CREATE = CREATE_TABLE + REMOTE_GROUP_TABLE_NAME + BEGIN_SQL
+            + GROUP_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT + GROUP_KEY_UUID + TEXT_NOT_NULL +
+            GROUP_KEY_NAME + TEXT_NOT_NULL + GROUP_KEY_OWNER_GUID + TEXT_NOT_NULL + GROUP_KEY_CREATE_TIME + INTEGER_NOT_NULL
+            + GROUP_KEY_MODIFY_TIME + INTEGER_NOT_NULL + GROUP_KEY_LOCATED_STATION_ID + TEXT_NOT_NULL
+            + GROUP_KEY_LAST_READ_COMMENT_INDEX + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;
+
+    public static final String DATABASE_REMOTE_GROUP_USER_CREATE = CREATE_TABLE + REMOTE_GROUP_USER_TABLE_NAME
+            + USER_FIELD_CREATE + COMMA + GROUP_USER_KEY_GROUP_UUID + TEXT_NOT_NULL
+            + GROUP_USER_ASSOCIATED_WECHAT_GUID + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
+
+/*    public static final String DATABASE_REMOTE_GROUP_COMMENT_CREATE = CREATE_TABLE + REMOTE_GROUP_TWEET_TABLE_NAME +
+            USER_FIELD_CREATE + COMMA + GROUP_COMMENT_KEY_UUID + TEXT_NOT_NULL + GROUP_COMMENT_KEY_CREATE_TIME + INTEGER_NOT_NULL
+            + GROUP_COMMENT_KEY_STORE_TIME + INTEGER_NOT_NULL
+            + GROUP_COMMENT_KEY_CONTENT + TEXT_NOT_NULL + GROUP_COMMENT_KEY_GROUP_UUID + TEXT_NOT_NULL
+            + GROUP_COMMENT_KEY_STATION_ID + TEXT_NOT_NULL + GROUP_COMMENT_KEY_INDEX + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;*/
+
+    private static final String REMOTE_GROUP_COMMENT_FIELD_CREATE =
+            USER_FIELD_CREATE + COMMA + GROUP_COMMENT_KEY_STORE_TIME + INTEGER
+                    + GROUP_COMMENT_KEY_GROUP_UUID + TEXT_NOT_NULL
+                    + GROUP_COMMENT_KEY_STATION_ID + TEXT_NOT_NULL +
+                    GROUP_COMMENT_KEY_CONTENT + TEXT_NOT_NULL_WITHOUT_COMMA;
+
+    public static final String DATABASE_REMOTE_GROUP_COMMENT_CREATE = CREATE_TABLE + REMOTE_GROUP_TWEET_TABLE_NAME +
+            REMOTE_GROUP_COMMENT_FIELD_CREATE + END_SQL;
+
+    public static final String DATABASE_REMOTE_GROUP_LAST_COMMENT_CREATE = CREATE_TABLE + REMOTE_GROUP_LAST_TWEET_TABLE_NAME
+            + REMOTE_GROUP_COMMENT_FIELD_CREATE + END_SQL;
+
+    public static final String DATABASE_REMOTE_STATION_CREATE = CREATE_TABLE + REMOTE_STATION_TABLE_NAME + BEGIN_SQL
+            + STATION_KEY_ID + INTEGER_PRIMARY_KEY + STATION_KEY_NAME + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
+
 
     DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -190,6 +260,16 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DATABASE_REMOTE_VIDEO_CREATE);
 
         db.execSQL(DATABASE_UPLOAD_FILE_CREATE);
+
+        db.execSQL(DATABASE_REMOTE_GROUP_CREATE);
+
+        db.execSQL(DATABASE_REMOTE_GROUP_COMMENT_CREATE);
+
+        db.execSQL(DATABASE_REMOTE_GROUP_USER_CREATE);
+
+        db.execSQL(DATABASE_REMOTE_STATION_CREATE);
+
+        db.execSQL(DATABASE_REMOTE_GROUP_LAST_COMMENT_CREATE);
     }
 
     @Override
@@ -236,8 +316,17 @@ public class DBHelper extends SQLiteOpenHelper {
         if (oldVersion < ADD_UPLOAD_FILE_TABLE_VERSION)
             db.execSQL(DROP_TABLE + UPLOAD_FILE_TABLE_NAME);
 
-        if(oldVersion < ADD_USER_IS_FIRST_USER_VERSION)
+        if (oldVersion < ADD_USER_IS_FIRST_USER_VERSION)
             db.execSQL(DROP_TABLE + REMOTE_USER_TABLE_NAME);
+
+        if (oldVersion < ADD_GROUP_STATION_AND_COMMENT_VERSION) {
+
+            db.execSQL(DROP_TABLE + REMOTE_GROUP_TABLE_NAME);
+            db.execSQL(DROP_TABLE + REMOTE_GROUP_TWEET_TABLE_NAME);
+            db.execSQL(DROP_TABLE + REMOTE_GROUP_USER_TABLE_NAME);
+            db.execSQL(DROP_TABLE + REMOTE_STATION_TABLE_NAME);
+            db.execSQL(DROP_TABLE + REMOTE_GROUP_LAST_TWEET_TABLE_NAME);
+        }
 
         onCreate(db);
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import com.winsun.fruitmix.base.data.BaseDataOperator;
 import com.winsun.fruitmix.base.data.InjectBaseDataOperator;
 import com.winsun.fruitmix.base.data.retry.RefreshTokenRetryStrategy;
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
@@ -33,16 +34,18 @@ public class InjectGroupDataSource {
         TokenManager tokenManager = InjectSCloudTokenManager.provideInstance(context);
 
         BaseDataOperator baseDataOperator = InjectBaseDataOperator.provideInstance(context,
-                tokenManager,groupRemoteDataSource,
+                tokenManager, groupRemoteDataSource,
                 new RefreshTokenRetryStrategy(tokenManager));
 
         GroupDataSourceConditionCheckWrapper groupDataSourceConditionCheckWrapper = new
                 GroupDataSourceConditionCheckWrapper(groupRemoteDataSource,
                 baseDataOperator);
 
+        GroupDataSource groupLocalDataSource = new GroupLocalDataSource(DBUtils.getInstance(context));
+
         MediaDataSourceRepository mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(context);
 
-        return GroupRepository.getInstance(groupDataSourceConditionCheckWrapper, ThreadManagerImpl.getInstance(),mediaDataSourceRepository);
+        return GroupRepository.getInstance(groupDataSourceConditionCheckWrapper, groupLocalDataSource, ThreadManagerImpl.getInstance(), mediaDataSourceRepository);
 
 //        GroupDataSource fakeGroupDataSource = FakeGroupDataSource.getInstance();
 //        return GroupRepository.getInstance(fakeGroupDataSource,ThreadManagerImpl.getInstance());

@@ -188,7 +188,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
             if (localMedias.size() != 0) {
 
-                UserComment localMediaComment = new MediaComment(userComment.getUuid(), userComment.getCreator(), userComment.getTime(),
+                UserComment localMediaComment = new MediaComment(userComment.getUuid(), userComment.getCreator(), userComment.getCreateTime(),
                         userComment.getGroupUUID(), localMedias);
 
                 insertUserCommentSrcFromPhone(groupUUID, localMediaComment, new BaseOperateCallback() {
@@ -508,7 +508,9 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
     }
 
     @Override
-    public synchronized void addUsersInGroup(GroupRequestParam groupRequestParam, List<String> userGUIDs, BaseOperateCallback callback) {
+    public synchronized void addUsersInGroup(GroupRequestParam groupRequestParam, List<User> users, BaseOperateCallback callback) {
+
+        List<String> userGUIDs = getSelectedUserGUIDs(users);
 
         JsonObject root = getAddDeleteUserBody("add", userGUIDs);
 
@@ -516,6 +518,15 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
     }
 
+    @NonNull
+    private List<String> getSelectedUserGUIDs(List<User> users) {
+        List<String> selectedUserGUID = new ArrayList<>(users.size());
+
+        for (User user : users) {
+            selectedUserGUID.add(user.getAssociatedWeChatGUID());
+        }
+        return selectedUserGUID;
+    }
 
     @Override
     public synchronized void deleteUsersInGroup(GroupRequestParam groupRequestParam, List<String> userGUIDs, BaseOperateCallback callback) {

@@ -13,6 +13,8 @@ import com.winsun.fruitmix.util.Util;
 
 import static org.junit.Assert.*;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -312,7 +314,7 @@ public class StringUtilTest {
 
         assertEquals(filterStr, result.get(0));
         assertEquals(1,result.size());
-    }
 
+    }
 
 }

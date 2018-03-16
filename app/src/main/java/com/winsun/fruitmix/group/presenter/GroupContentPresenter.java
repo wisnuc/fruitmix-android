@@ -217,9 +217,9 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             @Override
             public int compare(UserComment o1, UserComment o2) {
 
-                long o1Time = o1.getTime();
+                long o1Time = o1.getCreateTime();
 
-                long o2Time = o2.getTime();
+                long o2Time = o2.getCreateTime();
 
                 if (o1Time > o2Time)
                     return 1;

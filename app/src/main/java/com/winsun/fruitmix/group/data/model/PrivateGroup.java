@@ -2,7 +2,7 @@ package com.winsun.fruitmix.group.data.model;
 
 import android.content.Context;
 
-import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.user.User;
 
 import java.util.ArrayList;
@@ -26,13 +26,9 @@ public class PrivateGroup {
 
     private List<UserComment> userComments;
 
-    private String stationID;
-
     private UserComment lastComment;
 
-    private boolean stationOnline;
-
-    private String stationName;
+    private Station mStation;
 
     private List<Pin> pins;
 
@@ -41,30 +37,35 @@ public class PrivateGroup {
 
     private long lastReadCommentIndex = -1;
 
-    public PrivateGroup(String uuid, String name, String ownerGUID,String stationID) {
+    public PrivateGroup(String uuid, String name, String ownerGUID, String stationID) {
         this.uuid = uuid;
         this.name = name;
         this.ownerGUID = ownerGUID;
-
-        this.stationID = stationID;
 
         userComments = new ArrayList<>();
 
         pins = new ArrayList<>();
 
         users = new ArrayList<>();
+
+        mStation = new Station();
+        mStation.setId(stationID);
     }
 
-    public PrivateGroup(String uuid, String name, String ownerGUID, String stationID,List<User> users) {
+    public PrivateGroup(String uuid, String name, String ownerGUID, String stationID, List<User> users) {
         this.uuid = uuid;
         this.name = name;
         this.ownerGUID = ownerGUID;
-        this.stationID = stationID;
+
         this.users = users;
 
         userComments = new ArrayList<>();
 
         pins = new ArrayList<>();
+
+        mStation = new Station();
+        mStation.setId(stationID);
+
     }
 
     public String getUUID() {
@@ -163,7 +164,7 @@ public class PrivateGroup {
 
     public long getLastCommentTime() {
 
-        return getLastComment() != null ? getLastComment().getTime() : -1;
+        return getLastComment() != null ? getLastComment().getCreateTime() : -1;
 
     }
 
@@ -211,27 +212,34 @@ public class PrivateGroup {
     }
 
     public void setStationID(String stationID) {
-        this.stationID = stationID;
+        mStation.setId(stationID);
     }
 
     public String getStationID() {
-        return stationID;
+        return mStation.getId();
     }
 
     public boolean isStationOnline() {
-        return stationOnline;
+        return mStation.isOnline();
     }
 
     public void setStationOnline(boolean online) {
-        stationOnline = online;
+        mStation.setOnline(online);
     }
 
     public String getStationName() {
+
+        String stationName = mStation.getLabel();
+
         return stationName != null ? stationName : "";
     }
 
     public void setStationName(String stationName) {
-        this.stationName = stationName;
+        mStation.setLabel(stationName);
+    }
+
+    public Station getStation() {
+        return mStation;
     }
 
     public List<Pin> getPins() {
@@ -293,7 +301,7 @@ public class PrivateGroup {
 
     public PrivateGroup cloneSelf() {
 
-        PrivateGroup privateGroup = new PrivateGroup(getUUID(), getName(), getOwnerGUID(), getStationID(),new ArrayList<>(getUsers()));
+        PrivateGroup privateGroup = new PrivateGroup(getUUID(), getName(), getOwnerGUID(), getStationID(), new ArrayList<>(getUsers()));
 
         privateGroup.addUserComments(getUserComments());
 

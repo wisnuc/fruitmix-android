@@ -15,12 +15,20 @@ import com.winsun.fruitmix.file.data.upload.FileUploadFinishedState;
 import com.winsun.fruitmix.file.data.upload.FileUploadItem;
 import com.winsun.fruitmix.file.data.upload.FileUploadPendingState;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
+import com.winsun.fruitmix.group.data.model.GroupUserWrapper;
+import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.parser.FileFinishedTaskItemParser;
+import com.winsun.fruitmix.parser.LocalGroupParser;
+import com.winsun.fruitmix.parser.LocalGroupTweetParser;
+import com.winsun.fruitmix.parser.LocalGroupUserParser;
+import com.winsun.fruitmix.parser.LocalStationParser;
 import com.winsun.fruitmix.parser.LocalVideoParser;
 import com.winsun.fruitmix.parser.LocalWeChatUserParser;
+import com.winsun.fruitmix.stations.Station;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.LocalDataParser;
 import com.winsun.fruitmix.parser.LocalMediaParser;
@@ -30,7 +38,10 @@ import com.winsun.fruitmix.wechat.user.WeChatUser;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -405,6 +416,190 @@ public class DBUtils {
 
     }
 
+    public long insertRemoteGroups(Collection<PrivateGroup> groups) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues;
+
+        Map<String, Station> stationMap = new HashMap<>();
+
+        for (PrivateGroup group : groups) {
+
+            contentValues = createGroupContentValues(group);
+
+            if (!stationMap.containsKey(group.getStationID()))
+                stationMap.put(group.getStationID(), group.getStation());
+
+            long insertRemoteGroupUsersResult = insertRemoteGroupUsers(group.getUsers(), group.getUUID());
+
+            Log.d(TAG, "insertRemoteGroupUsers result:" + insertRemoteGroupUsersResult);
+
+            returnValue = database.insert(DBHelper.REMOTE_GROUP_TABLE_NAME, null, contentValues);
+
+        }
+
+        long insertRemoteStationsResult = insertRemoteStations(stationMap.values());
+
+        Log.d(TAG, "insertRemoteStations result: " + insertRemoteStationsResult);
+
+        close();
+
+        Log.d(TAG, "insertRemoteGroups result: " + returnValue);
+
+        return returnValue;
+
+    }
+
+    @NonNull
+    private ContentValues createGroupContentValues(PrivateGroup group) {
+        ContentValues contentValues;
+        contentValues = new ContentValues();
+        contentValues.put(DBHelper.GROUP_KEY_UUID, group.getUUID());
+        contentValues.put(DBHelper.GROUP_KEY_NAME, group.getName());
+        contentValues.put(DBHelper.GROUP_KEY_OWNER_GUID, group.getOwnerGUID());
+        contentValues.put(DBHelper.GROUP_KEY_CREATE_TIME, group.getCreateTime());
+        contentValues.put(DBHelper.GROUP_KEY_MODIFY_TIME, group.getModifyTime());
+
+        contentValues.put(DBHelper.GROUP_KEY_LAST_READ_COMMENT_INDEX, group.getLastReadCommentIndex());
+        contentValues.put(DBHelper.GROUP_KEY_LOCATED_STATION_ID, group.getStationID());
+
+        return contentValues;
+    }
+
+    public long insertRemoteGroupTweets(Collection<UserComment> userComments) {
+
+        long returnValue = 0;
+
+        try {
+            openWritableDB();
+
+            String sql = createInsertGroupTweetSql(DBHelper.REMOTE_GROUP_TWEET_TABLE_NAME);
+
+            SQLiteStatement sqLiteStatement = database.compileStatement(sql);
+            database.beginTransaction();
+
+            for (UserComment userComment : userComments) {
+
+                bindGroupTweetWhenCreate(sqLiteStatement, userComment);
+
+                returnValue = sqLiteStatement.executeInsert();
+
+            }
+
+            database.setTransactionSuccessful();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+
+            database.endTransaction();
+
+            close();
+        }
+
+        return returnValue;
+
+    }
+
+    private void bindGroupTweetWhenCreate(SQLiteStatement sqLiteStatement, UserComment userComment) {
+
+        sqLiteStatement.bindLong(1, System.currentTimeMillis());
+        sqLiteStatement.bindString(2, userComment.getGroupUUID());
+        sqLiteStatement.bindString(3, userComment.getStationID());
+        sqLiteStatement.bindString(4, userComment.getContentJsonStr());
+
+        User user = userComment.getCreator();
+
+        sqLiteStatement.bindString(5, user.getUserName());
+        sqLiteStatement.bindString(6, user.getUuid());
+        sqLiteStatement.bindString(7, user.getAvatar());
+        sqLiteStatement.bindString(8, user.getEmail());
+        sqLiteStatement.bindString(9, user.getDefaultAvatar());
+        sqLiteStatement.bindLong(10, user.getDefaultAvatarBgColor());
+        sqLiteStatement.bindString(11, user.getHome());
+        sqLiteStatement.bindString(12, user.getLibrary());
+        sqLiteStatement.bindLong(13, user.isAdmin() ? 1 : 0);
+    }
+
+    @NonNull
+    private String createInsertGroupTweetSql(String dbName) {
+        return "insert into " + dbName + "(" +
+                DBHelper.GROUP_COMMENT_KEY_STORE_TIME + "," +
+                DBHelper.GROUP_COMMENT_KEY_GROUP_UUID + "," +
+                DBHelper.GROUP_COMMENT_KEY_STATION_ID + "," +
+                DBHelper.GROUP_COMMENT_KEY_CONTENT + "," +
+                DBHelper.USER_KEY_USERNAME + "," +
+                DBHelper.USER_KEY_UUID + "," +
+                DBHelper.USER_KEY_AVATAR + "," +
+                DBHelper.USER_KEY_EMAIL + "," +
+                DBHelper.USER_KEY_DEFAULT_AVATAR + "," +
+                DBHelper.USER_KEY_DEFAULT_AVATAR_BG_COLOR + "," +
+                DBHelper.USER_KEY_HOME + "," +
+                DBHelper.USER_KEY_LIBRARY + "," +
+                DBHelper.USER_KEY_IS_ADMIN + ")" +
+                "values(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    }
+
+
+    public long insertRemoteGroupUsers(Collection<User> users, String groupUUID) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues;
+
+        for (User user : users) {
+
+            contentValues = createUserContentValues(user);
+            contentValues.put(DBHelper.GROUP_USER_KEY_GROUP_UUID, groupUUID);
+            contentValues.put(DBHelper.GROUP_USER_ASSOCIATED_WECHAT_GUID, user.getAssociatedWeChatGUID());
+
+            returnValue = database.insert(DBHelper.REMOTE_GROUP_USER_TABLE_NAME, null, contentValues);
+
+        }
+
+        close();
+
+        return returnValue;
+
+    }
+
+    private long insertRemoteStations(Collection<Station> stations) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues;
+
+        for (Station station : stations) {
+
+            contentValues = createStationContentValues(station);
+
+            returnValue = database.insert(DBHelper.REMOTE_STATION_TABLE_NAME, null, contentValues);
+
+        }
+
+        close();
+
+        return returnValue;
+
+    }
+
+    @NonNull
+    private ContentValues createStationContentValues(Station station) {
+        ContentValues contentValues;
+        contentValues = new ContentValues();
+        contentValues.put(DBHelper.STATION_KEY_ID, station.getId());
+        contentValues.put(DBHelper.STATION_KEY_NAME, station.getLabel());
+        return contentValues;
+    }
+
+
     private long deleteAllDataInTable(String tableName) {
         openWritableDB();
 
@@ -552,6 +747,27 @@ public class DBUtils {
         return "delete from " + dbName + " where " +
                 DBHelper.MEDIA_KEY_ORIGINAL_PHOTO_PATH + " = ?";
     }
+
+    public long deleteRemoteGroupUsers(Collection<String> userGUIDs, String groupUUID) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        for (String userGUID : userGUIDs) {
+
+            returnValue = database.delete(DBHelper.REMOTE_GROUP_USER_TABLE_NAME,
+                    DBHelper.GROUP_USER_KEY_GROUP_UUID + " = ? and " + DBHelper.GROUP_USER_ASSOCIATED_WECHAT_GUID
+                            + " = ?", new String[]{groupUUID, userGUID});
+
+        }
+
+        close();
+
+        return returnValue;
+
+    }
+
 
     public List<User> getAllRemoteUser() {
         openReadableDB();
@@ -795,6 +1011,114 @@ public class DBUtils {
         return getAllMedia(DBHelper.LOCAL_MEDIA_TABLE_NAME);
     }
 
+    public List<PrivateGroup> getAllPrivateGroup() {
+
+        openReadableDB();
+
+        List<PrivateGroup> groups = new ArrayList<>();
+
+        Cursor groupCursor = database.query(DBHelper.REMOTE_GROUP_TABLE_NAME, null, null, null, null, null, null);
+
+        LocalGroupParser localGroupParser = new LocalGroupParser();
+
+        while (groupCursor.moveToNext()) {
+
+            PrivateGroup group = localGroupParser.parse(groupCursor);
+
+            groups.add(group);
+
+        }
+
+        groupCursor.close();
+
+        Cursor groupUserCursor = database.query(DBHelper.REMOTE_GROUP_USER_TABLE_NAME, null, null, null, null, null, null);
+
+        LocalGroupUserParser localGroupUserParser = new LocalGroupUserParser();
+
+        while (groupUserCursor.moveToNext()) {
+
+            GroupUserWrapper groupUserWrapper = localGroupUserParser.parse(groupUserCursor);
+
+            for (PrivateGroup group : groups) {
+
+                if (group.getUUID().equals(groupUserWrapper.getGroupUUID())) {
+
+                    group.addUser(groupUserWrapper.getUser());
+
+                }
+
+            }
+
+        }
+
+        groupUserCursor.close();
+
+        Cursor stationCursor = database.query(DBHelper.REMOTE_STATION_TABLE_NAME, null, null, null, null, null, null);
+
+        LocalStationParser localStationParser = new LocalStationParser();
+
+        while (stationCursor.moveToNext()) {
+
+            Station station = localStationParser.parse(stationCursor);
+
+            for (PrivateGroup group : groups) {
+
+                if (group.getStationID().equals(station.getId())) {
+
+                    group.setStationOnline(true);
+                    group.setStationName(station.getLabel());
+
+                }
+
+            }
+
+        }
+
+        stationCursor.close();
+
+        for (PrivateGroup group : groups) {
+
+            List<UserComment> userComments = getUserComments(DBHelper.REMOTE_GROUP_LAST_TWEET_TABLE_NAME, group.getUUID());
+
+            if (userComments.size() > 0)
+                group.setLastComment(userComments.get(0));
+
+        }
+
+        return groups;
+
+    }
+
+    public List<UserComment> getUserComments(String groupUUID) {
+
+        return getUserComments(DBHelper.REMOTE_GROUP_TWEET_TABLE_NAME, groupUUID);
+
+    }
+
+
+    private List<UserComment> getUserComments(String dbName, String groupUUID) {
+
+        Cursor groupTweetCursor = database.query(dbName, null, DBHelper.GROUP_COMMENT_KEY_GROUP_UUID + " = ?"
+                , new String[]{groupUUID}, null, null, null);
+
+        LocalGroupTweetParser localGroupTweetParser = new LocalGroupTweetParser();
+
+        List<UserComment> userComments = new ArrayList<>();
+
+        while (groupTweetCursor.moveToNext()) {
+
+            UserComment userComment = localGroupTweetParser.parse(groupTweetCursor);
+
+            userComments.add(userComment);
+
+        }
+
+        groupTweetCursor.close();
+
+        return userComments;
+
+    }
+
     public long updateRemoteMedia(Media media) {
 
         return updateRemoteMedia(media, DBHelper.REMOTE_MEDIA_TABLE_NAME);
@@ -910,6 +1234,41 @@ public class DBUtils {
         close();
 
         return returnValue > 0;
+    }
+
+    public long updateGroupName(String groupUUID, String newGroupName) {
+
+        openWritableDB();
+
+        long returnValue;
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.GROUP_KEY_NAME, newGroupName);
+
+        returnValue = database.update(DBHelper.REMOTE_GROUP_TABLE_NAME, contentValues, DBHelper.GROUP_KEY_UUID + " = ?",
+                new String[]{groupUUID});
+
+        close();
+
+        return returnValue;
+
+    }
+
+    public long updateStation(Station station) {
+
+        openWritableDB();
+
+        long returnValue;
+
+        ContentValues contentValues = createStationContentValues(station);
+
+        returnValue = database.update(DBHelper.REMOTE_STATION_TABLE_NAME, contentValues, DBHelper.STATION_KEY_ID + " = ?",
+                new String[]{station.getId()});
+
+        close();
+
+        return returnValue;
+
     }
 
 

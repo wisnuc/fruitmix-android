@@ -6,6 +6,7 @@ import android.util.Log;
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.MediaComment;
@@ -20,6 +21,8 @@ import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.util.FilterRule;
+import com.winsun.fruitmix.util.ItemFilterKt;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.Util;
 
@@ -40,16 +43,21 @@ public class GroupRepository extends BaseDataRepository {
 
     private static GroupRepository ourInstance;
 
-    private GroupDataSource groupDataSource;
+    private GroupDataSource mGroupRemoteDataSource;
+
+    private GroupDataSource mGroupLocalDataSource;
 
     private MediaDataSourceRepository mMediaDataSourceRepository;
 
     private Map<String, PrivateGroup> mPrivateGroups;
 
-    public static GroupRepository getInstance(GroupDataSource groupDataSource, ThreadManager threadManager,
+    private User mCurrentUser;
+
+    public static GroupRepository getInstance(GroupDataSource groupDataSource, GroupDataSource groupLocalDataSource,
+                                              ThreadManager threadManager, User currentUser,
                                               MediaDataSourceRepository mediaDataSourceRepository) {
         if (ourInstance == null)
-            ourInstance = new GroupRepository(threadManager, groupDataSource, mediaDataSourceRepository);
+            ourInstance = new GroupRepository(threadManager, groupDataSource, groupLocalDataSource, currentUser, mediaDataSourceRepository);
 
         return ourInstance;
     }
@@ -58,12 +66,15 @@ public class GroupRepository extends BaseDataRepository {
         ourInstance = null;
     }
 
-    public GroupRepository(ThreadManager threadManager, GroupDataSource groupDataSource,
+    public GroupRepository(ThreadManager threadManager, GroupDataSource mGroupRemoteDataSource,
+                           GroupDataSource groupLocalDataSource, User currentUser,
                            MediaDataSourceRepository mediaDataSourceRepository) {
         super(threadManager);
-        this.groupDataSource = groupDataSource;
+        this.mGroupRemoteDataSource = mGroupRemoteDataSource;
+        mGroupLocalDataSource = groupLocalDataSource;
 
         mMediaDataSourceRepository = mediaDataSourceRepository;
+        mCurrentUser = currentUser;
 
         mPrivateGroups = new LinkedHashMap<>();
 
@@ -71,11 +82,11 @@ public class GroupRepository extends BaseDataRepository {
 
     public void setCurrentUser(User currentUser) {
 
-        if (groupDataSource instanceof FakeGroupDataSource)
-            ((FakeGroupDataSource) groupDataSource).setCurrentUser(currentUser);
+        if (mGroupRemoteDataSource instanceof FakeGroupDataSource)
+            ((FakeGroupDataSource) mGroupRemoteDataSource).setCurrentUser(currentUser);
     }
 
-    public void getGroupList(BaseLoadDataCallback<PrivateGroup> callback) {
+    public void getGroupList(final BaseLoadDataCallback<PrivateGroup> callback) {
 
         final BaseLoadDataCallback<PrivateGroup> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
 
@@ -83,7 +94,64 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
-                groupDataSource.getAllGroups(new BaseLoadDataCallback<PrivateGroup>() {
+                mGroupLocalDataSource.getAllGroups(new BaseLoadDataCallback<PrivateGroup>() {
+                    @Override
+                    public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
+
+                        List<PrivateGroup> currentUserGroup = ItemFilterKt.filterItem(data, new FilterRule<PrivateGroup>() {
+                            @Override
+                            public boolean isFiltered(PrivateGroup item) {
+
+                                for (User user : item.getUsers())
+                                    if (user.getAssociatedWeChatGUID().equals(mCurrentUser.getAssociatedWeChatGUID()))
+                                        return true;
+
+                                return false;
+                            }
+                        });
+
+                        if (currentUserGroup.size() != 0) {
+                            mPrivateGroups.clear();
+
+                            for (PrivateGroup privateGroup : data) {
+                                mPrivateGroups.put(privateGroup.getUUID(), privateGroup);
+                            }
+
+                            runOnMainThreadCallback.onSucceed(data, operationResult);
+
+                            getGroupFromRemoteWhenLocalGroupNotEmpty();
+
+                        } else {
+
+                            getGroupFromRemoteWhenLocalGroupEmpty();
+
+                            handleLocalGroupEmpty();
+
+                        }
+
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        getGroupFromRemoteWhenLocalGroupEmpty();
+
+                        handleLocalGroupEmpty();
+
+                    }
+                });
+
+
+            }
+
+            private void handleLocalGroupEmpty() {
+                for (PrivateGroup group : mPrivateGroups.values())
+                    mGroupLocalDataSource.addGroup(group, new BaseOperateCallbackImpl());
+            }
+
+            private void getGroupFromRemoteWhenLocalGroupEmpty() {
+                mGroupRemoteDataSource.getAllGroups(new BaseLoadDataCallback<PrivateGroup>() {
                     @Override
                     public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
 
@@ -112,9 +180,30 @@ public class GroupRepository extends BaseDataRepository {
                     }
                 });
             }
+
+            private void getGroupFromRemoteWhenLocalGroupNotEmpty() {
+
+                mGroupRemoteDataSource.getAllGroups(new BaseLoadDataCallback<PrivateGroup>() {
+                    @Override
+                    public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
+
+
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+
+                    }
+                });
+
+            }
+
         });
 
     }
+
 
     public void getGroupFromMemory(String groupUUID, BaseLoadDataCallback<PrivateGroup> callback) {
 
@@ -178,7 +267,7 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.deleteGroup(groupRequestParam, createOperateCallbackRunOnMainThread(callback));
+                mGroupRemoteDataSource.deleteGroup(groupRequestParam, createOperateCallbackRunOnMainThread(callback));
             }
         });
 
@@ -189,7 +278,7 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.quitGroup(groupRequestParam, currentUserGUID, createOperateCallbackRunOnMainThread(callback));
+                mGroupRemoteDataSource.quitGroup(groupRequestParam, currentUserGUID, createOperateCallbackRunOnMainThread(callback));
             }
         });
 
@@ -202,7 +291,7 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.getAllUserCommentByGroupUUID(groupRequestParam, new BaseLoadDataCallback<UserComment>() {
+                mGroupRemoteDataSource.getAllUserCommentByGroupUUID(groupRequestParam, new BaseLoadDataCallback<UserComment>() {
                     @Override
                     public void onSucceed(final List<UserComment> data, OperationResult operationResult) {
 
@@ -295,7 +384,7 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
-                groupDataSource.addGroup(privateGroup, runOnMainThreadCallback);
+                mGroupRemoteDataSource.addGroup(privateGroup, runOnMainThreadCallback);
 
             }
         });
@@ -310,7 +399,7 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
-                groupDataSource.insertUserComment(groupRequestParam, userComment, runOnMainThreadCallback);
+                mGroupRemoteDataSource.insertUserComment(groupRequestParam, userComment, runOnMainThreadCallback);
 
             }
         });
@@ -324,7 +413,7 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.updateGroupProperty(groupRequestParam, "name", newValue, new BaseOperateCallback() {
+                mGroupRemoteDataSource.updateGroupProperty(groupRequestParam, "name", newValue, new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
 
@@ -354,7 +443,7 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.addUsersInGroup(groupRequestParam, getSelectedUserGUIDs(users), new BaseOperateCallback() {
+                mGroupRemoteDataSource.addUsersInGroup(groupRequestParam, users, new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
 
@@ -385,7 +474,7 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                groupDataSource.deleteUsersInGroup(groupRequestParam, getSelectedUserGUIDs(users), new BaseOperateCallback() {
+                mGroupRemoteDataSource.deleteUsersInGroup(groupRequestParam, getSelectedUserGUIDs(users), new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
 
@@ -427,7 +516,7 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                runOnMainThreadCallback.onSucceed(groupDataSource.insertPin(groupUUID, pin), new OperationSuccess());
+                runOnMainThreadCallback.onSucceed(mGroupRemoteDataSource.insertPin(groupUUID, pin), new OperationSuccess());
             }
         });
 
@@ -440,7 +529,7 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                runOnMainThreadCallback.onSucceed(groupDataSource.insertMediaToPin(medias, groupUUID, pinUUID), new OperationSuccess());
+                runOnMainThreadCallback.onSucceed(mGroupRemoteDataSource.insertMediaToPin(medias, groupUUID, pinUUID), new OperationSuccess());
             }
         });
 
@@ -453,7 +542,7 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-                runOnMainThreadCallback.onSucceed(groupDataSource.insertFileToPin(files, groupUUID, pinUUID), new OperationSuccess());
+                runOnMainThreadCallback.onSucceed(mGroupRemoteDataSource.insertFileToPin(files, groupUUID, pinUUID), new OperationSuccess());
             }
         });
 
@@ -467,7 +556,7 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
-                boolean result = groupDataSource.updatePinInGroup(pin, groupUUID);
+                boolean result = mGroupRemoteDataSource.updatePinInGroup(pin, groupUUID);
 
                 sendCallback(runOnMainThreadCallback, result);
 
@@ -478,7 +567,7 @@ public class GroupRepository extends BaseDataRepository {
 
     public Pin getPinInGroup(String pinUUID, String groupUUID) {
 
-        return groupDataSource.getPinInGroup(pinUUID, groupUUID);
+        return mGroupRemoteDataSource.getPinInGroup(pinUUID, groupUUID);
 
     }
 
@@ -490,7 +579,7 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
-                boolean result = groupDataSource.modifyPin(groupUUID, pinName, pinUUID);
+                boolean result = mGroupRemoteDataSource.modifyPin(groupUUID, pinName, pinUUID);
 
                 sendCallback(runOnMainThreadCallback, result);
 
@@ -507,7 +596,7 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
-                boolean result = groupDataSource.deletePin(groupUUID, pinUUID);
+                boolean result = mGroupRemoteDataSource.deletePin(groupUUID, pinUUID);
 
                 sendCallback(runOnMainThreadCallback, result);
 

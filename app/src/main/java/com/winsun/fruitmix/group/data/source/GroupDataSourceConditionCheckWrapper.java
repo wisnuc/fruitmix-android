@@ -9,6 +9,7 @@ import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.user.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -259,13 +260,13 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
     }
 
     @Override
-    public void addUsersInGroup(final GroupRequestParam groupRequestParam, final List<String> userGUIDs, final BaseOperateCallback callback) {
+    public void addUsersInGroup(final GroupRequestParam groupRequestParam, final List<User> users, final BaseOperateCallback callback) {
 
         mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
-                mGroupRemoteDataSource.addUsersInGroup(groupRequestParam, userGUIDs, new BaseOperateCallback() {
+                mGroupRemoteDataSource.addUsersInGroup(groupRequestParam, users, new BaseOperateCallback() {
 
                     @Override
                     public void onSucceed() {
@@ -276,7 +277,7 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
                     public void onFail(OperationResult operationResult) {
 
                         if (mBaseDataOperator.needRetryWhenFail(operationResult))
-                            addUsersInGroup(groupRequestParam, userGUIDs, callback);
+                            addUsersInGroup(groupRequestParam, users, callback);
                         else
                             callback.onFail(operationResult);
 
@@ -288,7 +289,7 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
             @Override
             public void onFail(OperationResult operationResult) {
 
-                mGroupRemoteDataSource.addUsersInGroup(groupRequestParam, userGUIDs, callback);
+                mGroupRemoteDataSource.addUsersInGroup(groupRequestParam, users, callback);
 
             }
         });
