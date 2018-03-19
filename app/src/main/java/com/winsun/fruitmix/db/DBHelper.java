@@ -91,12 +91,16 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String GROUP_KEY_MODIFY_TIME = "group_key_modify_time";
     public static final String GROUP_KEY_LAST_READ_COMMENT_INDEX = "group_key_last_read_comment_index";
     public static final String GROUP_KEY_LOCATED_STATION_ID = "group_key_located_station_id";
+    public static final String GROUP_KEY_STORE_USER_GUID = "group_key_store_user_guid";
+
+    public static final String ID = "id";
 
     public static final String STATION_KEY_ID = "station_key_id";
     public static final String STATION_KEY_NAME = "station_key_name";
 
     public static final String GROUP_USER_KEY_GROUP_UUID = "group_user_key_group_uuid";
-    public static final String GROUP_USER_ASSOCIATED_WECHAT_GUID = "user_associated_wechat_user_guid";
+    public static final String GROUP_USER_KEY_ASSOCIATED_WECHAT_GUID = "group_user_key_associated_wechat_user_guid";
+    public static final String GROUP_USER_KEY_STORE_USER_GUID = "group_user_key_store_user_guid";
 
     /*    public static final String GROUP_COMMENT_KEY_UUID = "group_comment_key_uuid";
         public static final String GROUP_COMMENT_KEY_CREATE_TIME = "group_comment_key_create_time";
@@ -110,6 +114,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String GROUP_COMMENT_KEY_GROUP_UUID = "group_comment_key_group_uuid";
     public static final String GROUP_COMMENT_KEY_STATION_ID = "group_comment_key_station_id";
     public static final String GROUP_COMMENT_KEY_CONTENT = "group_comment_key_content";
+    public static final String GROUP_COMMENT_KEY_STORE_USER_GUID = "group_comment_key_store_user_guid";
 
     private static final String DB_NAME = "fruitmix";
     static final String REMOTE_USER_TABLE_NAME = "remote_user";
@@ -211,11 +216,13 @@ public class DBHelper extends SQLiteOpenHelper {
             + GROUP_KEY_ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT + GROUP_KEY_UUID + TEXT_NOT_NULL +
             GROUP_KEY_NAME + TEXT_NOT_NULL + GROUP_KEY_OWNER_GUID + TEXT_NOT_NULL + GROUP_KEY_CREATE_TIME + INTEGER_NOT_NULL
             + GROUP_KEY_MODIFY_TIME + INTEGER_NOT_NULL + GROUP_KEY_LOCATED_STATION_ID + TEXT_NOT_NULL
+            + GROUP_KEY_STORE_USER_GUID + TEXT_NOT_NULL
             + GROUP_KEY_LAST_READ_COMMENT_INDEX + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
     public static final String DATABASE_REMOTE_GROUP_USER_CREATE = CREATE_TABLE + REMOTE_GROUP_USER_TABLE_NAME
             + USER_FIELD_CREATE + COMMA + GROUP_USER_KEY_GROUP_UUID + TEXT_NOT_NULL
-            + GROUP_USER_ASSOCIATED_WECHAT_GUID + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
+            + GROUP_USER_KEY_ASSOCIATED_WECHAT_GUID + TEXT_NOT_NULL
+            + GROUP_USER_KEY_STORE_USER_GUID + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
 /*    public static final String DATABASE_REMOTE_GROUP_COMMENT_CREATE = CREATE_TABLE + REMOTE_GROUP_TWEET_TABLE_NAME +
             USER_FIELD_CREATE + COMMA + GROUP_COMMENT_KEY_UUID + TEXT_NOT_NULL + GROUP_COMMENT_KEY_CREATE_TIME + INTEGER_NOT_NULL
@@ -226,7 +233,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String REMOTE_GROUP_COMMENT_FIELD_CREATE =
             USER_FIELD_CREATE + COMMA + GROUP_COMMENT_KEY_STORE_TIME + INTEGER
                     + GROUP_COMMENT_KEY_GROUP_UUID + TEXT_NOT_NULL
-                    + GROUP_COMMENT_KEY_STATION_ID + TEXT_NOT_NULL +
+                    + GROUP_COMMENT_KEY_STATION_ID + TEXT_NOT_NULL
+                    + GROUP_COMMENT_KEY_STORE_USER_GUID + TEXT_NOT_NULL +
                     GROUP_COMMENT_KEY_CONTENT + TEXT_NOT_NULL_WITHOUT_COMMA;
 
     public static final String DATABASE_REMOTE_GROUP_COMMENT_CREATE = CREATE_TABLE + REMOTE_GROUP_TWEET_TABLE_NAME +
@@ -236,7 +244,8 @@ public class DBHelper extends SQLiteOpenHelper {
             + REMOTE_GROUP_COMMENT_FIELD_CREATE + END_SQL;
 
     public static final String DATABASE_REMOTE_STATION_CREATE = CREATE_TABLE + REMOTE_STATION_TABLE_NAME + BEGIN_SQL
-            + STATION_KEY_ID + INTEGER_PRIMARY_KEY + STATION_KEY_NAME + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
+            + ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT
+            + STATION_KEY_ID + TEXT_NOT_NULL + STATION_KEY_NAME + TEXT_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
 
     DBHelper(Context context) {

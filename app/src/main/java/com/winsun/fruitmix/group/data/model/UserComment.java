@@ -59,6 +59,10 @@ public class UserComment {
         this.storeTime = storeTime;
     }
 
+    public long getStoreTime() {
+        return storeTime;
+    }
+
     public String getGroupUUID() {
         return groupUUID;
     }

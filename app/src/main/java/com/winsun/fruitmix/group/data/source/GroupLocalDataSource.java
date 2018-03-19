@@ -20,7 +20,7 @@ import java.util.List;
  * Created by Administrator on 2018/3/15.
  */
 
-public class GroupLocalDataSource implements GroupDataSource {
+public class GroupLocalDataSource {
 
     private DBUtils mDBUtils;
 
@@ -28,65 +28,88 @@ public class GroupLocalDataSource implements GroupDataSource {
         mDBUtils = DBUtils;
     }
 
-    @Override
-    public void addGroup(PrivateGroup group, BaseOperateCallback callback) {
+    public long addGroup(String currentUserGUID, PrivateGroup group) {
 
-        long result = mDBUtils.insertRemoteGroups(Collections.singletonList(group));
-
-        handleResult(callback, result);
+        return mDBUtils.insertRemoteGroups(Collections.singletonList(group), currentUserGUID);
 
     }
 
-    @Override
-    public void getAllGroups(BaseLoadDataCallback<PrivateGroup> callback) {
+    public void getAllGroups(String currentUserGUID, BaseLoadDataCallback<PrivateGroup> callback) {
 
-        List<PrivateGroup> groups = mDBUtils.getAllPrivateGroup();
+        List<PrivateGroup> groups = mDBUtils.getAllPrivateGroup(currentUserGUID);
 
         callback.onSucceed(groups, new OperationSuccess());
 
     }
 
-    @Override
-    public void deleteGroup(GroupRequestParam groupRequestParam, BaseOperateCallback callback) {
+    public void insertGroupLastComment(String currentUserGUID, UserComment userComment) {
 
-
-    }
-
-    @Override
-    public void quitGroup(GroupRequestParam groupRequestParam, String currentUserGUID, BaseOperateCallback callback) {
+        mDBUtils.insertRemoteGroupLastComment(currentUserGUID, userComment);
 
     }
 
-    @Override
+    public void updateGroups(String currentUserGUID, Collection<PrivateGroup> groups) {
+
+        for (PrivateGroup group : groups) {
+
+            mDBUtils.updateGroup(group, currentUserGUID);
+
+        }
+
+    }
+
+    public void updateGroupLastComment(String currentUserGUID, UserComment userComment) {
+
+        mDBUtils.updateGroupLastComment(currentUserGUID, userComment);
+
+    }
+
+
+    public void deleteGroup(String currentUserGUID, GroupRequestParam groupRequestParam) {
+
+        mDBUtils.deleteAllRemoteGroupUsers(groupRequestParam.getGroupUUID(), currentUserGUID);
+
+    }
+
+    public void quitGroup(GroupRequestParam groupRequestParam, String currentUserGUID) {
+
+        mDBUtils.deleteRemoteGroupUsers(Collections.singletonList(currentUserGUID), groupRequestParam.getGroupUUID(), currentUserGUID);
+
+    }
+
     public void clearGroups() {
 
     }
 
-    @Override
-    public void getAllUserCommentByGroupUUID(GroupRequestParam groupRequestParam, BaseLoadDataCallback<UserComment> callback) {
+    public void getAllUserCommentByGroupUUID(String currentUserGUID, GroupRequestParam groupRequestParam, BaseLoadDataCallback<UserComment> callback) {
 
+        List<UserComment> userComments = mDBUtils.getUserComments(groupRequestParam.getGroupUUID(), currentUserGUID);
 
-    }
-
-    @Override
-    public void insertUserComment(GroupRequestParam groupRequestParam, UserComment userComment, BaseOperateCallback callback) {
-
-        long result = mDBUtils.insertRemoteGroupTweets(Collections.singletonList(userComment));
-
-        handleResult(callback, result);
+        callback.onSucceed(userComments, new OperationSuccess());
 
     }
 
-    @Override
-    public void updateGroupProperty(GroupRequestParam groupRequestParam, String property, String newValue, BaseOperateCallback callback) {
+    public long insertUserComment(String currentUserGUID, GroupRequestParam groupRequestParam, Collection<UserComment> userComments) {
+
+        return mDBUtils.insertRemoteGroupTweets(currentUserGUID, userComments);
+
+    }
+
+    public long insertUserComment(String currentUserGUID, GroupRequestParam groupRequestParam, UserComment userComment) {
+
+        return mDBUtils.insertRemoteGroupTweets(currentUserGUID, Collections.singletonList(userComment));
+
+    }
+
+    public long updateGroupProperty(String currentUserGUID, GroupRequestParam groupRequestParam, String property, String newValue) {
 
         if (property.equals("name")) {
 
-            long result = mDBUtils.updateGroupName(groupRequestParam.getGroupUUID(), newValue);
-
-            handleResult(callback, result);
+            return mDBUtils.updateGroupName(currentUserGUID, groupRequestParam.getGroupUUID(), newValue);
 
         }
+
+        return 0;
 
     }
 
@@ -97,57 +120,16 @@ public class GroupLocalDataSource implements GroupDataSource {
             callback.onFail(new OperationSQLException());
     }
 
-    @Override
-    public void addUsersInGroup(GroupRequestParam groupRequestParam, List<User> users, BaseOperateCallback callback) {
+    public long addUsersInGroup(String currentUserGUID, GroupRequestParam groupRequestParam, List<User> users) {
 
-        long result = mDBUtils.insertRemoteGroupUsers(users, groupRequestParam.getGroupUUID());
-
-        handleResult(callback, result);
+        return mDBUtils.insertRemoteGroupUsers(users, groupRequestParam.getGroupUUID(), currentUserGUID);
 
     }
 
-    @Override
-    public void deleteUsersInGroup(GroupRequestParam groupRequestParam, List<String> userGUIDs, BaseOperateCallback callback) {
+    public long deleteUsersInGroup(String currentUserGUID, GroupRequestParam groupRequestParam, List<String> userGUIDs) {
 
-        long result = mDBUtils.deleteRemoteGroupUsers(userGUIDs, groupRequestParam.getGroupUUID());
+        return mDBUtils.deleteRemoteGroupUsers(userGUIDs, groupRequestParam.getGroupUUID(), currentUserGUID);
 
-        handleResult(callback, result);
-
-    }
-
-    @Override
-    public Pin insertPin(String groupUUID, Pin pin) {
-        return null;
-    }
-
-    @Override
-    public boolean modifyPin(String groupUUID, String pinName, String pinUUID) {
-        return false;
-    }
-
-    @Override
-    public boolean deletePin(String groupUUID, String pinUUID) {
-        return false;
-    }
-
-    @Override
-    public boolean insertMediaToPin(Collection<Media> medias, String groupUUID, String pinUUID) {
-        return false;
-    }
-
-    @Override
-    public boolean insertFileToPin(Collection<AbstractFile> files, String groupUUID, String pinUUID) {
-        return false;
-    }
-
-    @Override
-    public boolean updatePinInGroup(Pin pin, String groupUUID) {
-        return false;
-    }
-
-    @Override
-    public Pin getPinInGroup(String pinUUID, String groupUUID) {
-        return null;
     }
 
 

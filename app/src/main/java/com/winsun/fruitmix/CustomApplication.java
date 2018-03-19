@@ -1,14 +1,8 @@
 package com.winsun.fruitmix;
 
 import android.app.Application;
-import android.content.Context;
-import android.os.Build;
-import android.support.annotation.NonNull;
-import android.util.Log;
-import com.github.druk.rxdnssd.RxDnssd;
-import com.github.druk.rxdnssd.RxDnssdBindable;
-import com.github.druk.rxdnssd.RxDnssdEmbedded;
-import com.umeng.analytics.MobclickAgent;
+
+import com.facebook.stetho.Stetho;
 import com.wisnun.fruitmix.MyEventBusIndex;
 
 import org.greenrobot.eventbus.EventBus;
@@ -25,6 +19,8 @@ public class CustomApplication extends Application {
         super.onCreate();
 
         EventBus.builder().addIndex(new MyEventBusIndex()).installDefaultEventBus();
+
+        Stetho.initializeWithDefaults(this);
 
     }
 

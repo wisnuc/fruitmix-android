@@ -37,6 +37,8 @@ public class PrivateGroup {
 
     private long lastReadCommentIndex = -1;
 
+    private boolean readOnly = false;
+
     public PrivateGroup(String uuid, String name, String ownerGUID, String stationID) {
         this.uuid = uuid;
         this.name = name;
@@ -297,6 +299,14 @@ public class PrivateGroup {
 
     public void setModifyTime(long modifyTime) {
         this.modifyTime = modifyTime;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
     }
 
     public PrivateGroup cloneSelf() {

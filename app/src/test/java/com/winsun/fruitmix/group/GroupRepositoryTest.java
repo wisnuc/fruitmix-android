@@ -2,14 +2,15 @@ package com.winsun.fruitmix.group;
 
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallbackImpl;
-import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
+import com.winsun.fruitmix.group.data.source.GroupLocalDataSource;
+import com.winsun.fruitmix.group.data.source.GroupRemoteDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mock.MockThreadManager;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 
 import org.junit.Before;
@@ -28,10 +29,13 @@ public class GroupRepositoryTest {
     private GroupRepository groupRepository;
 
     @Mock
-    private GroupDataSource groupDataSource;
+    private GroupDataSource mGroupDataSource;
 
     @Mock
-    private GroupDataSource groupLocalDataSource;
+    private GroupLocalDataSource groupLocalDataSource;
+
+    @Mock
+    private User currentUser;
 
     @Mock
     private MediaDataSourceRepository mMediaDataSourceRepository;
@@ -41,7 +45,8 @@ public class GroupRepositoryTest {
 
         MockitoAnnotations.initMocks(this);
 
-        groupRepository = GroupRepository.getInstance(groupDataSource,groupLocalDataSource,new MockThreadManager(),mMediaDataSourceRepository);
+        groupRepository = GroupRepository.getInstance(mGroupDataSource,groupLocalDataSource,new MockThreadManager(),
+                currentUser,mMediaDataSourceRepository);
 
     }
 
@@ -50,7 +55,7 @@ public class GroupRepositoryTest {
 
         groupRepository.insertUserComment(new GroupRequestParam("",""), new UserComment(Util.createLocalUUid(),null, 0,"",""), new BaseOperateCallbackImpl());
 
-        verify(groupDataSource).insertUserComment(any(GroupRequestParam.class), any(UserComment.class), any(BaseOperateCallback.class));
+        verify(mGroupDataSource).insertUserComment(any(GroupRequestParam.class), any(UserComment.class), any(BaseOperateCallback.class));
 
     }
 

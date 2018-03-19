@@ -28,6 +28,8 @@ public interface GroupDataSource extends PinDataSource{
 
     void clearGroups();
 
+    void getUserCommentRange(GroupRequestParam groupRequestParam,long first,long last,int count,BaseLoadDataCallback<UserComment> callback);
+
     void getAllUserCommentByGroupUUID(GroupRequestParam groupRequestParam, BaseLoadDataCallback<UserComment> callback);
 
     void insertUserComment(GroupRequestParam groupRequestParam, UserComment userComment,BaseOperateCallback callback);

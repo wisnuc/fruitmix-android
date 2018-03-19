@@ -18,7 +18,7 @@ public class LocalGroupUserParser implements LocalDataParser<GroupUserWrapper> {
         LocalUserParser parser = new LocalUserParser();
         User user = parser.parse(cursor);
 
-        String userGUID = cursor.getString(cursor.getColumnIndex(DBHelper.GROUP_USER_ASSOCIATED_WECHAT_GUID));
+        String userGUID = cursor.getString(cursor.getColumnIndex(DBHelper.GROUP_USER_KEY_ASSOCIATED_WECHAT_GUID));
         String groupUUID = cursor.getString(cursor.getColumnIndex(DBHelper.GROUP_USER_KEY_GROUP_UUID));
 
         user.setAssociatedWeChatGUID(userGUID);

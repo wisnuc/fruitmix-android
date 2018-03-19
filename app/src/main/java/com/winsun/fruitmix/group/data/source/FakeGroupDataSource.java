@@ -246,6 +246,11 @@ public class FakeGroupDataSource implements GroupDataSource {
 
     }
 
+    @Override
+    public void getUserCommentRange(GroupRequestParam groupRequestParam, long first, long last, int count, BaseLoadDataCallback<UserComment> callback) {
+
+    }
+
     private PrivateGroup getOriginalGroupByUUID(String groupUUID) {
 
         for (PrivateGroup privateGroup : mPrivateGroups) {

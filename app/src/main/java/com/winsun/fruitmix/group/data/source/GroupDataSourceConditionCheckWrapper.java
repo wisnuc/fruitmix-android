@@ -186,6 +186,42 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
     }
 
     @Override
+    public void getUserCommentRange(final GroupRequestParam groupRequestParam, final long first, final long last, final int count,final BaseLoadDataCallback<UserComment> callback) {
+
+        mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
+            @Override
+            public void onSucceed() {
+
+                mGroupRemoteDataSource.getUserCommentRange(groupRequestParam,first,last,count, new BaseLoadDataCallback<UserComment>() {
+                    @Override
+                    public void onSucceed(List<UserComment> data, OperationResult operationResult) {
+                        callback.onSucceed(data, operationResult);
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        if (mBaseDataOperator.needRetryWhenFail(operationResult))
+                            getUserCommentRange(groupRequestParam, first,last,count,callback);
+                        else
+                            callback.onFail(operationResult);
+
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFail(OperationResult operationResult) {
+
+                mGroupRemoteDataSource.getUserCommentRange(groupRequestParam,first,last,count, callback);
+
+            }
+        });
+
+    }
+
+    @Override
     public void insertUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, final BaseOperateCallback callback) {
 
         mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {

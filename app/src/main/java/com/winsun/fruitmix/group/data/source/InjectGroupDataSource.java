@@ -18,6 +18,7 @@ import com.winsun.fruitmix.token.manager.InjectSCloudTokenManager;
 import com.winsun.fruitmix.token.manager.SCloudTokenManager;
 import com.winsun.fruitmix.token.manager.TokenManager;
 import com.winsun.fruitmix.token.param.SCloudTokenParam;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 
 /**
@@ -41,11 +42,16 @@ public class InjectGroupDataSource {
                 GroupDataSourceConditionCheckWrapper(groupRemoteDataSource,
                 baseDataOperator);
 
-        GroupDataSource groupLocalDataSource = new GroupLocalDataSource(DBUtils.getInstance(context));
+        GroupLocalDataSource groupLocalDataSource = new GroupLocalDataSource(DBUtils.getInstance(context));
+
+        User currentUser = InjectUser.provideRepository(context).getUserByUUID(
+                InjectSystemSettingDataSource.provideSystemSettingDataSource(context).getCurrentLoginUserUUID()
+        );
 
         MediaDataSourceRepository mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(context);
 
-        return GroupRepository.getInstance(groupDataSourceConditionCheckWrapper, groupLocalDataSource, ThreadManagerImpl.getInstance(), mediaDataSourceRepository);
+        return GroupRepository.getInstance(groupDataSourceConditionCheckWrapper, groupLocalDataSource, ThreadManagerImpl.getInstance(),
+                currentUser,mediaDataSourceRepository);
 
 //        GroupDataSource fakeGroupDataSource = FakeGroupDataSource.getInstance();
 //        return GroupRepository.getInstance(fakeGroupDataSource,ThreadManagerImpl.getInstance());
