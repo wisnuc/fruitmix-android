@@ -2,6 +2,7 @@ package com.winsun.fruitmix.group;
 
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallbackImpl;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupDataSource;
 import com.winsun.fruitmix.group.data.source.GroupLocalDataSource;
@@ -55,7 +56,7 @@ public class GroupRepositoryTest {
 
         groupRepository.insertUserComment(new GroupRequestParam("",""), new UserComment(Util.createLocalUUid(),null, 0,"",""), new BaseOperateCallbackImpl());
 
-        verify(mGroupDataSource).insertUserComment(any(GroupRequestParam.class), any(UserComment.class), any(BaseOperateCallback.class));
+        verify(mGroupDataSource).insertUserComment(any(GroupRequestParam.class), any(UserComment.class), any(BaseOperateDataCallback.class));
 
     }
 

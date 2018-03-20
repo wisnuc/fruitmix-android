@@ -2,6 +2,7 @@ package com.winsun.fruitmix.group.data.source;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
@@ -32,7 +33,7 @@ public interface GroupDataSource extends PinDataSource{
 
     void getAllUserCommentByGroupUUID(GroupRequestParam groupRequestParam, BaseLoadDataCallback<UserComment> callback);
 
-    void insertUserComment(GroupRequestParam groupRequestParam, UserComment userComment,BaseOperateCallback callback);
+    void insertUserComment(GroupRequestParam groupRequestParam, UserComment userComment,BaseOperateDataCallback<UserComment> callback);
 
     void updateGroupProperty(GroupRequestParam groupRequestParam,String property,String newValue,BaseOperateCallback callback);
 

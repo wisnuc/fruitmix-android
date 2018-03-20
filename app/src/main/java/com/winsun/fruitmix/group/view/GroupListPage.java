@@ -39,7 +39,7 @@ import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import java.util.List;
 import java.util.Map;
 
-public class GroupListPage implements Page, IShowHideFragmentListener, GroupListPageView,GoToBindWeChatListener {
+public class GroupListPage implements Page, IShowHideFragmentListener, GroupListPageView, GoToBindWeChatListener {
 
     public static final String TAG = GroupListPage.class.getSimpleName();
 
@@ -165,6 +165,9 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
     @Override
     public void refreshViewForce() {
 
+        groupListPresenter.resetAlreadyCallGetGroupList();
+        groupListPresenter.refreshGroups();
+
     }
 
     public void handleMqttMessage(MqttMessageEvent mqttMessageEvent) {
@@ -233,9 +236,9 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
         return false;
     }
 
-    public void showToast(String message){
+    public void showToast(String message) {
 
-        Toast.makeText(containerActivity,message,Toast.LENGTH_SHORT).show();
+        Toast.makeText(containerActivity, message, Toast.LENGTH_SHORT).show();
 
     }
 

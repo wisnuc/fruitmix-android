@@ -778,8 +778,12 @@ public class DBUtils {
 
         openWritableDB();
 
-        return database.delete(DBHelper.REMOTE_GROUP_USER_TABLE_NAME, DBHelper.GROUP_USER_KEY_GROUP_UUID
+        long result = database.delete(DBHelper.REMOTE_GROUP_USER_TABLE_NAME, DBHelper.GROUP_USER_KEY_GROUP_UUID
                 + " = ? and " + DBHelper.GROUP_USER_KEY_STORE_USER_GUID + " = ?", new String[]{groupUUID, currentUserGUID});
+
+        close();
+
+        return result;
 
     }
 
@@ -801,6 +805,37 @@ public class DBUtils {
 
         return returnValue;
 
+    }
+
+    public long clearGroups() {
+
+        openWritableDB();
+
+        long returnValue;
+
+        returnValue = database.delete(DBHelper.REMOTE_GROUP_TABLE_NAME, null, null);
+
+        Log.d(TAG, "clearGroups: clear group table result: " + returnValue);
+
+        database.delete(DBHelper.REMOTE_GROUP_USER_TABLE_NAME, null, null);
+
+        Log.d(TAG, "clearGroups: clear group user table result: " + returnValue);
+
+        database.delete(DBHelper.REMOTE_GROUP_LAST_TWEET_TABLE_NAME, null, null);
+
+        Log.d(TAG, "clearGroups: clear group last tweet table result: " + returnValue);
+
+        database.delete(DBHelper.REMOTE_GROUP_TWEET_TABLE_NAME, null, null);
+
+        Log.d(TAG, "clearGroups: clear group tweet table result: " + returnValue);
+
+        database.delete(DBHelper.REMOTE_STATION_TABLE_NAME, null, null);
+
+        Log.d(TAG, "clearGroups: clear station table result: " + returnValue);
+
+        close();
+
+        return returnValue;
     }
 
 
@@ -1120,6 +1155,8 @@ public class DBUtils {
 
         }
 
+        close();
+
         return groups;
 
     }
@@ -1132,6 +1169,8 @@ public class DBUtils {
 
 
     private List<UserComment> getUserComments(String dbName, String groupUUID, String currentUserGUID) {
+
+        openReadableDB();
 
         Cursor groupTweetCursor = database.query(dbName, null, DBHelper.GROUP_COMMENT_KEY_GROUP_UUID + " = ? and "
                         + DBHelper.GROUP_COMMENT_KEY_STORE_USER_GUID + " = ?"
@@ -1150,6 +1189,8 @@ public class DBUtils {
         }
 
         groupTweetCursor.close();
+
+        close();
 
         return userComments;
 
@@ -1323,7 +1364,7 @@ public class DBUtils {
         contentValues.put(DBHelper.GROUP_COMMENT_KEY_CONTENT, lastComment.getContentJsonStr());
 
         returnValue = database.update(DBHelper.REMOTE_GROUP_LAST_TWEET_TABLE_NAME, contentValues,
-                DBHelper.GROUP_KEY_UUID + " = ? and " + DBHelper.GROUP_COMMENT_KEY_STORE_USER_GUID + " = ?",
+                DBHelper.GROUP_COMMENT_KEY_GROUP_UUID + " = ? and " + DBHelper.GROUP_COMMENT_KEY_STORE_USER_GUID + " = ?",
                 new String[]{lastComment.getGroupUUID(), currentUserGUID});
 
         close();

@@ -30,7 +30,7 @@ public class Station {
     }
 
     public String getLabel() {
-        return label;
+        return label != null ? label : "";
     }
 
     public void setLabel(String label) {

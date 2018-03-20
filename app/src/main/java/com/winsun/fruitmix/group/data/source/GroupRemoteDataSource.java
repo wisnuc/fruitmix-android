@@ -30,6 +30,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteGroupParser;
 import com.winsun.fruitmix.parser.RemoteUserCommentParser;
+import com.winsun.fruitmix.parser.RemoteUserCommentsParser;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
@@ -44,7 +45,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Administrator on 2018/1/19.
@@ -161,24 +161,29 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(httpPath, groupRequestParam.getGroupUUID(), groupRequestParam.getStationID(), mSCloudToken);
 
-        wrapper.loadCall(httpRequest, callback, new RemoteUserCommentParser());
+        wrapper.loadCall(httpRequest, callback, new RemoteUserCommentsParser());
 
     }
 
     @Override
     public void getUserCommentRange(GroupRequestParam groupRequestParam, long first, long last, int count, BaseLoadDataCallback<UserComment> callback) {
 
-        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS + METADATA_TRUE
-                + "&first=" + first + "&last=" + last + "&count=" + count;
+        String httpPath = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS + METADATA_TRUE;
+
+        if (last >= 0) {
+
+            httpPath += "&first=" + first + "&last=" + last + "&count=" + count;
+
+        }
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(httpPath, groupRequestParam.getGroupUUID(), groupRequestParam.getStationID(), mSCloudToken);
 
-        wrapper.loadCall(httpRequest, callback, new RemoteUserCommentParser());
+        wrapper.loadCall(httpRequest, callback, new RemoteUserCommentsParser());
 
     }
 
     @Override
-    public synchronized void insertUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, final BaseOperateCallback callback) {
+    public synchronized void insertUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, final BaseOperateDataCallback<UserComment> callback) {
 
         if (userComment instanceof MediaComment) {
 
@@ -233,7 +238,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
     }
 
-    private void insertMediaComment(GroupRequestParam groupRequestParam, MediaComment mediaComment, final BaseOperateCallback callback) {
+    private void insertMediaComment(GroupRequestParam groupRequestParam, MediaComment mediaComment, final BaseOperateDataCallback<UserComment> callback) {
 
         List<Media> medias = mediaComment.getMedias();
 
@@ -396,7 +401,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
                 });
     }
 
-    private void insertFileCommentSrcFromNas(GroupRequestParam groupRequestParam, UserComment userComment, final BaseOperateCallback callback) {
+    private void insertFileCommentSrcFromNas(GroupRequestParam groupRequestParam, UserComment userComment, final BaseOperateDataCallback<UserComment> callback) {
 
         String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
 
@@ -436,7 +441,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
     }
 
     private void insertUserComment(HttpRequest httpRequest, JsonObject textFormDataContentBody,
-                                   List<FileFormData> fileFormDatas, final BaseOperateCallback callback) {
+                                   List<FileFormData> fileFormDatas, final BaseOperateDataCallback<UserComment> callback) {
 
         JsonObject jsonObject = new JsonObject();
 
@@ -486,11 +491,11 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
         Log.d(TAG, "insertUserComment: jsonObject:" + textFormDataBody);
 
         wrapper.operateCall(httpRequest, Collections.singletonList(textFormData), fileFormDatas,
-                new BaseOperateDataCallback<Void>() {
+                new BaseOperateDataCallback<UserComment>() {
                     @Override
-                    public void onSucceed(Void data, OperationResult result) {
+                    public void onSucceed(UserComment data, OperationResult result) {
 
-                        callback.onSucceed();
+                        callback.onSucceed(data, result);
 
                     }
 
@@ -500,12 +505,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
                         callback.onFail(operationResult);
 
                     }
-                }, new RemoteDataParser<Void>() {
-                    @Override
-                    public Void parse(String json) throws JSONException {
-                        return null;
-                    }
-                });
+                }, new RemoteUserCommentParser());
 
     }
 

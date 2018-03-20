@@ -2,6 +2,8 @@ package com.winsun.fruitmix.group;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
@@ -110,9 +112,9 @@ public class GroupDataSourceTest {
 
         UserComment userComment = new TextComment(Util.createLocalUUid(),new User(), time, testGroupUuid,testStationId,testText);
 
-        groupDataSource.insertUserComment(new GroupRequestParam(testGroupUuid,testStationId), userComment, new BaseOperateCallback() {
+        groupDataSource.insertUserComment(new GroupRequestParam(testGroupUuid,testStationId), userComment, new BaseOperateDataCallback<UserComment>() {
             @Override
-            public void onSucceed() {
+            public void onSucceed(UserComment data, OperationResult result) {
 
                 groupDataSource.getAllUserCommentByGroupUUID(new GroupRequestParam(testGroupUuid,testStationId), new BaseLoadDataCallback<UserComment>() {
                     @Override
@@ -131,7 +133,6 @@ public class GroupDataSourceTest {
 
                     }
                 });
-
 
             }
 

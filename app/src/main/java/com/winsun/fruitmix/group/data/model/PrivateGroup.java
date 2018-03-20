@@ -37,6 +37,8 @@ public class PrivateGroup {
 
     private long lastReadCommentIndex = -1;
 
+    private long lastRetrieveCommentIndex = -1;
+
     private boolean readOnly = false;
 
     public PrivateGroup(String uuid, String name, String ownerGUID, String stationID) {
@@ -172,8 +174,14 @@ public class PrivateGroup {
 
     public long getLastCommentIndex() {
 
-        return getLastComment() != null ? getLastComment().getIndex() : -1;
+//        return getLastComment() != null ? getLastComment().getIndex() : -1;
 
+        return lastRetrieveCommentIndex;
+
+    }
+
+    public void setLastRetrieveCommentIndex(long lastRetrieveCommentIndex) {
+        this.lastRetrieveCommentIndex = lastRetrieveCommentIndex;
     }
 
     public String getLastCommentDate(Context context) {
@@ -231,9 +239,8 @@ public class PrivateGroup {
 
     public String getStationName() {
 
-        String stationName = mStation.getLabel();
+        return mStation.getLabel();
 
-        return stationName != null ? stationName : "";
     }
 
     public void setStationName(String stationName) {

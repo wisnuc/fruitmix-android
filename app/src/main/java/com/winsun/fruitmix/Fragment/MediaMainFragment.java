@@ -528,13 +528,13 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
             Log.d(TAG, "onActivityResult: delete or quit group in setting,so refresh group ");
 
-            groupListPage.refreshView();
+            groupListPage.refreshViewForce();
 
         } else if (requestCode == PersonInfoActivity.START_PERSON_INFO && resultCode == RESULT_OK) {
 
             Log.d(TAG, "onActivityResult: start person info result ok");
 
-            groupListPage.refreshView();
+            groupListPage.refreshViewForce();
 
         }
 

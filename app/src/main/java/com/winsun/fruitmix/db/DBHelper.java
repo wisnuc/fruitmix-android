@@ -30,6 +30,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final int ADD_GROUP_STATION_AND_COMMENT_VERSION = 36;
 
+    public static final int MODIFY_STATION_TABLE_COLUMN = 37;
+
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
     public static final String USER_KEY_UUID = "user_uuid";
@@ -135,7 +137,7 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String REMOTE_GROUP_TWEET_TABLE_NAME = "remote_group_tweet";
     static final String REMOTE_STATION_TABLE_NAME = "remote_station";
 
-    private static final int DB_VERSION = ADD_GROUP_STATION_AND_COMMENT_VERSION;
+    private static final int DB_VERSION = MODIFY_STATION_TABLE_COLUMN;
 
     private static final String CREATE_TABLE = "create table if not exists ";
 
@@ -335,6 +337,13 @@ public class DBHelper extends SQLiteOpenHelper {
             db.execSQL(DROP_TABLE + REMOTE_GROUP_USER_TABLE_NAME);
             db.execSQL(DROP_TABLE + REMOTE_STATION_TABLE_NAME);
             db.execSQL(DROP_TABLE + REMOTE_GROUP_LAST_TWEET_TABLE_NAME);
+
+        }
+
+        if (oldVersion < MODIFY_STATION_TABLE_COLUMN) {
+
+            db.execSQL(DROP_TABLE + REMOTE_STATION_TABLE_NAME);
+
         }
 
         onCreate(db);

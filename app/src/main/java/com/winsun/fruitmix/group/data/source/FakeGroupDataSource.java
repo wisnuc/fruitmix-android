@@ -2,6 +2,7 @@ package com.winsun.fruitmix.group.data.source;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.gif.GifRequest;
 import com.winsun.fruitmix.group.data.model.Pin;
@@ -264,7 +265,7 @@ public class FakeGroupDataSource implements GroupDataSource {
 
 
     @Override
-    public void insertUserComment(GroupRequestParam groupRequestParam, UserComment userComment, BaseOperateCallback callback) {
+    public void insertUserComment(GroupRequestParam groupRequestParam, UserComment userComment, BaseOperateDataCallback<UserComment> callback) {
 
         String groupUUID = groupRequestParam.getGroupUUID();
 
@@ -273,7 +274,7 @@ public class FakeGroupDataSource implements GroupDataSource {
         if (privateGroup != null)
             privateGroup.addUserComment(userComment);
 
-        callback.onSucceed();
+        callback.onSucceed(userComment,new OperationSuccess());
 
     }
 

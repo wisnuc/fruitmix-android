@@ -1,50 +1,23 @@
 package com.winsun.fruitmix.parser;
 
-import com.winsun.fruitmix.file.data.model.AbstractFile;
-import com.winsun.fruitmix.file.data.model.RemoteFile;
-import com.winsun.fruitmix.group.data.model.FileComment;
-import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
-import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.user.User;
-import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.util.Util;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Created by Administrator on 2018/1/22.
+ * Created by Administrator on 2018/3/19.
  */
 
-public class RemoteUserCommentParser extends BaseRemoteDataParser implements RemoteDatasParser<UserComment> {
-
+public class RemoteUserCommentParser extends BaseRemoteDataParser implements RemoteDataParser<UserComment> {
     @Override
-    public List<UserComment> parse(String json) throws JSONException {
+    public UserComment parse(String json) throws JSONException {
 
         String root = checkHasWrapper(json);
 
-        JSONArray jsonArray = new JSONArray(root);
+        RemoteOneCommentParser parser = new RemoteOneCommentParser();
 
-        List<UserComment> userComments = new ArrayList<>();
+        return parser.parse(new JSONObject(root));
 
-        RemoteOneCommentParser remoteOneCommentParser = new RemoteOneCommentParser();
-
-        for (int i = 0; i < jsonArray.length(); i++) {
-
-            JSONObject jsonObject = jsonArray.optJSONObject(i);
-
-            UserComment userComment = remoteOneCommentParser.parse(jsonObject);
-
-            userComments.add(userComment);
-
-        }
-
-        return userComments;
     }
-
 }

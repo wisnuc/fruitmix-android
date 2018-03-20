@@ -3,6 +3,7 @@ package com.winsun.fruitmix.group.data.source;
 import com.winsun.fruitmix.base.data.BaseDataOperator;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
@@ -222,17 +223,17 @@ public class GroupDataSourceConditionCheckWrapper implements GroupDataSource {
     }
 
     @Override
-    public void insertUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, final BaseOperateCallback callback) {
+    public void insertUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, final BaseOperateDataCallback<UserComment> callback) {
 
         mBaseDataOperator.preConditionCheck(false,new BaseOperateCallback() {
             @Override
             public void onSucceed() {
 
-                mGroupRemoteDataSource.insertUserComment(groupRequestParam, userComment, new BaseOperateCallback() {
+                mGroupRemoteDataSource.insertUserComment(groupRequestParam, userComment, new BaseOperateDataCallback<UserComment>() {
 
                     @Override
-                    public void onSucceed() {
-                        callback.onSucceed();
+                    public void onSucceed(UserComment data, OperationResult result) {
+                        callback.onSucceed(data,result);
                     }
 
                     @Override

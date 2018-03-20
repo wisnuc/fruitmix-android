@@ -74,6 +74,8 @@ public class GroupListPresenter implements ActiveView {
 
     private boolean alreadyCallGetGroupList = false;
 
+    private boolean alreadyInitialMqttService = false;
+
     public GroupListPresenter(GroupListPageView groupListPageView, User currentUser,
                               TokenDataSource tokenDataSource, GroupRepository groupRepository,
                               LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel,
@@ -103,7 +105,6 @@ public class GroupListPresenter implements ActiveView {
     public GroupListAdapter getGroupListAdapter() {
         return groupListAdapter;
     }
-
 
     public void refreshGroups() {
 
@@ -220,9 +221,19 @@ public class GroupListPresenter implements ActiveView {
 
     }
 
+    public void resetAlreadyCallGetGroupList() {
+        alreadyCallGetGroupList = false;
+    }
+
     private void initMqttService() {
 
-        mMqttUseCase.initMqttClient(groupListPageView.getContext(), mCurrentUser.getAssociatedWeChatGUID());
+        if (!alreadyInitialMqttService) {
+
+            alreadyInitialMqttService = true;
+
+            mMqttUseCase.initMqttClient(groupListPageView.getContext(), mCurrentUser.getAssociatedWeChatGUID());
+        }
+
 
     }
 
@@ -345,8 +356,6 @@ public class GroupListPresenter implements ActiveView {
                 public void onClick(View v) {
 
                     if (privateGroup.isStationOnline()) {
-
-                        privateGroup.refreshLastReadCommentIndex();
 
                         groupListPageView.gotoGroupContentActivity(privateGroup.getUUID());
 

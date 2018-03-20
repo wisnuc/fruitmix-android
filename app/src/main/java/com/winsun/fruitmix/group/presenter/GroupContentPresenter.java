@@ -173,6 +173,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             @Override
             public void onSucceed(List<UserComment> data, OperationResult operationResult) {
 
+                mPrivateGroup.refreshLastReadCommentIndex();
+
                 mLoadingViewModel.showLoading.set(false);
 
                 userComments = data;
@@ -263,8 +265,6 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
                     if (group.getLastCommentIndex() > currentGroupIndex) {
 
                         Log.d(TAG, "handleMqttMessage: last group index is large than current group index,refresh group");
-
-                        mPrivateGroup.refreshLastReadCommentIndex();
 
                         refreshGroup();
 

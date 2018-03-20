@@ -79,6 +79,8 @@ public class GroupLocalDataSource {
 
     public void clearGroups() {
 
+        mDBUtils.clearGroups();
+
     }
 
     public void getAllUserCommentByGroupUUID(String currentUserGUID, GroupRequestParam groupRequestParam, BaseLoadDataCallback<UserComment> callback) {

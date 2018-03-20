@@ -116,11 +116,11 @@ public class GroupRepository extends BaseDataRepository {
                         if (currentUserGroup.size() != 0) {
                             mPrivateGroups.clear();
 
-                            for (PrivateGroup privateGroup : data) {
+                            for (PrivateGroup privateGroup : currentUserGroup) {
                                 mPrivateGroups.put(privateGroup.getUUID(), privateGroup);
                             }
 
-                            runOnMainThreadCallback.onSucceed(data, operationResult);
+                            runOnMainThreadCallback.onSucceed(currentUserGroup, operationResult);
 
                             getGroupFromRemoteWhenLocalGroupNotEmpty(new HashMap<>(mPrivateGroups));
 
@@ -172,7 +172,8 @@ public class GroupRepository extends BaseDataRepository {
                         for (PrivateGroup privateGroup : data) {
                             mPrivateGroups.put(privateGroup.getUUID(), privateGroup);
 
-                            getNewCommentInGroup(privateGroup.getUUID(), privateGroup.getStationID(), 0, privateGroup.getLastCommentIndex());
+                            getNewCommentInGroup(privateGroup.getUUID(), privateGroup.getStationID(), -1,
+                                    new BaseOperateCallbackImpl());
                         }
 
                         runOnMainThreadCallback.onSucceed(data, operationResult);
@@ -225,13 +226,15 @@ public class GroupRepository extends BaseDataRepository {
 
                         mGroupLocalDataSource.addGroup(mCurrentUserGUID, remoteGroup);
 
-                        getNewCommentInGroup(remoteGroup.getUUID(), remoteGroup.getStationID(), 0, remoteGroup.getLastCommentIndex());
+                        getNewCommentInGroup(remoteGroup.getUUID(), remoteGroup.getStationID(), -1,
+                                new BaseOperateCallbackImpl());
 
                     } else if (remoteGroup.getLastCommentIndex() != localGroup.getLastCommentIndex()) {
 
                         updateGroup(remoteGroup, localGroup);
 
-                        getNewCommentInGroup(remoteGroup.getUUID(), remoteGroup.getStationID(), localGroup.getLastCommentIndex(), remoteGroup.getLastCommentIndex());
+                        getNewCommentInGroup(remoteGroup.getUUID(), remoteGroup.getStationID(), localGroup.getLastCommentIndex(),
+                                new BaseOperateCallbackImpl());
 
                     }
 
@@ -326,8 +329,6 @@ public class GroupRepository extends BaseDataRepository {
 
                     mPrivateGroups.put(currentGroup.getUUID(), newGroup);
 
-                    getNewCommentInGroup(currentGroup.getUUID(), currentGroup.getStationID(), currentGroupLastCommentIndex, newGroupLastCommentIndex);
-
                 }
 
             }
@@ -336,7 +337,7 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    private void getNewCommentInGroup(final String groupUUID, String stationID, long localGroupCommentIndex, long remoteGroupCommentIndex) {
+    private void getNewCommentInGroup(final String groupUUID, String stationID, final long localGroupCommentIndex, final BaseOperateCallback callback) {
 
         final GroupRequestParam groupRequestParam = new GroupRequestParam(groupUUID, stationID);
 
@@ -349,11 +350,15 @@ public class GroupRepository extends BaseDataRepository {
 
                         mGroupLocalDataSource.insertUserComment(mCurrentUserGUID, groupRequestParam, data);
 
+                        mPrivateGroups.get(groupUUID).setLastRetrieveCommentIndex(localGroupCommentIndex);
+
+                        callback.onSucceed();
                     }
 
                     @Override
                     public void onFail(OperationResult operationResult) {
 
+                        callback.onFail(operationResult);
                     }
                 });
 
@@ -423,6 +428,51 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
+
+                String groupUUID = groupRequestParam.getGroupUUID();
+
+                PrivateGroup group = mPrivateGroups.get(groupUUID);
+
+                if (group == null) {
+
+                    getNewCommentInGroup(groupUUID, groupRequestParam.getStationID(), -1, new BaseOperateCallback() {
+                        @Override
+                        public void onSucceed() {
+
+                            handleGetNewCommentFinished();
+
+                        }
+
+                        @Override
+                        public void onFail(OperationResult operationResult) {
+
+                            handleGetNewCommentFinished();
+
+                        }
+                    });
+
+                } else {
+
+                    getNewCommentInGroup(groupUUID, groupRequestParam.getStationID(), group.getLastCommentIndex(), new BaseOperateCallback() {
+                        @Override
+                        public void onSucceed() {
+
+                            handleGetNewCommentFinished();
+
+                        }
+
+                        @Override
+                        public void onFail(OperationResult operationResult) {
+
+                            handleGetNewCommentFinished();
+
+                        }
+                    });
+                }
+
+            }
+
+            private void handleGetNewCommentFinished() {
                 mGroupLocalDataSource.getAllUserCommentByGroupUUID(mCurrentUserGUID, groupRequestParam, new BaseLoadDataCallback<UserComment>() {
                     @Override
                     public void onSucceed(final List<UserComment> data, OperationResult operationResult) {
@@ -522,7 +572,7 @@ public class GroupRepository extends BaseDataRepository {
                     @Override
                     public void onSucceed() {
 
-                        mGroupLocalDataSource.addGroup(mCurrentUserGUID, privateGroup);
+//                        mGroupLocalDataSource.addGroup(mCurrentUserGUID, privateGroup);
 
                         runOnMainThreadCallback.onSucceed();
 
@@ -548,11 +598,11 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
-                mGroupRemoteDataSource.insertUserComment(groupRequestParam, userComment, new BaseOperateCallback() {
+                mGroupRemoteDataSource.insertUserComment(groupRequestParam, userComment, new BaseOperateDataCallback<UserComment>() {
                     @Override
-                    public void onSucceed() {
+                    public void onSucceed(UserComment data, OperationResult result) {
 
-                        mGroupLocalDataSource.insertUserComment(mCurrentUserGUID, groupRequestParam, userComment);
+//                        mGroupLocalDataSource.insertUserComment(mCurrentUserGUID, groupRequestParam, data);
 
                         runOnMainThreadCallback.onSucceed();
 
