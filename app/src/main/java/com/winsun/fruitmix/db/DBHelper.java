@@ -32,6 +32,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final int MODIFY_STATION_TABLE_COLUMN = 37;
 
+    public static final int ADD_GROUP_LAST_RETRIEVE_COMMENT_INDEX_VERSION = 38;
+
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
     public static final String USER_KEY_UUID = "user_uuid";
@@ -94,6 +96,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String GROUP_KEY_LAST_READ_COMMENT_INDEX = "group_key_last_read_comment_index";
     public static final String GROUP_KEY_LOCATED_STATION_ID = "group_key_located_station_id";
     public static final String GROUP_KEY_STORE_USER_GUID = "group_key_store_user_guid";
+    public static final String GROUP_KEY_LAST_RETRIEVE_COMMENT_INDEX = "group_key_last_retrieve_comment_index";
 
     public static final String ID = "id";
 
@@ -137,7 +140,7 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String REMOTE_GROUP_TWEET_TABLE_NAME = "remote_group_tweet";
     static final String REMOTE_STATION_TABLE_NAME = "remote_station";
 
-    private static final int DB_VERSION = MODIFY_STATION_TABLE_COLUMN;
+    private static final int DB_VERSION = ADD_GROUP_LAST_RETRIEVE_COMMENT_INDEX_VERSION;
 
     private static final String CREATE_TABLE = "create table if not exists ";
 
@@ -219,6 +222,7 @@ public class DBHelper extends SQLiteOpenHelper {
             GROUP_KEY_NAME + TEXT_NOT_NULL + GROUP_KEY_OWNER_GUID + TEXT_NOT_NULL + GROUP_KEY_CREATE_TIME + INTEGER_NOT_NULL
             + GROUP_KEY_MODIFY_TIME + INTEGER_NOT_NULL + GROUP_KEY_LOCATED_STATION_ID + TEXT_NOT_NULL
             + GROUP_KEY_STORE_USER_GUID + TEXT_NOT_NULL
+            + GROUP_KEY_LAST_RETRIEVE_COMMENT_INDEX + INTEGER_NOT_NULL
             + GROUP_KEY_LAST_READ_COMMENT_INDEX + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
     public static final String DATABASE_REMOTE_GROUP_USER_CREATE = CREATE_TABLE + REMOTE_GROUP_USER_TABLE_NAME
@@ -343,6 +347,12 @@ public class DBHelper extends SQLiteOpenHelper {
         if (oldVersion < MODIFY_STATION_TABLE_COLUMN) {
 
             db.execSQL(DROP_TABLE + REMOTE_STATION_TABLE_NAME);
+
+        }
+
+        if(oldVersion < ADD_GROUP_LAST_RETRIEVE_COMMENT_INDEX_VERSION){
+
+            db.execSQL(DROP_TABLE + REMOTE_GROUP_TABLE_NAME);
 
         }
 

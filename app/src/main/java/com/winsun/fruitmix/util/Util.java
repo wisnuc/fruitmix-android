@@ -96,6 +96,8 @@ public class Util {
 
     public static final String CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED = "calc_new_local_media_digest_finished";
 
+    public static final String GET_NEW_COMMENT_FINISHED = "get_new_comment_finished";
+
     public static final String LOCAL_MEDIA_RETRIEVED = "local_media_retrieved";
     public static final String REMOTE_MEDIA_RETRIEVED = "remote_media_retrieved";
     public static final String REMOTE_USER_RETRIEVED = "remote_user_retrieved";

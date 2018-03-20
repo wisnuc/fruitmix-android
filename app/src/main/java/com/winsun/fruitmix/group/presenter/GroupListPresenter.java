@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.szysky.customize.siv.ImageLoader;
-import com.szysky.customize.siv.SImageView;
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.ActiveView;
@@ -331,21 +330,23 @@ public class GroupListPresenter implements ActiveView {
 
             Context context = binding.getRoot().getContext();
 
-            binding.lastCommentContent.setText(getLastCommentContent(privateGroup, context));
+            long lastRetrievedCommentIndex = privateGroup.getLastRetrievedCommentIndex();
 
-            long lastCommentIndex = privateGroup.getLastCommentIndex();
-
-            long difference = lastCommentIndex - privateGroup.getLastReadCommentIndex();
+            long difference = lastRetrievedCommentIndex - privateGroup.getLastReadCommentIndex();
 
             if (difference > 0) {
 
                 binding.newCommentCountTextview.setVisibility(View.VISIBLE);
                 binding.newCommentCountTextview.setText(difference + "");
 
-            } else if (lastCommentIndex == -1 && privateGroup.getLastReadCommentIndex() == -1) {
+                binding.lastCommentContent.setText(getLastCommentContent(privateGroup, context));
+
+            } else if (lastRetrievedCommentIndex == -1 && privateGroup.getLastReadCommentIndex() == -1) {
 
                 binding.newCommentCountTextview.setVisibility(View.VISIBLE);
                 binding.newCommentCountTextview.setText("1");
+
+                binding.lastCommentContent.setText(getLastCommentContent(privateGroup, context));
 
             } else {
                 binding.newCommentCountTextview.setVisibility(View.INVISIBLE);

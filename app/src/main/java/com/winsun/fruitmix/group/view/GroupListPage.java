@@ -176,6 +176,12 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
     }
 
+    public void handleGetNewCommentFinished(){
+
+        refreshViewForce();
+
+    }
+
     @Override
     public void onActivityReenter(int resultCode, Intent data) {
 

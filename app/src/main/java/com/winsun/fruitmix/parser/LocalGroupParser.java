@@ -23,10 +23,13 @@ public class LocalGroupParser implements LocalDataParser<PrivateGroup> {
         long groupLastReadCommentIndex = cursor.getLong(cursor.getColumnIndex(DBHelper.GROUP_KEY_LAST_READ_COMMENT_INDEX));
         String groupLocatedStationId = cursor.getString(cursor.getColumnIndex(DBHelper.GROUP_KEY_LOCATED_STATION_ID));
 
+        long groupLastRetrieveCommentIndex = cursor.getLong(cursor.getColumnIndex(DBHelper.GROUP_KEY_LAST_RETRIEVE_COMMENT_INDEX));
+
         PrivateGroup group = new PrivateGroup(groupUUID, groupName, groupOwnerGUID, groupLocatedStationId);
         group.setLastReadCommentIndex(groupLastReadCommentIndex);
         group.setCreateTime(groupCreateTime);
         group.setModifyTime(groupModifyTime);
+        group.setLastRetrievedCommentIndex(groupLastRetrieveCommentIndex);
 
         return group;
 

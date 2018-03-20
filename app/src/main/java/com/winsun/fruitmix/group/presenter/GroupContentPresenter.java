@@ -146,7 +146,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
         refreshTitleFromMemory();
 
-        refreshGroup();
+        refreshUserCommentData();
     }
 
     public void refreshTitleFromMemory() {
@@ -165,7 +165,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     }
 
-    private void refreshGroup() {
+    private void refreshUserCommentData() {
 
         GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(), mPrivateGroup.getStationID());
 
@@ -179,7 +179,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
                 userComments = data;
 
-                refreshUserComment();
+                refreshViewWithNewUserComment();
 
 //                refreshPinView();
 
@@ -196,7 +196,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         }, this));
     }
 
-    private void refreshUserComment() {
+    private void refreshViewWithNewUserComment() {
 
         if (userComments.size() == 0)
             return;
@@ -266,7 +266,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
                         Log.d(TAG, "handleMqttMessage: last group index is large than current group index,refresh group");
 
-                        refreshGroup();
+                        refreshUserCommentData();
 
                     }
 
@@ -285,7 +285,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void refreshPin() {
 
-        refreshGroup();
+        refreshUserCommentData();
 
         refreshPinView();
 

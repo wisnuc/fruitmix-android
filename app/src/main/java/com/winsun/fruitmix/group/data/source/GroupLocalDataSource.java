@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.group.data.source;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.db.DBUtils;
@@ -21,6 +23,8 @@ import java.util.List;
  */
 
 public class GroupLocalDataSource {
+
+    public static final String TAG = GroupLocalDataSource.class.getSimpleName();
 
     private DBUtils mDBUtils;
 
@@ -55,6 +59,14 @@ public class GroupLocalDataSource {
             mDBUtils.updateGroup(group, currentUserGUID);
 
         }
+
+    }
+
+    public void updateGroupLastRetrieveCommentIndex(String currentUserGUID, String groupUUID, long lastRetrieveCommentIndex) {
+
+        long result = mDBUtils.updateGroupLastRetrieveCommentIndex(groupUUID, currentUserGUID, lastRetrieveCommentIndex);
+
+        Log.d(TAG, "updateGroupLastRetrieveCommentIndex result: " + result);
 
     }
 

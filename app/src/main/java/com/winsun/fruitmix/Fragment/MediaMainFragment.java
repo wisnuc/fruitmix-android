@@ -709,6 +709,14 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
             groupListPage.handleMqttMessage((MqttMessageEvent) operationEvent);
 
+        }else if(action.equals(Util.GET_NEW_COMMENT_FINISHED)){
+
+            Log.d(TAG, "handleStickyOperationEvent: get new comment finished");
+
+            EventBus.getDefault().removeStickyEvent(operationEvent);
+
+            groupListPage.handleGetNewCommentFinished();
+
         }
 
     }

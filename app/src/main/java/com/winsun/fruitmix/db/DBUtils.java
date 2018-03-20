@@ -475,6 +475,7 @@ public class DBUtils {
         contentValues.put(DBHelper.GROUP_KEY_LAST_READ_COMMENT_INDEX, group.getLastReadCommentIndex());
         contentValues.put(DBHelper.GROUP_KEY_LOCATED_STATION_ID, group.getStationID());
         contentValues.put(DBHelper.GROUP_KEY_STORE_USER_GUID, currentUserGUID);
+        contentValues.put(DBHelper.GROUP_KEY_LAST_RETRIEVE_COMMENT_INDEX, group.getLastRetrievedCommentIndex());
 
         return contentValues;
     }
@@ -1349,6 +1350,27 @@ public class DBUtils {
         return returnValue;
 
     }
+
+    public long updateGroupLastRetrieveCommentIndex(String groupUUID, String currentUserGUID, long lastRetrieveCommentIndex) {
+
+        openWritableDB();
+
+        long returnValue;
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.GROUP_KEY_LAST_RETRIEVE_COMMENT_INDEX, lastRetrieveCommentIndex);
+
+        returnValue = database.update(DBHelper.REMOTE_GROUP_TABLE_NAME, contentValues, DBHelper.GROUP_KEY_UUID + " = ? and "
+                        + DBHelper.GROUP_KEY_STORE_USER_GUID + " = ?",
+                new String[]{groupUUID, currentUserGUID});
+
+        close();
+
+        return returnValue;
+
+
+    }
+
 
     public long updateGroupLastComment(String currentUserGUID, UserComment lastComment) {
 

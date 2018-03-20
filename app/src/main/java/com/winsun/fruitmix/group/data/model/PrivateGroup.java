@@ -37,7 +37,7 @@ public class PrivateGroup {
 
     private long lastReadCommentIndex = -1;
 
-    private long lastRetrieveCommentIndex = -1;
+    private long lastRetrievedCommentIndex = -1;
 
     private boolean readOnly = false;
 
@@ -174,14 +174,20 @@ public class PrivateGroup {
 
     public long getLastCommentIndex() {
 
-//        return getLastComment() != null ? getLastComment().getIndex() : -1;
-
-        return lastRetrieveCommentIndex;
+        return getLastComment() != null ? getLastComment().getIndex() : -1;
 
     }
 
-    public void setLastRetrieveCommentIndex(long lastRetrieveCommentIndex) {
-        this.lastRetrieveCommentIndex = lastRetrieveCommentIndex;
+    public long getLastRetrievedCommentIndex() {
+
+//        return getLastComment() != null ? getLastComment().getIndex() : -1;
+
+        return lastRetrievedCommentIndex;
+
+    }
+
+    public void setLastRetrievedCommentIndex(long lastRetrievedCommentIndex) {
+        this.lastRetrievedCommentIndex = lastRetrievedCommentIndex;
     }
 
     public String getLastCommentDate(Context context) {
