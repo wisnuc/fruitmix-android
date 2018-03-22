@@ -11,7 +11,9 @@ import android.widget.Toast;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.databinding.NewActivityAlbumPicChooseBinding;
@@ -49,7 +51,7 @@ import java.util.List;
  * Created by Administrator on 2016/5/9.
  */
 public class NewPicChooseActivity extends BaseActivity implements IPhotoListListener, RevealToolbarViewModel.RevealToolbarRightTextOnClickListener, HandleFileListOperateCallback,
-        FileListSelectModeListener {
+        FileListSelectModeListener, ActiveView {
 
     public static final String TAG = "NewAlbumPicChooseActivity";
 
@@ -90,6 +92,8 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
     private boolean showMedia;
 
     private boolean createComment;
+
+    private boolean isDestroy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,9 +152,9 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
             StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(this);
 
-            FileListViewDataSource fileListViewDataSource  = new FileFragmentViewDataSource(this,stationFileRepository);
+            FileListViewDataSource fileListViewDataSource = new FileFragmentViewDataSource(this, stationFileRepository);
 
-            mFileFragment = new FileFragment(this, this, this,fileListViewDataSource);
+            mFileFragment = new FileFragment(this, this, this, fileListViewDataSource);
 
             mFileFragment.setCanEnterFolderWhenSelectMode(true);
 
@@ -167,7 +171,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
     }
 
     private void initPhotoList() {
-        mNewPhotoList = new NewPhotoList(this,this);
+        mNewPhotoList = new NewPhotoList(this, this);
 
         final List<String> alreadySelectedImageKeyArrayList = getIntent().getStringArrayListExtra(Util.KEY_ALREADY_SELECTED_IMAGE_KEY_ARRAYLIST);
 
@@ -226,6 +230,8 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
             mFileFragment.onDestroy();
 
         }
+
+        isDestroy = true;
 
     }
 
@@ -393,32 +399,35 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(), mPrivateGroup.getStationID());
 
-        groupDataSource.insertUserComment(groupRequestParam, userComment, new BaseOperateCallback() {
-            @Override
-            public void onSucceed() {
 
-                dismissDialog();
+        groupDataSource.insertUserComment(groupRequestParam, userComment, new BaseOperateCallbackWrapper(
+                new BaseOperateCallback() {
+                    @Override
+                    public void onSucceed() {
 
-                showToast(getString(R.string.success, getString(R.string.send)));
+                        dismissDialog();
 
-                NewPicChooseActivity.this.setResult(RESULT_OK);
+                        showToast(getString(R.string.success, getString(R.string.send)));
 
-                finish();
+                        NewPicChooseActivity.this.setResult(RESULT_OK);
 
-            }
+                        finish();
 
-            @Override
-            public void onFail(OperationResult result) {
+                    }
 
-                dismissDialog();
+                    @Override
+                    public void onFail(OperationResult result) {
 
-                showToast(result.getResultMessage(NewPicChooseActivity.this));
+                        dismissDialog();
 
-                NewPicChooseActivity.this.setResult(RESULT_CANCELED);
+                        showToast(result.getResultMessage(NewPicChooseActivity.this));
 
-                finish();
-            }
-        });
+                        NewPicChooseActivity.this.setResult(RESULT_CANCELED);
+
+                        finish();
+                    }
+                }, this
+        ));
     }
 
     @NonNull
@@ -490,5 +499,10 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
     @Override
     public void onFileSelectOperationAvailable() {
 
+    }
+
+    @Override
+    public boolean isActive() {
+        return !isDestroy;
     }
 }

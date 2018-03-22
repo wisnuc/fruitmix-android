@@ -231,7 +231,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         } else if (userComment instanceof FileComment) {
 
-            insertFileCommentSrcFromNas(groupRequestParam, userComment, callback);
+            insertFileCommentSrcFromNas(groupRequestParam, (FileComment) userComment, callback);
 
         }
 
@@ -401,7 +401,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
                 });
     }
 
-    private void insertFileCommentSrcFromNas(GroupRequestParam groupRequestParam, UserComment userComment, final BaseOperateDataCallback<UserComment> callback) {
+    private void insertFileCommentSrcFromNas(GroupRequestParam groupRequestParam, FileComment fileComment, final BaseOperateDataCallback<UserComment> callback) {
 
         String path = BOXES + "/" + groupRequestParam.getGroupUUID() + TWEETS;
 
@@ -412,7 +412,7 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
         JsonArray jsonArray = new JsonArray();
 
-        List<AbstractFile> files = ((FileComment) userComment).getFiles();
+        List<AbstractFile> files = fileComment.getFiles();
 
         for (AbstractFile file : files) {
 

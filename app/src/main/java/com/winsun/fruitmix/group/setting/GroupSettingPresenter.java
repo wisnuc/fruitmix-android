@@ -140,7 +140,12 @@ public class GroupSettingPresenter implements ActiveView {
             mGroupSettingViewModel.showCheckMoreMembers.set(false);
 
         for (User user : users) {
-            viewItems.add(new GroupMemberViewItem(user));
+
+            if (user.getAssociatedWeChatGUID().equals(mPrivateGroup.getOwnerGUID()))
+                viewItems.add(0, new GroupMemberViewItem(user));
+            else
+                viewItems.add(new GroupMemberViewItem(user));
+
         }
 
         viewItems.add(new GroupAddMemberViewItem());
@@ -218,7 +223,7 @@ public class GroupSettingPresenter implements ActiveView {
 
         }
 
-        ModifyGroupNameLayoutBinding binding = ModifyGroupNameLayoutBinding.inflate(LayoutInflater.from(mGroupSettingView.getContext()),null,false);
+        ModifyGroupNameLayoutBinding binding = ModifyGroupNameLayoutBinding.inflate(LayoutInflater.from(mGroupSettingView.getContext()), null, false);
 
         final EditText modifyGroupNameEditText = binding.modifyGroupNameEdittext;
 

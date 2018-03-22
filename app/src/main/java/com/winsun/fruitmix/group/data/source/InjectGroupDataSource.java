@@ -42,7 +42,9 @@ public class InjectGroupDataSource {
                 GroupDataSourceConditionCheckWrapper(groupRemoteDataSource,
                 baseDataOperator);
 
-        GroupLocalDataSource groupLocalDataSource = new GroupLocalDataSource(DBUtils.getInstance(context));
+        DBUtils dbUtils = DBUtils.getInstance(context);
+
+        GroupLocalDataSource groupLocalDataSource = new GroupLocalDataSource(dbUtils);
 
         User currentUser = InjectUser.provideRepository(context).getUserByUUID(
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(context).getCurrentLoginUserUUID()
@@ -50,8 +52,9 @@ public class InjectGroupDataSource {
 
         MediaDataSourceRepository mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(context);
 
-        return GroupRepository.getInstance(groupDataSourceConditionCheckWrapper, groupLocalDataSource, ThreadManagerImpl.getInstance(),
-                currentUser,mediaDataSourceRepository);
+        return GroupRepository.getInstance(groupDataSourceConditionCheckWrapper, groupLocalDataSource,
+                new GroupTweetInDraftDataSource(dbUtils),
+                ThreadManagerImpl.getInstance(), currentUser, mediaDataSourceRepository);
 
 //        GroupDataSource fakeGroupDataSource = FakeGroupDataSource.getInstance();
 //        return GroupRepository.getInstance(fakeGroupDataSource,ThreadManagerImpl.getInstance());

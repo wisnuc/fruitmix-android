@@ -174,6 +174,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             public void onSucceed(List<UserComment> data, OperationResult operationResult) {
 
                 mPrivateGroup.refreshLastReadCommentIndex();
+                groupRepository.updateGroupLastReadIndexInDB(mPrivateGroup.getUUID(), mPrivateGroup.getLastReadCommentIndex());
 
                 mLoadingViewModel.showLoading.set(false);
 
@@ -219,19 +220,27 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             @Override
             public int compare(UserComment o1, UserComment o2) {
 
-                long o1Time = o1.getCreateTime();
+/*                long o1Param = o1.getCreateTime();
 
-                long o2Time = o2.getCreateTime();
+                long o2Param = o2.getCreateTime();*/
 
-                if (o1Time > o2Time)
+                long o1Param = o1.getStoreTime();
+
+                long o2Param = o2.getStoreTime();
+
+                if (o1Param == o2Param) {
+                    o1Param = o1.getIndex();
+                    o2Param = o2.getIndex();
+                }
+
+                if (o1Param > o2Param)
                     return 1;
-                else if (o2Time > o1Time) {
+                else if (o2Param > o1Param) {
                     return -1;
                 } else
                     return 0;
             }
         });
-
 
         groupContentAdapter.setUserComments(showComments);
         groupContentAdapter.notifyDataSetChanged();

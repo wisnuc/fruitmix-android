@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -97,14 +98,42 @@
 
         </LinearLayout>
 
-
-        <FrameLayout
+        <RelativeLayout
             android:id="@+id/comment_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/user_info_layout"
+            android:layout_below="@id/current_user_info_layout"
             android:layout_marginTop="6dp"
-            android:layout_toRightOf="@id/user_avatar" />
+            android:layout_toLeftOf="@id/current_user_icon">
+
+            <FrameLayout
+                android:id="@+id/comment_framelayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true" />
+
+            <ProgressBar
+                android:id="@+id/comment_creating"
+                style="@android:style/Widget.Holo.ProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:layout_toLeftOf="@id/comment_framelayout"
+                android:layout_toStartOf="@id/comment_framelayout" />
+
+            <ImageView
+                android:id="@+id/comment_state_image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:layout_toLeftOf="@id/comment_framelayout"
+                android:layout_toStartOf="@id/comment_framelayout"
+                android:src="@drawable/new_releases" />
+
+        </RelativeLayout>
+
 
     </RelativeLayout>
 

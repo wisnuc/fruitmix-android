@@ -330,23 +330,21 @@ public class GroupListPresenter implements ActiveView {
 
             Context context = binding.getRoot().getContext();
 
-            long lastRetrievedCommentIndex = privateGroup.getLastRetrievedCommentIndex();
+            long lastCommentIndex = privateGroup.getLastCommentIndex();
 
-            long difference = lastRetrievedCommentIndex - privateGroup.getLastReadCommentIndex();
+            long difference = lastCommentIndex - privateGroup.getLastReadCommentIndex();
+
+            binding.lastCommentContent.setText(getLastCommentContent(privateGroup, context));
 
             if (difference > 0) {
 
                 binding.newCommentCountTextview.setVisibility(View.VISIBLE);
                 binding.newCommentCountTextview.setText(difference + "");
 
-                binding.lastCommentContent.setText(getLastCommentContent(privateGroup, context));
-
-            } else if (lastRetrievedCommentIndex == -1 && privateGroup.getLastReadCommentIndex() == -1) {
+            } else if (lastCommentIndex == -1 && privateGroup.getLastReadCommentIndex() == -1) {
 
                 binding.newCommentCountTextview.setVisibility(View.VISIBLE);
                 binding.newCommentCountTextview.setText("1");
-
-                binding.lastCommentContent.setText(getLastCommentContent(privateGroup, context));
 
             } else {
                 binding.newCommentCountTextview.setVisibility(View.INVISIBLE);

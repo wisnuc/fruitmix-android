@@ -31,17 +31,15 @@ public abstract class UserCommentView {
 
         viewDataBinding = BaseLeftCommentBinding.inflate(LayoutInflater.from(context), parent, false);
 
-        View view = viewDataBinding.getRoot();
+        FrameLayout frameLayout = viewDataBinding.commentFramelayout;
 
-        FrameLayout frameLayout = (FrameLayout) view.findViewById(R.id.comment_content);
-
-        frameLayout.addView(generateContentView(context,frameLayout));
+        frameLayout.addView(generateContentView(context, frameLayout));
 
         return viewDataBinding;
 
     }
 
-    protected abstract View generateContentView(Context context,ViewGroup parent);
+    protected abstract View generateContentView(Context context, ViewGroup parent);
 
     public void refreshCommentView(Context context, View toolbar, UserCommentShowStrategy strategy, UserComment data) {
 
@@ -61,9 +59,7 @@ public abstract class UserCommentView {
 
         RelativeLayout.LayoutParams userInfoLayoutLayoutParams = (RelativeLayout.LayoutParams) userInfoLayout.getLayoutParams();
 
-        FrameLayout commentContentLayout = viewDataBinding.commentContent;
-
-        RelativeLayout.LayoutParams commentContentLayoutLayoutParams = (RelativeLayout.LayoutParams) commentContentLayout.getLayoutParams();
+        RelativeLayout.LayoutParams commentContentLayoutLayoutParams = (RelativeLayout.LayoutParams) viewDataBinding.commentContent.getLayoutParams();
 
         if (strategy.isShowLeft()) {
 
@@ -80,11 +76,14 @@ public abstract class UserCommentView {
             commentContentLayoutLayoutParams.addRule(RelativeLayout.RIGHT_OF, R.id.user_avatar);
             commentContentLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, 0);
 
-            commentContentLayoutLayoutParams.addRule(RelativeLayout.BELOW,R.id.user_info_layout);
+            commentContentLayoutLayoutParams.addRule(RelativeLayout.BELOW, R.id.user_info_layout);
 
             ImageLoader imageLoader = InjectHttp.provideImageGifLoaderInstance(context).getImageLoader(context);
 
-            userAvatar.setUser(data.getCreator(),imageLoader);
+            userAvatar.setUser(data.getCreator(), imageLoader);
+
+            viewDataBinding.commentCreating.setVisibility(View.GONE);
+            viewDataBinding.commentStateImageView.setVisibility(View.GONE);
 
         } else {
 
@@ -106,7 +105,26 @@ public abstract class UserCommentView {
 
             commentContentLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, R.id.current_user_icon);
 
-            commentContentLayoutLayoutParams.addRule(RelativeLayout.BELOW,R.id.current_user_info_layout);
+            commentContentLayoutLayoutParams.addRule(RelativeLayout.BELOW, R.id.current_user_info_layout);
+
+            if(data.isFake()){
+
+                if (data.isFail())
+                    viewDataBinding.commentStateImageView.setVisibility(View.VISIBLE);
+                else {
+
+                    //TODO:check in running task contains current user comment,if true show loading,otherwise set fail and update in db
+
+                    viewDataBinding.commentCreating.setVisibility(View.VISIBLE);
+
+                }
+
+            }else {
+
+                viewDataBinding.commentCreating.setVisibility(View.GONE);
+                viewDataBinding.commentStateImageView.setVisibility(View.GONE);
+
+            }
 
         }
 

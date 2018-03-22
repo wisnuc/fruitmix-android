@@ -70,6 +70,15 @@ public class GroupLocalDataSource {
 
     }
 
+    public void updateGroupLastReadCommentIndex(String currentUserGUID, String groupUUID, long readCommentCount) {
+
+        long result = mDBUtils.updateGroupLastReadCommentIndex(groupUUID, currentUserGUID, readCommentCount);
+
+        Log.d(TAG, "updateGroupLastReadCommentIndex result: " + result);
+
+    }
+
+
     public void updateGroupLastComment(String currentUserGUID, UserComment userComment) {
 
         mDBUtils.updateGroupLastComment(currentUserGUID, userComment);

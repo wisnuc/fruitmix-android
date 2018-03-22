@@ -468,7 +468,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
 
         if (requestCode == REQUEST_NEW_PIC_CHOOSE_ACTIVITY && resultCode == RESULT_OK) {
 
-//            groupContentPresenter.refreshView();
+            groupContentPresenter.refreshView();
 
         } else if (requestCode == REQUEST_CREATE_PING_ACTIVITY && resultCode == RESULT_OK)
             groupContentPresenter.refreshView();

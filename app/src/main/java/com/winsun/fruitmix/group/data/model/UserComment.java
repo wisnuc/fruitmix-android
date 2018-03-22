@@ -30,6 +30,12 @@ public class UserComment {
 
     private String contentJsonStr;
 
+    private boolean isFake;
+
+    private String realUUIDWhenFake;
+
+    private boolean isFail;
+
     public UserComment(String uuid, User creator, long createTime, String groupUUID, String stationID) {
 
         this.uuid = uuid;
@@ -37,6 +43,7 @@ public class UserComment {
         this.createTime = createTime;
         this.groupUUID = groupUUID;
         this.stationID = stationID;
+
     }
 
     public String getUuid() {
@@ -116,4 +123,29 @@ public class UserComment {
     public String getContentJsonStr() {
         return contentJsonStr;
     }
+
+    public void setFake(boolean fake) {
+        isFake = fake;
+    }
+
+    public boolean isFake() {
+        return isFake;
+    }
+
+    public boolean isFail() {
+        return isFail;
+    }
+
+    public void setFail(boolean fail) {
+        isFail = fail;
+    }
+
+    public void setRealUUIDWhenFake(String realUUIDWhenFake) {
+        this.realUUIDWhenFake = realUUIDWhenFake;
+    }
+
+    public String getRealUUIDWhenFake() {
+        return realUUIDWhenFake;
+    }
+
 }

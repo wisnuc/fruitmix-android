@@ -22,6 +22,7 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.parser.FileFinishedTaskItemParser;
+import com.winsun.fruitmix.parser.LocalFakeGroupTweetParser;
 import com.winsun.fruitmix.parser.LocalGroupParser;
 import com.winsun.fruitmix.parser.LocalGroupTweetParser;
 import com.winsun.fruitmix.parser.LocalGroupUserParser;
@@ -492,6 +493,32 @@ public class DBUtils {
 
     }
 
+    public long insertRemoteGroupTweetsInDraft(String currentUserGUID, Collection<UserComment> userComments) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        for (UserComment userComment : userComments) {
+
+            ContentValues contentValues = createUserContentValues(userComment.getCreator());
+
+            contentValues.put(DBHelper.GROUP_COMMENT_KEY_STORE_TIME, System.currentTimeMillis());
+            contentValues.put(DBHelper.GROUP_COMMENT_KEY_GROUP_UUID, userComment.getGroupUUID());
+            contentValues.put(DBHelper.GROUP_COMMENT_KEY_STATION_ID, userComment.getStationID());
+            contentValues.put(DBHelper.GROUP_COMMENT_KEY_CONTENT, userComment.getContentJsonStr());
+            contentValues.put(DBHelper.GROUP_COMMENT_KEY_STORE_USER_GUID, currentUserGUID);
+            contentValues.put(DBHelper.GROUP_COMMENT_DRAFT_KEY_FAKE_COMMENT_UUID, userComment.getUuid());
+            contentValues.put(DBHelper.GROUP_COMMENT_DRAFT_KEY_IS_FAIL, userComment.isFail() ? 1 : 0);
+
+            returnValue = database.insert(DBHelper.REMOTE_GROUP_TWEET_DRAFT_TABLE_NAME, null, contentValues);
+
+        }
+
+        return returnValue;
+
+    }
+
     private long insertRemoteGroupTweets(String tableName, String currentUserGUID, Collection<UserComment> userComments) {
 
         long returnValue = 0;
@@ -565,7 +592,6 @@ public class DBUtils {
                 DBHelper.USER_KEY_LIBRARY + "," +
                 DBHelper.USER_KEY_IS_ADMIN + ")" +
                 "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
 
     }
 
@@ -808,6 +834,23 @@ public class DBUtils {
 
     }
 
+    public long deleteRemoteCommentInDraft(String realCommentUUID, String groupUUID, String currentUserGUID) {
+
+        openWritableDB();
+
+        long returnValue;
+
+        returnValue = database.delete(DBHelper.REMOTE_GROUP_TWEET_DRAFT_TABLE_NAME,
+                DBHelper.GROUP_COMMENT_DRAFT_KEY_REAL_COMMENT_UUID + " = ? and "
+                        + DBHelper.GROUP_COMMENT_KEY_STORE_USER_GUID + " = ? and "
+                        + DBHelper.GROUP_COMMENT_KEY_GROUP_UUID + " = ?",
+                new String[]{realCommentUUID, currentUserGUID, groupUUID});
+
+        return returnValue;
+
+    }
+
+
     public long clearGroups() {
 
         openWritableDB();
@@ -833,6 +876,10 @@ public class DBUtils {
         database.delete(DBHelper.REMOTE_STATION_TABLE_NAME, null, null);
 
         Log.d(TAG, "clearGroups: clear station table result: " + returnValue);
+
+        database.delete(DBHelper.REMOTE_GROUP_TWEET_DRAFT_TABLE_NAME, null, null);
+
+        Log.d(TAG, "clearGroups: clear group tweet draft table result: " + returnValue);
 
         close();
 
@@ -1149,7 +1196,8 @@ public class DBUtils {
 
         for (PrivateGroup group : groups) {
 
-            List<UserComment> userComments = getUserComments(DBHelper.REMOTE_GROUP_LAST_TWEET_TABLE_NAME, group.getUUID(), currentUserGUID);
+            List<UserComment> userComments = getUserComments(DBHelper.REMOTE_GROUP_LAST_TWEET_TABLE_NAME,
+                    group.getUUID(), currentUserGUID, new LocalGroupTweetParser());
 
             if (userComments.size() > 0)
                 group.setLastComment(userComments.get(0));
@@ -1164,12 +1212,17 @@ public class DBUtils {
 
     public List<UserComment> getUserComments(String groupUUID, String currentUserGUID) {
 
-        return getUserComments(DBHelper.REMOTE_GROUP_TWEET_TABLE_NAME, groupUUID, currentUserGUID);
+        return getUserComments(DBHelper.REMOTE_GROUP_TWEET_TABLE_NAME, groupUUID, currentUserGUID, new LocalGroupTweetParser());
 
     }
 
+    public List<UserComment> getUserCommentsInDraft(String groupUUID, String currentUserGUID) {
 
-    private List<UserComment> getUserComments(String dbName, String groupUUID, String currentUserGUID) {
+        return getUserComments(DBHelper.REMOTE_GROUP_TWEET_DRAFT_TABLE_NAME, groupUUID, currentUserGUID, new LocalFakeGroupTweetParser());
+
+    }
+
+    private List<UserComment> getUserComments(String dbName, String groupUUID, String currentUserGUID, LocalGroupTweetParser parser) {
 
         openReadableDB();
 
@@ -1177,13 +1230,11 @@ public class DBUtils {
                         + DBHelper.GROUP_COMMENT_KEY_STORE_USER_GUID + " = ?"
                 , new String[]{groupUUID, currentUserGUID}, null, null, null);
 
-        LocalGroupTweetParser localGroupTweetParser = new LocalGroupTweetParser();
-
         List<UserComment> userComments = new ArrayList<>();
 
         while (groupTweetCursor.moveToNext()) {
 
-            UserComment userComment = localGroupTweetParser.parse(groupTweetCursor);
+            UserComment userComment = parser.parse(groupTweetCursor);
 
             userComments.add(userComment);
 
@@ -1316,49 +1367,43 @@ public class DBUtils {
 
     public long updateGroupName(String currentUserGUID, String groupUUID, String newGroupName) {
 
-        openWritableDB();
-
-        long returnValue;
-
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.GROUP_KEY_NAME, newGroupName);
 
-        returnValue = database.update(DBHelper.REMOTE_GROUP_TABLE_NAME, contentValues, DBHelper.GROUP_KEY_UUID + " = ? and "
-                        + DBHelper.GROUP_KEY_STORE_USER_GUID + " = ?",
-                new String[]{groupUUID, currentUserGUID});
-
-        close();
-
-        return returnValue;
+        return updateGroupData(groupUUID, currentUserGUID, contentValues);
 
     }
 
     public long updateGroup(PrivateGroup group, String currentUserGUID) {
 
-        openWritableDB();
-
-        long returnValue;
-
         ContentValues contentValues = createGroupContentValues(group, currentUserGUID);
 
-        returnValue = database.update(DBHelper.REMOTE_GROUP_TABLE_NAME, contentValues, DBHelper.GROUP_KEY_UUID + " = ? and "
-                        + DBHelper.GROUP_KEY_STORE_USER_GUID + " = ?",
-                new String[]{group.getUUID(), currentUserGUID});
+        return updateGroupData(group.getUUID(), currentUserGUID, contentValues);
 
-        close();
+    }
 
-        return returnValue;
+    public long updateGroupLastReadCommentIndex(String groupUUID, String currentUserGUID, long lastReadCommentIndex){
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.GROUP_KEY_LAST_READ_COMMENT_INDEX, lastReadCommentIndex);
+
+        return updateGroupData(groupUUID, currentUserGUID, contentValues);
 
     }
 
     public long updateGroupLastRetrieveCommentIndex(String groupUUID, String currentUserGUID, long lastRetrieveCommentIndex) {
 
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.GROUP_KEY_LAST_RETRIEVE_COMMENT_INDEX, lastRetrieveCommentIndex);
+
+        return updateGroupData(groupUUID, currentUserGUID, contentValues);
+
+    }
+
+    private long updateGroupData(String groupUUID, String currentUserGUID, ContentValues contentValues) {
         openWritableDB();
 
         long returnValue;
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.GROUP_KEY_LAST_RETRIEVE_COMMENT_INDEX, lastRetrieveCommentIndex);
 
         returnValue = database.update(DBHelper.REMOTE_GROUP_TABLE_NAME, contentValues, DBHelper.GROUP_KEY_UUID + " = ? and "
                         + DBHelper.GROUP_KEY_STORE_USER_GUID + " = ?",
@@ -1367,8 +1412,6 @@ public class DBUtils {
         close();
 
         return returnValue;
-
-
     }
 
 
@@ -1393,6 +1436,41 @@ public class DBUtils {
 
         return returnValue;
 
+    }
+
+    public long updateGroupCommentRealUUIDInDraft(String fakeCommentUUID, String currentUserGUID, String groupUUID, String realCommentUUID) {
+
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(DBHelper.GROUP_COMMENT_DRAFT_KEY_REAL_COMMENT_UUID, realCommentUUID);
+
+        return updateGroupCommentInDraft(fakeCommentUUID, currentUserGUID, groupUUID, contentValues);
+
+    }
+
+    public long updateGroupCommentIsFailInDraft(String fakeCommentUUID, String currentUserGUID, String groupUUID, boolean isFail) {
+
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(DBHelper.GROUP_COMMENT_DRAFT_KEY_IS_FAIL, isFail);
+
+        return updateGroupCommentInDraft(fakeCommentUUID, currentUserGUID, groupUUID, contentValues);
+
+    }
+
+    private long updateGroupCommentInDraft(String fakeCommentUUID, String currentUserGUID, String groupUUID, ContentValues contentValues) {
+        openWritableDB();
+
+        long returnValue;
+
+        returnValue = database.update(DBHelper.REMOTE_GROUP_TWEET_DRAFT_TABLE_NAME, contentValues,
+                DBHelper.GROUP_COMMENT_KEY_GROUP_UUID + " = ? and " + DBHelper.GROUP_COMMENT_KEY_STORE_USER_GUID + " = ? and "
+                        + DBHelper.GROUP_COMMENT_DRAFT_KEY_FAKE_COMMENT_UUID + " = ?",
+                new String[]{groupUUID, currentUserGUID, fakeCommentUUID});
+
+        close();
+
+        return returnValue;
     }
 
 
