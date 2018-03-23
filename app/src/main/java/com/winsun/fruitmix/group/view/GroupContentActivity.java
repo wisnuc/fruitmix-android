@@ -22,6 +22,7 @@ import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.databinding.ActivityGroupContentBinding;
+import com.winsun.fruitmix.eventbus.GetNewCommentFinishedEvent;
 import com.winsun.fruitmix.eventbus.MqttMessageEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
@@ -566,6 +567,14 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
             EventBus.getDefault().removeStickyEvent(operationEvent);
 
             groupContentPresenter.handleMqttMessage((MqttMessageEvent) operationEvent);
+
+        } else if (action.equals(Util.GET_NEW_COMMENT_FINISHED)) {
+
+            GetNewCommentFinishedEvent getNewCommentFinishedEvent = (GetNewCommentFinishedEvent) operationEvent;
+
+            String groupUUID = getNewCommentFinishedEvent.getGroupUUID();
+
+            groupContentPresenter.handleGetNewCommentFinishedMessage(groupUUID);
 
         }
 

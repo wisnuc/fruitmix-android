@@ -645,6 +645,9 @@
 
     <string name="only_support_upload_for_one_local_media">Currently only support for uploading a local photo</string>
 
+    <string name="retry_or_not">Retry or not</string>
+    <string name="retry">Retry</string>
+
     <!-- group setting -->
     <string name="group_member">Group Members</string>
     <string name="check_more_group_members">Check more group members</string>

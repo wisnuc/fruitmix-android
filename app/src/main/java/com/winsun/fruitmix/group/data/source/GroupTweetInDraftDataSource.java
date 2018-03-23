@@ -110,8 +110,9 @@ public class GroupTweetInDraftDataSource {
 
                     metadata.addProperty("date", media.getFormattedTime());
 
-                    list.add(item);
+                    item.add("metadata",metadata);
 
+                    list.add(item);
                 }
 
 

@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.BufferedReader;

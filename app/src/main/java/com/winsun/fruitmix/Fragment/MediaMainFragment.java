@@ -713,8 +713,6 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
             Log.d(TAG, "handleStickyOperationEvent: get new comment finished");
 
-            EventBus.getDefault().removeStickyEvent(operationEvent);
-
             groupListPage.handleGetNewCommentFinished();
 
         }

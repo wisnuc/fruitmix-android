@@ -11,8 +11,6 @@ import com.winsun.fruitmix.util.Util;
 
 public abstract class AbstractFile {
 
-    //TODO:setFileTypeResID automatic when set name to avoid forget
-
     private String name;
 
     private long time;

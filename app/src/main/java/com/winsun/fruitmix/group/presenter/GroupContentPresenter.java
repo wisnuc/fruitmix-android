@@ -1,6 +1,8 @@
 package com.winsun.fruitmix.group.presenter;
 
+import android.content.DialogInterface;
 import android.databinding.ViewDataBinding;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,12 +16,14 @@ import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallbackWrapper;
 import com.winsun.fruitmix.databinding.GroupAddPingItemBinding;
 import com.winsun.fruitmix.databinding.GroupPingItemBinding;
 import com.winsun.fruitmix.eventbus.MqttMessageEvent;
 import com.winsun.fruitmix.group.data.model.AudioComment;
 import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
+import com.winsun.fruitmix.group.data.model.RetryFailUserCommentStrategy;
 import com.winsun.fruitmix.group.data.model.SystemMessageTextComment;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
@@ -53,7 +57,8 @@ import java.util.List;
  * Created by Administrator on 2017/7/21.
  */
 
-public class GroupContentPresenter implements CustomArrowToggleButton.PingToggleListener, ActiveView {
+public class GroupContentPresenter implements CustomArrowToggleButton.PingToggleListener, ActiveView,
+        RetryFailUserCommentStrategy {
 
     public static final String TAG = GroupContentPresenter.class.getSimpleName();
 
@@ -173,8 +178,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             @Override
             public void onSucceed(List<UserComment> data, OperationResult operationResult) {
 
-                mPrivateGroup.refreshLastReadCommentIndex();
-                groupRepository.updateGroupLastReadIndexInDB(mPrivateGroup.getUUID(), mPrivateGroup.getLastReadCommentIndex());
+                mPrivateGroup.resetUnreadCommentCount();
+                groupRepository.updateGroupUnreadCommentCountInDB(mPrivateGroup.getUUID(), mPrivateGroup.getUnreadCommentCount());
 
                 mLoadingViewModel.showLoading.set(false);
 
@@ -271,16 +276,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
                     refreshTitleFromMemory();
 
-                    if (group.getLastCommentIndex() > currentGroupIndex) {
-
-                        Log.d(TAG, "handleMqttMessage: last group index is large than current group index,refresh group");
-
-                        refreshUserCommentData();
-
-                    }
-
                 }
-
 
             }
 
@@ -289,8 +285,18 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
             e.printStackTrace();
         }
 
+    }
+
+    public void handleGetNewCommentFinishedMessage(String groupUUID) {
+
+        if (groupUUID.equals(mPrivateGroup.getUUID())) {
+
+            refreshUserCommentData();
+
+        }
 
     }
+
 
     public void refreshPin() {
 
@@ -344,6 +350,49 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         return groupContentView != null;
     }
 
+    @Override
+    public void handleRetryFailUserComment(final UserComment failUserCommentInDraft) {
+
+        if (groupContentView.getContext() == null)
+            return;
+
+        new AlertDialog.Builder(groupContentView.getContext()).setTitle(groupContentView.getString(R.string.retry_or_not))
+                .setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        retryFailUserComment(failUserCommentInDraft);
+
+                    }
+                }).setNegativeButton(R.string.cancel, null).create().show();
+
+    }
+
+    private void retryFailUserComment(final UserComment failUserCommentInDraft) {
+        GroupRequestParam groupRequestParam = new GroupRequestParam(failUserCommentInDraft.getGroupUUID(),
+                failUserCommentInDraft.getStationID());
+
+        groupRepository.retryFailUserComment(groupRequestParam, failUserCommentInDraft, new BaseOperateCallbackWrapper(
+                new BaseOperateCallback() {
+                    @Override
+                    public void onSucceed() {
+
+                        int position = userComments.indexOf(failUserCommentInDraft);
+
+                        getGroupContentAdapter().notifyItemChanged(position);
+
+                    }
+
+                    @Override
+                    public void onFail(OperationResult operationResult) {
+
+                        groupContentView.showToast(operationResult.getResultMessage(groupContentView.getContext()));
+
+                    }
+                }, this
+        ));
+    }
+
     private class GroupContentAdapter extends RecyclerView.Adapter<UserCommentViewHolder> {
 
         private List<UserComment> mUserComments;
@@ -353,7 +402,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
         GroupContentAdapter() {
             mUserComments = new ArrayList<>();
 
-            factory = UserCommentViewFactory.getInstance(imageLoader, playAudioUseCase);
+            factory = UserCommentViewFactory.getInstance(imageLoader, playAudioUseCase,
+                    GroupContentPresenter.this);
         }
 
         void setUserComments(List<UserComment> userComments) {

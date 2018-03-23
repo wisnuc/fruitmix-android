@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.AudioCommentItemBinding;
 import com.winsun.fruitmix.group.data.model.AudioComment;
+import com.winsun.fruitmix.group.data.model.RetryFailUserCommentStrategy;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.usecase.PlayAudioUseCase;
 import com.winsun.fruitmix.util.Util;
@@ -32,7 +33,8 @@ public class AudioCommentView extends UserCommentView {
 
     private boolean isPlaying = false;
 
-    public AudioCommentView(PlayAudioUseCase playAudioUseCase) {
+    public AudioCommentView(RetryFailUserCommentStrategy retryFailUserCommentStrategy,PlayAudioUseCase playAudioUseCase) {
+        super(retryFailUserCommentStrategy);
         this.playAudioUseCase = playAudioUseCase;
     }
 

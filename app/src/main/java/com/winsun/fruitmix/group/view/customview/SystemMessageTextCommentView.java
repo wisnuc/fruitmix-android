@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.SystemMessageTextCommentBinding;
+import com.winsun.fruitmix.group.data.model.RetryFailUserCommentStrategy;
 import com.winsun.fruitmix.group.data.model.SystemMessageTextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
@@ -29,6 +30,10 @@ import java.util.List;
 public class SystemMessageTextCommentView extends UserCommentView {
 
     private SystemMessageTextCommentBinding mSystemMessageTextCommentBinding;
+
+    public SystemMessageTextCommentView(RetryFailUserCommentStrategy retryFailUserCommentStrategy) {
+        super(retryFailUserCommentStrategy);
+    }
 
     @Override
     public ViewDataBinding getViewDataBinding(Context context, ViewGroup parent) {

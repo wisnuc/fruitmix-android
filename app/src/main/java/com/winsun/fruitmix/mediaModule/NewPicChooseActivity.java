@@ -407,7 +407,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
                         dismissDialog();
 
-                        showToast(getString(R.string.success, getString(R.string.send)));
+//                        showToast(getString(R.string.success, getString(R.string.send)));
 
                         NewPicChooseActivity.this.setResult(RESULT_OK);
 

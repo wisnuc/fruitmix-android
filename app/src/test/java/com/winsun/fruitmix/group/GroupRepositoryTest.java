@@ -9,6 +9,8 @@ import com.winsun.fruitmix.group.data.source.GroupLocalDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRemoteDataSource;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
+import com.winsun.fruitmix.group.data.source.GroupTweetInDraftDataSource;
+import com.winsun.fruitmix.group.usecase.HandleUserCommentInDraft;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.user.User;
@@ -36,25 +38,31 @@ public class GroupRepositoryTest {
     private GroupLocalDataSource groupLocalDataSource;
 
     @Mock
+    private GroupTweetInDraftDataSource mGroupTweetInDraftDataSource;
+
+    @Mock
     private User currentUser;
 
     @Mock
     private MediaDataSourceRepository mMediaDataSourceRepository;
+
+    @Mock
+    private HandleUserCommentInDraft mHandleUserCommentInDraft;
 
     @Before
     public void setup() {
 
         MockitoAnnotations.initMocks(this);
 
-        groupRepository = GroupRepository.getInstance(mGroupDataSource,groupLocalDataSource,new MockThreadManager(),
-                currentUser,mMediaDataSourceRepository);
+        groupRepository = GroupRepository.getInstance(mGroupDataSource, groupLocalDataSource, mGroupTweetInDraftDataSource,
+                new MockThreadManager(), currentUser, mMediaDataSourceRepository,mHandleUserCommentInDraft);
 
     }
 
     @Test
     public void testInsert() {
 
-        groupRepository.insertUserComment(new GroupRequestParam("",""), new UserComment(Util.createLocalUUid(),null, 0,"",""), new BaseOperateCallbackImpl());
+        groupRepository.insertUserComment(new GroupRequestParam("", ""), new UserComment(Util.createLocalUUid(), null, 0, "", ""), new BaseOperateCallbackImpl());
 
         verify(mGroupDataSource).insertUserComment(any(GroupRequestParam.class), any(UserComment.class), any(BaseOperateDataCallback.class));
 

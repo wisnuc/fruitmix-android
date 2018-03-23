@@ -23,6 +23,7 @@ import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.MediaComment;
+import com.winsun.fruitmix.group.data.model.RetryFailUserCommentStrategy;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.group.data.viewmodel.FileCommentViewModel;
@@ -47,7 +48,8 @@ public class SingleFileCommentView extends UserCommentView implements SCloudToke
 
     private ImageLoader imageLoader;
 
-    public SingleFileCommentView(ImageLoader imageLoader) {
+    public SingleFileCommentView(RetryFailUserCommentStrategy retryFailUserCommentStrategy,ImageLoader imageLoader) {
+        super(retryFailUserCommentStrategy);
         this.imageLoader = imageLoader;
     }
 

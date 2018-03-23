@@ -129,8 +129,6 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         HttpRequest httpRequest;
 
-        //TODO:refactor http request factory get media and file in tweet,local and cloud api change
-
         if (fileDownloadParam instanceof FileFromBoxDownloadParam) {
 
 //            httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),

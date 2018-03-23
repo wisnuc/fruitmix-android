@@ -97,7 +97,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String GROUP_KEY_OWNER_GUID = "group_key_owner_guid";
     public static final String GROUP_KEY_CREATE_TIME = "group_key_create_time";
     public static final String GROUP_KEY_MODIFY_TIME = "group_key_modify_time";
-    public static final String GROUP_KEY_LAST_READ_COMMENT_INDEX = "group_key_last_read_comment_index";
+    public static final String GROUP_KEY_UNREAD_COMMENT_COUNT = "group_key_last_read_comment_index";
     public static final String GROUP_KEY_LOCATED_STATION_ID = "group_key_located_station_id";
     public static final String GROUP_KEY_STORE_USER_GUID = "group_key_store_user_guid";
     public static final String GROUP_KEY_LAST_RETRIEVE_COMMENT_INDEX = "group_key_last_retrieve_comment_index";
@@ -231,7 +231,7 @@ public class DBHelper extends SQLiteOpenHelper {
             + GROUP_KEY_MODIFY_TIME + INTEGER_NOT_NULL + GROUP_KEY_LOCATED_STATION_ID + TEXT_NOT_NULL
             + GROUP_KEY_STORE_USER_GUID + TEXT_NOT_NULL
             + GROUP_KEY_LAST_RETRIEVE_COMMENT_INDEX + INTEGER_NOT_NULL
-            + GROUP_KEY_LAST_READ_COMMENT_INDEX + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;
+            + GROUP_KEY_UNREAD_COMMENT_COUNT + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
     public static final String DATABASE_REMOTE_GROUP_USER_CREATE = CREATE_TABLE + REMOTE_GROUP_USER_TABLE_NAME
             + USER_FIELD_CREATE + COMMA + GROUP_USER_KEY_GROUP_UUID + TEXT_NOT_NULL

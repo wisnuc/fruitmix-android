@@ -15,6 +15,7 @@ import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.BaseLeftCommentBinding;
+import com.winsun.fruitmix.group.data.model.RetryFailUserCommentStrategy;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
 import com.winsun.fruitmix.http.InjectHttp;
@@ -26,6 +27,12 @@ import com.winsun.fruitmix.http.InjectHttp;
 public abstract class UserCommentView {
 
     private BaseLeftCommentBinding viewDataBinding;
+
+    private RetryFailUserCommentStrategy mRetryFailUserCommentStrategy;
+
+    public UserCommentView(RetryFailUserCommentStrategy retryFailUserCommentStrategy) {
+        mRetryFailUserCommentStrategy = retryFailUserCommentStrategy;
+    }
 
     public ViewDataBinding getViewDataBinding(Context context, ViewGroup parent) {
 
@@ -41,7 +48,7 @@ public abstract class UserCommentView {
 
     protected abstract View generateContentView(Context context, ViewGroup parent);
 
-    public void refreshCommentView(Context context, View toolbar, UserCommentShowStrategy strategy, UserComment data) {
+    public void refreshCommentView(Context context, View toolbar, UserCommentShowStrategy strategy, final UserComment data) {
 
         viewDataBinding.setVariable(BR.userComment, data);
 
@@ -83,7 +90,7 @@ public abstract class UserCommentView {
             userAvatar.setUser(data.getCreator(), imageLoader);
 
             viewDataBinding.commentCreating.setVisibility(View.GONE);
-            viewDataBinding.commentStateImageView.setVisibility(View.GONE);
+            viewDataBinding.failCommentImageView.setVisibility(View.GONE);
 
         } else {
 
@@ -107,22 +114,36 @@ public abstract class UserCommentView {
 
             commentContentLayoutLayoutParams.addRule(RelativeLayout.BELOW, R.id.current_user_info_layout);
 
-            if(data.isFake()){
+            if (data.isFake()) {
 
-                if (data.isFail())
-                    viewDataBinding.commentStateImageView.setVisibility(View.VISIBLE);
-                else {
+                if (data.isFail()) {
+
+                    viewDataBinding.commentCreating.setVisibility(View.GONE);
+
+                    viewDataBinding.failCommentImageView.setVisibility(View.VISIBLE);
+
+                    viewDataBinding.failCommentImageView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mRetryFailUserCommentStrategy.handleRetryFailUserComment(data);
+                        }
+                    });
+
+
+                } else {
 
                     //TODO:check in running task contains current user comment,if true show loading,otherwise set fail and update in db
+
+                    viewDataBinding.failCommentImageView.setVisibility(View.GONE);
 
                     viewDataBinding.commentCreating.setVisibility(View.VISIBLE);
 
                 }
 
-            }else {
+            } else {
 
                 viewDataBinding.commentCreating.setVisibility(View.GONE);
-                viewDataBinding.commentStateImageView.setVisibility(View.GONE);
+                viewDataBinding.failCommentImageView.setVisibility(View.GONE);
 
             }
 

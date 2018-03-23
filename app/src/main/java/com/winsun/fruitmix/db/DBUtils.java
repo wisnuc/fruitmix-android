@@ -473,7 +473,7 @@ public class DBUtils {
         contentValues.put(DBHelper.GROUP_KEY_CREATE_TIME, group.getCreateTime());
         contentValues.put(DBHelper.GROUP_KEY_MODIFY_TIME, group.getModifyTime());
 
-        contentValues.put(DBHelper.GROUP_KEY_LAST_READ_COMMENT_INDEX, group.getLastReadCommentIndex());
+        contentValues.put(DBHelper.GROUP_KEY_UNREAD_COMMENT_COUNT, group.getUnreadCommentCount());
         contentValues.put(DBHelper.GROUP_KEY_LOCATED_STATION_ID, group.getStationID());
         contentValues.put(DBHelper.GROUP_KEY_STORE_USER_GUID, currentUserGUID);
         contentValues.put(DBHelper.GROUP_KEY_LAST_RETRIEVE_COMMENT_INDEX, group.getLastRetrievedCommentIndex());
@@ -1382,10 +1382,10 @@ public class DBUtils {
 
     }
 
-    public long updateGroupLastReadCommentIndex(String groupUUID, String currentUserGUID, long lastReadCommentIndex){
+    public long updateGroupUnreadCommentCount(String groupUUID, String currentUserGUID, long unreadCommentCount){
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.GROUP_KEY_LAST_READ_COMMENT_INDEX, lastReadCommentIndex);
+        contentValues.put(DBHelper.GROUP_KEY_UNREAD_COMMENT_COUNT, unreadCommentCount);
 
         return updateGroupData(groupUUID, currentUserGUID, contentValues);
 

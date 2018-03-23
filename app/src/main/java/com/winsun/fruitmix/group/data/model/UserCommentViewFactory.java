@@ -25,15 +25,20 @@ public class UserCommentViewFactory {
 
     private PlayAudioUseCase playAudioUseCase;
 
-    private UserCommentViewFactory(ImageLoader imageLoader, PlayAudioUseCase playAudioUseCase) {
+    private RetryFailUserCommentStrategy mRetryFailUserCommentStrategy;
+
+    private UserCommentViewFactory(ImageLoader imageLoader, PlayAudioUseCase playAudioUseCase,
+                                   RetryFailUserCommentStrategy retryFailUserCommentStrategy) {
         this.imageLoader = imageLoader;
         this.playAudioUseCase = playAudioUseCase;
+        mRetryFailUserCommentStrategy = retryFailUserCommentStrategy;
     }
 
-    public static UserCommentViewFactory getInstance(ImageLoader imageLoader, PlayAudioUseCase playAudioUseCase) {
+    public static UserCommentViewFactory getInstance(ImageLoader imageLoader, PlayAudioUseCase playAudioUseCase,
+                                                     RetryFailUserCommentStrategy retryFailUserCommentStrategy) {
 
         if (instance == null)
-            instance = new UserCommentViewFactory(imageLoader, playAudioUseCase);
+            instance = new UserCommentViewFactory(imageLoader, playAudioUseCase,retryFailUserCommentStrategy);
 
         return instance;
     }
@@ -83,15 +88,15 @@ public class UserCommentViewFactory {
     public UserCommentView createUserCommentView(int type) {
 
         if (type == TYPE_TEXT)
-            return new TextCommentView();
+            return new TextCommentView(mRetryFailUserCommentStrategy);
         else if (type == TYPE_VOICE)
-            return new AudioCommentView(playAudioUseCase);
+            return new AudioCommentView(mRetryFailUserCommentStrategy,playAudioUseCase);
         else if (type == TYPE_MULTIPLE_FILE)
-            return new MultiFileCommentView(imageLoader);
+            return new MultiFileCommentView(mRetryFailUserCommentStrategy,imageLoader);
         else if (type == TYPE_SINGLE_FILE)
-            return new SingleFileCommentView(imageLoader);
+            return new SingleFileCommentView(mRetryFailUserCommentStrategy,imageLoader);
         else if(type == TYPE_SYSTEM_MESSAGE_TEXT)
-            return new SystemMessageTextCommentView();
+            return new SystemMessageTextCommentView(mRetryFailUserCommentStrategy);
         else
             return null;
 

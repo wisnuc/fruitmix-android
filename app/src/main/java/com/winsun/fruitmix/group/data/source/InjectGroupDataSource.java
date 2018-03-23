@@ -6,6 +6,7 @@ import com.winsun.fruitmix.base.data.BaseDataOperator;
 import com.winsun.fruitmix.base.data.InjectBaseDataOperator;
 import com.winsun.fruitmix.base.data.retry.RefreshTokenRetryStrategy;
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.group.usecase.HandleUserCommentInDraft;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
@@ -52,9 +53,12 @@ public class InjectGroupDataSource {
 
         MediaDataSourceRepository mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(context);
 
-        return GroupRepository.getInstance(groupDataSourceConditionCheckWrapper, groupLocalDataSource,
-                new GroupTweetInDraftDataSource(dbUtils),
-                ThreadManagerImpl.getInstance(), currentUser, mediaDataSourceRepository);
+        GroupTweetInDraftDataSource groupTweetInDraftDataSource = new GroupTweetInDraftDataSource(dbUtils);
+
+        HandleUserCommentInDraft handleUserCommentInDraft = HandleUserCommentInDraft.getInstance(groupTweetInDraftDataSource);
+
+        return GroupRepository.getInstance(groupDataSourceConditionCheckWrapper, groupLocalDataSource, groupTweetInDraftDataSource,
+                ThreadManagerImpl.getInstance(), currentUser, mediaDataSourceRepository, handleUserCommentInDraft);
 
 //        GroupDataSource fakeGroupDataSource = FakeGroupDataSource.getInstance();
 //        return GroupRepository.getInstance(fakeGroupDataSource,ThreadManagerImpl.getInstance());

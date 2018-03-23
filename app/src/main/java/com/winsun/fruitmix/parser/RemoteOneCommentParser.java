@@ -68,7 +68,7 @@ public class RemoteOneCommentParser {
 
             case "list":
 
-                result =  analyzeCommentContainsList(jsonObject, uuid, time, index, comment, creator);
+                result = analyzeCommentContainsList(jsonObject, uuid, time, index, comment, creator);
 
                 break;
 
@@ -156,6 +156,14 @@ public class RemoteOneCommentParser {
                 abstractFile.setName(name);
 
                 abstractFile.setSize(size);
+
+                if (listItem.has("rootUUID")) {
+                    abstractFile.setRootFolderUUID(listItem.optString("rootUUID"));
+                }
+
+                if (listItem.has("dirUUID")) {
+                    abstractFile.setParentFolderUUID(listItem.optString("dirUUID"));
+                }
 
                 files.add(abstractFile);
 

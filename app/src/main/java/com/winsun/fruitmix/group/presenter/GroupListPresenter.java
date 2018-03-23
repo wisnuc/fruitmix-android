@@ -75,6 +75,8 @@ public class GroupListPresenter implements ActiveView {
 
     private boolean alreadyInitialMqttService = false;
 
+    private BaseLoadDataCallback<PrivateGroup> mPrivateGroupBaseLoadDataCallback;
+
     public GroupListPresenter(GroupListPageView groupListPageView, User currentUser,
                               TokenDataSource tokenDataSource, GroupRepository groupRepository,
                               LoadingViewModel loadingViewModel, NoContentViewModel noContentViewModel,
@@ -99,55 +101,12 @@ public class GroupListPresenter implements ActiveView {
 
         ImageLoader.getInstance(groupListPageView.getContext()).setPicUrlRegex("https?://.*?");
 
+        initCallback();
     }
 
-    public GroupListAdapter getGroupListAdapter() {
-        return groupListAdapter;
-    }
+    private void initCallback(){
 
-    public void refreshGroups() {
-
-        if (alreadyCallGetGroupList) {
-
-            groupListPageView.finishSwipeRefreshAnimation();
-
-            return;
-
-        }
-
-        if (mSystemSettingDataSource.getCurrentWAToken().isEmpty()) {
-
-            groupListPageView.finishSwipeRefreshAnimation();
-
-            loadingViewModel.showLoading.set(false);
-
-            groupListViewModel.showNoWATokenExplainLayout.set(true);
-
-            String currentUserGUID = mCurrentUser.getAssociatedWeChatGUID();
-
-            if (currentUserGUID != null && currentUserGUID.length() > 0) {
-
-                groupListViewModel.showGoToBindWeChatBtn.set(false);
-
-                groupListViewModel.explainTextField.set(groupListPageView.getString(R.string.login_with_wechat_to_use_group));
-
-            } else {
-
-                groupListViewModel.showGoToBindWeChatBtn.set(true);
-
-                groupListViewModel.explainTextField.set(groupListPageView.getString(R.string.bind_wechat_to_use_group));
-
-            }
-
-            groupListViewModel.showRecyclerView.set(false);
-            groupListViewModel.showAddFriendsFAB.set(false);
-
-            return;
-        }
-
-        alreadyCallGetGroupList = true;
-
-        groupRepository.getGroupList(new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<PrivateGroup>() {
+        mPrivateGroupBaseLoadDataCallback = new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<PrivateGroup>() {
             @Override
             public void onSucceed(final List<PrivateGroup> data, OperationResult operationResult) {
 
@@ -216,7 +175,63 @@ public class GroupListPresenter implements ActiveView {
                 initMqttService();
 
             }
-        }, this));
+        }, this);
+
+    }
+
+    public GroupListAdapter getGroupListAdapter() {
+        return groupListAdapter;
+    }
+
+    public void refreshGroups() {
+
+        if (alreadyCallGetGroupList) {
+
+            groupListPageView.finishSwipeRefreshAnimation();
+
+            return;
+
+        }
+
+        if (mSystemSettingDataSource.getCurrentWAToken().isEmpty()) {
+
+            groupListPageView.finishSwipeRefreshAnimation();
+
+            loadingViewModel.showLoading.set(false);
+
+            groupListViewModel.showNoWATokenExplainLayout.set(true);
+
+            String currentUserGUID = mCurrentUser.getAssociatedWeChatGUID();
+
+            if (currentUserGUID != null && currentUserGUID.length() > 0) {
+
+                groupListViewModel.showGoToBindWeChatBtn.set(false);
+
+                groupListViewModel.explainTextField.set(groupListPageView.getString(R.string.login_with_wechat_to_use_group));
+
+            } else {
+
+                groupListViewModel.showGoToBindWeChatBtn.set(true);
+
+                groupListViewModel.explainTextField.set(groupListPageView.getString(R.string.bind_wechat_to_use_group));
+
+            }
+
+            groupListViewModel.showRecyclerView.set(false);
+            groupListViewModel.showAddFriendsFAB.set(false);
+
+            return;
+        }
+
+        alreadyCallGetGroupList = true;
+
+        groupRepository.getGroupList(mPrivateGroupBaseLoadDataCallback);
+
+    }
+
+    public void refreshGroupsUsingDB(){
+
+        groupRepository.getGroupListFromDB(mPrivateGroupBaseLoadDataCallback);
 
     }
 
@@ -330,9 +345,9 @@ public class GroupListPresenter implements ActiveView {
 
             Context context = binding.getRoot().getContext();
 
-            long lastCommentIndex = privateGroup.getLastCommentIndex();
+//            long difference = lastCommentIndex - privateGroup.getUnreadCommentCount();
 
-            long difference = lastCommentIndex - privateGroup.getLastReadCommentIndex();
+            long difference = privateGroup.getUnreadCommentCount();
 
             binding.lastCommentContent.setText(getLastCommentContent(privateGroup, context));
 
@@ -341,12 +356,7 @@ public class GroupListPresenter implements ActiveView {
                 binding.newCommentCountTextview.setVisibility(View.VISIBLE);
                 binding.newCommentCountTextview.setText(difference + "");
 
-            } else if (lastCommentIndex == -1 && privateGroup.getLastReadCommentIndex() == -1) {
-
-                binding.newCommentCountTextview.setVisibility(View.VISIBLE);
-                binding.newCommentCountTextview.setText("1");
-
-            } else {
+            }  else {
                 binding.newCommentCountTextview.setVisibility(View.INVISIBLE);
             }
 

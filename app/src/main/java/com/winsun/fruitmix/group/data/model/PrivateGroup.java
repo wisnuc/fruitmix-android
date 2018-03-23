@@ -35,7 +35,7 @@ public class PrivateGroup {
     private long createTime;
     private long modifyTime;
 
-    private long lastReadCommentIndex = -1;
+    private long unreadCommentCount = 0;
 
     private long lastRetrievedCommentIndex = -1;
 
@@ -153,8 +153,8 @@ public class PrivateGroup {
     public void setLastComment(UserComment lastComment) {
         this.lastComment = lastComment;
 
-        if (lastReadCommentIndex == -1)
-            lastReadCommentIndex = lastComment.getIndex();
+/*        if (unreadCommentCount == -1)
+            unreadCommentCount = lastComment.getIndex();*/
 
     }
 
@@ -210,21 +210,23 @@ public class PrivateGroup {
 
     }
 
-    public void refreshLastReadCommentIndex() {
+    public void resetUnreadCommentCount() {
 
-        if (lastComment != null)
-            lastReadCommentIndex = lastComment.getIndex();
+ /*       if (lastComment != null)
+            unreadCommentCount = lastComment.getIndex();
         else
-            lastReadCommentIndex = 0;
+            unreadCommentCount = 0;*/
+
+        unreadCommentCount = 0;
 
     }
 
-    public void setLastReadCommentIndex(long lastReadCommentIndex) {
-        this.lastReadCommentIndex = lastReadCommentIndex;
+    public void setUnreadCommentCount(long unreadCommentCount) {
+        this.unreadCommentCount = unreadCommentCount;
     }
 
-    public long getLastReadCommentIndex() {
-        return lastReadCommentIndex;
+    public long getUnreadCommentCount() {
+        return unreadCommentCount;
     }
 
     public void setStationID(String stationID) {

@@ -143,8 +143,6 @@ public class GroupRemoteDataSource extends BaseRemoteDataSourceImpl implements G
 
     }
 
-    //TODO:modify create http request
-
     @Override
     public synchronized void quitGroup(GroupRequestParam groupRequestParam, String currentUserGUID, BaseOperateCallback callback) {
 

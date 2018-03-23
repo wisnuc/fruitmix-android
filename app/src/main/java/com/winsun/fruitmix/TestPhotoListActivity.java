@@ -61,8 +61,6 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
     private Map<String, List<MediaViewModel>> mMapKeyIsDateValueIsPhotoList;
 
-    //TODO use SparseArray or ArrayMap to optimize memory use effect
-
     private Map<Integer, String> mMapKeyIsPhotoPositionValueIsPhotoDate;
     private SparseArray<MediaViewModel> mMapKeyIsPhotoPositionValueIsPhoto;
 

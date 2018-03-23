@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.google.gson.JsonObject;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.databinding.TextCommentBinding;
+import com.winsun.fruitmix.group.data.model.RetryFailUserCommentStrategy;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.model.UserCommentShowStrategy;
@@ -31,6 +32,10 @@ import java.util.List;
 public class TextCommentView extends UserCommentView {
 
     private TextCommentBinding binding;
+
+    public TextCommentView(RetryFailUserCommentStrategy retryFailUserCommentStrategy) {
+        super(retryFailUserCommentStrategy);
+    }
 
     @Override
     protected View generateContentView(Context context, ViewGroup parent) {

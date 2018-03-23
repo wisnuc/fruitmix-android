@@ -5,15 +5,18 @@ import android.util.Log;
 
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.eventbus.OperationEvent;
+import com.winsun.fruitmix.eventbus.GetNewCommentFinishedEvent;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.SystemMessageTextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
+import com.winsun.fruitmix.group.usecase.HandleUserCommentInDraft;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -58,24 +61,31 @@ public class GroupRepository extends BaseDataRepository {
 
     private String mCurrentUserGUID;
 
+    private HandleUserCommentInDraft mHandleUserCommentInDraft;
+
     public static GroupRepository getInstance(GroupDataSource groupDataSource, GroupLocalDataSource groupLocalDataSource,
                                               GroupTweetInDraftDataSource groupTweetInDraftDataSource,
                                               ThreadManager threadManager, User currentUser,
-                                              MediaDataSourceRepository mediaDataSourceRepository) {
+                                              MediaDataSourceRepository mediaDataSourceRepository,
+                                              HandleUserCommentInDraft handleUserCommentInDraft) {
         if (ourInstance == null)
             ourInstance = new GroupRepository(threadManager, groupDataSource, groupLocalDataSource, groupTweetInDraftDataSource,
-                    currentUser, mediaDataSourceRepository);
+                    currentUser, mediaDataSourceRepository, handleUserCommentInDraft);
 
         return ourInstance;
     }
 
     public static void destroyInstance() {
+
+        HandleUserCommentInDraft.destroyInstance();
+
         ourInstance = null;
     }
 
     public GroupRepository(ThreadManager threadManager, GroupDataSource mGroupRemoteDataSource,
                            GroupLocalDataSource groupLocalDataSource, GroupTweetInDraftDataSource groupTweetInDraftDataSource,
-                           User currentUser, MediaDataSourceRepository mediaDataSourceRepository) {
+                           User currentUser, MediaDataSourceRepository mediaDataSourceRepository,
+                           HandleUserCommentInDraft handleUserCommentInDraft) {
         super(threadManager);
         this.mGroupRemoteDataSource = mGroupRemoteDataSource;
         mGroupLocalDataSource = groupLocalDataSource;
@@ -85,6 +95,8 @@ public class GroupRepository extends BaseDataRepository {
         mMediaDataSourceRepository = mediaDataSourceRepository;
 
         mCurrentUserGUID = currentUser.getAssociatedWeChatGUID();
+
+        mHandleUserCommentInDraft = handleUserCommentInDraft;
 
         mPrivateGroups = new LinkedHashMap<>();
 
@@ -97,6 +109,10 @@ public class GroupRepository extends BaseDataRepository {
     }
 
     public void getGroupList(final BaseLoadDataCallback<PrivateGroup> callback) {
+        getGroupList(true, callback);
+    }
+
+    private void getGroupList(final boolean getGroupFromRemote, final BaseLoadDataCallback<PrivateGroup> callback) {
 
         final BaseLoadDataCallback<PrivateGroup> runOnMainThreadCallback = createLoadCallbackRunOnMainThread(callback);
 
@@ -129,11 +145,15 @@ public class GroupRepository extends BaseDataRepository {
 
                             runOnMainThreadCallback.onSucceed(currentUserGroup, operationResult);
 
-                            getGroupFromRemoteWhenLocalGroupNotEmpty(new HashMap<>(mPrivateGroups));
+                            if (getGroupFromRemote)
+                                getGroupFromRemoteWhenLocalGroupNotEmpty(new HashMap<>(mPrivateGroups));
 
                         } else {
 
-                            getGroupFromRemoteWhenLocalGroupEmpty();
+                            if (getGroupFromRemote)
+                                getGroupFromRemoteWhenLocalGroupEmpty();
+                            else
+                                runOnMainThreadCallback.onSucceed(currentUserGroup, operationResult);
 
                         }
 
@@ -142,16 +162,14 @@ public class GroupRepository extends BaseDataRepository {
                     @Override
                     public void onFail(OperationResult operationResult) {
 
-                        getGroupFromRemoteWhenLocalGroupEmpty();
+                        if (getGroupFromRemote)
+                            getGroupFromRemoteWhenLocalGroupEmpty();
+                        else
+                            callback.onFail(operationResult);
 
                     }
                 });
 
-            }
-
-            private void handleLocalGroupEmpty() {
-                for (PrivateGroup group : mPrivateGroups.values())
-                    mGroupLocalDataSource.addGroup(mCurrentUserGUID, group);
             }
 
             private void getGroupFromRemoteWhenLocalGroupEmpty() {
@@ -164,7 +182,7 @@ public class GroupRepository extends BaseDataRepository {
                             PrivateGroup preGroup = mPrivateGroups.get(privateGroup.getUUID());
 
                             if (preGroup != null)
-                                privateGroup.setLastReadCommentIndex(preGroup.getLastReadCommentIndex());
+                                privateGroup.setUnreadCommentCount(preGroup.getUnreadCommentCount());
 
                         }
 
@@ -178,6 +196,20 @@ public class GroupRepository extends BaseDataRepository {
 
                         handleLocalGroupEmpty();
 
+                        for (final PrivateGroup privateGroup : data) {
+
+                            getNewCommentInGroup(privateGroup.getUUID(), privateGroup.getStationID(),
+                                    privateGroup.getLastRetrievedCommentIndex(), new BaseOperateCallbackImpl() {
+                                        @Override
+                                        public void onSucceed() {
+                                            super.onSucceed();
+
+                                            handleFinishGetNewComment(privateGroup.getUUID());
+                                        }
+                                    });
+
+                        }
+
                     }
 
                     @Override
@@ -187,25 +219,32 @@ public class GroupRepository extends BaseDataRepository {
                 });
             }
 
+            private void handleLocalGroupEmpty() {
+                for (PrivateGroup group : mPrivateGroups.values())
+                    mGroupLocalDataSource.addGroup(mCurrentUserGUID, group);
+            }
+
             private void getGroupFromRemoteWhenLocalGroupNotEmpty(final Map<String, PrivateGroup> mLocalGroupMaps) {
 
                 mGroupRemoteDataSource.getAllGroups(new BaseLoadDataCallback<PrivateGroup>() {
                     @Override
                     public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
 
-                        List<PrivateGroup> result = handleGetRemoteGroupSucceed(data, mLocalGroupMaps);
-
-                        mPrivateGroups.clear();
-
-                        for (PrivateGroup privateGroup : data) {
-                            mPrivateGroups.put(privateGroup.getUUID(), privateGroup);
-                        }
-
-                        for (PrivateGroup privateGroup : result) {
-                            mPrivateGroups.put(privateGroup.getUUID(), privateGroup);
-                        }
+                        List<PrivateGroup> result = generateNeedGetNewCommentGroups(data, mLocalGroupMaps);
 
                         runOnMainThreadCallback.onSucceed(data, operationResult);
+
+                        for (final PrivateGroup group : result) {
+                            getNewCommentInGroup(group.getUUID(), group.getStationID(),
+                                    group.getLastRetrievedCommentIndex(), new BaseOperateCallbackImpl() {
+                                        @Override
+                                        public void onSucceed() {
+                                            super.onSucceed();
+
+                                            handleFinishGetNewComment(group.getUUID());
+                                        }
+                                    });
+                        }
 
                     }
 
@@ -218,27 +257,33 @@ public class GroupRepository extends BaseDataRepository {
 
             }
 
-            private List<PrivateGroup> handleGetRemoteGroupSucceed(List<PrivateGroup> remoteGroups, final Map<String, PrivateGroup> mLocalGroupMaps) {
+            private List<PrivateGroup> generateNeedGetNewCommentGroups(List<PrivateGroup> remoteGroups, final Map<String, PrivateGroup> mLocalGroupMaps) {
 
-                for (PrivateGroup remoteGroup : remoteGroups) {
+                List<PrivateGroup> needGetNewCommentGroups = new ArrayList<>();
+
+                for (final PrivateGroup remoteGroup : remoteGroups) {
 
                     PrivateGroup localGroup = mLocalGroupMaps.get(remoteGroup.getUUID());
 
                     if (localGroup == null) {
 
-                        remoteGroup.setLastReadCommentIndex(-1);
+                        remoteGroup.setUnreadCommentCount(0);
 
                         mGroupLocalDataSource.addGroup(mCurrentUserGUID, remoteGroup);
 
+                        needGetNewCommentGroups.add(remoteGroup);
+
                     } else {
 
-                        remoteGroup.setLastReadCommentIndex(localGroup.getLastReadCommentIndex());
+                        remoteGroup.setUnreadCommentCount(localGroup.getUnreadCommentCount());
 
                         remoteGroup.setLastRetrievedCommentIndex(localGroup.getLastRetrievedCommentIndex());
 
                         if (remoteGroup.getLastCommentIndex() > localGroup.getLastCommentIndex()) {
 
                             updateGroup(remoteGroup, localGroup);
+
+                            needGetNewCommentGroups.add(remoteGroup);
 
                         }
 
@@ -252,17 +297,17 @@ public class GroupRepository extends BaseDataRepository {
                     localGroup.setReadOnly(true);
                 }
 
-                List<PrivateGroup> results = new ArrayList<>();
-                results.addAll(mLocalGroupMaps.values());
+                mPrivateGroups.clear();
 
-                return results;
+                for (PrivateGroup privateGroup : remoteGroups) {
+                    mPrivateGroups.put(privateGroup.getUUID(), privateGroup);
+                }
 
-            }
+                for (PrivateGroup privateGroup : mLocalGroupMaps.values()) {
+                    mPrivateGroups.put(privateGroup.getUUID(), privateGroup);
+                }
 
-            private void handleFinishGetNewComment(int currentCount, int totalCount) {
-
-                if (currentCount == totalCount)
-                    EventBus.getDefault().postSticky(new OperationEvent(Util.GET_NEW_COMMENT_FINISHED, new OperationSuccess()));
+                return needGetNewCommentGroups;
 
             }
 
@@ -270,9 +315,17 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
+    private void handleFinishGetNewComment(String groupUUID) {
+
+        EventBus.getDefault().postSticky(new GetNewCommentFinishedEvent(Util.GET_NEW_COMMENT_FINISHED,
+                new OperationSuccess(), groupUUID));
+
+    }
+
+
     private void updateGroup(PrivateGroup remoteGroup, PrivateGroup localGroup) {
 
-        remoteGroup.setLastReadCommentIndex(localGroup.getLastReadCommentIndex());
+        remoteGroup.setUnreadCommentCount(localGroup.getUnreadCommentCount());
         remoteGroup.setLastRetrievedCommentIndex(localGroup.getLastRetrievedCommentIndex());
 
         mGroupLocalDataSource.updateGroups(mCurrentUserGUID, Collections.singletonList(remoteGroup));
@@ -288,9 +341,13 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    public void updateGroupLastReadIndexInDB(String groupUUID, long newLastReadIndex) {
+    public void getGroupListFromDB(BaseLoadDataCallback<PrivateGroup> callback) {
+        getGroupList(false, callback);
+    }
 
-        mGroupLocalDataSource.updateGroupLastReadCommentIndex(mCurrentUserGUID, groupUUID, newLastReadIndex);
+    public void updateGroupUnreadCommentCountInDB(String groupUUID, long newUnreadCommentCount) {
+
+        mGroupLocalDataSource.updateGroupUnreadCommentCount(mCurrentUserGUID, groupUUID, newUnreadCommentCount);
 
     }
 
@@ -310,7 +367,7 @@ public class GroupRepository extends BaseDataRepository {
 
     public void refreshGroupInMemory(List<PrivateGroup> newGroups) {
 
-        for (PrivateGroup newGroup : newGroups) {
+        for (final PrivateGroup newGroup : newGroups) {
 
             String groupUUID = newGroup.getUUID();
 
@@ -318,11 +375,20 @@ public class GroupRepository extends BaseDataRepository {
 
             if (currentGroup == null) {
 
-                newGroup.setLastReadCommentIndex(-1);
+                newGroup.setUnreadCommentCount(0);
 
                 mPrivateGroups.put(groupUUID, newGroup);
 
                 mGroupLocalDataSource.addGroup(mCurrentUserGUID, newGroup);
+
+                getNewCommentInGroup(newGroup.getUUID(), newGroup.getStationID(), newGroup.getLastRetrievedCommentIndex()
+                        , new BaseOperateCallbackImpl() {
+                            @Override
+                            public void onSucceed() {
+                                super.onSucceed();
+                                handleFinishGetNewComment(newGroup.getUUID());
+                            }
+                        });
 
             } else {
 
@@ -348,6 +414,15 @@ public class GroupRepository extends BaseDataRepository {
 
                     mPrivateGroups.put(currentGroup.getUUID(), newGroup);
 
+                    getNewCommentInGroup(newGroup.getUUID(), newGroup.getStationID(), newGroup.getLastRetrievedCommentIndex()
+                            , new BaseOperateCallbackImpl() {
+                                @Override
+                                public void onSucceed() {
+                                    super.onSucceed();
+                                    handleFinishGetNewComment(newGroup.getUUID());
+                                }
+                            });
+
                 }
 
             }
@@ -355,6 +430,8 @@ public class GroupRepository extends BaseDataRepository {
         }
 
     }
+
+    //TODO:refactor get new tweet logic: after get mqtt message,refresh group and then get new tweet,insert into db and then send message to update ui,ui get tweet source only from db
 
     private synchronized void getNewCommentInGroup(final String groupUUID, String stationID, final long localGroupCommentIndex, final BaseOperateCallback callback) {
 
@@ -373,32 +450,12 @@ public class GroupRepository extends BaseDataRepository {
 
                             updateLastRetrieveCommentIndex(getLastCommentIndex(data), groupUUID);
 
-                            List<UserComment> userCommentsInDraft = mGroupTweetInDraftDataSource.getAllComments(groupUUID, mCurrentUserGUID);
+                            handleUserCommentInDraft(data, groupUUID);
 
-                            userCommentsInDraft = ItemFilterKt.filterItem(userCommentsInDraft,
-                                    new FilterRule<UserComment>() {
-                                        @Override
-                                        public boolean isFiltered(UserComment item) {
-                                            return item.getRealUUIDWhenFake() != null && item.getRealUUIDWhenFake().length() > 0;
-                                        }
-                                    });
+                            updateUnreadCommentCount(mCurrentUserGUID, groupRequestParam, callback);
 
-                            if (userCommentsInDraft.size() > 0) {
-
-                                for (UserComment userCommentInDraft : userCommentsInDraft) {
-
-                                    for (UserComment userComment : data) {
-                                        if (userComment.getUuid().equals(userCommentInDraft.getRealUUIDWhenFake()))
-                                            mGroupTweetInDraftDataSource.deleteCommentInDraft(groupUUID, mCurrentUserGUID, userCommentInDraft.getRealUUIDWhenFake());
-                                    }
-
-                                }
-
-                            }
-
-                        }
-
-                        callback.onSucceed();
+                        } else
+                            callback.onSucceed();
 
                     }
 
@@ -410,6 +467,22 @@ public class GroupRepository extends BaseDataRepository {
                     }
                 });
 
+    }
+
+    private void updateLastRetrieveCommentIndex(long localGroupCommentIndex, String groupUUID) {
+        if (localGroupCommentIndex == -1) {
+
+            mPrivateGroups.get(groupUUID).setLastRetrievedCommentIndex(0);
+
+            mGroupLocalDataSource.updateGroupLastRetrieveCommentIndex(mCurrentUserGUID, groupUUID, 0);
+
+        } else {
+
+            mPrivateGroups.get(groupUUID).setLastRetrievedCommentIndex(localGroupCommentIndex);
+
+            mGroupLocalDataSource.updateGroupLastRetrieveCommentIndex(mCurrentUserGUID, groupUUID, localGroupCommentIndex);
+
+        }
     }
 
     private long getLastCommentIndex(List<UserComment> userComments) {
@@ -427,18 +500,61 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    private void updateLastRetrieveCommentIndex(long localGroupCommentIndex, String groupUUID) {
-        if (localGroupCommentIndex == -1) {
+    private void updateUnreadCommentCount(final String currentUserGUID, final GroupRequestParam groupRequestParam, final BaseOperateCallback callback) {
 
-            mPrivateGroups.get(groupUUID).setLastRetrievedCommentIndex(0);
+        mGroupLocalDataSource.getAllUserCommentByGroupUUID(currentUserGUID, groupRequestParam,
+                new BaseLoadDataCallbackImpl<UserComment>() {
+                    @Override
+                    public void onSucceed(List<UserComment> data, OperationResult operationResult) {
+                        super.onSucceed(data, operationResult);
 
-            mGroupLocalDataSource.updateGroupLastRetrieveCommentIndex(mCurrentUserGUID, groupUUID, 0);
+                        List<UserComment> otherUserComments = ItemFilterKt.filterItem(data, new FilterRule<UserComment>() {
+                            @Override
+                            public boolean isFiltered(UserComment item) {
+                                return !item.getCreator().getAssociatedWeChatGUID().equals(currentUserGUID);
+                            }
+                        });
 
-        } else {
+                        int otherUserCommentSize = otherUserComments.size();
 
-            mPrivateGroups.get(groupUUID).setLastRetrievedCommentIndex(localGroupCommentIndex);
+                        PrivateGroup group = mPrivateGroups.get(groupRequestParam.getGroupUUID());
 
-            mGroupLocalDataSource.updateGroupLastRetrieveCommentIndex(mCurrentUserGUID, groupUUID, localGroupCommentIndex);
+                        if (group != null && group.getUnreadCommentCount() != otherUserCommentSize) {
+                            group.setUnreadCommentCount(otherUserCommentSize);
+
+                            updateGroupUnreadCommentCountInDB(group.getUUID(), otherUserCommentSize);
+                        }
+
+                        callback.onSucceed();
+                    }
+                });
+
+    }
+
+
+    private void handleUserCommentInDraft(List<UserComment> data, String groupUUID) {
+        mHandleUserCommentInDraft.handleUserCommentInDraft(groupUUID, mCurrentUserGUID);
+
+        List<UserComment> userCommentsInDraft = mGroupTweetInDraftDataSource.getAllComments(groupUUID, mCurrentUserGUID);
+
+        userCommentsInDraft = ItemFilterKt.filterItem(userCommentsInDraft,
+                new FilterRule<UserComment>() {
+                    @Override
+                    public boolean isFiltered(UserComment item) {
+                        return item.getRealUUIDWhenFake() != null && item.getRealUUIDWhenFake().length() > 0;
+                    }
+                });
+
+        if (userCommentsInDraft.size() > 0) {
+
+            for (UserComment userCommentInDraft : userCommentsInDraft) {
+
+                for (UserComment userComment : data) {
+                    if (userComment.getUuid().equals(userCommentInDraft.getRealUUIDWhenFake()))
+                        mGroupTweetInDraftDataSource.deleteCommentInDraft(groupUUID, mCurrentUserGUID, userCommentInDraft.getRealUUIDWhenFake());
+                }
+
+            }
 
         }
     }
@@ -513,6 +629,9 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
+                handleGetNewCommentFinished();
+
+/*
                 String groupUUID = groupRequestParam.getGroupUUID();
 
                 PrivateGroup group = mPrivateGroups.get(groupUUID);
@@ -553,6 +672,7 @@ public class GroupRepository extends BaseDataRepository {
                         }
                     });
                 }
+*/
 
             }
 
@@ -594,23 +714,6 @@ public class GroupRepository extends BaseDataRepository {
         });
 
     }
-
-    private void checkReadCommentCount(List<UserComment> comments, String groupUUID) {
-
-        PrivateGroup group = mPrivateGroups.get(groupUUID);
-
-        int commentSize = comments.size();
-
-        if (group.getLastReadCommentIndex() != commentSize) {
-
-            group.setLastReadCommentIndex(commentSize);
-
-            mGroupLocalDataSource.updateGroupLastReadCommentIndex(mCurrentUserGUID, groupUUID, commentSize);
-
-        }
-
-    }
-
 
     private void handleGetUserCommentSucceed(List<UserComment> data, String groupUUID,
                                              List<Media> localMedias) {
@@ -694,7 +797,15 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
+    public void retryFailUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, BaseOperateCallback callback) {
+        insertUserComment(true, groupRequestParam, userComment, callback);
+    }
+
     public void insertUserComment(final GroupRequestParam groupRequestParam, final UserComment userComment, BaseOperateCallback callback) {
+        insertUserComment(false, groupRequestParam, userComment, callback);
+    }
+
+    private void insertUserComment(final boolean retryFailUserComment, final GroupRequestParam groupRequestParam, final UserComment userComment, BaseOperateCallback callback) {
 
         final BaseOperateCallback runOnMainThreadCallback = createOperateCallbackRunOnMainThread(callback);
 
@@ -702,7 +813,18 @@ public class GroupRepository extends BaseDataRepository {
             @Override
             public void run() {
 
-                mGroupTweetInDraftDataSource.insertCommentIntoDraft(mCurrentUserGUID, userComment);
+                if (retryFailUserComment) {
+
+                    userComment.setFail(false);
+
+                    mGroupTweetInDraftDataSource.updateCommentIsFail(userComment.getUuid(), groupRequestParam.getGroupUUID(),
+                            mCurrentUserGUID, false);
+
+                } else
+                    mGroupTweetInDraftDataSource.insertCommentIntoDraft(mCurrentUserGUID, userComment);
+
+                mHandleUserCommentInDraft.insertUserCommentIntoRunningList(userComment);
+
                 runOnMainThreadCallback.onSucceed();
 
                 mGroupRemoteDataSource.insertUserComment(groupRequestParam, userComment, new BaseOperateDataCallback<UserComment>() {
@@ -714,7 +836,9 @@ public class GroupRepository extends BaseDataRepository {
                         mGroupTweetInDraftDataSource.updateCommentRealUUID(userComment.getUuid(), userComment.getGroupUUID(),
                                 mCurrentUserGUID, data.getUuid());
 
-                        runOnMainThreadCallback.onSucceed();
+                        mHandleUserCommentInDraft.deleteUserCommentFromRunningList(userComment);
+
+//                        runOnMainThreadCallback.onSucceed();
 
                     }
 
@@ -723,6 +847,8 @@ public class GroupRepository extends BaseDataRepository {
 
                         mGroupTweetInDraftDataSource.updateCommentIsFail(userComment.getUuid(), userComment.getGroupUUID(),
                                 mCurrentUserGUID, true);
+
+                        mHandleUserCommentInDraft.deleteUserCommentFromRunningList(userComment);
 
                         runOnMainThreadCallback.onFail(operationResult);
 

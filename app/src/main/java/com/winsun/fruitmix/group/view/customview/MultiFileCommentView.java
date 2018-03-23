@@ -24,6 +24,7 @@ import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.FileComment;
+import com.winsun.fruitmix.group.data.model.RetryFailUserCommentStrategy;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.group.data.viewmodel.FileCommentViewModel;
@@ -52,7 +53,8 @@ public class MultiFileCommentView extends UserCommentView implements SCloudToken
 
     private String mSCloudToken = "";
 
-    public MultiFileCommentView(ImageLoader imageLoader) {
+    public MultiFileCommentView(RetryFailUserCommentStrategy retryFailUserCommentStrategy,ImageLoader imageLoader) {
+        super(retryFailUserCommentStrategy);
         this.imageLoader = imageLoader;
     }
 

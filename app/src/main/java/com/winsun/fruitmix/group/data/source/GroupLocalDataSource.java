@@ -5,11 +5,8 @@ import android.util.Log;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.db.DBUtils;
-import com.winsun.fruitmix.file.data.model.AbstractFile;
-import com.winsun.fruitmix.group.data.model.Pin;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.UserComment;
-import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.user.User;
@@ -70,11 +67,11 @@ public class GroupLocalDataSource {
 
     }
 
-    public void updateGroupLastReadCommentIndex(String currentUserGUID, String groupUUID, long readCommentCount) {
+    public void updateGroupUnreadCommentCount(String currentUserGUID, String groupUUID, long unreadCommentCount) {
 
-        long result = mDBUtils.updateGroupLastReadCommentIndex(groupUUID, currentUserGUID, readCommentCount);
+        long result = mDBUtils.updateGroupUnreadCommentCount(groupUUID, currentUserGUID, unreadCommentCount);
 
-        Log.d(TAG, "updateGroupLastReadCommentIndex result: " + result);
+        Log.d(TAG, "updateGroupUnreadCommentCount result: " + result);
 
     }
 

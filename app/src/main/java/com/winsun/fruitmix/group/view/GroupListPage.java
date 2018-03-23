@@ -178,7 +178,7 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
     public void handleGetNewCommentFinished(){
 
-        refreshViewForce();
+        groupListPresenter.refreshGroupsUsingDB();
 
     }
 
