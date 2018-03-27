@@ -75,7 +75,7 @@ public class GroupShareMenuLayout {
 
     public void initView() {
 
-        mGroupRepository.getGroupList(new BaseLoadDataCallback<PrivateGroup>() {
+        mGroupRepository.getGroupListFromRemoteDataSource(new BaseLoadDataCallback<PrivateGroup>() {
             @Override
             public void onSucceed(List<PrivateGroup> data, OperationResult operationResult) {
 

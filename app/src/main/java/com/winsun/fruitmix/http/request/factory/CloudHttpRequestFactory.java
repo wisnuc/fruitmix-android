@@ -26,7 +26,7 @@ public class CloudHttpRequestFactory extends BaseAbsHttpRequestFactory {
     CloudHttpRequestFactory(HttpHeader httpHeader) {
         super(httpHeader);
 
-        setGateway(CLOUD_DOMAIN_NAME);
+        setGateway(CURRENT_DOMAIN_NAME);
 
         setPort(RELEASE_CLOUD_PORT);
 

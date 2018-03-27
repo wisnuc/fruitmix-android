@@ -147,3 +147,15 @@ public static final int *;
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
+
+#Minify was removing the druk classes for some reason
+#Forcing it to stay in the release package.
+-dontwarn com.github.druk.**
+-keep class com.github.druk.** { *; }
+
+#wechat
+-keep class com.tencent.mm.opensdk.** { *; }
+
+-keep class com.tencent.wxop.** { *; }
+
+-keep class com.tencent.mm.sdk.** { *; }

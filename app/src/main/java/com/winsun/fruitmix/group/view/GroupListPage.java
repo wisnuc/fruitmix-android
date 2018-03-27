@@ -124,7 +124,7 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
                 Log.d(TAG, "onRefresh: swipe refresh");
 
-                refreshView();
+                refreshViewForce();
 
             }
         });

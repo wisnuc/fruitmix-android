@@ -345,6 +345,17 @@ public class GroupRepository extends BaseDataRepository {
         getGroupList(false, callback);
     }
 
+    public void getGroupListFromRemoteDataSource(final BaseLoadDataCallback<PrivateGroup> callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                mGroupRemoteDataSource.getAllGroups(createLoadCallbackRunOnMainThread(callback));
+            }
+        });
+
+    }
+
     public void updateGroupUnreadCommentCountInDB(String groupUUID, long newUnreadCommentCount) {
 
         mGroupLocalDataSource.updateGroupUnreadCommentCount(mCurrentUserGUID, groupUUID, newUnreadCommentCount);
@@ -533,7 +544,6 @@ public class GroupRepository extends BaseDataRepository {
 
 
     private void handleUserCommentInDraft(List<UserComment> data, String groupUUID) {
-        mHandleUserCommentInDraft.handleUserCommentInDraft(groupUUID, mCurrentUserGUID);
 
         List<UserComment> userCommentsInDraft = mGroupTweetInDraftDataSource.getAllComments(groupUUID, mCurrentUserGUID);
 
@@ -628,6 +638,8 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
+
+                mHandleUserCommentInDraft.handleUserCommentInDraft(groupRequestParam.getGroupUUID(), mCurrentUserGUID);
 
                 handleGetNewCommentFinished();
 

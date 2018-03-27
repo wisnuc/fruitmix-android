@@ -2,7 +2,6 @@ package com.winsun.fruitmix;
 
 import android.app.Application;
 
-import com.facebook.stetho.Stetho;
 import com.wisnun.fruitmix.MyEventBusIndex;
 
 import org.greenrobot.eventbus.EventBus;
@@ -19,8 +18,6 @@ public class CustomApplication extends Application {
         super.onCreate();
 
         EventBus.builder().addIndex(new MyEventBusIndex()).installDefaultEventBus();
-
-        Stetho.initializeWithDefaults(this);
 
     }
 

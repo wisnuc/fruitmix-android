@@ -353,7 +353,7 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
     @Override
     public void handleRetryFailUserComment(final UserComment failUserCommentInDraft) {
 
-        if (groupContentView.getContext() == null)
+        if (groupContentView == null || groupContentView.getContext() == null)
             return;
 
         new AlertDialog.Builder(groupContentView.getContext()).setTitle(groupContentView.getString(R.string.retry_or_not))
