@@ -75,6 +75,7 @@ import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -809,7 +810,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
         }
 
         if (mSelectMediaOriginalPhotoPaths.isEmpty()) {
-            Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(mContext, getString(R.string.download_original_photo_fail));
         } else {
             FileUtil.sendShareToOtherApp(getContext(), mSelectMediaOriginalPhotoPaths);
         }

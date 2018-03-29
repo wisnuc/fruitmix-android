@@ -41,6 +41,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
 
@@ -347,7 +348,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
                 @Override
                 public void onFail(OperationResult result) {
-                    Toast.makeText(NewPicChooseActivity.this, "插入失败", Toast.LENGTH_SHORT).show();
+                    ToastUtil.showToast(NewPicChooseActivity.this, "插入失败");
 
                     NewPicChooseActivity.this.setResult(RESULT_CANCELED);
 
@@ -374,7 +375,7 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
                 @Override
                 public void onFail(OperationResult result) {
-                    Toast.makeText(NewPicChooseActivity.this, "插入失败", Toast.LENGTH_SHORT).show();
+                    ToastUtil.showToast(NewPicChooseActivity.this, "插入失败");
 
                     NewPicChooseActivity.this.setResult(RESULT_CANCELED);
 

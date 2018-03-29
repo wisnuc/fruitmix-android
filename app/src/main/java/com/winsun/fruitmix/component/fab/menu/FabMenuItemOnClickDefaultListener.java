@@ -2,6 +2,7 @@ package com.winsun.fruitmix.component.fab.menu;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
@@ -20,6 +21,7 @@ import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
+import com.winsun.fruitmix.group.view.GroupContentActivity;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
@@ -28,6 +30,7 @@ import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
@@ -74,7 +77,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
     public void systemShareBtnOnClick(final Context context, final int currentItem) {
 
         if (!Util.isNetworkConnected(context)) {
-            Toast.makeText(context, context.getString(R.string.no_network), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(context, context.getString(R.string.no_network));
             return;
         }
 
@@ -136,7 +139,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
 
         UserComment userComment;
 
-        String groupUUID = group.getUUID();
+        final String groupUUID = group.getUUID();
         String stationID = group.getStationID();
 
         if (currentItem == ITEM_MEDIA) {
@@ -156,8 +159,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
 
                 dismissDialog();
 
-                Toast.makeText(context, context.getString(R.string.success, context.getString(R.string.send)), Toast.LENGTH_SHORT)
-                        .show();
+                startGroupContentActivity(context, groupUUID);
 
             }
 
@@ -166,8 +168,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
 
                 dismissDialog();
 
-                Toast.makeText(context, operationResult.getResultMessage(context), Toast.LENGTH_SHORT)
-                        .show();
+                ToastUtil.showToast(context, operationResult.getResultMessage(context));
 
             }
         });
@@ -201,6 +202,13 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
 
     }
 
+    private void startGroupContentActivity(Context context, String groupUUID) {
+
+        Intent intent = new Intent(context, GroupContentActivity.class);
+        intent.putExtra(GroupContentActivity.GROUP_UUID, groupUUID);
+
+        context.startActivity(intent);
+    }
 
     private List<Media> mSelectMedias;
 
@@ -263,7 +271,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
         }
 
         if (mSelectMediaOriginalPhotoPaths.isEmpty()) {
-            Toast.makeText(context, context.getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(context, context.getString(R.string.download_original_photo_fail));
         } else {
             FileUtil.sendShareToOtherApp(context, mSelectMediaOriginalPhotoPaths);
         }

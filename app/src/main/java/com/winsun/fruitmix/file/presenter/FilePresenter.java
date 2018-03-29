@@ -67,6 +67,7 @@ import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.video.PlayVideoActivity;
 import com.winsun.fruitmix.recyclerview.BaseBindingViewHolder;
@@ -265,7 +266,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                                     @Override
                                     public void onFail(OperationResult result) {
 
-                                        Toast.makeText(activity, activity.getString(R.string.delete_original_file_fail, abstractRemoteFile.getName()), Toast.LENGTH_SHORT).show();
+                                        ToastUtil.showToast(activity, activity.getString(R.string.delete_original_file_fail, abstractRemoteFile.getName()));
 
                                     }
                                 });
@@ -641,7 +642,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                     if (cancelDownload)
                         cancelDownload = false;
                     else
-                        Toast.makeText(activity, activity.getString(R.string.fail, activity.getString(R.string.download)), Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(activity, activity.getString(R.string.fail, activity.getString(R.string.download)));
 
                 } else if (currentDownloadFileForShareCommand != null) {
 
@@ -666,7 +667,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                         currentDownloadFileForShareProgressDialog.dismiss();
 
-                        Toast.makeText(activity, activity.getString(R.string.fail, activity.getString(R.string.download)), Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(activity, activity.getString(R.string.fail, activity.getString(R.string.download)));
 
                     }
 
@@ -683,7 +684,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                     currentDownloadFileProgressDialog.dismiss();
 
-                    Toast.makeText(activity, activity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+                    ToastUtil.showToast(activity, activity.getString(R.string.no_enough_space));
 
                 } else if (currentDownloadFileForShareCommand != null) {
 
@@ -708,7 +709,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                         currentDownloadFileForShareProgressDialog.dismiss();
 
-                        Toast.makeText(activity, activity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(activity, activity.getString(R.string.no_enough_space));
 
                     }
 
@@ -909,7 +910,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                 } else {
 
-                    Toast.makeText(activity, activity.getString(R.string.android_no_write_external_storage_permission), Toast.LENGTH_SHORT).show();
+                    ToastUtil.showToast(activity, activity.getString(R.string.android_no_write_external_storage_permission));
 
                 }
 
@@ -1329,7 +1330,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                         if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName())) {
 
                             if (!abstractRemoteFile.openAbstractRemoteFile(activity)) {
-                                Toast.makeText(activity, activity.getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
+                                ToastUtil.showToast(activity, activity.getString(R.string.open_file_failed));
                             }
 
                         } else {

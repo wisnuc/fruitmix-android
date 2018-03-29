@@ -29,6 +29,7 @@ import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.torrent.view.TorrentDownloadManageActivity;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -76,7 +77,7 @@ public class TestReceiveActivity extends AppCompatActivity {
 
             if (file.isFile() && file.length() > MAX_UPLOAD_FILE_SIZE) {
 
-                Toast.makeText(mContext, "暂不支持超过1G文件上传", Toast.LENGTH_SHORT).show();
+                ToastUtil.showToast(mContext, "暂不支持超过1G文件上传");
 
                 return;
             }
@@ -100,7 +101,7 @@ public class TestReceiveActivity extends AppCompatActivity {
             }
 
         } else {
-            Toast.makeText(mContext, getString(R.string.file_not_exist), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(mContext, getString(R.string.file_not_exist));
         }
 
     }

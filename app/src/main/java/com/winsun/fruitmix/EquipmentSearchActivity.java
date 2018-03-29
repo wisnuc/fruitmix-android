@@ -40,6 +40,7 @@ import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.retrieve.file.from.other.app.RetrieveFilePresenter;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.wxapi.MiniProgram;
@@ -180,7 +181,7 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
     public void handleLoginWithUserSucceed(boolean autoUpload) {
 
         if (!autoUpload)
-            Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(mContext, getString(R.string.photo_auto_upload_already_close));
 
         setResult(RESULT_OK);
 

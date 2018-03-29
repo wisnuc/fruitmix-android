@@ -51,6 +51,7 @@ import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.video.PlayVideoActivity;
 import com.winsun.fruitmix.recyclerview.BindingViewHolder;
@@ -274,7 +275,7 @@ public class FileListPresenter {
                     if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName())) {
 
                         if (!abstractRemoteFile.openAbstractRemoteFile(context)) {
-                            Toast.makeText(context, context.getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
+                            ToastUtil.showToast(context, context.getString(R.string.open_file_failed));
                         }
 
                     } else {
@@ -411,7 +412,7 @@ public class FileListPresenter {
                                     @Override
                                     public void onFail(OperationResult result) {
 
-                                        Toast.makeText(mActivity, mActivity.getString(R.string.delete_original_file_fail, abstractRemoteFile.getName()), Toast.LENGTH_SHORT).show();
+                                        ToastUtil.showToast(mActivity, mActivity.getString(R.string.delete_original_file_fail, abstractRemoteFile.getName()));
 
                                     }
                                 });
@@ -506,7 +507,7 @@ public class FileListPresenter {
                     if (cancelDownload)
                         cancelDownload = false;
                     else
-                        Toast.makeText(mActivity, mActivity.getString(R.string.fail, mActivity.getString(R.string.download)), Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(mActivity, mActivity.getString(R.string.fail, mActivity.getString(R.string.download)));
 
                 }
 
@@ -521,7 +522,7 @@ public class FileListPresenter {
 
                     currentDownloadFileProgressDialog.dismiss();
 
-                    Toast.makeText(mActivity, mActivity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+                    ToastUtil.showToast(mActivity, mActivity.getString(R.string.no_enough_space));
 
                 }
 

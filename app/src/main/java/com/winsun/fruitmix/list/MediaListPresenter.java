@@ -36,6 +36,7 @@ import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.mediaModule.viewmodel.MediaViewModel;
 import com.winsun.fruitmix.mediaModule.viewmodel.PhotoItemViewModel;
 import com.winsun.fruitmix.util.MediaUtil;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 
@@ -716,7 +717,7 @@ public class MediaListPresenter {
 
         if (!selected && mSelectCount >= Util.MAX_PHOTO_SIZE) {
 
-            Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(containerActivity, containerActivity.getString(R.string.max_select_photo));
 
             return;
         }

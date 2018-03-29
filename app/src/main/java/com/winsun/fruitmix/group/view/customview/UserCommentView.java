@@ -68,6 +68,8 @@ public abstract class UserCommentView {
 
         RelativeLayout.LayoutParams commentContentLayoutLayoutParams = (RelativeLayout.LayoutParams) viewDataBinding.commentContent.getLayoutParams();
 
+        RelativeLayout.LayoutParams commentFrameLayoutParams = (RelativeLayout.LayoutParams) viewDataBinding.commentFramelayout.getLayoutParams();
+
         if (strategy.isShowLeft()) {
 
             userAvatar.setVisibility(View.VISIBLE);
@@ -84,6 +86,9 @@ public abstract class UserCommentView {
             commentContentLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, 0);
 
             commentContentLayoutLayoutParams.addRule(RelativeLayout.BELOW, R.id.user_info_layout);
+
+            commentFrameLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+            commentFrameLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
 
             ImageLoader imageLoader = InjectHttp.provideImageGifLoaderInstance(context).getImageLoader(context);
 
@@ -113,6 +118,9 @@ public abstract class UserCommentView {
             commentContentLayoutLayoutParams.addRule(RelativeLayout.LEFT_OF, R.id.current_user_icon);
 
             commentContentLayoutLayoutParams.addRule(RelativeLayout.BELOW, R.id.current_user_info_layout);
+
+            commentFrameLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+            commentFrameLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
             if (data.isFake()) {
 

@@ -38,6 +38,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.recyclerview.BindingViewHolder;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 
 import java.lang.ref.WeakReference;
@@ -1078,8 +1079,8 @@ public class EquipmentPresenter implements ActiveView {
 
         equipmentSearchView.dismissDialog();
 
-        Toast.makeText(equipmentSearchView.getContext(), result.getResultMessage(equipmentSearchView.getContext()), Toast.LENGTH_SHORT).show();
-    }
+        ToastUtil.showToast(equipmentSearchView.getContext(), result.getResultMessage(equipmentSearchView.getContext()));
 
+    }
 
 }

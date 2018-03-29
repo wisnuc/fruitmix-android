@@ -32,6 +32,7 @@ import com.winsun.fruitmix.token.data.TokenDataSource;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -244,7 +245,7 @@ public class GroupListPage implements Page, IShowHideFragmentListener, GroupList
 
     public void showToast(String message) {
 
-        Toast.makeText(containerActivity, message, Toast.LENGTH_SHORT).show();
+        ToastUtil.showToast(containerActivity,message);
 
     }
 

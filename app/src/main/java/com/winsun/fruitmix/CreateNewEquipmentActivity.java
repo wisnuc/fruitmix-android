@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.util.regex.Matcher;
@@ -70,7 +71,7 @@ public class CreateNewEquipmentActivity extends BaseActivity implements View.OnC
 
                 if (ip.equals("")) {
 
-                    Toast.makeText(CreateNewEquipmentActivity.this, getString(R.string.enter_ip), Toast.LENGTH_SHORT).show();
+                    ToastUtil.showToast(CreateNewEquipmentActivity.this,getString(R.string.enter_ip));
 
                 } else {
 
@@ -83,7 +84,7 @@ public class CreateNewEquipmentActivity extends BaseActivity implements View.OnC
 
                     } else {
 
-                        Toast.makeText(CreateNewEquipmentActivity.this, getString(R.string.ip_illegal), Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(CreateNewEquipmentActivity.this, getString(R.string.ip_illegal));
 
                     }
 

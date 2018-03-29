@@ -52,6 +52,7 @@ import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.util.FileTool;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.recyclerview.BindingViewHolder;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.lang.ref.WeakReference;
@@ -260,7 +261,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
         } else if (taskState == TaskState.NO_ENOUGH_SPACE) {
 
-            Toast.makeText(activity, activity.getString(R.string.no_enough_space), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(activity, activity.getString(R.string.no_enough_space));
 
         } else if (taskState == TaskState.START_DOWNLOAD_OR_UPLOAD || taskState == TaskState.PENDING) {
 
@@ -287,7 +288,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
         if (result.getOperationResultType() == OperationResultType.SUCCEED)
             refreshView();
         else
-            Toast.makeText(activity, result.getResultMessage(activity), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(activity, result.getResultMessage(activity));
 
     }
 
@@ -480,7 +481,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
     public void selectMode() {
 
         if (!canEnterSelectMode()) {
-            Toast.makeText(activity, activity.getString(R.string.no_download_record), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(activity, activity.getString(R.string.no_download_record));
             return;
         }
 
@@ -796,7 +797,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
                         if (taskState.equals(TaskState.FINISHED)) {
 
                             if (!FileUtil.openAbstractRemoteFile(activity, fileTaskItem.getFileName())) {
-                                Toast.makeText(activity, activity.getString(R.string.open_file_failed), Toast.LENGTH_SHORT).show();
+                                ToastUtil.showToast(activity, activity.getString(R.string.open_file_failed));
                             }
 
                         }

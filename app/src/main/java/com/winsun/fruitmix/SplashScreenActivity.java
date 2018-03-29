@@ -19,6 +19,7 @@ import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.File;
@@ -226,14 +227,14 @@ public class SplashScreenActivity extends AppCompatActivity {
             fileOutputStream.write(bytes);
             fileOutputStream.flush();
 
-            Toast.makeText(mContext, " 创建成功", Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(mContext, " 创建成功");
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            Toast.makeText(mContext, " 创建失败", Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(mContext, " 创建失败");
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(mContext, " 创建失败", Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(mContext, " 创建失败");
         } finally {
             if (fileOutputStream != null) {
                 try {

@@ -26,6 +26,7 @@ import com.winsun.fruitmix.torrent.data.TorrentDataSource;
 import com.winsun.fruitmix.torrent.data.TorrentRequestParam;
 import com.winsun.fruitmix.torrent.view.TorrentDownloadManageActivity;
 import com.winsun.fruitmix.util.FileUtil;
+import com.winsun.fruitmix.util.ToastUtil;
 
 import java.io.File;
 
@@ -130,14 +131,14 @@ public class RetrieveFilePresenter {
                     @Override
                     public void onSucceed(TorrentRequestParam data, OperationResult result) {
 
-                        Toast.makeText(context, context.getString(R.string.success, context.getString(R.string.create_new_download_task)), Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(context, context.getString(R.string.success, context.getString(R.string.create_new_download_task)));
 
                     }
 
                     @Override
                     public void onFail(OperationResult operationResult) {
 
-                        Toast.makeText(context, operationResult.getResultMessage(context), Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(context, operationResult.getResultMessage(context));
 
                     }
                 }

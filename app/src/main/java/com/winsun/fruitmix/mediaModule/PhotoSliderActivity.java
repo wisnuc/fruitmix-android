@@ -85,6 +85,7 @@ import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.MediaUtil;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.video.PlayVideoFragment;
 
@@ -635,7 +636,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
                     if (mediaViewModels.size() > currentPhotoPosition) {
 
-                        Toast.makeText(mContext, mContext.getString(R.string.coming_soon), Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(mContext, mContext.getString(R.string.coming_soon));
 
 /*                        String imageUUID = mediaViewModels.get(currentPhotoPosition).getUuid();
 
@@ -694,7 +695,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private void showCreateShareBottomDialog() {
 
-        mFabMenuItemOnClickListener.systemShareBtnOnClick(mContext,FabMenuItemOnClickListener.ITEM_MEDIA);
+        mFabMenuItemOnClickListener.systemShareBtnOnClick(mContext, FabMenuItemOnClickListener.ITEM_MEDIA);
 
     }
 
@@ -726,7 +727,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         String originalPhotoPath = mediaViewModels.get(currentPhotoPosition).getMedia().getOriginalPhotoPath();
 
         if (originalPhotoPath.isEmpty()) {
-            Toast.makeText(mContext, getString(R.string.download_original_photo_fail), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(mContext, getString(R.string.download_original_photo_fail));
         } else {
             FileUtil.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
         }

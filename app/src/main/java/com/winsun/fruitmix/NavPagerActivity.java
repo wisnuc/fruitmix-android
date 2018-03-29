@@ -76,6 +76,7 @@ import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
 import com.winsun.fruitmix.user.manage.UserManageActivity;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -171,7 +172,7 @@ public class NavPagerActivity extends BaseActivity
 
                     dismissDialog();
 
-                    Toast.makeText(mContext, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+                    ToastUtil.showToast(mContext, result.getResultMessage(mContext));
 
                 }
             });
@@ -300,7 +301,7 @@ public class NavPagerActivity extends BaseActivity
 
                     weakReference.get().dismissDialog();
 
-                    Toast.makeText(weakReference.get(), weakReference.get().getString(R.string.search_equipment_failed), Toast.LENGTH_SHORT).show();
+                    ToastUtil.showToast(weakReference.get(), weakReference.get().getString(R.string.search_equipment_failed));
 
                     weakReference.get().mDrawerLayout.closeDrawer(GravityCompat.START);
 
@@ -670,7 +671,7 @@ public class NavPagerActivity extends BaseActivity
 
                 Log.d(TAG, "onFail: login with logged in user failed");
 
-                Toast.makeText(mContext, result.getResultMessage(mContext), Toast.LENGTH_SHORT).show();
+                ToastUtil.showToast(mContext, result.getResultMessage(mContext));
 
             }
         });
@@ -684,9 +685,9 @@ public class NavPagerActivity extends BaseActivity
         uploadMediaUseCase.startUploadMedia();
 
         if (systemSettingDataSource.getAutoUploadOrNot())
-            Toast.makeText(mContext, String.format(getString(R.string.success), getString(R.string.login)), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(mContext, String.format(getString(R.string.success), getString(R.string.login)));
         else
-            Toast.makeText(mContext, getString(R.string.photo_auto_upload_already_close), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(mContext, getString(R.string.photo_auto_upload_already_close));
 
         handleFinishLoginWithLoggedInUser();
 
@@ -1003,7 +1004,7 @@ public class NavPagerActivity extends BaseActivity
 
                 refreshUserInNavigationView();
 
-                mediaMainFragment.onActivityResult(requestCode,resultCode,intent);
+                mediaMainFragment.onActivityResult(requestCode, resultCode, intent);
 
             } else if (resultCode == RESULT_FINISH_ACTIVITY) {
                 finish();

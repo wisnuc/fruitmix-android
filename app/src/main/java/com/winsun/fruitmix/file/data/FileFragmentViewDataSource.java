@@ -17,6 +17,7 @@ import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
+import com.winsun.fruitmix.util.ToastUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -131,7 +132,7 @@ public class FileFragmentViewDataSource implements FileListViewDataSource {
 
                     handleGetFileSucceed(data, true);
 
-                    callback.onSucceed(abstractRemoteFiles,operationResult);
+                    callback.onSucceed(abstractRemoteFiles, operationResult);
 
                 }
 
@@ -139,7 +140,7 @@ public class FileFragmentViewDataSource implements FileListViewDataSource {
                 public void onFail(OperationResult operationResult) {
 
                     if (operationResult instanceof OperationNetworkException) {
-                        Toast.makeText(context, operationResult.getResultMessage(context), Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(context, operationResult.getResultMessage(context));
                     }
 
                     handleGetFileFail();

@@ -32,6 +32,7 @@ import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.token.manager.InjectSCloudTokenManager;
 import com.winsun.fruitmix.token.manager.TokenManager;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.UnsupportedEncodingException;
@@ -114,7 +115,7 @@ public class PlayVideoFragment implements SCloudTokenContainer {
 
                 Context viewContext = view.getContext();
 
-                Toast.makeText(viewContext, viewContext.getString(R.string.fail, viewContext.getString(R.string.play_video)), Toast.LENGTH_SHORT).show();
+                ToastUtil.showToast(viewContext, viewContext.getString(R.string.fail, viewContext.getString(R.string.play_video)));
 
                 return true;
 
@@ -172,7 +173,7 @@ public class PlayVideoFragment implements SCloudTokenContainer {
 
                 tokenManager.resetToken();
 
-                baseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+                baseDataOperator.preConditionCheck(true, new BaseOperateCallback() {
                     @Override
                     public void onSucceed() {
 
@@ -182,7 +183,7 @@ public class PlayVideoFragment implements SCloudTokenContainer {
 
                         try {
                             httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
-                                    fileFromBoxDownloadParam.getBoxUUID(),fileFromBoxDownloadParam.getStationID());
+                                    fileFromBoxDownloadParam.getBoxUUID(), fileFromBoxDownloadParam.getStationID());
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                         }
@@ -200,7 +201,7 @@ public class PlayVideoFragment implements SCloudTokenContainer {
 
                         try {
                             httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
-                                    fileFromBoxDownloadParam.getBoxUUID(),fileFromBoxDownloadParam.getStationID());
+                                    fileFromBoxDownloadParam.getBoxUUID(), fileFromBoxDownloadParam.getStationID());
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                         }

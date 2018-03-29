@@ -81,6 +81,7 @@ import com.winsun.fruitmix.token.manager.TokenManager;
 import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
 import com.winsun.fruitmix.upload.media.InjectUploadMediaUseCase;
 import com.winsun.fruitmix.util.MediaUtil;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
 import com.winsun.fruitmix.util.Util;
@@ -1275,7 +1276,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                     if (unSelectLocalMediaNum + mSelectLocalMediaCount > 1) {
 
-                        Toast.makeText(containerActivity, containerActivity.getString(R.string.only_support_upload_for_one_local_media), Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(containerActivity, containerActivity.getString(R.string.only_support_upload_for_one_local_media));
 
                     }
 
@@ -1304,7 +1305,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                     }
 
                 } else if (!selected && unSelectNumInList + mSelectCount > Util.MAX_PHOTO_SIZE) {
-                    Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
+                    ToastUtil.showToast(containerActivity, containerActivity.getString(R.string.max_select_photo));
 
                     int newSelectItemCount = 0;
                     int newSelectItemTotalCount = Util.MAX_PHOTO_SIZE - mSelectCount;
@@ -1889,7 +1890,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private void handleMediaOnClickWhenSelectMode(MediaViewModel mediaViewModel, View view, ObservableBoolean showPhotoSelectImg) {
         if (alreadySelectedImageKeysFromChooseActivity != null && alreadySelectedImageKeysFromChooseActivity.contains(mediaViewModel.getMedia().getKey())) {
-            Toast.makeText(containerActivity, containerActivity.getString(R.string.already_select_media), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(containerActivity, containerActivity.getString(R.string.already_select_media));
             return;
         }
 
@@ -1899,13 +1900,13 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
         if (!selected && selectForCreateComment && mSelectLocalMediaCount + 1 > 1) {
 
-            Toast.makeText(containerActivity, containerActivity.getString(R.string.only_support_upload_for_one_local_media), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(containerActivity, containerActivity.getString(R.string.only_support_upload_for_one_local_media));
 
             return;
 
         } else if (!selected && mSelectCount >= Util.MAX_PHOTO_SIZE) {
 
-            Toast.makeText(containerActivity, containerActivity.getString(R.string.max_select_photo), Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(containerActivity, containerActivity.getString(R.string.max_select_photo));
 
             return;
         }

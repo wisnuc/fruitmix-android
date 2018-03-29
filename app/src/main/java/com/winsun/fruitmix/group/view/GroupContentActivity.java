@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -69,7 +71,6 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
     private GroupContentPresenter groupContentPresenter;
 
     public static final String GROUP_UUID = "group_uuid";
-    public static final String GROUP_NAME = "group_name";
 
     private String groupUUID;
 
@@ -577,6 +578,7 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
             groupContentPresenter.handleGetNewCommentFinishedMessage(groupUUID);
 
         }
+
 
     }
 

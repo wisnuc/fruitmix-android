@@ -33,6 +33,7 @@ import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.util.FNAS;
+import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
@@ -163,12 +164,16 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
 
     @Override
     public void showToast(String text) {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+
+        ToastUtil.showToast(this,text);
+
     }
 
     @Override
     public void showCustomErrorCode(String text) {
-        Toast.makeText(this, String.format(getString(R.string.server_exception), text), Toast.LENGTH_SHORT).show();
+
+        ToastUtil.showToast(this,String.format(getString(R.string.server_exception), text));
+
     }
 
     protected ToolbarViewModel initToolBar(ViewDataBinding binding, ToolbarLayoutBinding toolbarLayoutBinding, String title) {
