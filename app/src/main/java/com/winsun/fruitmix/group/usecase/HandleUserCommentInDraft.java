@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.group.usecase;
 
+import android.util.Log;
+
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupTweetInDraftDataSource;
 
@@ -11,6 +13,8 @@ import java.util.List;
  */
 
 public class HandleUserCommentInDraft {
+
+    public static final String TAG = HandleUserCommentInDraft.class.getSimpleName();
 
     private static HandleUserCommentInDraft handleUserCommentInDraft;
 
@@ -33,7 +37,7 @@ public class HandleUserCommentInDraft {
         return handleUserCommentInDraft;
     }
 
-    public static void destroyInstance(){
+    public static void destroyInstance() {
         handleUserCommentInDraft = null;
     }
 
@@ -43,10 +47,12 @@ public class HandleUserCommentInDraft {
 
         for (UserComment userComment : userComments) {
 
-            if (userComment.isFake() && !userComment.isFail() && !runningUserCommentUUIDs.contains(userComment.getUuid())) {
+            if (userComment.isFake() && !userComment.isFail() && userComment.getRealUUIDWhenFake() == null && !runningUserCommentUUIDs.contains(userComment.getUuid())) {
                 userComment.setFail(true);
 
                 mGroupTweetInDraftDataSource.updateCommentIsFail(userComment.getUuid(), groupUUID, currentUserGUID, true);
+
+                Log.d(TAG, "handleUserCommentInDraft updateCommentIsFail commentFakeUUID: " + userComment.getUuid());
             }
 
         }

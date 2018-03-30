@@ -104,6 +104,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
                                  LoadingViewModel loadingViewModel, ToolbarViewModel toolbarViewModel,
                                  ImageLoader imageLoader, PlayAudioUseCase playAudioUseCase) {
 
+        Log.d(TAG, "init GroupContentPresenter");
+
         mLoadingViewModel = loadingViewModel;
         mToolbarViewModel = toolbarViewModel;
 
@@ -289,7 +291,11 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
 
     public void handleGetNewCommentFinishedMessage(String groupUUID) {
 
+        Log.d(TAG, "handleGetNewCommentFinishedMessage: groupUUID: " + groupUUID);
+
         if (groupUUID.equals(mPrivateGroup.getUUID())) {
+
+            Log.d(TAG, "handleGetNewCommentFinishedMessage,message is current group,so refreshUserComment ");
 
             refreshUserCommentData();
 
@@ -326,6 +332,8 @@ public class GroupContentPresenter implements CustomArrowToggleButton.PingToggle
     }
 
     public void onDestroy() {
+
+        Log.d(TAG, "onDestroy: ");
 
         groupContentView = null;
 

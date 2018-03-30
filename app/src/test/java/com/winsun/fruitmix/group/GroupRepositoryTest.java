@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.group;
 
+import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -12,14 +13,18 @@ import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.group.data.source.GroupTweetInDraftDataSource;
 import com.winsun.fruitmix.group.usecase.HandleUserCommentInDraft;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
+import com.winsun.fruitmix.mock.MockApplication;
 import com.winsun.fruitmix.mock.MockThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import static org.mockito.Mockito.*;
 
@@ -27,6 +32,8 @@ import static org.mockito.Mockito.*;
  * Created by Administrator on 2017/7/20.
  */
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
 public class GroupRepositoryTest {
 
     private GroupRepository groupRepository;

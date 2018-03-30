@@ -159,7 +159,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
 
                 dismissDialog();
 
-                startGroupContentActivity(context, groupUUID);
+                ToastUtil.showToast(context,context.getString(R.string.finish_send_hint));
 
             }
 

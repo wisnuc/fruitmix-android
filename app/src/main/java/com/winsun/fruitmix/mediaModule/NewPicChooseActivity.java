@@ -400,7 +400,6 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
         GroupRequestParam groupRequestParam = new GroupRequestParam(mPrivateGroup.getUUID(), mPrivateGroup.getStationID());
 
-
         groupDataSource.insertUserComment(groupRequestParam, userComment, new BaseOperateCallbackWrapper(
                 new BaseOperateCallback() {
                     @Override

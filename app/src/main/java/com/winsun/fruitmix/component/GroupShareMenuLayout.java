@@ -21,6 +21,7 @@ import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter;
 import com.winsun.fruitmix.recyclerview.BindingViewHolder;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.util.FilterRule;
 import com.winsun.fruitmix.util.ItemFilterKt;
 import com.winsun.fruitmix.util.Util;
@@ -42,6 +43,8 @@ public class GroupShareMenuLayout {
 
     private GroupShareMenuItemOnClickListener mGroupShareMenuItemOnClickListener;
 
+    private String mCurrentStationID;
+
     private View mView;
 
     public GroupShareMenuLayout(Context context, ViewGroup root, GroupShareMenuItemOnClickListener groupShareMenuItemOnClickListener) {
@@ -49,7 +52,7 @@ public class GroupShareMenuLayout {
         GroupShareMenuLayoutBinding binding = GroupShareMenuLayoutBinding
                 .inflate(LayoutInflater.from(context), root, false);
 
-        mLoadingViewModel = new LoadingViewModel(context,android.R.color.transparent);
+        mLoadingViewModel = new LoadingViewModel(context, android.R.color.transparent);
 
         binding.setLoadingViewModel(mLoadingViewModel);
 
@@ -62,6 +65,8 @@ public class GroupShareMenuLayout {
         groupShareMenuRecyclerView.setAdapter(mGroupShareMenuRecyclerViewAdapter);
 
         mGroupRepository = InjectGroupDataSource.provideGroupRepository(context);
+
+        mCurrentStationID = InjectSystemSettingDataSource.provideSystemSettingDataSource(context).getCurrentLoginStationID();
 
         mGroupShareMenuItemOnClickListener = groupShareMenuItemOnClickListener;
 
@@ -85,7 +90,7 @@ public class GroupShareMenuLayout {
                         ItemFilterKt.filterItem(data, new FilterRule<PrivateGroup>() {
                             @Override
                             public boolean isFiltered(PrivateGroup item) {
-                                return item.isStationOnline();
+                                return item.isStationOnline() && item.getStationID().equals(mCurrentStationID);
                             }
                         });
 

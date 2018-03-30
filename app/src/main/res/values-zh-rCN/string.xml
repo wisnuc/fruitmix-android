@@ -620,6 +620,8 @@
     <string name="retry_or_not">是否重试</string>
     <string name="retry">重试</string>
 
+    <string name="finish_send_hint">发送完成，请前往群界面查看</string>
+
     <!-- group setting -->
     <string name="group_member">群成员</string>
     <string name="check_more_group_members">查看更多群员</string>

@@ -648,6 +648,8 @@
     <string name="retry_or_not">Retry or not</string>
     <string name="retry">Retry</string>
 
+    <string name="finish_send_hint">Send completed,You can go to box page to check it</string>
+
     <!-- group setting -->
     <string name="group_member">Group Members</string>
     <string name="check_more_group_members">Check more group members</string>

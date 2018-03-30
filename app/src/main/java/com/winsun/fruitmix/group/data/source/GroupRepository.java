@@ -455,6 +455,8 @@ public class GroupRepository extends BaseDataRepository {
 
                         if (data.size() != 0) {
 
+                            Log.d(TAG, "onSucceed: getNewCommentInGroup,data size: " + data.size());
+
                             handleGetUserCommentSucceed(data, groupUUID, null);
 
                             mGroupLocalDataSource.insertUserComment(mCurrentUserGUID, groupRequestParam, data);
@@ -462,6 +464,8 @@ public class GroupRepository extends BaseDataRepository {
                             updateLastRetrieveCommentIndex(getLastCommentIndex(data), groupUUID);
 
                             handleUserCommentInDraft(data, groupUUID);
+
+                            mHandleUserCommentInDraft.handleUserCommentInDraft(groupRequestParam.getGroupUUID(), mCurrentUserGUID);
 
                             updateUnreadCommentCount(mCurrentUserGUID, groupRequestParam, callback);
 
@@ -560,8 +564,13 @@ public class GroupRepository extends BaseDataRepository {
             for (UserComment userCommentInDraft : userCommentsInDraft) {
 
                 for (UserComment userComment : data) {
-                    if (userComment.getUuid().equals(userCommentInDraft.getRealUUIDWhenFake()))
+                    if (userComment.getUuid().equals(userCommentInDraft.getRealUUIDWhenFake())) {
+
+                        Log.d(TAG, "handleUserCommentInDraft: deleteCommentInDraft realUUID: " + userCommentInDraft.getRealUUIDWhenFake());
+
                         mGroupTweetInDraftDataSource.deleteCommentInDraft(groupUUID, mCurrentUserGUID, userCommentInDraft.getRealUUIDWhenFake());
+                    }
+
                 }
 
             }
@@ -638,8 +647,6 @@ public class GroupRepository extends BaseDataRepository {
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
             public void run() {
-
-                mHandleUserCommentInDraft.handleUserCommentInDraft(groupRequestParam.getGroupUUID(), mCurrentUserGUID);
 
                 handleGetNewCommentFinished();
 
@@ -827,13 +834,21 @@ public class GroupRepository extends BaseDataRepository {
 
                 if (retryFailUserComment) {
 
+                    Log.d(TAG, "retry Fail UserComment,updateUserComment fail to false");
+
                     userComment.setFail(false);
 
                     mGroupTweetInDraftDataSource.updateCommentIsFail(userComment.getUuid(), groupRequestParam.getGroupUUID(),
                             mCurrentUserGUID, false);
 
-                } else
+                } else {
+
+                    Log.d(TAG, "insert userCommnent into draft");
+
                     mGroupTweetInDraftDataSource.insertCommentIntoDraft(mCurrentUserGUID, userComment);
+                }
+
+                Log.d(TAG, "insert UserComment into Running List");
 
                 mHandleUserCommentInDraft.insertUserCommentIntoRunningList(userComment);
 
@@ -844,6 +859,8 @@ public class GroupRepository extends BaseDataRepository {
                     public void onSucceed(UserComment data, OperationResult result) {
 
 //                        mGroupLocalDataSource.insertUserComment(mCurrentUserGUID, groupRequestParam, data);
+
+                        Log.d(TAG, "onSucceed: insert userComment: + fakeUUID:" + userComment.getUuid() + " realUUID:" + data.getUuid());
 
                         mGroupTweetInDraftDataSource.updateCommentRealUUID(userComment.getUuid(), userComment.getGroupUUID(),
                                 mCurrentUserGUID, data.getUuid());
@@ -856,6 +873,8 @@ public class GroupRepository extends BaseDataRepository {
 
                     @Override
                     public void onFail(OperationResult operationResult) {
+
+                        Log.d(TAG, "onFail: insert userComment + fakeUUID:" + userComment.getUuid());
 
                         mGroupTweetInDraftDataSource.updateCommentIsFail(userComment.getUuid(), userComment.getGroupUUID(),
                                 mCurrentUserGUID, true);

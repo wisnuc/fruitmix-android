@@ -151,6 +151,8 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         mMaskLayout = mActivityGroupContentBinding.maskLayout;
         mMaskLayout.setOnClickListener(this);
 
+        Log.d(TAG, "onCreate: ");
+
     }
 
     private void initInputChatLayout(ActivityGroupContentBinding binding) {
@@ -239,6 +241,8 @@ public class GroupContentActivity extends BaseActivity implements GroupContentVi
         super.onDestroy();
 
         groupContentPresenter.onDestroy();
+
+        Log.d(TAG, "onDestroy: ");
     }
 
     @Override
