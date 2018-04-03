@@ -104,7 +104,7 @@ public class GroupListPresenter implements ActiveView {
         initCallback();
     }
 
-    private void initCallback(){
+    private void initCallback() {
 
         mPrivateGroupBaseLoadDataCallback = new BaseLoadDataCallbackWrapper<>(new BaseLoadDataCallback<PrivateGroup>() {
             @Override
@@ -185,6 +185,8 @@ public class GroupListPresenter implements ActiveView {
 
     public void refreshGroups() {
 
+        Log.d(TAG, "refreshGroups: alreadyCallGetGroupList: " + alreadyCallGetGroupList);
+
         if (alreadyCallGetGroupList) {
 
             groupListPageView.finishSwipeRefreshAnimation();
@@ -194,6 +196,8 @@ public class GroupListPresenter implements ActiveView {
         }
 
         if (mSystemSettingDataSource.getCurrentWAToken().isEmpty()) {
+
+            Log.d(TAG, "refreshGroups: currentWAToken is empty");
 
             groupListPageView.finishSwipeRefreshAnimation();
 
@@ -229,7 +233,7 @@ public class GroupListPresenter implements ActiveView {
 
     }
 
-    public void refreshGroupsUsingDB(){
+    public void refreshGroupsUsingDB() {
 
         groupRepository.getGroupListFromDB(mPrivateGroupBaseLoadDataCallback);
 
@@ -241,13 +245,17 @@ public class GroupListPresenter implements ActiveView {
 
     private void initMqttService() {
 
+        Log.d(TAG, "initMqttService: alreadyInitialMqttService: " + alreadyInitialMqttService);
+
         if (!alreadyInitialMqttService) {
+
+            Log.d(TAG, "initMqttService: ");
 
             alreadyInitialMqttService = true;
 
             mMqttUseCase.initMqttClient(groupListPageView.getContext(), mCurrentUser.getAssociatedWeChatGUID());
-        }
 
+        }
 
     }
 
@@ -356,7 +364,7 @@ public class GroupListPresenter implements ActiveView {
                 binding.newCommentCountTextview.setVisibility(View.VISIBLE);
                 binding.newCommentCountTextview.setText(difference + "");
 
-            }  else {
+            } else {
                 binding.newCommentCountTextview.setVisibility(View.INVISIBLE);
             }
 

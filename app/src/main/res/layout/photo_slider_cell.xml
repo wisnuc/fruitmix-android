@@ -4,12 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- try to fix crash:#207 by delete android:scaleType 2018-4-3 -->
+
     <com.winsun.fruitmix.component.GifTouchNetworkImageView
         android:id="@+id/mainPic"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:scaleType="centerCrop"
         android:src="@drawable/new_placeholder"
         android:visibility="visible" />
 

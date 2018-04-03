@@ -62,7 +62,7 @@ public class MqttUseCase {
 
     public void initMqttClient(Context context, final String currentUserGUID) {
 
-        if(initMqtt)
+        if (initMqtt)
             return;
 
         initMqtt = true;
@@ -77,7 +77,7 @@ public class MqttUseCase {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
 
-                if (reconnect) {
+                if (reconnect && mMqttAndroidClient != null) {
 
                     Log.d(TAG, "connectComplete: reconnect to " + serverURI);
 
@@ -182,20 +182,24 @@ public class MqttUseCase {
     public void stopMqtt() {
 
         Log.d(TAG, "stopMqtt: ");
-        
+
         try {
 
             if (mMqttAndroidClient != null) {
+
+                mMqttAndroidClient.unregisterResources();
 
                 mMqttAndroidClient.unsubscribe(subscriptionTopic);
 
                 mMqttAndroidClient.disconnect();
 
+                mMqttAndroidClient = null;
+
             }
 
         } catch (MqttException e) {
             e.printStackTrace();
-        } catch (Exception e){
+        } catch (Exception e) {
 
             e.printStackTrace();
 
