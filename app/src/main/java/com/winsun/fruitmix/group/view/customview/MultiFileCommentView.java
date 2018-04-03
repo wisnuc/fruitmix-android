@@ -22,6 +22,7 @@ import com.winsun.fruitmix.databinding.MultiFileCommentBinding;
 import com.winsun.fruitmix.databinding.SinglePhotoBinding;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.group.data.model.GroupUtilKt;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.FileComment;
 import com.winsun.fruitmix.group.data.model.RetryFailUserCommentStrategy;
@@ -53,7 +54,7 @@ public class MultiFileCommentView extends UserCommentView implements SCloudToken
 
     private String mSCloudToken = "";
 
-    public MultiFileCommentView(RetryFailUserCommentStrategy retryFailUserCommentStrategy,ImageLoader imageLoader) {
+    public MultiFileCommentView(RetryFailUserCommentStrategy retryFailUserCommentStrategy, ImageLoader imageLoader) {
         super(retryFailUserCommentStrategy);
         this.imageLoader = imageLoader;
     }
@@ -86,112 +87,27 @@ public class MultiFileCommentView extends UserCommentView implements SCloudToken
 
             final List<Media> medias = comment.getMedias();
 
-            totalSize = medias.size();
-
-            int showSize = totalSize;
-
-            if (totalSize > 6) {
-                showSize = 6;
-            }
-
-            handleLayout(context, frameLayouts, showSize);
-
-            int layoutNum = 0;
-
-            for (int i = 0; i < showSize; i++) {
-
-                for (; layoutNum < 6; layoutNum++) {
-
-                    if (frameLayouts[layoutNum].getVisibility() != View.GONE)
-                        break;
-
-                }
-
-                final Media media = medias.get(i);
-
-                View root;
-                final NetworkImageView networkImageView;
-
-                final SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayouts[layoutNum], false);
-
-                root = singlePhotoBinding.getRoot();
-
-                networkImageView = singlePhotoBinding.coverImg;
-
-                frameLayouts[layoutNum].addView(root);
-
-/*                final NewPhotoGridlayoutItemBinding newPhotoGridlayoutItemBinding = NewPhotoGridlayoutItemBinding.inflate(LayoutInflater.from(context),
-                        frameLayouts[layoutNum],false);
-
-                frameLayouts[layoutNum].addView(newPhotoGridlayoutItemBinding.getRoot());
-
-                MediaUtil.setMediaImageUrl(media, newPhotoGridlayoutItemBinding.photoIv, httpRequest, imageLoader);*/
-
-                root.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        PhotoSliderActivity.startPhotoSliderActivityWithMedias(toolbar, (Activity) context, medias, data.getGroupUUID(), data.getStationID(),
-                                3, networkImageView, media);
-
-                    }
-                });
-
-
-                TokenManager tokenManager = InjectSCloudTokenManager.provideInstance(context);
-
-                BaseDataOperator baseDataOperator = InjectBaseDataOperator.provideInstance(context,
-                        tokenManager, this, new RefreshTokenRetryStrategy(tokenManager));
-
-                baseDataOperator.preConditionCheck(true, new BaseOperateCallback() {
-                    @Override
-                    public void onSucceed() {
-
-                        handleGetSCloudToken(context, data, media, singlePhotoBinding);
-
-                    }
-
-                    @Override
-                    public void onFail(OperationResult operationResult) {
-
-                        handleGetSCloudToken(context, data, media, singlePhotoBinding);
-
-                    }
-                });
-
-
-                layoutNum++;
-
-            }
-
-            if (totalSize > 6) {
-
-                MorePhotoMaskBinding morePhotoMaskBinding;
-
-                FrameLayout addMaskLayout = isLeftModel ? frameLayouts[3] : frameLayouts[5];
-
-                morePhotoMaskBinding = MorePhotoMaskBinding.inflate(LayoutInflater.from(context),
-                        addMaskLayout, false);
-
-                addMaskLayout.addView(morePhotoMaskBinding.getRoot());
-
-                String text = "+" + (totalSize - 6);
-
-                morePhotoMaskBinding.sizeTextview.setText(text);
-
-                morePhotoMaskBinding.maskContainer.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        TweetContentListActivity.startListActivity(data, context);
-
-                    }
-                });
-
-            }
+            refreshMedias(context, toolbar, data, isLeftModel, frameLayouts, medias);
 
 
         } else if (data instanceof FileComment) {
+
+            FileComment comment = (FileComment) data;
+
+            List<AbstractFile> files = comment.getFiles();
+
+            /*if (GroupUtilKt.checkFilesAllContainsMedias(files)) {
+
+                List<Media> medias = GroupUtilKt.convertFilesToMedias(files);
+
+                UserComment mediaComment = new MediaComment(data.getUuid(), data.getCreator(), data.getCreateTime(), data.getGroupUUID(),
+                        data.getStationID(), medias);
+
+                refreshMedias(context, toolbar, mediaComment, isLeftModel, frameLayouts, medias);
+
+                return;
+
+            }*/
 
             for (int i = 0; i < 5; i++) {
 
@@ -212,10 +128,6 @@ public class MultiFileCommentView extends UserCommentView implements SCloudToken
                 fileCommentViewModel = new FileCommentViewModel();
 
             fileTweetGroupItemBinding.setFileCommentViewModel(fileCommentViewModel);
-
-            FileComment comment = (FileComment) data;
-
-            List<AbstractFile> files = comment.getFiles();
 
             totalSize = files.size();
 
@@ -263,6 +175,113 @@ public class MultiFileCommentView extends UserCommentView implements SCloudToken
         }
 
 
+    }
+
+    private void refreshMedias(final Context context, final View toolbar, final UserComment data, boolean isLeftModel, FrameLayout[] frameLayouts, final List<Media> medias) {
+        int totalSize;
+        totalSize = medias.size();
+
+        int showSize = totalSize;
+
+        if (totalSize > 6) {
+            showSize = 6;
+        }
+
+        handleLayout(context, frameLayouts, showSize);
+
+        int layoutNum = 0;
+
+        for (int i = 0; i < showSize; i++) {
+
+            for (; layoutNum < 6; layoutNum++) {
+
+                if (frameLayouts[layoutNum].getVisibility() != View.GONE)
+                    break;
+
+            }
+
+            final Media media = medias.get(i);
+
+            View root;
+            final NetworkImageView networkImageView;
+
+            final SinglePhotoBinding singlePhotoBinding = SinglePhotoBinding.inflate(LayoutInflater.from(context), frameLayouts[layoutNum], false);
+
+            root = singlePhotoBinding.getRoot();
+
+            networkImageView = singlePhotoBinding.coverImg;
+
+            frameLayouts[layoutNum].addView(root);
+
+/*                final NewPhotoGridlayoutItemBinding newPhotoGridlayoutItemBinding = NewPhotoGridlayoutItemBinding.inflate(LayoutInflater.from(context),
+                    frameLayouts[layoutNum],false);
+
+            frameLayouts[layoutNum].addView(newPhotoGridlayoutItemBinding.getRoot());
+
+            MediaUtil.setMediaImageUrl(media, newPhotoGridlayoutItemBinding.photoIv, httpRequest, imageLoader);*/
+
+            root.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    PhotoSliderActivity.startPhotoSliderActivityWithMedias(toolbar, (Activity) context, medias, data.getGroupUUID(), data.getStationID(),
+                            3, networkImageView, media);
+
+                }
+            });
+
+
+            TokenManager tokenManager = InjectSCloudTokenManager.provideInstance(context);
+
+            BaseDataOperator baseDataOperator = InjectBaseDataOperator.provideInstance(context,
+                    tokenManager, this, new RefreshTokenRetryStrategy(tokenManager));
+
+            baseDataOperator.preConditionCheck(true, new BaseOperateCallback() {
+                @Override
+                public void onSucceed() {
+
+                    handleGetSCloudToken(context, data, media, singlePhotoBinding);
+
+                }
+
+                @Override
+                public void onFail(OperationResult operationResult) {
+
+                    handleGetSCloudToken(context, data, media, singlePhotoBinding);
+
+                }
+            });
+
+
+            layoutNum++;
+
+        }
+
+        if (totalSize > 6) {
+
+            MorePhotoMaskBinding morePhotoMaskBinding;
+
+            FrameLayout addMaskLayout = isLeftModel ? frameLayouts[3] : frameLayouts[5];
+
+            morePhotoMaskBinding = MorePhotoMaskBinding.inflate(LayoutInflater.from(context),
+                    addMaskLayout, false);
+
+            addMaskLayout.addView(morePhotoMaskBinding.getRoot());
+
+            String text = "+" + (totalSize - 6);
+
+            morePhotoMaskBinding.sizeTextview.setText(text);
+
+            morePhotoMaskBinding.maskContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    TweetContentListActivity.startListActivity(data, context);
+
+                }
+            });
+
+        }
     }
 
     private void handleGetSCloudToken(Context context, UserComment data, Media media, SinglePhotoBinding singlePhotoBinding) {

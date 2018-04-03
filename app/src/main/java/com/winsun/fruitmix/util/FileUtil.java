@@ -811,7 +811,7 @@ public class FileUtil {
         context.startActivity(filterIntent(context, intent));
     }
 
-    private static Intent filterIntentForOpenFile(Context context,Intent intent){
+    private static Intent filterIntentForOpenFile(Context context, Intent intent) {
 
         List<ResolveInfo> resolveInfos = context.getPackageManager().queryIntentActivities(intent, 0);
 
@@ -1167,6 +1167,13 @@ public class FileUtil {
 
         return getMIMEType(fileName).startsWith("video");
 
+    }
+
+    public static boolean checkFileIsMedia(String fileName) {
+        String type = getMIMEType(fileName);
+
+        return type.startsWith("video") || type.contains("gif") || type.contains("jpeg") ||
+                type.contains("png");
     }
 
     public static int getFileTypeResID(String fileName) {

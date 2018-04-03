@@ -9,11 +9,13 @@ import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.RemoteFile;
 import com.winsun.fruitmix.group.data.model.FileComment;
+import com.winsun.fruitmix.group.data.model.GroupUtilKt;
 import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.SystemMessageTextComment;
 import com.winsun.fruitmix.group.data.model.TextComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
+import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONArray;
@@ -67,8 +69,26 @@ public class GroupTweetInDraftDataSource {
 
     public void insertCommentIntoDraft(String userGUID, UserComment userComment) {
 
-        userComment.setFake(true);
-        userComment.setContentJsonStr(createContentJsonStr((TextComment) userComment));
+        UserComment actualComment;
+
+        if (userComment instanceof FileComment) {
+
+            List<AbstractFile> files = ((FileComment) userComment).getFiles();
+
+            if (GroupUtilKt.checkFilesAllContainsMedias(files)) {
+
+                actualComment = new MediaComment(userComment.getUuid(), userComment.getCreator(),
+                        userComment.getCreateTime(), userComment.getGroupUUID(), userComment.getStationID(),
+                        GroupUtilKt.convertFilesToMedias(files));
+
+            } else
+                actualComment = userComment;
+
+        } else
+            actualComment = userComment;
+
+        actualComment.setFake(true);
+        actualComment.setContentJsonStr(createContentJsonStr((TextComment) userComment));
 
         long result = mDBUtils.insertRemoteGroupTweetsInDraft(userGUID, Collections.singletonList(userComment));
 
@@ -109,7 +129,7 @@ public class GroupTweetInDraftDataSource {
 
                     metadata.addProperty("date", media.getFormattedTime());
 
-                    item.add("metadata",metadata);
+                    item.add("metadata", metadata);
 
                     list.add(item);
                 }

@@ -101,7 +101,7 @@ import io.github.sin3hz.fastjumper.callback.SpannableCallback;
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView, SCloudTokenContainer,SelectedMediasListener {
+public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView, SCloudTokenContainer, SelectedMediasListener {
 
     public static final String TAG = NewPhotoList.class.getSimpleName();
 
@@ -285,7 +285,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         TokenManager tokenManager = InjectSCloudTokenManager.provideInstance(containerActivity);
 
         mBaseDataOperator = InjectBaseDataOperator.provideInstance(containerActivity,
-                tokenManager,this,new RefreshTokenRetryStrategy(tokenManager));
+                tokenManager, this, new RefreshTokenRetryStrategy(tokenManager));
 
     }
 
@@ -365,7 +365,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
     private void finishSwipeRefreshAnimation() {
 
-        if(mNoContentSwipeRefreshLayout.isRefreshing())
+        if (mNoContentSwipeRefreshLayout.isRefreshing())
             mNoContentSwipeRefreshLayout.setRefreshing(false);
 
         if (!mEnableSwipeRefreshLayout)
@@ -954,10 +954,10 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
                 if (currentMedia == null) return;
 
-                View newSharedElement = mRecyclerView.findViewWithTag(createMediaThumbHttpRequest(currentMedia,"").getUrl());
+                View newSharedElement = mRecyclerView.findViewWithTag(createMediaThumbHttpRequest(currentMedia, "").getUrl());
 
                 if (newSharedElement == null)
-                    newSharedElement = mRecyclerView.findViewWithTag(createMediaSmallThumbHttpRequest(currentMedia,"").getUrl());
+                    newSharedElement = mRecyclerView.findViewWithTag(createMediaSmallThumbHttpRequest(currentMedia, "").getUrl());
 
                 if (newSharedElement == null)
                     return;
@@ -1658,18 +1658,18 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 }
             });
 
-            mBaseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+            mBaseDataOperator.preConditionCheck(true, new BaseOperateCallback() {
                 @Override
                 public void onSucceed() {
 
-                    handleGetSCloudToken(currentMedia,mPhotoIv);
+                    handleGetSCloudToken(currentMedia, mPhotoIv);
 
                 }
 
                 @Override
                 public void onFail(OperationResult operationResult) {
 
-                    handleGetSCloudToken(currentMedia,mPhotoIv);
+                    handleGetSCloudToken(currentMedia, mPhotoIv);
 
                 }
             });
@@ -1746,16 +1746,16 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         return initialPhotoPosition;
     }
 
-    private void handleGetSCloudToken(Media currentMedia,NetworkImageView mPhotoIv) {
+    private void handleGetSCloudToken(Media currentMedia, NetworkImageView mPhotoIv) {
         HttpRequest httpRequest;
 
         if (!mIsFling) {
 
-            httpRequest = createMediaThumbHttpRequest(currentMedia,mSCloudToken);
+            httpRequest = createMediaThumbHttpRequest(currentMedia, mSCloudToken);
 
         } else {
 
-            httpRequest = createMediaSmallThumbHttpRequest(currentMedia,mSCloudToken);
+            httpRequest = createMediaSmallThumbHttpRequest(currentMedia, mSCloudToken);
 
         }
 
@@ -1843,17 +1843,17 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
                 }
             });
 
-            mBaseDataOperator.preConditionCheck(true,new BaseOperateCallback() {
+            mBaseDataOperator.preConditionCheck(true, new BaseOperateCallback() {
                 @Override
                 public void onSucceed() {
 
-                    handleGetSCloudToken(video,networkImageView);
+                    handleGetSCloudToken(video, networkImageView);
                 }
 
                 @Override
                 public void onFail(OperationResult operationResult) {
 
-                    handleGetSCloudToken(video,networkImageView);
+                    handleGetSCloudToken(video, networkImageView);
                 }
             });
 
@@ -2058,7 +2058,9 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
             super.onScrolled(recyclerView, dx, dy);
 
             //fix bug#313,update scroll offset when scroll
-            mJumperCallback.invalidate();
+            //fix crash by add check mJumperCallback is null or not,2018-4-2
+            if (mJumperCallback != null)
+                mJumperCallback.invalidate();
         }
 
         @Override
@@ -2178,7 +2180,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
         }
     }
 
-    private HttpRequest createMediaThumbHttpRequest(Media media,String sCloudToken) {
+    private HttpRequest createMediaThumbHttpRequest(Media media, String sCloudToken) {
 
         if (mGroupRequestParam != null)
             return media.getImageThumbUrl(mHttpRequestFactory, mGroupRequestParam, sCloudToken);

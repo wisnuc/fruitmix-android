@@ -943,7 +943,7 @@ public class Util {
 
     }
 
-    private static String formatDateAndTime(long time) {
+    public static String formatDateAndTime(long time) {
 
         return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA).format(new Date(time));
 
