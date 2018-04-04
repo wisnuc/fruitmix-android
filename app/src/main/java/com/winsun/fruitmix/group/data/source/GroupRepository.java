@@ -442,8 +442,6 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    //TODO:refactor get new tweet logic: after get mqtt message,refresh group and then get new tweet,insert into db and then send message to update ui,ui get tweet source only from db
-
     private synchronized void getNewCommentInGroup(final String groupUUID, String stationID, final long localGroupCommentIndex, final BaseOperateCallback callback) {
 
         final GroupRequestParam groupRequestParam = new GroupRequestParam(groupUUID, stationID);
@@ -467,7 +465,7 @@ public class GroupRepository extends BaseDataRepository {
 
                             mHandleUserCommentInDraft.handleUserCommentInDraft(groupRequestParam.getGroupUUID(), mCurrentUserGUID);
 
-                            updateUnreadCommentCount(mCurrentUserGUID, groupRequestParam, callback);
+                            updateUnreadCommentCount(data, mCurrentUserGUID, groupRequestParam, callback);
 
                         } else
                             callback.onSucceed();
@@ -515,8 +513,29 @@ public class GroupRepository extends BaseDataRepository {
 
     }
 
-    private void updateUnreadCommentCount(final String currentUserGUID, final GroupRequestParam groupRequestParam, final BaseOperateCallback callback) {
+    private void updateUnreadCommentCount(List<UserComment> newUserComments, final String currentUserGUID, final GroupRequestParam groupRequestParam, final BaseOperateCallback callback) {
 
+        List<UserComment> otherUserComments = ItemFilterKt.filterItem(newUserComments, new FilterRule<UserComment>() {
+            @Override
+            public boolean isFiltered(UserComment item) {
+                return !item.getCreator().getAssociatedWeChatGUID().equals(currentUserGUID);
+            }
+        });
+
+        int otherUserCommentSize = otherUserComments.size();
+
+        PrivateGroup group = mPrivateGroups.get(groupRequestParam.getGroupUUID());
+
+        if (group != null) {
+
+            group.setUnreadCommentCount(group.getUnreadCommentCount() + otherUserCommentSize);
+
+            updateGroupUnreadCommentCountInDB(group.getUUID(), otherUserCommentSize);
+        }
+
+        callback.onSucceed();
+
+/*
         mGroupLocalDataSource.getAllUserCommentByGroupUUID(currentUserGUID, groupRequestParam,
                 new BaseLoadDataCallbackImpl<UserComment>() {
                     @Override
@@ -543,6 +562,7 @@ public class GroupRepository extends BaseDataRepository {
                         callback.onSucceed();
                     }
                 });
+*/
 
     }
 

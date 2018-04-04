@@ -219,8 +219,6 @@ public class Media extends AbstractFile {
 
     }
 
-    //TODO: create image thumb original url with sCloudToken
-
     public HttpRequest getImageSmallThumbUrl(HttpRequestFactory httpRequestFactory, GroupRequestParam groupRequestParam, String sCloudToken) {
 
         HttpRequest httpRequest = actualGetImageSmallThumbUrl(httpRequestFactory, groupRequestParam, sCloudToken);

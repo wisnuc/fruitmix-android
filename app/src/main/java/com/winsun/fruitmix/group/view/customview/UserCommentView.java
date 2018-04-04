@@ -140,8 +140,6 @@ public abstract class UserCommentView {
 
                 } else {
 
-                    //TODO:check in running task contains current user comment,if true show loading,otherwise set fail and update in db
-
                     viewDataBinding.failCommentImageView.setVisibility(View.GONE);
 
                     viewDataBinding.commentCreating.setVisibility(View.VISIBLE);
