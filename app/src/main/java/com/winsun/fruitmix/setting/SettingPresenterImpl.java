@@ -15,6 +15,7 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallbackWrapper;
 import com.winsun.fruitmix.databinding.ActivitySettingBinding;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
+import com.winsun.fruitmix.group.data.source.GroupLocalDataSource;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.model.OperationType;
@@ -182,6 +183,10 @@ public class SettingPresenterImpl implements SettingPresenter, ActiveView {
                     public void onClick(DialogInterface dialog, int which) {
 
                         FileUtil.clearAllCache(context);
+
+                        //consider clear group when clear cache is reasonable
+//                        mGroupLocalDataSource.clearGroups();
+
                         dialog.dismiss();
 
                         mTotalCacheSize = FileUtil.getTotalCacheSize(context);

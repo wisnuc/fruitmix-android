@@ -19,9 +19,11 @@ apply plugin: 'com.android.library'
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
-
     useLibrary 'org.apache.http.legacy'
-
+    buildTypes {
+        releaseTest {
+        }
+    }
 }
 apply from: 'rules.gradle'
 apply from: 'bintray.gradle'

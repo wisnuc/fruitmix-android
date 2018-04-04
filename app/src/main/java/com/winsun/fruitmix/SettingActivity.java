@@ -7,7 +7,10 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 
 import com.winsun.fruitmix.databinding.ActivitySettingBinding;
+import com.winsun.fruitmix.db.DBUtils;
 import com.winsun.fruitmix.firmware.FirmwareActivity;
+import com.winsun.fruitmix.group.data.source.GroupLocalDataSource;
+import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.media.InjectMedia;
 import com.winsun.fruitmix.plugin.view.PluginManageActivity;
 import com.winsun.fruitmix.setting.SettingPresenter;
@@ -53,7 +56,7 @@ public class SettingActivity extends BaseActivity implements SettingView {
         ToolbarViewModel toolbarViewModel = new ToolbarViewModel();
 
         toolbarViewModel.titleText.set(getString(R.string.setting));
-        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_black));
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this, R.color.eighty_seven_percent_black));
 
         toolbarViewModel.setBaseView(this);
 

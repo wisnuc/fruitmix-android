@@ -47,27 +47,45 @@ android {
 
     }
     buildTypes {
-
         debug {
-
             minifyEnabled false
             zipAlignEnabled false
             shrinkResources false
-
             signingConfig signingConfigs.debug
+
+            buildConfigField("String", "server_url", "\"test.siyouqun.com\"")
+            buildConfigField("int", "server_port", "4000")
+
+            buildConfigField("String", "mqtt_server_url", "\"tcp://test.siyouqun.com\"")
 
         }
         release {
+            minifyEnabled true
+            zipAlignEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+
+            buildConfigField("String", "server_url", "\"www.siyouqun.com\"")
+            buildConfigField("int", "server_port", "80")
+
+            buildConfigField("String", "mqtt_server_url", "\"tcp://mqtt.siyouqun.com\"")
+
+        }
+        releaseTest {
 
             minifyEnabled true
             zipAlignEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-
             signingConfig signingConfigs.release
 
-        }
+            buildConfigField("String", "server_url", "\"test.siyouqun.com\"")
+            buildConfigField("int", "server_port", "4000")
 
+            buildConfigField("String", "mqtt_server_url", "\"tcp://test.siyouqun.com\"")
+
+        }
     }
     repositories {
         flatDir {
@@ -85,6 +103,20 @@ android {
     sourceSets {
         debug {
             manifest.srcFile 'src/debug/AndroidManifest.xml'
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+
+            if (variant.buildType.name.equals('release')) {
+                outputFileName = "wisnuc-v${defaultConfig.versionName}-release.apk"
+            } else if (variant.buildType.name.equals('releaseTest')) {
+                outputFileName = "wisnuc-v${defaultConfig.versionName}-release-test-cloud.apk"
+            } else if (variant.buildType.name.equals('debug')) {
+                outputFileName = "wisnuc-v${defaultConfig.versionName}-debug.apk"
+            }
+
         }
     }
 }

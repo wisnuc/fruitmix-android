@@ -3,6 +3,7 @@ package com.winsun.fruitmix.mqtt;
 import android.content.Context;
 import android.util.Log;
 
+import com.winsun.fruitmix.BuildConfig;
 import com.winsun.fruitmix.eventbus.MqttMessageEvent;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 
@@ -71,7 +72,7 @@ public class MqttUseCase {
 
         Log.d(TAG, "initMqttClient: clientID: " + clientID);
 
-        mMqttAndroidClient = new MqttAndroidClient(context, PRODUCTION_SERVER_URI, clientID);
+        mMqttAndroidClient = new MqttAndroidClient(context, BuildConfig.mqtt_server_url, clientID);
 
         mMqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
