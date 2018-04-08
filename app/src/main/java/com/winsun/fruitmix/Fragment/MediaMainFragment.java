@@ -117,7 +117,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
     private List<Page> pageList;
     private FileFragment fileFragment;
     private NewPhotoList photoList;
-    private GroupListPage groupListPage;
+//    private GroupListPage groupListPage;
 
     private InboxListPage mInboxListPage;
 
@@ -128,9 +128,9 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
     private ProgressDialog mDialog;
 
     //    private static final int PAGE_INBOX = 0;
-    private static final int PAGE_GROUP = 0;
-    private static final int PAGE_PHOTO = 1;
-    private static final int PAGE_FILE = 2;
+//    private static final int PAGE_GROUP = 0;
+    private static final int PAGE_PHOTO = 0;
+    private static final int PAGE_FILE = 1;
 
     private boolean sInChooseMode = false;
 
@@ -351,7 +351,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
         photoList.refreshView();
 
-        groupListPage.onResume();
+//        groupListPage.onResume();
 
 //        if (Util.isRemoteMediaLoaded() && Util.isLocalMediaInCameraLoaded() && Util.isLocalMediaInDBLoaded() && !mPhotoListRefresh) {
 //            pageList.get(PAGE_PHOTO).refreshDownloadItemView();
@@ -529,13 +529,13 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
             Log.d(TAG, "onActivityResult: delete or quit group in setting,so refresh group ");
 
-            groupListPage.refreshViewForce();
+//            groupListPage.refreshViewForce();
 
         } else if (requestCode == PersonInfoActivity.START_PERSON_INFO && resultCode == RESULT_OK) {
 
             Log.d(TAG, "onActivityResult: start person info result ok");
 
-            groupListPage.refreshViewForce();
+//            groupListPage.refreshViewForce();
 
         }
 
@@ -563,15 +563,13 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
                         viewPager.setCurrentItem(PAGE_INBOX);
 
                         break;*/
-                    case R.id.group:
+ /*                   case R.id.group:
 
                         eventId = Util.SWITCH_GROUP_MODULE_UMENG_EVENT_ID;
 
                         viewPager.setCurrentItem(PAGE_GROUP);
 
-//                       ViewPagerTranslation.INSTANCE.animatePagerTransition(false, viewPager, 200, viewPager.getCurrentItem() - PAGE_GROUP);
-
-                        break;
+                        break;*/
                     case R.id.photo:
 
                         eventId = Util.SWITCH_MEDIA_MODULE_UMENG_EVENT_ID;
@@ -620,7 +618,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
 //        mInboxListPage = new InboxListPage((BaseActivity) getActivity());
 
-        groupListPage = new GroupListPage(getActivity());
+//        groupListPage = new GroupListPage(getActivity());
         photoList = new NewPhotoList(getActivity(), this);
 
         StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(getContext());
@@ -632,7 +630,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
         pageList = new ArrayList<>();
 
 //        pageList.add(mInboxListPage);
-        pageList.add(groupListPage);
+//        pageList.add(groupListPage);
         pageList.add(photoList);
         pageList.add(fileFragment);
 
@@ -652,7 +650,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
     public void refreshAllViewsForce() {
 
-        groupListPage.refreshViewForce();
+//        groupListPage.refreshViewForce();
 
         photoList.refreshViewForce();
         fileFragment.refreshViewForce();
@@ -708,13 +706,13 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
             EventBus.getDefault().removeStickyEvent(operationEvent);
 
-            groupListPage.handleMqttMessage((MqttMessageEvent) operationEvent);
+//            groupListPage.handleMqttMessage((MqttMessageEvent) operationEvent);
 
         }else if(action.equals(Util.GET_NEW_COMMENT_FINISHED)){
 
             Log.d(TAG, "handleStickyOperationEvent: get new comment finished");
 
-            groupListPage.handleGetNewCommentFinished();
+//            groupListPage.handleGetNewCommentFinished();
 
         }
 
@@ -1254,7 +1252,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
         }
 
         switch (position) {
-            case PAGE_GROUP:
+/*            case PAGE_GROUP:
 
                 setCurrentItem(groupListPage);
 
@@ -1300,7 +1298,7 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
                 mListener.unlockDrawer();
 
-                break;
+                break;*/
 /*            case PAGE_INBOX:
 
                 setCurrentItem(mInboxListPage);

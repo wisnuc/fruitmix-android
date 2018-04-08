@@ -6,10 +6,10 @@
             android:icon="@drawable/inbox"
             android:title="@string/inbox" />-->
 
-    <item
+<!--    <item
         android:id="@+id/group"
         android:icon="@drawable/group"
-        android:title="@string/group" />
+        android:title="@string/group" />-->
 
     <item
         android:id="@+id/photo"
