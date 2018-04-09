@@ -21,7 +21,7 @@ public class FileUploadFinishedState extends FileUploadState {
     @Override
     public void startWork() {
 
-        FileTaskManager.getInstance().startPendingTaskItem();
+        FileTaskManager.getInstance().startPendingUploadTaskItem();
 
     }
 }

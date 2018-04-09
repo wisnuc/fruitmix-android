@@ -22,7 +22,7 @@ public class FileDownloadFinishedState extends FileDownloadState {
     @Override
     public void startWork() {
 
-        FileTaskManager.getInstance().startPendingTaskItem();
+        FileTaskManager.getInstance().startPendingDownloadTaskItem();
 
     }
 

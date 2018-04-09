@@ -16,8 +16,8 @@ android {
 }
 
 dependencies {
-    testCompile "junit:junit:$rootProject.ext.junitVersion"
-    compile rootProject.ext.appcompatV7
-    compile rootProject.ext.recyclerviewV7
-    compile rootProject.ext.supportV4
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    implementation rootProject.ext.appcompatV7
+    implementation rootProject.ext.recyclerviewV7
+    implementation rootProject.ext.supportV4
 }

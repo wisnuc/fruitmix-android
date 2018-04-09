@@ -107,6 +107,7 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
             }
         };
 
+/*
         if (mSystemSettingDataSource.getCurrentWAToken().isEmpty())
             new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(context).show();
         else
@@ -121,8 +122,9 @@ public class FabMenuItemOnClickDefaultListener implements FabMenuItemOnClickList
 
                         }
                     }).createDialog(context).show();
+*/
 
-//        new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(context).show();
+        new ShareMenuBottomDialogFactory(shareInAppCommand, shareToOtherAppCommand).createDialog(context).show();
 
     }
 

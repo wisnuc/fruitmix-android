@@ -29,6 +29,6 @@ apply from: 'rules.gradle'
 apply from: 'bintray.gradle'
 
 dependencies {
-    compile "com.squareup.okhttp3:okhttp:$rootProject.ext.okhttpVersion"
-    compile rootProject.ext.supportV4
+    implementation "com.squareup.okhttp3:okhttp:$rootProject.ext.okhttpVersion"
+    implementation rootProject.ext.supportV4
 }

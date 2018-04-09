@@ -19,7 +19,6 @@ import com.winsun.fruitmix.eventbus.LoggedInUserRequestEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
 import com.winsun.fruitmix.eventbus.RetrieveTicketOperationEvent;
-import com.winsun.fruitmix.eventbus.StartMqttRequestEvent;
 import com.winsun.fruitmix.executor.DeleteDownloadedFileTask;
 import com.winsun.fruitmix.executor.ExecutorServiceInstance;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
@@ -46,6 +45,7 @@ import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
+import com.winsun.fruitmix.network.NetworkState;
 import com.winsun.fruitmix.network.NetworkStateManager;
 import com.winsun.fruitmix.network.change.InjectNetworkChangeUseCase;
 import com.winsun.fruitmix.network.change.NetworkChangeUseCase;
@@ -59,16 +59,6 @@ import com.winsun.fruitmix.model.OperationTargetType;
 import com.winsun.fruitmix.model.OperationType;
 import com.winsun.fruitmix.util.Util;
 
-import org.eclipse.paho.android.service.MqttAndroidClient;
-import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -536,9 +526,17 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
         FileTaskManager fileTaskManager = FileTaskManager.getInstance();
 
         if (UploadFileUseCase.checkUploadCondition(networkStateManager, systemSettingDataSource))
-            fileTaskManager.startPendingTaskItem();
+            fileTaskManager.startPendingUploadTaskItem();
         else
-            fileTaskManager.cancelAllStartItemAndSetPending(this);
+            fileTaskManager.cancelAllStartUploadItemAndSetPending(this);
+
+        NetworkState networkState = networkStateManager.getNetworkState();
+
+        if (!networkState.isMobileConnected() && !networkState.isWifiConnected())
+            fileTaskManager.cancelAllStartDownloadItemAndSetPending(this);
+        else
+            fileTaskManager.startPendingDownloadTaskItem();
+
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING)
@@ -571,7 +569,6 @@ public class ButlerService extends Service implements UploadMediaCountChangeList
         }
 
     }
-
 
 
     private void handleCreateOperation(RequestEvent requestEvent) {
