@@ -9,10 +9,14 @@ import android.os.Build;
 import android.os.Bundle;
 
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.db.DBUtils;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
+import com.winsun.fruitmix.wxapi.MiniProgram;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

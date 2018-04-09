@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
@@ -924,6 +925,25 @@ public class FileUtil {
 
         } else
             return intent;
+
+    }
+
+    public static boolean checkAppInstalledByPackageName(String packageName,Context context){
+
+        List<PackageInfo> packageInfos = context.getPackageManager().getInstalledPackages(0);
+
+        if(packageInfos == null)
+            return false;
+
+        for (PackageInfo packageInfo:packageInfos){
+
+            if(packageInfo.packageName.equalsIgnoreCase(packageName)){
+                return true;
+            }
+
+        }
+
+        return false;
 
     }
 

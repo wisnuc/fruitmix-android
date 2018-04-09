@@ -40,6 +40,10 @@ public class MiniProgram {
 
     }
 
+    public static boolean checkIsWXAppInstalled(IWXAPI iwxapi) {
+        return iwxapi.isWXAppInstalled() && iwxapi.isWXAppSupportAPI();
+    }
+
     public static IWXAPI registerToWX(Context context) {
 
         IWXAPI iwxapi = WXAPIFactory.createWXAPI(context, APP_ID, true);
