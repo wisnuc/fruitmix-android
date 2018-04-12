@@ -70,7 +70,6 @@ public class Util {
     public static final String CUSTOM_ERROR_CODE_GET_FOLDER = "05";
 
     public static final String SHOW_ALBUM_TIPS = "show_album_tips";
-    public static final String SHOW_PHOTO_RETURN_TIPS = "show_photo_return_tips";
     public static final String USER_GROUP_NAME = "user_group_name";
     public static final String USER_NAME = "user_child_name";
     public static final String USER_BG_COLOR = "user_bg_color";

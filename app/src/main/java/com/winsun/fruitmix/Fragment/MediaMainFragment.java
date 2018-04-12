@@ -829,48 +829,6 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
     }
 
-    public void showTips() {
-        if (getShowAlbumTipsValue()) {
-            setShowAlbumTipsValue(false);
-            if (mAlbumBalloon != null) {
-                mAlbumBalloon.setVisibility(View.VISIBLE);
-                mAlbumBalloon.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mAlbumBalloon.setVisibility(View.GONE);
-                    }
-                });
-            }
-        }
-    }
-
-    private boolean getShowAlbumTipsValue() {
-        SharedPreferences sp;
-
-        FragmentActivity activity = getActivity();
-
-        if (activity == null)
-            return false;
-
-        sp = activity.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        return sp.getBoolean(Util.SHOW_ALBUM_TIPS, true);
-    }
-
-    private void setShowAlbumTipsValue(boolean value) {
-        SharedPreferences sp;
-        SharedPreferences.Editor editor;
-
-        FragmentActivity activity = getActivity();
-
-        if (activity == null)
-            return;
-
-        sp = activity.getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        editor = sp.edit();
-        editor.putBoolean(Util.SHOW_ALBUM_TIPS, value);
-        editor.apply();
-    }
-
     private void showChooseHeader() {
 
         showRevealToolbarAnim();

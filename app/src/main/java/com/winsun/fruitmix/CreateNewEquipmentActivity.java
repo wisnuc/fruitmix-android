@@ -16,19 +16,12 @@ import com.winsun.fruitmix.util.Util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class CreateNewEquipmentActivity extends BaseActivity implements View.OnClickListener {
 
-    @BindView(R.id.title)
     TextView mLayoutTitle;
-    @BindView(R.id.toolbar)
     Toolbar mToolBar;
-    @BindView(R.id.select)
     TextView rightTextView;
-
-    @BindView(R.id.ip_edit)
     TextInputEditText ipInputEditText;
 
     @Override
@@ -36,7 +29,10 @@ public class CreateNewEquipmentActivity extends BaseActivity implements View.OnC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_equipment);
 
-        ButterKnife.bind(this);
+        mLayoutTitle = findViewById(R.id.title);
+        mToolBar = findViewById(R.id.toolbar);
+        rightTextView = findViewById(R.id.select);
+        ipInputEditText = findViewById(R.id.ip_edit);
 
         mLayoutTitle.setText(getString(R.string.enter_ip));
 

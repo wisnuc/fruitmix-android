@@ -11,15 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class GalleryTestActivity extends Activity {
 
-    @BindView(R.id.recylcerview)
     RecyclerView mRecyclerView;
 
-    @BindView(R.id.floatingactionbtn)
     FloatingActionButton mBtn;
 
     private int mSpanCount = 3;
@@ -34,7 +29,8 @@ public class GalleryTestActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery_test);
 
-        ButterKnife.bind(this);
+        mRecyclerView = findViewById(R.id.recyclerView);
+        mBtn = findViewById(R.id.floatingactionbtn);
 
         mManager = new GridLayoutManager(this, mSpanCount);
         mRecyclerView.setLayoutManager(mManager);

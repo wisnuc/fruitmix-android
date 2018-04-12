@@ -32,8 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import io.github.sin3hz.fastjumper.FastJumper;
 import io.github.sin3hz.fastjumper.callback.LinearScrollCalculator;
 import io.github.sin3hz.fastjumper.callback.SpannableCallback;
@@ -42,11 +41,8 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
     public static final String TAG = TestPhotoListActivity.class.getSimpleName();
 
-    @BindView(R.id.photo_recyclerview)
     RecyclerView mRecyclerView;
-    @BindView(R.id.loading_layout)
     LinearLayout mLoadingLayout;
-    @BindView(R.id.no_content_layout)
     LinearLayout mNoContentLayout;
 
     private int mSpanCount = 3;
@@ -83,7 +79,9 @@ public class TestPhotoListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test_photo_list);
 
-        ButterKnife.bind(this);
+        mRecyclerView = findViewById(R.id.photo_recyclerview);
+        mLoadingLayout = findViewById(R.id.loading_layout);
+        mNoContentLayout = findViewById(R.id.no_content_layout);
 
         mContext = this;
 
@@ -371,15 +369,15 @@ public class TestPhotoListActivity extends AppCompatActivity {
 
     class PhotoHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.photo_iv)
         NetworkImageView mPhotoIv;
 
-        @BindView(R.id.photo_item_layout)
         ViewGroup mImageLayout;
 
         PhotoHolder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+
+            mPhotoIv = view.findViewById(R.id.photo_iv);
+            mImageLayout = view.findViewById(R.id.photo_item_layout);
         }
 
         public void refreshView(int position) {

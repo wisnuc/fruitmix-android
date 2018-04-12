@@ -698,4 +698,30 @@
     <string name="time_ago">%1$s ago</string>
 
 
+    <!-- new design login -->
+
+    <!-- product introduction -->
+
+    <string name="login_entrance">Login</string>
+
+    <!-- login -->
+
+    <string name="user_protocol">User Protocol</string>
+    <string name="close">Close</string>
+
+    <!-- my equipment -->
+    <string name="my_equipment">My equipment</string>
+    <string name="add_equipment">Add equipment</string>
+
+    <string name="login_lan">login lan</string>
+    <string name="disk_abnormal">Disk abnormal</string>
+
+    <!-- lan login -->
+    <string name="lan_login_title">LAN Equipment</string>
+
+    <string name="forget_password">Forget Password</string>
+    <string name="forget_password_explain1">Please connect the device to Internet and use WeChat to login</string>
+    <string name="forget_password_explain2">Please contact the device administrator to reset the password</string>
+
+
 </resources>

@@ -43,6 +43,10 @@ public class SystemSettingDataSource {
     public static final int OPEN_TORRENT_FILE_BEHAVIOR_CREATE_DOWNLOAD_TASK = 1;
     public static final int OPEN_TORRENT_FILE_BEHAVIOR_UPLOAD_FILE = 2;
 
+    private static final String SHOW_PHOTO_RETURN_TIPS = "show_photo_return_tips";
+
+    private static final String SHOW_PRODUCT_INTRODUCTION = "show_product_introduction";
+
     private static SystemSettingDataSource instance;
 
     static SystemSettingDataSource getInstance(Context context) {
@@ -267,6 +271,32 @@ public class SystemSettingDataSource {
 
     public boolean getAskIfNewFirmwareVersionOccur() {
         return sharedPreferences.getBoolean(ASK_IF_NEW_FIRMWARE_VERSION_OCCUR, true);
+    }
+
+    public boolean getShowPhotoReturnTipsValue() {
+
+        return sharedPreferences.getBoolean(SHOW_PHOTO_RETURN_TIPS, true);
+    }
+
+    public void setShowPhotoReturnTipsValue(boolean value) {
+
+        SharedPreferences.Editor editor;
+
+        editor = sharedPreferences.edit();
+        editor.putBoolean(SHOW_PHOTO_RETURN_TIPS, value);
+        editor.apply();
+    }
+
+    public boolean needShowProductIntroduction() {
+        return sharedPreferences.getBoolean(SHOW_PRODUCT_INTRODUCTION, true);
+    }
+
+    public void setShowProductIntroduction(boolean value) {
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putBoolean(SHOW_PRODUCT_INTRODUCTION, value);
+        editor.apply();
     }
 
 }

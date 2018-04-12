@@ -209,6 +209,18 @@
         <!-- mqtt service -->
         <service android:name="org.eclipse.paho.android.service.MqttService" />
 
+        <activity
+            android:name=".newdesign201804.login.LoginEntranceActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.introduction.ProductIntroductionActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.equipment.list.EquipmentListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.login.LanLoginActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

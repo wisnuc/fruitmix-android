@@ -669,5 +669,31 @@
     <string name="hour_min">%1$s:%2$s</string>
     <string name="time_ago">%1$s前</string>
 
+    <!-- new design login -->
+
+    <!-- product introduction -->
+
+    <string name="login_entrance">登陆</string>
+
+    <!-- login -->
+
+    <string name="user_protocol">用户协议</string>
+    <string name="close">关闭</string>
+
+    <!-- my equipment -->
+    <string name="my_equipment">我的设备</string>
+    <string name="add_equipment">添加设备</string>
+
+    <string name="login_lan">仅局域网登陆</string>
+    <string name="disk_abnormal">磁盘异常</string>
+
+    <!-- lan login -->
+    <string name="lan_login_title">局域网设备</string>
+
+    <string name="forget_password">忘记密码</string>
+    <string name="forget_password_explain1">1. 请将设备接入Internet并使用微信登陆</string>
+    <string name="forget_password_explain2">2. 请联系设备管理员重置密码</string>
+
+
 
 </resources>

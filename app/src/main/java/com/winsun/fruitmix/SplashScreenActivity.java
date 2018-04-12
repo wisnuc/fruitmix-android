@@ -17,6 +17,10 @@ import com.winsun.fruitmix.init.system.InitSystem;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
+import com.winsun.fruitmix.newdesigin201804.introduction.ProductIntroductionActivity;
+import com.winsun.fruitmix.newdesigin201804.login.LoginEntranceActivity;
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
+import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.ToastUtil;
@@ -89,36 +93,16 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         dialog.show();*/
 
+/*
         final LoginUseCase loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
 
         loginWithNoParamInThread(loginUseCase);
 
-//        FNAS.retrieveLocalMedia(mContext);
+*/
 
-/*        DBUtils dbUtils = DBUtils.getInstance(this);
-        LocalCache.LocalLoggedInUsers.addAll(dbUtils.getAllLoggedInUser());
 
-        Log.i(TAG, "onCreate: LocalLoggedInUsers size: " + LocalCache.LocalLoggedInUsers.size());
-
-        mGateway = LocalCache.getGateway(mContext);
-        mUuid = LocalCache.getUserUUID(mContext);
-        mToken = LocalCache.getToken(mContext);
-        String mDeviceID = LocalCache.getGlobalData(mContext, Util.DEVICE_ID_MAP_NAME);
-
-        if (!mUuid.isEmpty() && mGateway != null && mToken != null) {
-
-            Util.loginType = LoginType.SPLASH_SCREEN;
-
-            FNAS.Gateway = mGateway;
-            FNAS.JWT = mToken;
-            LocalCache.DeviceID = mDeviceID;
-            FNAS.userUUID = mUuid;
-
-            FNAS.retrieveUser(this);
-        }*/
-
-//        mHandler = new CustomHandler(this);
-//        mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
+        mHandler = new CustomHandler(this);
+        mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
 
     }
 
@@ -178,6 +162,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         Intent intent = new Intent();
 
+/*
         if (loginWithNoParamResult) {
 
             Log.d(TAG, "welcome: start nav pager");
@@ -187,9 +172,22 @@ public class SplashScreenActivity extends AppCompatActivity {
             intent.setClass(SplashScreenActivity.this, EquipmentSearchActivity.class);
             intent.putExtra(Util.KEY_SHOULD_STOP_SERVICE, true);
         }
+*/
+
+        SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
+
+/*        if (systemSettingDataSource.needShowProductIntroduction()) {
+            intent.setClass(SplashScreenActivity.this, ProductIntroductionActivity.class);
+        } else {
+            intent.setClass(SplashScreenActivity.this, LoginEntranceActivity.class);
+        }*/
+
+        intent.setClass(SplashScreenActivity.this, ProductIntroductionActivity.class);
 
         startActivity(intent);
+
         finish();
+
     }
 
     private static class CustomHandler extends Handler {

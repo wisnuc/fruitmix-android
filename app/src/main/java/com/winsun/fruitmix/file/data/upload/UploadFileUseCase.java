@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.file.data.upload;
 
 import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
@@ -220,7 +221,7 @@ public class UploadFileUseCase {
             return false;
 
         }
-
+        
         if (systemSettingDataSource.getOnlyAutoUploadWhenConnectedWithWifi() && !networkState.isWifiConnected()) {
 
             Log.d(TAG, "checkUploadCondition: only auto upload when connect with wifi is set,but wifi is not connected,set file upload pending state");

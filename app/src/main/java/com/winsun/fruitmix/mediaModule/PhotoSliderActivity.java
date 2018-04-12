@@ -734,8 +734,8 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     }
 
     private void refreshReturnResizeVisibility() {
-        if (getShowPhotoReturnTipsValue()) {
-            setShowPhotoReturnTipsValue(false);
+        if (systemSettingDataSource.getShowPhotoReturnTipsValue()) {
+            systemSettingDataSource.setShowPhotoReturnTipsValue(false);
 
             photoSliderViewModel.showReturnResize.set(true);
 
@@ -792,21 +792,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         setResult(RESULT_OK, intent);
 
         super.finishAfterTransition();
-    }
-
-    private boolean getShowPhotoReturnTipsValue() {
-        SharedPreferences sp;
-        sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        return sp.getBoolean(Util.SHOW_PHOTO_RETURN_TIPS, true);
-    }
-
-    private void setShowPhotoReturnTipsValue(boolean value) {
-        SharedPreferences sp;
-        SharedPreferences.Editor editor;
-        sp = getSharedPreferences(Util.FRUITMIX_SHAREDPREFERENCE_NAME, Context.MODE_PRIVATE);
-        editor = sp.edit();
-        editor.putBoolean(Util.SHOW_PHOTO_RETURN_TIPS, value);
-        editor.apply();
     }
 
     public void setPosition(int position) {
