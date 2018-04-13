@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.newdesigin201804.equipment.list
+package com.winsun.fruitmix.newdesign201804.equipment.list
 
 import android.content.Context
 import com.winsun.fruitmix.R

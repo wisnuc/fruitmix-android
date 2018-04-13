@@ -1,20 +1,16 @@
-package com.winsun.fruitmix.newdesigin201804.introduction
+package com.winsun.fruitmix.newdesign201804.introduction
 
-import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.view.PagerAdapter
-import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 
 import com.winsun.fruitmix.R
-import com.winsun.fruitmix.newdesigin201804.login.LoginEntranceActivity
+import com.winsun.fruitmix.newdesign201804.login.LoginEntranceActivity
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
-import com.winsun.fruitmix.system.setting.SystemSettingDataSource
 import kotlinx.android.synthetic.main.activity_product_introduction.*
 import kotlinx.android.synthetic.main.product_introduction_item.view.*
 

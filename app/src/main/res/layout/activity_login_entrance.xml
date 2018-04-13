@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/green"
-    tools:context=".newdesigin201804.login.LoginEntranceActivity">
+    tools:context=".newdesign201804.login.LoginEntranceActivity">
 
     <com.winsun.fruitmix.component.UserAvatar
         android:id="@+id/userAvatar"

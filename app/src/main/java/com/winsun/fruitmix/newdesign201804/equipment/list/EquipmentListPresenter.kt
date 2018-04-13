@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.newdesigin201804.equipment.list
+package com.winsun.fruitmix.newdesign201804.equipment.list
 
 import android.content.Intent
 import android.view.LayoutInflater
@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.model.ViewItem
-import com.winsun.fruitmix.newdesigin201804.login.LanLoginActivity
+import com.winsun.fruitmix.newdesign201804.login.LanLoginActivity
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewHolder
 import kotlinx.android.synthetic.main.my_equipment_item.view.*

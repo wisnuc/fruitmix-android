@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RadioButton
+        android:id="@+id/select_volume_radioButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:checked="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/original_equipment_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:text="TextView"
+        android:textColor="@color/eighty_seven_percent_black"
+        android:textSize="16dp"
+        app:layout_constraintStart_toEndOf="@+id/select_volume_radioButton"
+        app:layout_constraintTop_toTopOf="@+id/select_volume_radioButton"
+        tools:text="Wisnuc" />
+
+    <TextView
+        android:id="@+id/textView50"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/original_equipment_name"
+        android:textColor="@color/fifty_four_percent_black"
+        android:textSize="14dp"
+        app:layout_constraintStart_toStartOf="@+id/original_equipment_name"
+        app:layout_constraintTop_toBottomOf="@+id/original_equipment_name" />
+
+    <TextView
+        android:id="@+id/disk_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="TextView"
+        android:textColor="@color/eighty_seven_percent_black"
+        android:textSize="16dp"
+        app:layout_constraintStart_toStartOf="@+id/original_equipment_name"
+        app:layout_constraintTop_toBottomOf="@+id/textView50"
+        tools:text="single" />
+
+    <TextView
+        android:id="@+id/textView52"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/disk_mode"
+        android:textColor="@color/fifty_four_percent_black"
+        android:textSize="14dp"
+        app:layout_constraintStart_toStartOf="@+id/disk_mode"
+        app:layout_constraintTop_toBottomOf="@+id/disk_mode" />
+
+    <TextView
+        android:id="@+id/disk_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="TextView"
+        android:textColor="@color/eighty_seven_percent_black"
+        android:textSize="16dp"
+        app:layout_constraintStart_toStartOf="@+id/original_equipment_name"
+        app:layout_constraintTop_toBottomOf="@+id/textView52"
+        tools:text="1/2" />
+
+    <TextView
+        android:id="@+id/textView54"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/disk_num"
+        android:textColor="@color/fifty_four_percent_black"
+        android:textSize="14dp"
+        app:layout_constraintStart_toStartOf="@+id/original_equipment_name"
+        app:layout_constraintTop_toBottomOf="@+id/disk_num" />
+
+    <TextView
+        android:id="@+id/disk_space"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="TextView"
+        android:textColor="@color/eighty_seven_percent_black"
+        android:textSize="16dp"
+        app:layout_constraintStart_toStartOf="@+id/original_equipment_name"
+        app:layout_constraintTop_toBottomOf="@+id/textView54"
+        tools:text="1.6/3.8 TB" />
+
+    <TextView
+        android:id="@+id/textView56"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/disk_space"
+        android:textColor="@color/fifty_four_percent_black"
+        android:textSize="14dp"
+        app:layout_constraintStart_toStartOf="@+id/original_equipment_name"
+        app:layout_constraintTop_toBottomOf="@+id/disk_space" />
+
+</android.support.constraint.ConstraintLayout>

@@ -221,6 +221,12 @@
         <activity
             android:name=".newdesign201804.login.LanLoginActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.equipment.add.AddEquipmentActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.equipment.add.AddEquipmentByIpActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

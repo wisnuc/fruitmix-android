@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.newdesigin201804.equipment.list
+package com.winsun.fruitmix.newdesign201804.equipment.list
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle

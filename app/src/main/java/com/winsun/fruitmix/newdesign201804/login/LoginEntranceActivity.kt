@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.newdesigin201804.login
+package com.winsun.fruitmix.newdesign201804.login
 
 import android.content.Intent
 import android.graphics.Paint
@@ -8,7 +8,7 @@ import android.support.v7.app.AlertDialog
 import android.view.View
 
 import com.winsun.fruitmix.R
-import com.winsun.fruitmix.newdesigin201804.equipment.list.EquipmentListActivity
+import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentListActivity
 import kotlinx.android.synthetic.main.activity_login_entrance.*
 
 class LoginEntranceActivity : AppCompatActivity() {

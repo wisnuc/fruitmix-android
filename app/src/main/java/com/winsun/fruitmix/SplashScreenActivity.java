@@ -1,30 +1,22 @@
 package com.winsun.fruitmix;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.init.system.InitSystem;
-import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.newdesigin201804.introduction.ProductIntroductionActivity;
-import com.winsun.fruitmix.newdesigin201804.login.LoginEntranceActivity;
+import com.winsun.fruitmix.newdesign201804.introduction.ProductIntroductionActivity;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
-import com.winsun.fruitmix.util.LocalCache;
 import com.winsun.fruitmix.util.ToastUtil;
-import com.winsun.fruitmix.util.Util;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -491,7 +491,7 @@
     <string name="disk_state">State</string>
     <string name="disk_instruction">Instruction</string>
 
-    <string name="disk_mode">Disk Volume Mode:</string>
+    <string name="disk_volume_mode">Disk Volume Mode:</string>
 
     <string name="select_disk_mode">Select Disk Volume Mode</string>
 
@@ -722,6 +722,22 @@
     <string name="forget_password">Forget Password</string>
     <string name="forget_password_explain1">Please connect the device to Internet and use WeChat to login</string>
     <string name="forget_password_explain2">Please contact the device administrator to reset the password</string>
+
+    <!-- add equipment -->
+    <string name="add_equipment_manually">Add equipment manually</string>
+    <string name="add_equipment_by_ip">Add equipment by ip</string>
+
+    <string name="default_port">Default port</string>
+
+    <string name="error_ip_hints">Please enter the correct IP address</string>
+
+    <string name="select_volume_hint">It is found that other devices have been diskette, and I want to use:</string>
+    <string name="reinitialization">No, I want to re initialize</string>
+
+    <string name="disk_mode">Disk Mode</string>
+    <string name="disk_num">Disk Num</string>
+    <string name="disk_space">Disk Space</string>
+    <string name="original_equipment_name">Original Equipment Name</string>
 
 
 </resources>
