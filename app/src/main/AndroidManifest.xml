@@ -227,6 +227,12 @@
         <activity
             android:name=".newdesign201804.equipment.add.AddEquipmentByIpActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.equipment.reinitialization.ReinitializationActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.equipment.abnormal.HandleAbnormalEquipmentActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

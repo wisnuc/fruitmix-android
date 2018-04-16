@@ -10,7 +10,7 @@
         android:id="@+id/linearLayout2"
         android:layout_width="0dp"
         android:layout_height="240dp"
-        android:background="@color/green"
+        android:background="@color/new_design_primary_color"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"

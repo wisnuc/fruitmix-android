@@ -739,5 +739,23 @@
     <string name="disk_space">Disk Space</string>
     <string name="original_equipment_name">Original Equipment Name</string>
 
+    <!-- reinitialization -->
+    <string name="select_disk_usage_mode">Select disk usage mode</string>
+    <string name="select_mode">Select mode</string>
+    <string name="total_disk_capacity">Total disk capacity</string>
+    <string name="available_capacity">Available capacity</string>
+
+    <string name="setting_admin_password">Setting the administrator password</string>
+
+    <string name="disk_loss">Disk Loss</string>
+    <string name="lost_disk">Lost Disk</string>
+
+    <string name="disk_loss_reason_one">·Maybe the disk socket is loose. Please turn off the disk and re insert it</string>
+    <string name="disk_loss_reason_two">·Also possible disk damage</string>
+
+    <string name="continue_to_use">Continue to use</string>
+    <string name="repair">Repair</string>
+
+    <string name="repair_immediately">Repair immediately</string>
 
 </resources>

@@ -693,7 +693,7 @@
     <string name="forget_password">忘记密码</string>
     <string name="forget_password_explain1">1. 请将设备接入Internet并使用微信登陆</string>
     <string name="forget_password_explain2">2. 请联系设备管理员重置密码</string>
-    
+
     <!-- add equipment -->
     <string name="add_equipment_manually">手动添加</string>
     <string name="add_equipment_by_ip">通过IP地址添加</string>
@@ -709,5 +709,24 @@
     <string name="disk_num">磁盘数</string>
     <string name="disk_space">磁盘空间</string>
     <string name="original_equipment_name">原设备名</string>
+
+    <!-- reinitialization -->
+    <string name="select_disk_usage_mode">选择磁盘使用模式</string>
+    <string name="select_mode">选择模式</string>
+    <string name="total_disk_capacity">磁盘容量总和</string>
+    <string name="available_capacity">可用容量</string>
+
+    <string name="setting_admin_password">设置管理员密码</string>
+
+    <string name="disk_loss">磁盘丢失</string>
+    <string name="lost_disk">丢失的磁盘</string>
+
+    <string name="disk_loss_reason_one">·可能磁盘插口松动,请关机取出磁盘并重新插入</string>
+    <string name="disk_loss_reason_two">·也可能磁盘损坏</string>
+
+    <string name="continue_to_use">继续使用</string>
+    <string name="repair">修复</string>
+
+    <string name="repair_immediately">立即修复</string>
 
 </resources>
