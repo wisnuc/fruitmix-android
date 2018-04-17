@@ -2,6 +2,7 @@ package com.winsun.fruitmix.newdesign201804.equipment.abnormal
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
@@ -20,7 +21,8 @@ class HandleAbnormalEquipmentActivity : BaseToolbarActivity() {
 
     override fun generateContent(root: ViewGroup?): View {
 
-        return View.inflate(this,R.layout.activity_handle_abnormal_equipment,root)
+        return LayoutInflater.from(this).inflate(R.layout.activity_handle_abnormal_equipment,root,false)
+
     }
 
     override fun getToolbarTitle(): String {

@@ -1,12 +1,16 @@
 package com.winsun.fruitmix.newdesign201804.equipment.add
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.command.AbstractCommand
+import com.winsun.fruitmix.command.BaseAbstractCommand
+import com.winsun.fruitmix.dialog.BottomMenuDialogFactory
 import com.winsun.fruitmix.model.BottomMenuItem
 
 class AddEquipmentActivity : BaseToolbarActivity() {
@@ -26,7 +30,7 @@ class AddEquipmentActivity : BaseToolbarActivity() {
 
     override fun generateContent(root: ViewGroup?): View {
 
-        return View.inflate(this,R.layout.activity_add_equipment,root)
+        return LayoutInflater.from(this).inflate(R.layout.activity_add_equipment, root, false)
 
     }
 
@@ -34,31 +38,31 @@ class AddEquipmentActivity : BaseToolbarActivity() {
         return getString(R.string.add_equipment)
     }
 
-    private fun showEquipmentMenu(){
+    private fun showEquipmentMenu() {
 
         val bottomMenuItems = mutableListOf<BottomMenuItem>()
 
-        bottomMenuItems.add(BottomMenuItem(0,getString(R.string.add_equipment_manually),object :AbstractCommand(){
+        bottomMenuItems.add(BottomMenuItem(0, getString(R.string.add_equipment_manually), object : BaseAbstractCommand() {
 
             override fun execute() {
+
             }
 
-            override fun unExecute() {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
         }))
 
-        bottomMenuItems.add(BottomMenuItem(0,getString(R.string.add_equipment_by_ip),object :AbstractCommand(){
+        bottomMenuItems.add(BottomMenuItem(0, getString(R.string.add_equipment_by_ip), object : BaseAbstractCommand() {
             override fun execute() {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                enterAddEquipmentByIp()
             }
 
-            override fun unExecute() {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
         }))
+
+        BottomMenuDialogFactory(bottomMenuItems).createDialog(this).show()
 
     }
 
+    private fun enterAddEquipmentByIp() {
+        startActivity(Intent(this, AddEquipmentByIpActivity::class.java))
+    }
 
 }

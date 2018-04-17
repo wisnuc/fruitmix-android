@@ -611,7 +611,7 @@
 
     <string name="to_bind">去绑定</string>
 
-    <string name="station_offline">[离线]</string>
+    <string name="station_offline">离线</string>
 
     <string name="quited_user">退群用户</string>
 
@@ -686,7 +686,16 @@
 
     <string name="login_lan">仅局域网登陆</string>
     <string name="disk_abnormal">磁盘异常</string>
+    <string name="under_review">等待审核</string>
 
+    <string name="equipment_already_offline_title">设备已离线</string>
+    <string name="equipment_already_power_off_title">设备已关机</string>
+    <string name="equipment_already_offline_message">设备无法访问Internet</string>
+    <string name="under_review_message">\"%1$s\"尚未通过您的使用申请</string>
+    <string name="equipment_already_power_off_message">于%1$s关机</string>
+
+    <string name="got_it">知道了</string>
+    
     <!-- lan login -->
     <string name="lan_login_title">局域网设备</string>
 

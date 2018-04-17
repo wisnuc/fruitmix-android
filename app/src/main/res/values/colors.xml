@@ -48,6 +48,8 @@
     <color name="eighty_seven_percent_white">#DEFFFFFF</color>
     <color name="fifty_four_percent_white">#8AFFFFFF</color>
 
+    <color name="twenty_six_percent_white">#42FFFFFF</color>
+
     <color name="divide_bg">#1F000000</color>
 
     <color name="right_text_comment_bg_color">#03a9f4</color>

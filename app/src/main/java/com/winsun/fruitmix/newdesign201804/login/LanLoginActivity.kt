@@ -18,6 +18,9 @@ class LanLoginActivity : BaseToolbarActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setToolbarWhiteStyle(toolbarViewModel)
+        setStatusBarToolbarBgColor(R.color.blue)
+
         mActivityLanLoginBinding.forgetPasswordTv.setOnClickListener {
             handleForgetPasswordOnClick()
         }

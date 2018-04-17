@@ -83,7 +83,6 @@ class ProductIntroductionActivity : AppCompatActivity() {
             return pageList.size
         }
 
-
     }
 
 

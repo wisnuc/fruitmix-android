@@ -20,8 +20,8 @@
         android:id="@+id/original_equipment_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginLeft="32dp"
+        android:layout_marginStart="32dp"
         android:text="TextView"
         android:textColor="@color/eighty_seven_percent_black"
         android:textSize="16dp"
@@ -36,7 +36,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/original_equipment_name"
         android:textColor="@color/fifty_four_percent_black"
-        android:textSize="14dp"
+        android:textSize="12dp"
         app:layout_constraintStart_toStartOf="@+id/original_equipment_name"
         app:layout_constraintTop_toBottomOf="@+id/original_equipment_name" />
 
@@ -59,7 +59,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/disk_mode"
         android:textColor="@color/fifty_four_percent_black"
-        android:textSize="14dp"
+        android:textSize="12dp"
         app:layout_constraintStart_toStartOf="@+id/disk_mode"
         app:layout_constraintTop_toBottomOf="@+id/disk_mode" />
 
@@ -82,7 +82,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/disk_num"
         android:textColor="@color/fifty_four_percent_black"
-        android:textSize="14dp"
+        android:textSize="12dp"
         app:layout_constraintStart_toStartOf="@+id/original_equipment_name"
         app:layout_constraintTop_toBottomOf="@+id/disk_num" />
 
@@ -105,7 +105,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/disk_space"
         android:textColor="@color/fifty_four_percent_black"
-        android:textSize="14dp"
+        android:textSize="12dp"
         app:layout_constraintStart_toStartOf="@+id/original_equipment_name"
         app:layout_constraintTop_toBottomOf="@+id/disk_space" />
 

@@ -27,6 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:textColor="@color/eighty_seven_percent_white"
             tools:text="WISNUC" />
 
     </LinearLayout>
@@ -35,6 +36,8 @@
         android:id="@+id/constraintLayout"
         android:layout_width="0dp"
         android:layout_height="40dp"
+        android:paddingTop="12dp"
+        android:background="@color/white"
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -48,6 +51,8 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:text="@string/my_equipment"
+            android:textColor="@color/fifty_four_percent_black"
+            android:textSize="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -58,6 +63,9 @@
         android:id="@+id/equipmentRecyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@color/white"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

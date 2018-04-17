@@ -1,11 +1,15 @@
 package com.winsun.fruitmix.newdesign201804.equipment.list
 
+import android.content.Context
 import android.content.Intent
+import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.model.ViewItem
+import com.winsun.fruitmix.newdesign201804.equipment.abnormal.HandleAbnormalEquipmentActivity
+import com.winsun.fruitmix.newdesign201804.equipment.add.AddEquipmentActivity
 import com.winsun.fruitmix.newdesign201804.login.LanLoginActivity
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewHolder
@@ -28,6 +32,9 @@ class EquipmentListPresenter {
         equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.CLOUD_CONNECTED, "test1")))
         equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.CLOUD_UNCONNECTED, "test2")))
         equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.DISK_ABNORMAL, "test3")))
+        equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.POWER_OFF, "test4")))
+        equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.UNDER_REVIEW, "test5")))
+        equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.OFFLINE, "test6")))
         equipmentItems.add(AddEquipmentViewItem())
 
         equipmentListAdapter.setItemList(equipmentItems)
@@ -70,11 +77,12 @@ class EquipmentListPresenter {
 
             val viewItem = mItemList[position]
 
+            val context = holder?.itemView?.context
+
+
             if (viewItem is EquipmentViewItem) {
 
                 val equipmentItem = viewItem.equipmentItem
-
-                val context = holder?.itemView?.context
 
                 holder?.itemView?.equipment_name?.text = equipmentItem.name
 
@@ -84,12 +92,33 @@ class EquipmentListPresenter {
 
                 holder.itemView.setOnClickListener {
 
-                    val intent: Intent = when (equipmentItem.equipment_TYPE) {
-                        EquipmentType.CLOUD_UNCONNECTED -> Intent(context, LanLoginActivity::class.java)
-                        else -> Intent(context, LanLoginActivity::class.java)
+                    when (equipmentItem.equipment_TYPE) {
+                        EquipmentType.CLOUD_UNCONNECTED -> {
+                            val intent = Intent(context, LanLoginActivity::class.java)
+                            context.startActivity(intent)
+                        }
+                        EquipmentType.UNDER_REVIEW -> showMessageDialog(context, R.string.under_review,
+                                context.getString(R.string.under_review_message, "Mark"))
+                        EquipmentType.POWER_OFF -> showMessageDialog(context, R.string.equipment_already_power_off_title,
+                                context.getString(R.string.equipment_already_power_off_message, "2018年4月11日17:40:10"))
+                        EquipmentType.OFFLINE -> showMessageDialog(context, R.string.equipment_already_offline_title,
+                                context.getString(R.string.equipment_already_offline_message))
+                        EquipmentType.DISK_ABNORMAL -> {
+                            context.startActivity(Intent(context, HandleAbnormalEquipmentActivity::class.java))
+                        }
+                        else -> {
+
+                        }
                     }
 
-                    context.startActivity(intent)
+
+                }
+
+            } else if (viewItem is AddEquipmentViewItem) {
+
+                holder?.itemView?.setOnClickListener {
+
+                    context?.startActivity(Intent(context, AddEquipmentActivity::class.java))
 
                 }
 
@@ -100,6 +129,15 @@ class EquipmentListPresenter {
         override fun getItemViewType(position: Int): Int {
             return mItemList[position].type
         }
+
+    }
+
+    private fun showMessageDialog(context: Context, titleResID: Int, message: String) {
+
+        AlertDialog.Builder(context).setTitle(titleResID)
+                .setMessage(message)
+                .setCancelable(true)
+                .create().show()
 
     }
 

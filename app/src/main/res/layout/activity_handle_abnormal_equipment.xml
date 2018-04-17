@@ -10,11 +10,11 @@
         android:id="@+id/recyclerView2"
         android:layout_width="0dp"
         android:layout_height="200dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -25,13 +25,13 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        tools:text="@string/single_mode"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="24dp"
         android:text="TextView"
         android:textColor="@color/eighty_seven_percent_black"
-        android:textSize="16dp"
+        android:textSize="14dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recyclerView2" />
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView2"
+        tools:text="@string/single_mode" />
 
     <TextView
         android:id="@+id/textView64"
@@ -42,7 +42,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/mode"
         android:textColor="@color/fifty_four_percent_black"
-        android:textSize="14dp"
+        android:textSize="12dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView63" />
 
@@ -60,7 +60,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="24dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/view"
         app:srcCompat="?android:attr/alertDialogIcon" />
@@ -69,11 +69,11 @@
         android:id="@+id/textView65"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="24dp"
-        android:textSize="18dp"
-        android:textColor="@color/eighty_seven_percent_black"
-        android:layout_marginStart="24dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
         android:text="@string/lost_disk"
+        android:textColor="@color/eighty_seven_percent_black"
+        android:textSize="18dp"
         app:layout_constraintStart_toEndOf="@+id/imageView18"
         app:layout_constraintTop_toTopOf="@+id/imageView18" />
 
@@ -98,8 +98,10 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:text="@string/disk_loss_reason_one"
+        android:textColor="@color/fifty_four_percent_black"
+        android:textSize="14dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/recyclerView3" />
@@ -112,32 +114,36 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:text="@string/disk_loss_reason_two"
+        android:textColor="@color/fifty_four_percent_black"
+        android:textSize="14dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView66" />
 
     <Button
         android:id="@+id/button13"
+        style="@style/NoPaddingButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="36dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/white_btn_bg"
         android:text="@string/repair"
+        android:textColor="@color/new_design_primary_color"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView67" />
 
     <Button
         android:id="@+id/button14"
+        style="@style/NoPaddingButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="36dp"
         android:layout_marginEnd="16dp"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/white_btn_bg"
         android:text="@string/continue_to_use"
+        android:textColor="@color/new_design_primary_color"
         app:layout_constraintEnd_toStartOf="@+id/button13"
         app:layout_constraintTop_toBottomOf="@+id/textView67" />
 

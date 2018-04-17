@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.equipment.abnormal
 
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
@@ -15,7 +16,7 @@ class HandleAbnormalEquipmentPresenter {
 
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): SimpleViewHolder {
 
-            val view = View.inflate(parent?.context, R.layout.abnormal_disk_item, parent)
+            val view = LayoutInflater.from(parent?.context).inflate(R.layout.abnormal_disk_item, parent, false)
 
             return SimpleViewHolder(view)
         }
@@ -32,12 +33,11 @@ class HandleAbnormalEquipmentPresenter {
 
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): SimpleViewHolder {
 
-            return SimpleViewHolder(View.inflate(parent?.context, R.layout.abnormal_disk_item_info, parent))
+            return SimpleViewHolder(LayoutInflater.from(parent?.context).inflate(R.layout.abnormal_disk_item_info, parent, false))
 
         }
 
         override fun onBindViewHolder(holder: SimpleViewHolder, position: Int) {
-
 
 
         }

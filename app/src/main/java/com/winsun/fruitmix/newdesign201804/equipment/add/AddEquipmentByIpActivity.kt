@@ -1,6 +1,8 @@
 package com.winsun.fruitmix.newdesign201804.equipment.add
 
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -14,9 +16,17 @@ class AddEquipmentByIpActivity : BaseToolbarActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setStatusBarToolbarBgColor(R.color.new_design_primary_color)
+        setToolbarWhiteStyle(toolbarViewModel)
+
         toolbarViewModel.navigationIconResId.set(R.drawable.red_clear)
 
         toolbarViewModel.showSelect.set(true)
+
+        toolbarViewModel.selectTextEnable.set(false)
+
+        toolbarViewModel.selectTextResID.set(R.string.confirm)
+        toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(this, R.color.twenty_six_percent_white))
 
         toolbarViewModel.setToolbarSelectBtnOnClickListener {
 
@@ -66,7 +76,7 @@ class AddEquipmentByIpActivity : BaseToolbarActivity() {
 
     override fun generateContent(root: ViewGroup?): View {
 
-        return View.inflate(this, R.layout.activity_add_equipment_by_ip, root)
+        return LayoutInflater.from(this).inflate(R.layout.activity_add_equipment_by_ip, root, false)
 
     }
 

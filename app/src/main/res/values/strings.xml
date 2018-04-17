@@ -639,7 +639,7 @@
 
     <string name="to_bind">To bind</string>
 
-    <string name="station_offline">[Offline]</string>
+    <string name="station_offline">Offline</string>
 
     <string name="quited_user">Quited user</string>
 
@@ -715,6 +715,15 @@
 
     <string name="login_lan">login lan</string>
     <string name="disk_abnormal">Disk abnormal</string>
+    <string name="under_review">Under review</string>
+
+    <string name="equipment_already_offline_title">Equipment already offline</string>
+    <string name="equipment_already_power_off_title">Equipment already power off</string>
+    <string name="equipment_already_offline_message">Equipment can not access Internet</string>
+    <string name="under_review_message">\"%1$s\"has not applied for your use</string>
+    <string name="equipment_already_power_off_message">Switch off at %1$s</string>
+
+    <string name="got_it">Got it</string>
 
     <!-- lan login -->
     <string name="lan_login_title">LAN Equipment</string>

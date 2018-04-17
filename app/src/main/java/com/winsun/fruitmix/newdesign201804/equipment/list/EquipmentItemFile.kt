@@ -15,12 +15,15 @@ fun getEquipmentTypeStr(context: Context, equipmentTYPE: EquipmentType): String 
         EquipmentType.CLOUD_CONNECTED -> ""
         EquipmentType.CLOUD_UNCONNECTED -> context.getString(R.string.login_lan)
         EquipmentType.DISK_ABNORMAL -> context.getString(R.string.disk_abnormal)
+        EquipmentType.OFFLINE -> context.getString(R.string.station_offline)
+        EquipmentType.POWER_OFF -> context.getString(R.string.shutdown)
+        EquipmentType.UNDER_REVIEW->context.getString(R.string.under_review)
         else -> ""
     }
 
 }
 
-fun getEquipmentTypeIconId( equipmentTYPE: EquipmentType): Int {
+fun getEquipmentTypeIconId(equipmentTYPE: EquipmentType): Int {
 
     return when (equipmentTYPE) {
         EquipmentType.CLOUD_CONNECTED -> R.drawable.white_cloud
