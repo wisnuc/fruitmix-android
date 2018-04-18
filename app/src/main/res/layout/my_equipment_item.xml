@@ -21,7 +21,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/my_equipment" />
+        app:srcCompat="@drawable/w215i_without_background" />
 
     <TextView
         android:id="@+id/equipment_name"
@@ -63,7 +63,7 @@
         android:layout_height="18dp"
         app:layout_constraintStart_toEndOf="@+id/equipment_icon"
         app:layout_constraintTop_toTopOf="@+id/equipment_icon"
-        app:srcCompat="@drawable/cloud" />
+        app:srcCompat="@drawable/cloud_connected" />
 
 </android.support.constraint.ConstraintLayout>
 

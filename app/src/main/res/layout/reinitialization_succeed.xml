@@ -22,8 +22,7 @@
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="28dp"
-            android:background="@drawable/add_reduce_bg"
-            android:src="@drawable/green_done"
+            android:background="@drawable/add_equipment_ok"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

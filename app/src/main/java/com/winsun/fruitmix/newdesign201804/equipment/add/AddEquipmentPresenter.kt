@@ -15,6 +15,9 @@ public class AddEquipmentPresenter {
 public class EquipmentViewPager : PagerAdapter() {
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
+
+
+
         return super.instantiateItem(container, position)
     }
 

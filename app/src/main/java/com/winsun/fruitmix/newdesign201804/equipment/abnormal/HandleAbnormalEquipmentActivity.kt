@@ -13,7 +13,7 @@ class HandleAbnormalEquipmentActivity : BaseToolbarActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        toolbarViewModel.navigationIconResId.set(R.drawable.red_clear)
+        toolbarViewModel.navigationIconResId.set(R.drawable.white_clear)
         toolbarViewModel.showSelect.set(true)
         toolbarViewModel.selectTextResID.set(R.string.shutdown)
 

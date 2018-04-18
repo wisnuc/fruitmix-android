@@ -18,7 +18,7 @@
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/equipment_detail_title"
-        app:srcCompat="@drawable/user_name" />
+        app:srcCompat="@drawable/user_icon_green" />
 
     <TextView
         android:id="@+id/textView42"
@@ -52,7 +52,7 @@
         android:layout_marginTop="32dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView12"
-        app:srcCompat="@drawable/brtfs" />
+        app:srcCompat="@drawable/disk_icon_green" />
 
     <TextView
         android:id="@+id/textView44"

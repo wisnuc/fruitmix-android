@@ -19,7 +19,7 @@ class AddEquipmentByIpActivity : BaseToolbarActivity() {
         setStatusBarToolbarBgColor(R.color.new_design_primary_color)
         setToolbarWhiteStyle(toolbarViewModel)
 
-        toolbarViewModel.navigationIconResId.set(R.drawable.red_clear)
+        toolbarViewModel.navigationIconResId.set(R.drawable.white_clear)
 
         toolbarViewModel.showSelect.set(true)
 

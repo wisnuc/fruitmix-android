@@ -34,7 +34,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/equipment_215i" />
+                app:srcCompat="@drawable/w215i_with_circular_white_bg" />
 
             <ImageView
                 android:id="@+id/imageView10"
@@ -43,7 +43,7 @@
                 android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toBottomOf="@+id/imageView9"
                 app:layout_constraintStart_toEndOf="@+id/imageView9"
-                app:srcCompat="@drawable/ic_add_white_24dp" />
+                app:srcCompat="@drawable/lan_login_corner_white" />
 
             <TextView
                 android:id="@+id/textView30"
@@ -147,7 +147,7 @@
                 android:layout_marginStart="8dp"
                 app:layout_constraintStart_toEndOf="@+id/forget_password_tv"
                 app:layout_constraintTop_toTopOf="@+id/forget_password_tv"
-                app:srcCompat="@drawable/ic_sync_black_24dp" />
+                app:srcCompat="@drawable/help" />
 
             <LinearLayout
                 android:id="@+id/forget_password_explain_layout"

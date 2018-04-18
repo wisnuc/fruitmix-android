@@ -17,7 +17,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="20dp"
-        android:background="@drawable/add_reduce_bg"
+        android:background="@drawable/add_equipment_entrance"
         android:src="@drawable/ic_add_black_24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

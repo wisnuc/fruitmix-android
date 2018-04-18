@@ -15,7 +15,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_photo_black_24dp" />
+        app:srcCompat="@drawable/exist_disk_green" />
 
     <TextView
         android:id="@+id/textView68"
