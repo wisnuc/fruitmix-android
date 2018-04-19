@@ -17,11 +17,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
+        <com.winsun.fruitmix.component.UserAvatar
+            android:id="@+id/userAvatar"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_marginTop="50dp"
-            android:src="@drawable/circular_logo" />
+            android:layout_marginTop="50dp" />
 
         <TextView
             android:layout_width="wrap_content"

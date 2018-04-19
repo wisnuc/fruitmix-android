@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.winsun.fruitmix.databinding.ActivityEquipmentSearchBinding;
@@ -256,7 +255,7 @@ public class EquipmentSearchActivity extends BaseActivity implements View.OnClic
         } else if (requestCode == Util.KEY_MANUAL_INPUT_IP_REQUEST_CODE && resultCode == RESULT_OK) {
 
             String ip = data.getStringExtra(Util.KEY_MANUAL_INPUT_IP);
-            equipmentPresenter.handleInputIpbyByUser(ip);
+            equipmentPresenter.handleInputIPbyByUser(ip);
         } else if (requestCode == MaintenanceActivity.REQUEST_CODE) {
 
             if (resultCode == MaintenanceActivity.RESULT_INITIAL_EQUIPMENT) {

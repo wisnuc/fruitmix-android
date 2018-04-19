@@ -72,6 +72,9 @@
 
     <color name="new_design_primary_color">#009788</color>
 
+    <color name="new_design_progressbar_color">#f2f1f4</color>
+
+    <color name="lan_login_primary_color">#00bcd5</color>
 
     <!-- finish add by liang.wu-->
 

@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:text="@string/select_disk_mode"
             android:textColor="@color/fifty_four_percent_white"
             app:layout_constraintStart_toStartOf="parent"
@@ -27,12 +27,12 @@
 
         <android.support.v7.widget.RecyclerView
             android:layout_width="0dp"
-            android:layout_height="200dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView49" />
@@ -42,7 +42,7 @@
 
     <android.support.v7.widget.CardView
         android:layout_width="0dp"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="120dp"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
@@ -56,55 +56,73 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-
-            <TextView
-                android:id="@+id/textView51"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:textSize="16dp"
-                android:text="@string/select_disk_mode"
+            <LinearLayout
+                android:id="@+id/select_mode_title"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/imageView14"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                app:layout_constraintBottom_toBottomOf="@+id/textView51"
-                app:layout_constraintStart_toEndOf="@+id/textView51"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/help" />
+                <TextView
+                    android:id="@+id/textView51"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/select_disk_mode"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="14dp" />
+
+                <ImageView
+                    android:id="@+id/imageView14"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    app:srcCompat="@drawable/help" />
+
+            </LinearLayout>
 
             <RadioGroup
                 android:id="@+id/radioGroup2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
                 android:layout_marginTop="16dp"
                 android:orientation="horizontal"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView51">
+                app:layout_constraintTop_toBottomOf="@+id/select_mode_title">
 
                 <RadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/single_mode" />
+                    android:text="@string/single_mode"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="14dp" />
 
                 <RadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="48dp"
-                    android:text="@string/raid1_mode" />
+                    android:checked="true"
+                    android:text="@string/raid1_mode"
+                    android:textColor="@color/eighty_seven_percent_black"
+                    android:textSize="14dp" />
 
             </RadioGroup>
+
+            <View
+                android:id="@+id/view2"
+                android:layout_width="0dp"
+                android:layout_height="1px"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/divide_bg"
+                app:layout_constraintBottom_toTopOf="@+id/textView53"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/radioGroup2"
+                app:layout_constraintVertical_chainStyle="spread_inside" />
 
             <TextView
                 android:id="@+id/textView53"
@@ -112,12 +130,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:text="TextView"
                 android:textColor="@color/eighty_seven_percent_black"
                 android:textSize="16dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/radioGroup2"
+                app:layout_constraintTop_toBottomOf="@+id/view2"
                 tools:text="3.92TB" />
 
             <TextView
@@ -150,11 +168,14 @@
                 android:id="@+id/textView58"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:text="@string/available_capacity"
                 android:textColor="@color/fifty_four_percent_black"
                 android:textSize="14dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView57" />
 
@@ -172,7 +193,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
-        android:background="@drawable/blue_btn_bg"
+        android:background="@drawable/green_btn_bg"
         android:text="@string/next_step"
         android:textColor="@color/eighty_seven_percent_white"
         app:layout_constraintBottom_toBottomOf="parent"

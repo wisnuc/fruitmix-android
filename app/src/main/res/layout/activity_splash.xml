@@ -7,7 +7,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/app_launcher_page"
+        android:src="@drawable/product_introduction_1"
         android:scaleType="centerCrop"/>
 
 </LinearLayout>

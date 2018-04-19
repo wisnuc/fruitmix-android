@@ -9,7 +9,12 @@ import android.support.v7.app.AlertDialog
 import android.view.View
 
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.callback.BaseOperateCallback
+import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
+import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentListActivity
+import com.winsun.fruitmix.newdesign201804.wechatUser.WeChatUserInfoDataSource
+import com.winsun.fruitmix.token.data.InjectTokenRemoteDataSource
 import kotlinx.android.synthetic.main.activity_login_entrance.*
 
 class LoginEntranceActivity : AppCompatActivity() {
@@ -27,8 +32,18 @@ class LoginEntranceActivity : AppCompatActivity() {
             showUserProtocol()
         }
 
+        val loginPresenter = LoginPresenter(InjectTokenRemoteDataSource.provideTokenDataSource(this),
+                WeChatUserInfoDataSource)
+
         wechat_login_layout.setOnClickListener {
-            enterEquipmentListActivity()
+
+            loginPresenter.loginWithWechat(this, object : BaseOperateCallbackImpl() {
+                override fun onSucceed() {
+                    enterEquipmentListActivity()
+                }
+
+            })
+
         }
 
     }

@@ -19,7 +19,7 @@ class LanLoginActivity : BaseToolbarActivity() {
         super.onCreate(savedInstanceState)
 
         setToolbarWhiteStyle(toolbarViewModel)
-        setStatusBarToolbarBgColor(R.color.blue)
+        setStatusBarToolbarBgColor(R.color.lan_login_primary_color)
 
         mActivityLanLoginBinding.forgetPasswordTv.setOnClickListener {
             handleForgetPasswordOnClick()

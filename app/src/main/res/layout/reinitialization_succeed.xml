@@ -59,6 +59,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <android.support.v7.widget.RecyclerView
+            android:id="@+id/equipment_info_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
@@ -66,18 +67,17 @@
 
     <Button
         android:id="@+id/button12"
+        style="@style/NoPaddingButton"
         android:layout_width="wrap_content"
         android:layout_height="36dp"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
-        style="@style/NoPaddingButton"
         android:background="@drawable/white_btn_bg"
-        android:textColor="@color/new_design_primary_color"
         android:text="@string/got_it"
+        android:textColor="@color/new_design_primary_color"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>

@@ -37,13 +37,15 @@ class ProductIntroductionActivity : AppCompatActivity() {
 
     private inner class IntroductionViewPageAdapter : PagerAdapter() {
 
-        private val pageList: IntArray = intArrayOf(1, 2, 3)
+        private val pageList: IntArray = intArrayOf(
+                R.drawable.product_introduction_2, R.drawable.product_introduction_3, R.drawable.product_introduction_4,
+                R.drawable.product_introduction_5)
 
         override fun instantiateItem(container: ViewGroup, position: Int): Any {
 
             val view = LayoutInflater.from(container.context).inflate(R.layout.product_introduction_item, container, false)
 
-//            view.introduction_img.setImageResource(pageList[position])
+            view.introduction_img.setImageResource(pageList[position])
 
             if (position == pageList.size - 1)
                 view.login_entrance.visibility = View.VISIBLE

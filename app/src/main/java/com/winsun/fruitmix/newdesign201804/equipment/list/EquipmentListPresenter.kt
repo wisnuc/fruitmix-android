@@ -7,27 +7,32 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.callback.ActiveView
+import com.winsun.fruitmix.callback.BaseLoadDataCallback
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper
 import com.winsun.fruitmix.model.ViewItem
+import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.abnormal.HandleAbnormalEquipmentActivity
 import com.winsun.fruitmix.newdesign201804.equipment.add.AddEquipmentActivity
 import com.winsun.fruitmix.newdesign201804.login.LanLoginActivity
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewHolder
+import com.winsun.fruitmix.stations.Station
+import com.winsun.fruitmix.stations.StationsDataSource
 import kotlinx.android.synthetic.main.my_equipment_item.view.*
 
 private const val EQUIPMENT_TYPE = 1
 private const val ADD_EQUIPMENT_TYPE = 2
 
 
-class EquipmentListPresenter {
+class EquipmentListPresenter(val stationsDataSource: StationsDataSource, val wechatUserGUID: String,val activeView: ActiveView) {
 
-    private var equipmentListAdapter: EquipmentListAdapter
+    private var equipmentListAdapter: EquipmentListAdapter = EquipmentListAdapter()
+
+    private val equipmentItems: MutableList<ViewItem> = mutableListOf()
 
     init {
-
-        equipmentListAdapter = EquipmentListAdapter()
-
-        val equipmentItems: MutableList<ViewItem> = mutableListOf()
 
         equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.CLOUD_CONNECTED, "test1")))
         equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.CLOUD_UNCONNECTED, "test2")))
@@ -37,11 +42,30 @@ class EquipmentListPresenter {
         equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.OFFLINE, "test6")))
         equipmentItems.add(AddEquipmentViewItem())
 
-        equipmentListAdapter.setItemList(equipmentItems)
+    }
+
+    fun refreshEquipment() {
+
+        stationsDataSource.getStationsByWechatGUID(wechatUserGUID, object : BaseLoadDataCallbackWrapper<Station>(
+                object : BaseLoadDataCallbackImpl<Station>() {
+
+                    override fun onSucceed(data: MutableList<Station>?, operationResult: OperationResult?) {
+
+                        data?.forEach {
+                            equipmentItems.add(0,EquipmentViewItem(EquipmentItem(EquipmentType.CLOUD_CONNECTED,it.label)))
+                        }
+
+                        equipmentListAdapter.setItemList(equipmentItems)
+                        equipmentListAdapter.notifyDataSetChanged()
+
+                    }
+
+                }, activeView
+        ) {})
 
     }
 
-    public fun getEquipmentListAdapter(): EquipmentListAdapter {
+    fun getEquipmentListAdapter(): EquipmentListAdapter {
         return equipmentListAdapter
     }
 

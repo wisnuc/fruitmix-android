@@ -314,7 +314,7 @@ public class EquipmentPresenter implements ActiveView {
         return equipmentSearchView != null;
     }
 
-    public void handleInputIpbyByUser(String ip) {
+    public void handleInputIPbyByUser(String ip) {
         List<String> hosts = new ArrayList<>();
         hosts.add(ip);
 
