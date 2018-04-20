@@ -8,14 +8,31 @@ import android.support.v7.app.AlertDialog
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl
+import com.winsun.fruitmix.callback.BaseOperateCallback
+import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
 import com.winsun.fruitmix.equipment.search.data.Equipment
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager
+import com.winsun.fruitmix.model.operationResult.OperationResult
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.NewEquipmentInfoDataSource
+import java.util.*
 
-interface AddEquipmentUIState{
+interface SearchEquipmentUIState {
 
     fun startSearchState()
-    fun searchTimeoutState()
+    fun searchTimeoutState(showEquipmentViewPager: Boolean)
     fun searchSucceedState()
+
+}
+
+interface EquipmentUIState {
+
+    fun useExistDiskData()
+    fun selectDiskBeforeUseExistDiskData()
+    fun reinitialization()
+    fun addAvailableEquipment()
+
+    fun refreshStationName(stationName: String)
 
 }
 
@@ -24,13 +41,23 @@ private const val SEARCH_SUCCEED = 0x1002
 
 private const val SEARCH_TIMEOUT_SECOND = 6 * 1000L
 
-public class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchManager,
-                                   private val addEquipmentUIState: AddEquipmentUIState):AddEquipmentUIState {
+class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchManager,
+                            private val searchEquipmentUIState: SearchEquipmentUIState,
+                            private val equipmentUIState: EquipmentUIState,
+                            private val newEquipmentInfoDataSource: NewEquipmentInfoDataSource) : SearchEquipmentUIState {
 
-    private val equipments:MutableList<Equipment> = mutableListOf()
-    private val equipmentViewPager = EquipmentViewPager(equipments)
+    private val equipments: MutableList<Equipment> = mutableListOf()
+    private val equipmentViewPagerAdapter = EquipmentViewPagerAdapter()
 
     private val customHandler = CustomHandler(this)
+
+    fun getViewPagerAdapter(): PagerAdapter = equipmentViewPagerAdapter
+
+    private lateinit var currentEquipmentState: EquipmentState
+
+    private val baseNewEquipmentStates: MutableList<EquipmentState> = mutableListOf()
+
+    private val random = Random()
 
     override fun startSearchState() {
 
@@ -39,49 +66,132 @@ public class AddEquipmentPresenter(private val equipmentSearchManager: Equipment
             customHandler.removeMessages(SEARCH_TIMEOUT)
             customHandler.sendEmptyMessage(SEARCH_SUCCEED)
 
-            equipments.add(it)
+            convert(it, object : BaseOperateCallbackImpl() {
+                override fun onSucceed() {
+                    super.onSucceed()
 
-            equipmentViewPager.notifyDataSetChanged()
+                    equipmentViewPagerAdapter.setEquipmentStates(baseNewEquipmentStates)
+                    equipmentViewPagerAdapter.notifyDataSetChanged()
+
+                }
+            })
 
         }
 
         customHandler.sendEmptyMessageDelayed(SEARCH_TIMEOUT, SEARCH_TIMEOUT_SECOND)
     }
 
-    override fun searchTimeoutState() {
+    private fun convert(baseNewEquipmentInfo: BaseNewEquipmentInfo): EquipmentState {
+
+        return when (baseNewEquipmentInfo) {
+            is AvailableEquipmentInfo -> AvailableEquipmentState(equipmentUIState, baseNewEquipmentInfo)
+            is UnBoundEquipmentInfo -> UnboundEquipmentState(equipmentUIState, baseNewEquipmentInfo)
+            is ReinitializationEquipmentInfo -> ReinitializationEquipmentState(equipmentUIState, baseNewEquipmentInfo)
+            else -> throw IllegalArgumentException("current equipment type error")
+        }
+
+    }
+
+    private fun convert(equipment: Equipment, baseOperateCallback: BaseOperateCallback) {
+
+        when (random.nextInt(3)) {
+            0 -> newEquipmentInfoDataSource.getAvailableEquipmentInfo(equipment, object : BaseLoadDataCallbackImpl<AvailableEquipmentInfo>() {
+                override fun onSucceed(data: MutableList<AvailableEquipmentInfo>?, operationResult: OperationResult?) {
+                    super.onSucceed(data, operationResult)
+
+                    baseNewEquipmentStates.add(convert(data!![0]))
+
+                    baseOperateCallback.onSucceed()
+                }
+            })
+
+            1 -> newEquipmentInfoDataSource.getUnboundEquipmentInfo(equipment, object : BaseLoadDataCallbackImpl<UnBoundEquipmentInfo>() {
+                override fun onSucceed(data: MutableList<UnBoundEquipmentInfo>?, operationResult: OperationResult?) {
+                    super.onSucceed(data, operationResult)
+
+                    baseNewEquipmentStates.add(convert(data!![0]))
+
+                    baseOperateCallback.onSucceed()
+                }
+            })
+
+            2 -> newEquipmentInfoDataSource.getReinitializationEquipmentInfo(equipment, object : BaseLoadDataCallbackImpl<ReinitializationEquipmentInfo>() {
+                override fun onSucceed(data: MutableList<ReinitializationEquipmentInfo>?, operationResult: OperationResult?) {
+                    super.onSucceed(data, operationResult)
+
+                    baseNewEquipmentStates.add(convert(data!![0]))
+
+                    baseOperateCallback.onSucceed()
+
+                }
+            })
+
+        }
+
+
+    }
+
+    override fun searchTimeoutState(showEquipmentViewPager: Boolean) {
 
         equipmentSearchManager.stopDiscovery()
 
-        addEquipmentUIState.searchTimeoutState()
+        searchEquipmentUIState.searchTimeoutState(showEquipmentViewPager)
     }
 
     override fun searchSucceedState() {
 
-        addEquipmentUIState.searchSucceedState()
+        searchEquipmentUIState.searchSucceedState()
 
     }
 
+    fun onPageSelect(position: Int) {
+
+        currentEquipmentState = baseNewEquipmentStates[position]
+
+        currentEquipmentState.refreshView()
+
+    }
+
+    fun operateBtnOnClick(context: Context) {
+
+        currentEquipmentState.operateBtnOnClick(context)
+
+    }
+
+    fun getItemSize() = baseNewEquipmentStates.size
+
 }
 
-private  class CustomHandler(val addEquipmentPresenter: AddEquipmentPresenter):Handler(){
+private class CustomHandler(val addEquipmentPresenter: AddEquipmentPresenter) : Handler() {
 
     override fun handleMessage(msg: Message?) {
         super.handleMessage(msg)
 
-        when(msg?.what){
-            SEARCH_SUCCEED->addEquipmentPresenter.searchSucceedState()
-            SEARCH_TIMEOUT->addEquipmentPresenter.searchTimeoutState()
+        when (msg?.what) {
+            SEARCH_SUCCEED -> addEquipmentPresenter.searchSucceedState()
+            SEARCH_TIMEOUT -> addEquipmentPresenter.searchTimeoutState(addEquipmentPresenter.getItemSize() > 0)
         }
 
     }
 
 }
 
-private class EquipmentViewPager(private val equipments:MutableList<Equipment>) : PagerAdapter() {
+private class EquipmentViewPagerAdapter : PagerAdapter() {
+
+    private val mEquipmentStates: MutableList<EquipmentState> = mutableListOf()
+
+    fun setEquipmentStates(equipmentStates: List<EquipmentState>) {
+        mEquipmentStates.clear()
+        mEquipmentStates.addAll(equipmentStates)
+    }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
 
         val view = View.inflate(container.context, R.layout.equipment_list_item, null)
+
+        view.setOnClickListener {
+            mEquipmentStates[position].equipmentIconOnClick(container.context)
+        }
 
         container.addView(view)
 
@@ -97,10 +207,87 @@ private class EquipmentViewPager(private val equipments:MutableList<Equipment>) 
     }
 
     override fun getCount(): Int {
-        return equipments.size
+        return mEquipmentStates.size
     }
 
 }
+
+private abstract class EquipmentState(val equipmentUIState: EquipmentUIState) {
+
+    abstract fun refreshView()
+
+    abstract fun equipmentIconOnClick(context: Context)
+
+    abstract fun operateBtnOnClick(context: Context)
+}
+
+private class AvailableEquipmentState(equipmentUIState: EquipmentUIState,
+                                      val availableEquipmentInfo: AvailableEquipmentInfo) : EquipmentState(equipmentUIState) {
+
+    override fun refreshView() {
+
+        equipmentUIState.refreshStationName(availableEquipmentInfo.name)
+
+        equipmentUIState.addAvailableEquipment()
+    }
+
+    override fun equipmentIconOnClick(context: Context) {
+
+        showAvailableEquipmentDetail(context)
+
+    }
+
+    override fun operateBtnOnClick(context: Context) {
+
+    }
+
+}
+
+private class UnboundEquipmentState(equipmentUIState: EquipmentUIState,
+                                    val unBoundEquipmentInfo: UnBoundEquipmentInfo) : EquipmentState(equipmentUIState) {
+    override fun refreshView() {
+
+        equipmentUIState.refreshStationName(unBoundEquipmentInfo.name)
+
+        if (unBoundEquipmentInfo.unboundEquipmentDiskInfos.size > 1)
+            equipmentUIState.useExistDiskData()
+        else
+            equipmentUIState.selectDiskBeforeUseExistDiskData()
+    }
+
+    override fun equipmentIconOnClick(context: Context) {
+
+        showUnboundEquipmentDetail(context)
+
+    }
+
+    override fun operateBtnOnClick(context: Context) {
+
+    }
+
+}
+
+private class ReinitializationEquipmentState(equipmentUIState: EquipmentUIState,
+                                             val reinitializationEquipmentInfo: ReinitializationEquipmentInfo) : EquipmentState(equipmentUIState) {
+
+    override fun refreshView() {
+        equipmentUIState.refreshStationName(reinitializationEquipmentInfo.name)
+
+        equipmentUIState.reinitialization()
+    }
+
+    override fun equipmentIconOnClick(context: Context) {
+
+
+    }
+
+    override fun operateBtnOnClick(context: Context) {
+
+
+    }
+
+}
+
 
 private fun showAvailableEquipmentDetail(context: Context) {
 

@@ -15,7 +15,6 @@ public class LoginPresenter(val tokenDataSource: TokenDataSource, val wechatUser
 
     fun loginWithWechat(context: Context, baseOperateCallback: BaseOperateCallback) {
 
-
         WXEntryActivity.setWxEntryGetWeChatCodeCallback(object : WXEntryActivity.WXEntryGetWeChatCodeCallback {
             override fun fail(resID: Int) {
                 ToastUtil.showToast(context, context.getString(resID))

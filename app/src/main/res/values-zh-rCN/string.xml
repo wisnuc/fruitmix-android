@@ -718,6 +718,17 @@
     <string name="disk_num">磁盘数</string>
     <string name="disk_space">磁盘空间</string>
     <string name="original_equipment_name">原设备名</string>
+    
+    <string name="total_capacity">总容量</string>
+
+    <string name="searching_equipment">设备搜索中</string>
+    <string name="undiscovered_equipment">未发现设备</string>
+
+    <string name="refresh">刷新</string>
+    
+    <string name="add_immediately">立即添加</string>
+    <string name="use_exist_disk_data">使用已有磁盘数据</string>
+
 
     <!-- reinitialization -->
     <string name="select_disk_usage_mode">选择磁盘使用模式</string>

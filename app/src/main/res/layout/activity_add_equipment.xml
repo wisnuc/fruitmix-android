@@ -9,20 +9,19 @@
     tools:context=".newdesign201804.equipment.add.AddEquipmentActivity">
 
     <TextView
-        android:id="@+id/textView34"
+        android:id="@+id/add_equipment_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
-        android:text="TextView"
+        android:text="@string/searching_equipment"
         android:textColor="@color/eighty_seven_percent_black"
         android:textSize="21dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="@string/search_equipment" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
-        android:id="@+id/progressBar3"
+        android:id="@+id/search_progressbar"
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -31,24 +30,25 @@
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textView34" />
+        app:layout_constraintTop_toBottomOf="@id/add_equipment_title" />
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/refresh_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
-        android:visibility="invisible"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/progressBar3">
+        app:layout_constraintTop_toTopOf="@id/search_progressbar">
 
         <ImageView
             android:id="@+id/refresh_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
@@ -64,7 +64,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/refuse"
+            android:text="@string/refresh"
             android:textColor="@color/fifty_four_percent_black"
             android:textSize="14dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -74,7 +74,7 @@
     </android.support.constraint.ConstraintLayout>
 
     <android.support.v4.view.ViewPager
-        android:id="@+id/viewPager2"
+        android:id="@+id/new_equipment_viewPager"
         android:layout_width="0dp"
         android:layout_height="400dp"
         android:layout_marginEnd="8dp"
@@ -85,11 +85,10 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView34" />
-
+        app:layout_constraintTop_toBottomOf="@+id/add_equipment_title" />
 
     <Button
-        android:id="@+id/button5"
+        android:id="@+id/operate_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
@@ -115,7 +114,7 @@
         app:ci_width="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/viewPager2" />
+        app:layout_constraintTop_toBottomOf="@+id/new_equipment_viewPager" />
 
 
 </android.support.constraint.ConstraintLayout>

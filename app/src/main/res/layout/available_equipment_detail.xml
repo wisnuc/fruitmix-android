@@ -7,7 +7,7 @@
 
     <include
         android:id="@+id/equipment_detail_title"
-        layout="@layout/equipment_detail_title"/>
+        layout="@layout/equipment_detail_title" />
 
     <ImageView
         android:id="@+id/imageView12"
@@ -37,7 +37,7 @@
         android:id="@+id/textView43"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
+        android:text="@string/admin"
         android:textColor="@color/fifty_four_percent_black"
         android:textSize="14dp"
         app:layout_constraintStart_toStartOf="@+id/textView42"
@@ -71,7 +71,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="TextView"
+        android:text="@string/available_capacity"
         android:textColor="@color/fifty_four_percent_black"
         android:textSize="14dp"
         app:layout_constraintStart_toStartOf="@+id/textView44"
@@ -93,7 +93,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="TextView"
+        android:text="@string/total_capacity"
         android:textColor="@color/fifty_four_percent_black"
         android:textSize="14dp"
         app:layout_constraintStart_toStartOf="@+id/textView46"
