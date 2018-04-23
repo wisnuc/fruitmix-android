@@ -12,7 +12,7 @@ class FakeNewEquipmentInfoDataSource : NewEquipmentInfoDataSource {
 
         val availableEquipmentDiskInfo = AvailableEquipmentDiskInfo(createTestUser(), 6 * 1024 * 1024 * 1024L, 15 * 1024 * 1024 * 1024L)
 
-        val availableEquipmentInfo = AvailableEquipmentInfo(createTestEquipmentName(), availableEquipmentDiskInfo)
+        val availableEquipmentInfo = AvailableEquipmentInfo(createTestEquipmentName(), equipment.hosts[0], availableEquipmentDiskInfo)
 
         baseLoadDataCallback.onSucceed(listOf(availableEquipmentInfo), OperationSuccess())
 
@@ -23,7 +23,7 @@ class FakeNewEquipmentInfoDataSource : NewEquipmentInfoDataSource {
         val unboundEquipmentDiskInfo = UnboundEquipmentDiskInfo("TestOriginalEquipment",
                 DiskMode.RAID1, 2 * 1024 * 1024 * 1024L, 12 * 1024 * 1024 * 1024L)
 
-        val unBoundEquipmentInfo = UnBoundEquipmentInfo(createTestEquipmentName(), listOf(unboundEquipmentDiskInfo))
+        val unBoundEquipmentInfo = UnBoundEquipmentInfo(createTestEquipmentName(), equipment.hosts[0], listOf(unboundEquipmentDiskInfo))
 
         baseLoadDataCallback.onSucceed(listOf(unBoundEquipmentInfo), OperationSuccess())
 
@@ -31,7 +31,7 @@ class FakeNewEquipmentInfoDataSource : NewEquipmentInfoDataSource {
 
     override fun getReinitializationEquipmentInfo(equipment: Equipment, baseLoadDataCallback: BaseLoadDataCallback<ReinitializationEquipmentInfo>) {
 
-        val reinitializationEquipmentInfo = ReinitializationEquipmentInfo(createTestEquipmentName())
+        val reinitializationEquipmentInfo = ReinitializationEquipmentInfo(createTestEquipmentName(), equipment.hosts[0])
 
         baseLoadDataCallback.onSucceed(listOf(reinitializationEquipmentInfo), OperationSuccess())
 

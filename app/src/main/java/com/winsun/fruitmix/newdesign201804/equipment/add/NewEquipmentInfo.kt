@@ -2,13 +2,15 @@ package com.winsun.fruitmix.newdesign201804.equipment.add
 
 import com.winsun.fruitmix.user.User
 
-open class BaseNewEquipmentInfo(val name: String)
+open class BaseNewEquipmentInfo(val equipmentName: String,val equipmentIP:String)
 
-class UnBoundEquipmentInfo(name: String, val unboundEquipmentDiskInfos: List<UnboundEquipmentDiskInfo>) : BaseNewEquipmentInfo(name)
+class UnBoundEquipmentInfo(equipmentName: String,equipmentIP: String,
+                           val unboundEquipmentDiskInfos: List<UnboundEquipmentDiskInfo>) : BaseNewEquipmentInfo(equipmentName,equipmentIP)
 
-class AvailableEquipmentInfo(name: String, val availableEquipmentDiskInfo: AvailableEquipmentDiskInfo) : BaseNewEquipmentInfo(name)
+class AvailableEquipmentInfo(equipmentName: String,equipmentIP: String,
+                             val availableEquipmentDiskInfo: AvailableEquipmentDiskInfo) : BaseNewEquipmentInfo(equipmentName,equipmentIP)
 
-class ReinitializationEquipmentInfo(name: String) : BaseNewEquipmentInfo(name)
+class ReinitializationEquipmentInfo(equipmentName: String,equipmentIP: String) : BaseNewEquipmentInfo(equipmentName,equipmentIP)
 
 enum class DiskMode {
     SINGLE, RAID1

@@ -58,7 +58,7 @@ class LoginEntranceActivity : AppCompatActivity() {
                         "操作V第三节课V魔弦传说的法律九分裤" +
                         "范德萨水电费了健康撒地方认为缺乏服务器而非的行政村啊V型从中选出V字")
                 .setPositiveButton(getString(R.string.close), null)
-                .setCancelable(false)
+                .setCancelable(true)
                 .create()
 
         dialog.show()

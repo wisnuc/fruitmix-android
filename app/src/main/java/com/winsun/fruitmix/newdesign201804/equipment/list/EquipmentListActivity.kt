@@ -12,9 +12,11 @@ import com.winsun.fruitmix.stations.InjectStation
 import com.winsun.fruitmix.user.User
 import kotlinx.android.synthetic.main.activity_equipment_list.*
 
-class EquipmentListActivity : AppCompatActivity(),ActiveView {
+class EquipmentListActivity : AppCompatActivity(), ActiveView {
 
     private var isDestroy = false
+
+    private lateinit var equipmentListPresenter: EquipmentListPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,15 +31,22 @@ class EquipmentListActivity : AppCompatActivity(),ActiveView {
 
         userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this))
 
+        userName.text = weChatTokenUserWrapper.nickName
+
         equipmentRecyclerView.layoutManager = GridLayoutManager(this, 2)
         equipmentRecyclerView.itemAnimator = DefaultItemAnimator()
 
-        val equipmentListPresenter = EquipmentListPresenter(InjectStation.provideStationDataSource(this),
-                weChatTokenUserWrapper.guid,this)
+        equipmentListPresenter = EquipmentListPresenter(FakeEquipmentItemDataSource(),
+                weChatTokenUserWrapper.guid, this)
 
         val equipmentListAdapter = equipmentListPresenter.getEquipmentListAdapter()
 
         equipmentRecyclerView.adapter = equipmentListAdapter
+
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         equipmentListPresenter.refreshEquipment()
 

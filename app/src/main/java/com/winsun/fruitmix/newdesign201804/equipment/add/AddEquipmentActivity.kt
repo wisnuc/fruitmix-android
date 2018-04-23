@@ -1,7 +1,9 @@
 package com.winsun.fruitmix.newdesign201804.equipment.add
 
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
@@ -9,14 +11,18 @@ import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory
 import com.winsun.fruitmix.equipment.search.data.InjectEquipment
 import com.winsun.fruitmix.model.BottomMenuItem
+import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeNewEquipmentInfoDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.list.FakeEquipmentItemDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.ReinitializationActivity
 import kotlinx.android.synthetic.main.activity_add_equipment.*
 
-class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, EquipmentUIState {
+class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, EquipmentUIState, AddEquipmentView {
 
     private lateinit var addEquipmentPresenter: AddEquipmentPresenter
 
@@ -32,7 +38,8 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
         }
 
         addEquipmentPresenter = AddEquipmentPresenter(InjectEquipment.provideEquipmentSearchManager(this),
-                this, this, FakeNewEquipmentInfoDataSource())
+                this, this, this, FakeNewEquipmentInfoDataSource(),
+                FakeEquipmentItemDataSource())
 
         new_equipment_viewPager.adapter = addEquipmentPresenter.getViewPagerAdapter()
 
@@ -51,6 +58,15 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
 
         })
 
+        operate_btn.setOnClickListener {
+
+            addEquipmentPresenter.operateBtnOnClick(this, operate_btn)
+
+        }
+
+        search_progressbar.indeterminateDrawable.setColorFilter(
+                ContextCompat.getColor(this, R.color.new_design_progressbar_color),
+                android.graphics.PorterDuff.Mode.SRC_IN)
 
     }
 
@@ -181,6 +197,10 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
 
     private fun enterAddEquipmentByIp() {
         startActivity(Intent(this, AddEquipmentByIpActivity::class.java))
+    }
+
+    override fun enterReinitialization() {
+        startActivity(Intent(this, ReinitializationActivity::class.java))
     }
 
 }

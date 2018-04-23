@@ -749,4 +749,7 @@
 
     <string name="repair_immediately">立即修复</string>
 
+    <string name="single">SINGLE</string>
+    <string name="raid1">RAID1</string>
+
 </resources>

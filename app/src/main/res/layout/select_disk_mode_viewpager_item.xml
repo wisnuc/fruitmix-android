@@ -26,6 +26,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <android.support.v7.widget.RecyclerView
+            android:id="@+id/selectModeRecyclerView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="12dp"
@@ -97,7 +98,7 @@
                 <RadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/single_mode"
+                    android:text="@string/single"
                     android:textColor="@color/eighty_seven_percent_black"
                     android:textSize="14dp" />
 
@@ -106,7 +107,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="48dp"
                     android:checked="true"
-                    android:text="@string/raid1_mode"
+                    android:text="@string/raid1"
                     android:textColor="@color/eighty_seven_percent_black"
                     android:textSize="14dp" />
 
@@ -119,13 +120,13 @@
                 android:layout_marginBottom="8dp"
                 android:layout_marginTop="8dp"
                 android:background="@color/divide_bg"
-                app:layout_constraintBottom_toTopOf="@+id/textView53"
+                app:layout_constraintBottom_toTopOf="@+id/total_disk_capacity"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/radioGroup2"
                 app:layout_constraintVertical_chainStyle="spread_inside" />
 
             <TextView
-                android:id="@+id/textView53"
+                android:id="@+id/total_disk_capacity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
@@ -148,10 +149,10 @@
                 android:textColor="@color/fifty_four_percent_black"
                 android:textSize="14dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView53" />
+                app:layout_constraintTop_toBottomOf="@+id/total_disk_capacity" />
 
             <TextView
-                android:id="@+id/textView57"
+                android:id="@+id/available_capacity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
@@ -177,7 +178,7 @@
                 android:textSize="14dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView57" />
+                app:layout_constraintTop_toBottomOf="@+id/available_capacity" />
 
 
         </android.support.constraint.ConstraintLayout>
@@ -185,7 +186,7 @@
     </android.support.v7.widget.CardView>
 
     <Button
-        android:id="@+id/button9"
+        android:id="@+id/next_step"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"

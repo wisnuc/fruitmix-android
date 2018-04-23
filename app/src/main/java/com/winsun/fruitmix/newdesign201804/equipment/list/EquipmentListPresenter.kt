@@ -26,7 +26,7 @@ private const val EQUIPMENT_TYPE = 1
 private const val ADD_EQUIPMENT_TYPE = 2
 
 
-class EquipmentListPresenter(val stationsDataSource: StationsDataSource, val wechatUserGUID: String,val activeView: ActiveView) {
+class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemDataSource, val wechatUserGUID: String, val activeView: ActiveView) {
 
     private var equipmentListAdapter: EquipmentListAdapter = EquipmentListAdapter()
 
@@ -34,34 +34,32 @@ class EquipmentListPresenter(val stationsDataSource: StationsDataSource, val wec
 
     init {
 
-        equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.CLOUD_CONNECTED, "test1")))
-        equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.CLOUD_UNCONNECTED, "test2")))
-        equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.DISK_ABNORMAL, "test3")))
-        equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.POWER_OFF, "test4")))
-        equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.UNDER_REVIEW, "test5")))
-        equipmentItems.add(EquipmentViewItem(EquipmentItem(EquipmentType.OFFLINE, "test6")))
         equipmentItems.add(AddEquipmentViewItem())
 
     }
 
     fun refreshEquipment() {
 
-        stationsDataSource.getStationsByWechatGUID(wechatUserGUID, object : BaseLoadDataCallbackWrapper<Station>(
-                object : BaseLoadDataCallbackImpl<Station>() {
+        if (equipmentItemDataSource.isCacheDirty())
+            equipmentItemDataSource.getEquipmentItems(object : BaseLoadDataCallbackWrapper<EquipmentItem>(
 
-                    override fun onSucceed(data: MutableList<Station>?, operationResult: OperationResult?) {
+                    object : BaseLoadDataCallbackImpl<EquipmentItem>() {
 
-                        data?.forEach {
-                            equipmentItems.add(0,EquipmentViewItem(EquipmentItem(EquipmentType.CLOUD_CONNECTED,it.label)))
+                        override fun onSucceed(data: MutableList<EquipmentItem>?, operationResult: OperationResult?) {
+                            super.onSucceed(data, operationResult)
+
+
+                            data?.forEach {
+                                equipmentItems.add(0, EquipmentViewItem(it))
+                            }
+
+                            equipmentListAdapter.setItemList(equipmentItems)
+                            equipmentListAdapter.notifyDataSetChanged()
+
                         }
 
-                        equipmentListAdapter.setItemList(equipmentItems)
-                        equipmentListAdapter.notifyDataSetChanged()
-
-                    }
-
-                }, activeView
-        ) {})
+                    }, activeView
+            ) {})
 
     }
 
@@ -102,7 +100,6 @@ class EquipmentListPresenter(val stationsDataSource: StationsDataSource, val wec
             val viewItem = mItemList[position]
 
             val context = holder?.itemView?.context
-
 
             if (viewItem is EquipmentViewItem) {
 

@@ -9,7 +9,7 @@
     android:background="@color/new_design_primary_color">
 
     <ImageView
-        android:id="@+id/imageView15"
+        android:id="@+id/disk_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
@@ -18,7 +18,7 @@
         app:srcCompat="@drawable/disk_white" />
 
     <TextView
-        android:id="@+id/textView59"
+        android:id="@+id/disk_item_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -27,7 +27,7 @@
         android:textSize="14dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView15"
+        app:layout_constraintTop_toBottomOf="@+id/disk_icon"
         tools:text="WD-2TB" />
 
     <android.support.v7.widget.AppCompatCheckBox
@@ -39,6 +39,6 @@
         android:checked="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView59" />
+        app:layout_constraintTop_toBottomOf="@+id/disk_item_tv" />
 
 </android.support.constraint.ConstraintLayout>

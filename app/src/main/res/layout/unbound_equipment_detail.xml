@@ -26,6 +26,7 @@
         app:layout_constraintTop_toBottomOf="@+id/equipment_detail_title" />
 
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/unboundEquipmentRecyclerView"
         android:layout_width="0dp"
         android:layout_height="300dp"
         android:layout_marginEnd="24dp"
@@ -38,7 +39,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView48" />
 
     <Button
-        android:id="@+id/button6"
+        android:id="@+id/reinitializeBtn"
         style="@style/NoPaddingButton"
         android:layout_width="wrap_content"
         android:layout_height="36dp"

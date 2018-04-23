@@ -777,4 +777,7 @@
 
     <string name="repair_immediately">Repair immediately</string>
 
+    <string name="single">SINGLE</string>
+    <string name="raid1">RAID1</string>
+
 </resources>

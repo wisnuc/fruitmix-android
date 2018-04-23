@@ -21,7 +21,7 @@
         app:srcCompat="@drawable/user_icon_green" />
 
     <TextView
-        android:id="@+id/textView42"
+        android:id="@+id/admin_name_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
@@ -40,8 +40,8 @@
         android:text="@string/admin"
         android:textColor="@color/fifty_four_percent_black"
         android:textSize="14dp"
-        app:layout_constraintStart_toStartOf="@+id/textView42"
-        app:layout_constraintTop_toBottomOf="@+id/textView42" />
+        app:layout_constraintStart_toStartOf="@+id/admin_name_tv"
+        app:layout_constraintTop_toBottomOf="@+id/admin_name_tv" />
 
     <ImageView
         android:id="@+id/imageView13"
@@ -55,7 +55,7 @@
         app:srcCompat="@drawable/disk_icon_green" />
 
     <TextView
-        android:id="@+id/textView44"
+        android:id="@+id/available_capacity_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
@@ -74,11 +74,11 @@
         android:text="@string/available_capacity"
         android:textColor="@color/fifty_four_percent_black"
         android:textSize="14dp"
-        app:layout_constraintStart_toStartOf="@+id/textView44"
-        app:layout_constraintTop_toBottomOf="@+id/textView44" />
+        app:layout_constraintStart_toStartOf="@+id/available_capacity_tv"
+        app:layout_constraintTop_toBottomOf="@+id/available_capacity_tv" />
 
     <TextView
-        android:id="@+id/textView46"
+        android:id="@+id/total_capacity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -96,8 +96,8 @@
         android:text="@string/total_capacity"
         android:textColor="@color/fifty_four_percent_black"
         android:textSize="14dp"
-        app:layout_constraintStart_toStartOf="@+id/textView46"
-        app:layout_constraintTop_toBottomOf="@+id/textView46" />
+        app:layout_constraintStart_toStartOf="@+id/total_capacity"
+        app:layout_constraintTop_toBottomOf="@+id/total_capacity" />
 
 
 </android.support.constraint.ConstraintLayout>

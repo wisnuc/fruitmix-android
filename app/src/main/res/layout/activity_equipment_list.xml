@@ -24,6 +24,7 @@
             android:layout_marginTop="50dp" />
 
         <TextView
+            android:id="@+id/userName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -36,9 +37,9 @@
         android:id="@+id/constraintLayout"
         android:layout_width="0dp"
         android:layout_height="40dp"
-        android:paddingTop="12dp"
         android:background="@color/white"
         android:orientation="vertical"
+        android:paddingTop="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
