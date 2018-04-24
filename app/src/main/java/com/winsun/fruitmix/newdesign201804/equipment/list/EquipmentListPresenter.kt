@@ -3,28 +3,28 @@ package com.winsun.fruitmix.newdesign201804.equipment.list
 import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AlertDialog
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.ActiveView
-import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.abnormal.HandleAbnormalEquipmentActivity
 import com.winsun.fruitmix.newdesign201804.equipment.add.AddEquipmentActivity
+import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.login.LanLoginActivity
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewHolder
-import com.winsun.fruitmix.stations.Station
-import com.winsun.fruitmix.stations.StationsDataSource
 import kotlinx.android.synthetic.main.my_equipment_item.view.*
 
 private const val EQUIPMENT_TYPE = 1
 private const val ADD_EQUIPMENT_TYPE = 2
 
+private const val TAG = "EquipmentListPresenter"
 
 class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemDataSource, val wechatUserGUID: String, val activeView: ActiveView) {
 
@@ -32,13 +32,9 @@ class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemD
 
     private val equipmentItems: MutableList<ViewItem> = mutableListOf()
 
-    init {
-
-        equipmentItems.add(AddEquipmentViewItem())
-
-    }
-
     fun refreshEquipment() {
+
+        Log.d(TAG, "cache is dirty: " + equipmentItemDataSource.isCacheDirty())
 
         if (equipmentItemDataSource.isCacheDirty())
             equipmentItemDataSource.getEquipmentItems(object : BaseLoadDataCallbackWrapper<EquipmentItem>(
@@ -48,10 +44,13 @@ class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemD
                         override fun onSucceed(data: MutableList<EquipmentItem>?, operationResult: OperationResult?) {
                             super.onSucceed(data, operationResult)
 
+                            equipmentItems.clear()
 
                             data?.forEach {
-                                equipmentItems.add(0, EquipmentViewItem(it))
+                                equipmentItems.add(EquipmentViewItem(it))
                             }
+
+                            equipmentItems.add(AddEquipmentViewItem())
 
                             equipmentListAdapter.setItemList(equipmentItems)
                             equipmentListAdapter.notifyDataSetChanged()

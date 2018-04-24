@@ -729,6 +729,9 @@
     <string name="add_immediately">立即添加</string>
     <string name="use_exist_disk_data">使用已有磁盘数据</string>
 
+    <string name="select_disk_hint">请点击设备图片选择磁盘</string>
+
+    <string name="yes">是</string>
 
     <!-- reinitialization -->
     <string name="select_disk_usage_mode">选择磁盘使用模式</string>

@@ -8,6 +8,9 @@ import com.winsun.fruitmix.user.User
 
 class FakeNewEquipmentInfoDataSource : NewEquipmentInfoDataSource {
 
+    private var equipmentCurrentCount = 0
+    private var unboundDiskCount = 0
+
     override fun getAvailableEquipmentInfo(equipment: Equipment, baseLoadDataCallback: BaseLoadDataCallback<AvailableEquipmentInfo>) {
 
         val availableEquipmentDiskInfo = AvailableEquipmentDiskInfo(createTestUser(), 6 * 1024 * 1024 * 1024L, 15 * 1024 * 1024 * 1024L)
@@ -20,10 +23,23 @@ class FakeNewEquipmentInfoDataSource : NewEquipmentInfoDataSource {
 
     override fun getUnboundEquipmentInfo(equipment: Equipment, baseLoadDataCallback: BaseLoadDataCallback<UnBoundEquipmentInfo>) {
 
-        val unboundEquipmentDiskInfo = UnboundEquipmentDiskInfo("TestOriginalEquipment",
-                DiskMode.RAID1, 2 * 1024 * 1024 * 1024L, 12 * 1024 * 1024 * 1024L)
+        val unboundDiskInfos = mutableListOf<UnboundEquipmentDiskInfo>()
 
-        val unBoundEquipmentInfo = UnBoundEquipmentInfo(createTestEquipmentName(), equipment.hosts[0], listOf(unboundEquipmentDiskInfo))
+        for (i in 0..unboundDiskCount) {
+
+            val unboundEquipmentDiskInfo = UnboundEquipmentDiskInfo("TestOriginalEquipment$i",
+                    DiskMode.RAID1, 2 * 1024 * 1024 * 1024L, 12 * 1024 * 1024 * 1024L)
+
+            unboundDiskInfos.add(unboundEquipmentDiskInfo)
+
+        }
+
+        unboundDiskCount++
+
+        val unBoundEquipmentInfo = UnBoundEquipmentInfo(createTestEquipmentName(), equipment.hosts[0], unboundDiskInfos)
+
+        if (unboundDiskInfos.size == 1)
+            unBoundEquipmentInfo.selectBoundEquipmentDiskInfo = unboundDiskInfos[0]
 
         baseLoadDataCallback.onSucceed(listOf(unBoundEquipmentInfo), OperationSuccess())
 
@@ -47,7 +63,12 @@ class FakeNewEquipmentInfoDataSource : NewEquipmentInfoDataSource {
     }
 
     private fun createTestEquipmentName(): String {
-        return "TestEquipment"
+        val name = "TestEquipment$equipmentCurrentCount"
+
+        equipmentCurrentCount++
+
+        return name
+
     }
 
 

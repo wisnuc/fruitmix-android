@@ -3,7 +3,7 @@ package com.winsun.fruitmix.init.system;
 import android.content.Context;
 import android.util.Log;
 
-import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
+import com.winsun.fruitmix.equipment.search.data.EquipmentMDNSSearchManager;
 import com.winsun.fruitmix.file.data.station.StationFileDataSourceImpl;
 import com.winsun.fruitmix.file.data.station.StationFileRepositoryImpl;
 import com.winsun.fruitmix.group.data.source.GroupRemoteDataSource;
@@ -38,7 +38,7 @@ public class InitSystem {
 
         HttpRequestFactory.destroyInstance();
 
-        EquipmentSearchManager.destroyInstance();
+        EquipmentMDNSSearchManager.destroyInstance();
 
         LogoutUseCase.destroyInstance();
 

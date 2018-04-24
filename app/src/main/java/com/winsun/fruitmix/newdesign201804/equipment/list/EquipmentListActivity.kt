@@ -7,9 +7,11 @@ import android.support.v7.widget.GridLayoutManager
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.ActiveView
 import com.winsun.fruitmix.http.InjectHttp
+import com.winsun.fruitmix.newdesign201804.equipment.list.data.FakeEquipmentItemDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.list.data.InjectEquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.wechatUser.WeChatUserInfoDataSource
-import com.winsun.fruitmix.stations.InjectStation
 import com.winsun.fruitmix.user.User
+import com.winsun.fruitmix.util.Util
 import kotlinx.android.synthetic.main.activity_equipment_list.*
 
 class EquipmentListActivity : AppCompatActivity(), ActiveView {
@@ -28,6 +30,7 @@ class EquipmentListActivity : AppCompatActivity(), ActiveView {
 
         user.avatar = weChatTokenUserWrapper.avatarUrl
         user.userName = weChatTokenUserWrapper.nickName
+        user.defaultAvatar = Util.getUserNameForAvatar(user.userName)
 
         userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this))
 
@@ -36,12 +39,14 @@ class EquipmentListActivity : AppCompatActivity(), ActiveView {
         equipmentRecyclerView.layoutManager = GridLayoutManager(this, 2)
         equipmentRecyclerView.itemAnimator = DefaultItemAnimator()
 
-        equipmentListPresenter = EquipmentListPresenter(FakeEquipmentItemDataSource(),
+        equipmentListPresenter = EquipmentListPresenter(InjectEquipmentItemDataSource.inject(this),
                 weChatTokenUserWrapper.guid, this)
 
         val equipmentListAdapter = equipmentListPresenter.getEquipmentListAdapter()
 
         equipmentRecyclerView.adapter = equipmentListAdapter
+
+        FakeEquipmentItemDataSource.resetCacheDirty()
 
     }
 

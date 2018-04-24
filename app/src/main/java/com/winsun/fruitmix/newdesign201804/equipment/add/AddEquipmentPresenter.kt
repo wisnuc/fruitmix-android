@@ -8,7 +8,7 @@ import android.support.v4.view.PagerAdapter
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
@@ -21,8 +21,9 @@ import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.NewEquipmentInfoDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentItem
-import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentItemDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentType
+import com.winsun.fruitmix.newdesign201804.equipment.list.data.FakeEquipmentItemDataSource
 import com.winsun.fruitmix.util.FileUtil
 import kotlinx.android.synthetic.main.available_equipment_detail.view.*
 import kotlinx.android.synthetic.main.equipment_detail_title.view.*
@@ -59,6 +60,8 @@ private const val SEARCH_SUCCEED = 0x1002
 
 private const val SEARCH_TIMEOUT_SECOND = 6 * 1000L
 
+private const val TAG = "AddEquipmentPresenter"
+
 class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchManager,
                             private val searchEquipmentUIState: SearchEquipmentUIState,
                             private val equipmentUIState: EquipmentUIState,
@@ -78,14 +81,25 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
 
     private val random = Random()
 
+    private val mEquipmentSerialNumbers = mutableListOf<String>()
+    private val mEquipmentIps = mutableListOf<String>()
+
+    private val typeArray: IntArray = intArrayOf(0, 1, 1, 2)
+    private var type = 0
+
     override fun startSearchState() {
+
+        searchEquipmentUIState.startSearchState()
 
         equipmentSearchManager.startDiscovery {
 
-            customHandler.removeMessages(SEARCH_TIMEOUT)
-            customHandler.sendEmptyMessage(SEARCH_SUCCEED)
+            if (!checkEquipmentIsFounded(it))
+                return@startDiscovery
 
-            convert(it, object : BaseOperateCallbackImpl() {
+            customHandler.removeMessages(SEARCH_TIMEOUT)
+            customHandler.sendEmptyMessageDelayed(SEARCH_SUCCEED, 3 * 1000)
+
+            convert(it, typeArray[type], object : BaseOperateCallbackImpl() {
                 override fun onSucceed() {
                     super.onSucceed()
 
@@ -94,26 +108,48 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
 
                 }
             })
+            type++
 
         }
 
         customHandler.sendEmptyMessageDelayed(SEARCH_TIMEOUT, SEARCH_TIMEOUT_SECOND)
+
     }
 
-    private fun convert(baseNewEquipmentInfo: BaseNewEquipmentInfo): EquipmentState {
+    private fun checkEquipmentIsFounded(equipment: Equipment): Boolean {
 
-        return when (baseNewEquipmentInfo) {
-            is AvailableEquipmentInfo -> AvailableEquipmentState(equipmentUIState, baseNewEquipmentInfo)
-            is UnBoundEquipmentInfo -> UnboundEquipmentState(equipmentUIState, baseNewEquipmentInfo)
-            is ReinitializationEquipmentInfo -> ReinitializationEquipmentState(equipmentUIState, baseNewEquipmentInfo)
-            else -> throw IllegalArgumentException("current equipment type error")
+        if (equipment.serialNumber.isNotEmpty()) {
+
+            if (mEquipmentSerialNumbers.contains(equipment.serialNumber)) {
+
+                Log.d(TAG, "getEquipmentTypeInfo: serial number has founded: " + equipment.serialNumber)
+
+                return false
+
+            } else {
+
+                mEquipmentSerialNumbers.add(equipment.serialNumber)
+
+            }
+
         }
 
+        if (mEquipmentIps.contains(equipment.hosts[0])) {
+
+            Log.d(TAG, "getEquipmentTypeInfo: host has founded: " + equipment.hosts[0])
+
+            return false
+
+        } else
+            mEquipmentIps.add(equipment.hosts[0])
+
+        return true
+
     }
 
-    private fun convert(equipment: Equipment, baseOperateCallback: BaseOperateCallback) {
+    private fun convert(equipment: Equipment, type: Int, baseOperateCallback: BaseOperateCallback) {
 
-        when (random.nextInt(3)) {
+        when (type) {
             0 -> newEquipmentInfoDataSource.getAvailableEquipmentInfo(equipment, object : BaseLoadDataCallbackImpl<AvailableEquipmentInfo>() {
                 override fun onSucceed(data: MutableList<AvailableEquipmentInfo>?, operationResult: OperationResult?) {
                     super.onSucceed(data, operationResult)
@@ -147,6 +183,16 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
 
         }
 
+    }
+
+    private fun convert(baseNewEquipmentInfo: BaseNewEquipmentInfo): EquipmentState {
+
+        return when (baseNewEquipmentInfo) {
+            is AvailableEquipmentInfo -> AvailableEquipmentState(equipmentUIState, baseNewEquipmentInfo)
+            is UnBoundEquipmentInfo -> UnboundEquipmentState(equipmentUIState, baseNewEquipmentInfo)
+            is ReinitializationEquipmentInfo -> ReinitializationEquipmentState(equipmentUIState, baseNewEquipmentInfo)
+            else -> throw IllegalArgumentException("current equipment type error")
+        }
 
     }
 
@@ -155,6 +201,7 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
         equipmentSearchManager.stopDiscovery()
 
         searchEquipmentUIState.searchTimeoutState(showEquipmentViewPager)
+
     }
 
     override fun searchSucceedState() {
@@ -183,6 +230,10 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
 
         equipmentItemDataSource.addEquipmentItems(equipmentItem, baseOperateCallback)
 
+    }
+
+    fun onDestroy() {
+        equipmentSearchManager.stopDiscovery()
     }
 
 }
@@ -254,6 +305,7 @@ private class AvailableEquipmentState(equipmentUIState: EquipmentUIState,
         equipmentUIState.refreshStationName(availableEquipmentInfo.equipmentName)
 
         equipmentUIState.addAvailableEquipment()
+
     }
 
     override fun equipmentIconOnClick(context: Context, addEquipmentPresenter: AddEquipmentPresenter) {
@@ -264,35 +316,39 @@ private class AvailableEquipmentState(equipmentUIState: EquipmentUIState,
 
     override fun operateBtnOnClick(context: Context, addEquipmentPresenter: AddEquipmentPresenter, btn: View) {
 
-        val equipmentItem = EquipmentItem(EquipmentType.CLOUD_CONNECTED, availableEquipmentInfo.equipmentName)
-
-        addEquipmentPresenter.addEquipmentView.showProgressDialog(context.getString(R.string.operating_title,
-                context.getString(R.string.add_equipment)))
-
-        addEquipmentPresenter.addEquipmentItem(equipmentItem, object : BaseOperateCallback {
-            override fun onSucceed() {
-
-                addEquipmentPresenter.addEquipmentView.dismissDialog()
-
-                Snackbar.make(btn, context.getString(R.string.success, context.getString(R.string.add_equipment)), Snackbar.LENGTH_SHORT)
-                        .show()
-
-                addEquipmentPresenter.addEquipmentView.finishView()
-
-            }
-
-            override fun onFail(operationResult: OperationResult?) {
-
-                addEquipmentPresenter.addEquipmentView.dismissDialog()
-
-                Snackbar.make(btn, operationResult?.getResultMessage(context).toString(), Snackbar.LENGTH_SHORT)
-                        .show()
-
-            }
-        })
+        addEquipment(addEquipmentPresenter, context, btn, availableEquipmentInfo.equipmentName)
 
     }
 
+}
+
+private fun addEquipment(addEquipmentPresenter: AddEquipmentPresenter, context: Context, btn: View, name: String) {
+    val equipmentItem = EquipmentItem(EquipmentType.CLOUD_CONNECTED, name)
+
+    addEquipmentPresenter.addEquipmentView.showProgressDialog(context.getString(R.string.operating_title,
+            context.getString(R.string.add_equipment)))
+
+    addEquipmentPresenter.addEquipmentItem(equipmentItem, object : BaseOperateCallback {
+        override fun onSucceed() {
+
+            addEquipmentPresenter.addEquipmentView.dismissDialog()
+
+            Snackbar.make(btn, context.getString(R.string.success, context.getString(R.string.add_equipment)), Snackbar.LENGTH_SHORT)
+                    .show()
+
+            addEquipmentPresenter.addEquipmentView.finishView()
+
+        }
+
+        override fun onFail(operationResult: OperationResult?) {
+
+            addEquipmentPresenter.addEquipmentView.dismissDialog()
+
+            Snackbar.make(btn, operationResult?.getResultMessage(context).toString(), Snackbar.LENGTH_SHORT)
+                    .show()
+
+        }
+    })
 }
 
 private class UnboundEquipmentState(equipmentUIState: EquipmentUIState,
@@ -302,20 +358,28 @@ private class UnboundEquipmentState(equipmentUIState: EquipmentUIState,
 
         equipmentUIState.refreshStationName(unBoundEquipmentInfo.equipmentName)
 
-        if (unBoundEquipmentInfo.unboundEquipmentDiskInfos.size > 1)
-            equipmentUIState.useExistDiskData()
-        else
+        if (unBoundEquipmentInfo.selectBoundEquipmentDiskInfo == null)
             equipmentUIState.selectDiskBeforeUseExistDiskData()
+        else
+            equipmentUIState.useExistDiskData()
     }
 
     override fun equipmentIconOnClick(context: Context, addEquipmentPresenter: AddEquipmentPresenter) {
 
-        showUnboundEquipmentDetail(context, unBoundEquipmentInfo, addEquipmentPresenter)
+        showUnboundEquipmentDetail(context, unBoundEquipmentInfo, addEquipmentPresenter, {
+            refreshView()
+        })
 
     }
 
     override fun operateBtnOnClick(context: Context, addEquipmentPresenter: AddEquipmentPresenter, btn: View) {
 
+        if (unBoundEquipmentInfo.selectBoundEquipmentDiskInfo != null)
+            addEquipment(addEquipmentPresenter, context, btn, unBoundEquipmentInfo.equipmentName)
+        else {
+            Snackbar.make(btn, context.getString(R.string.select_disk_hint), Snackbar.LENGTH_SHORT)
+                    .show()
+        }
     }
 }
 
@@ -363,9 +427,13 @@ private fun showAvailableEquipmentDetail(context: Context, availableEquipmentInf
 }
 
 private fun showUnboundEquipmentDetail(context: Context, unBoundEquipmentInfo: UnBoundEquipmentInfo,
-                                       addEquipmentPresenter: AddEquipmentPresenter) {
+                                       addEquipmentPresenter: AddEquipmentPresenter, refreshView: () -> Unit) {
 
     val view = View.inflate(context, R.layout.unbound_equipment_detail, null)
+
+    val alertDialog = AlertDialog.Builder(context)
+            .setCancelable(true)
+            .create()
 
     view.equipment_ip.text = unBoundEquipmentInfo.equipmentIP
     view.equipment_name.text = unBoundEquipmentInfo.equipmentName
@@ -384,10 +452,40 @@ private fun showUnboundEquipmentDetail(context: Context, unBoundEquipmentInfo: U
     unboundEquipmentRecyclerViewAdapter.setItemList(unBoundEquipmentInfo.unboundEquipmentDiskInfos)
     unboundEquipmentRecyclerViewAdapter.notifyDataSetChanged()
 
-    AlertDialog.Builder(context)
-            .setView(view)
-            .setCancelable(true)
-            .create().show()
+    if (unBoundEquipmentInfo.selectBoundEquipmentDiskInfo == null) {
+
+        view.cancel_btn.visibility = View.VISIBLE
+
+        view.got_it_btn.setText(R.string.yes)
+        view.got_it_btn.setOnClickListener {
+
+            unBoundEquipmentInfo.selectBoundEquipmentDiskInfo =
+                    unBoundEquipmentInfo.unboundEquipmentDiskInfos[unboundEquipmentRecyclerViewAdapter.getSelectUnboundEquipmentDiskInfoPosition()]
+
+            alertDialog.dismiss()
+
+            refreshView()
+
+        }
+
+        view.cancel_btn.setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+    } else {
+
+        view.cancel_btn.visibility = View.INVISIBLE
+
+        view.got_it_btn.setText(R.string.got_it)
+        view.got_it_btn.setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+    }
+
+    alertDialog.setView(view)
+
+    alertDialog.show()
 
 }
 

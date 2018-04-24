@@ -27,14 +27,14 @@ import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.ViewTreeObserver;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.ActivityNavPagerBinding;
 import com.winsun.fruitmix.equipment.manage.EquipmentManageActivity;
-import com.winsun.fruitmix.equipment.manage.ShutDownEquipmentActivity;
+import com.winsun.fruitmix.equipment.search.data.EquipmentFoundedListener;
+import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.equipment.search.data.InjectEquipment;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RequestEvent;
@@ -54,7 +54,7 @@ import com.winsun.fruitmix.mainpage.MainPagePresenter;
 import com.winsun.fruitmix.mainpage.MainPagePresenterImpl;
 import com.winsun.fruitmix.mainpage.MainPageView;
 import com.winsun.fruitmix.equipment.search.data.Equipment;
-import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
+import com.winsun.fruitmix.equipment.search.data.EquipmentMDNSSearchManager;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.model.OperationType;
@@ -626,7 +626,7 @@ public class NavPagerActivity extends BaseActivity
 
         mEquipmentSearchManager = InjectEquipment.provideEquipmentSearchManager(mContext);
 
-        mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
+        mEquipmentSearchManager.startDiscovery(new EquipmentFoundedListener() {
             @Override
             public void call(Equipment equipment) {
                 handleFoundEquipment(equipment, loggedInUser);

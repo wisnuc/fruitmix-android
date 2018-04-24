@@ -11,6 +11,8 @@ import kotlinx.android.synthetic.main.unbound_equipment_detail_item.view.*
 
 class UnboundEquipmentRecyclerViewAdapter : BaseRecyclerViewAdapter<SimpleViewHolder, UnboundEquipmentDiskInfo>() {
 
+    private var selectUnboundEquipmentDiskInfoPosition = 0
+
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): SimpleViewHolder {
 
         val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.unbound_equipment_detail_item, parent, false)
@@ -39,10 +41,16 @@ class UnboundEquipmentRecyclerViewAdapter : BaseRecyclerViewAdapter<SimpleViewHo
 
         view?.disk_space?.text = "${FileUtil.formatFileSize(unboundEquipmentDiskInfo.availableDiskSize)}/${FileUtil.formatFileSize(unboundEquipmentDiskInfo.totalDiskSize)}"
 
-        if (position == 0)
+        if (position == selectUnboundEquipmentDiskInfoPosition)
             view?.select_volume_radioButton?.isChecked = true
-        
+
+        view?.select_volume_radioButton?.setOnClickListener {
+            selectUnboundEquipmentDiskInfoPosition = holder.adapterPosition
+        }
 
     }
+
+    fun getSelectUnboundEquipmentDiskInfoPosition() = selectUnboundEquipmentDiskInfoPosition
+
 
 }

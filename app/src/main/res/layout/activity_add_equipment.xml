@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="16dp"
+    android:background="@color/white"
     android:paddingRight="16dp"
     tools:context=".newdesign201804.equipment.add.AddEquipmentActivity">
 
@@ -75,7 +76,7 @@
     <android.support.v4.view.ViewPager
         android:id="@+id/new_equipment_viewPager"
         android:layout_width="0dp"
-        android:layout_height="400dp"
+        android:layout_height="250dp"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
@@ -94,7 +95,7 @@
         android:background="@drawable/green_btn_bg"
         android:text="Button"
         android:textColor="@color/eighty_seven_percent_white"
-        android:textSize="16dp"
+        android:textSize="14dp"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -105,7 +106,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="43dp"
-        android:visibility="invisible"
+        android:visibility="visible"
         app:ci_drawable="@drawable/viewpager_indicator_select_item_bg"
         app:ci_drawable_unselected="@drawable/viewpager_indicator_unselect_item_bg"
         app:ci_height="5dp"

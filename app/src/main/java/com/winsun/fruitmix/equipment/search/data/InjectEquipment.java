@@ -12,7 +12,7 @@ import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 public class InjectEquipment {
 
     public static EquipmentSearchManager provideEquipmentSearchManager(Context context) {
-        return EquipmentSearchManager.getInstance(context);
+        return EquipmentMDNSSearchManager.getInstance(context);
     }
 
     public static EquipmentDataSource provideEquipmentDataSource(Context context) {

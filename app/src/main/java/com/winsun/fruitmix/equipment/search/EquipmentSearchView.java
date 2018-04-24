@@ -3,6 +3,7 @@ package com.winsun.fruitmix.equipment.search;
 import android.content.Context;
 
 import com.winsun.fruitmix.equipment.search.data.Equipment;
+import com.winsun.fruitmix.equipment.search.data.EquipmentMDNSSearchManager;
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.user.User;

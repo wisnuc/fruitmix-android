@@ -4,19 +4,18 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.winsun.fruitmix.equipment.search.data.EquipmentFoundedListener;
 import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.equipment.search.data.Equipment;
-import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
+import com.winsun.fruitmix.equipment.search.data.EquipmentMDNSSearchManager;
 import com.winsun.fruitmix.util.Util;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.List;
-import java.util.Map;
 
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -35,7 +34,7 @@ public class CheckIpHttpUtil implements IHttpUtil {
     private IHttpUtil mIHttpUtil;
 
     private String mCurrentEquipmentName;
-    private EquipmentSearchManager mEquipmentSearchManager;
+    private EquipmentMDNSSearchManager mEquipmentSearchManager;
 
     private final Object threadControlObject;
 
@@ -67,7 +66,7 @@ public class CheckIpHttpUtil implements IHttpUtil {
 
     private static CheckIpHttpUtil instance;
 
-    public static CheckIpHttpUtil getInstance(IHttpUtil iHttpUtil, EquipmentSearchManager equipmentSearchManager) {
+    public static CheckIpHttpUtil getInstance(IHttpUtil iHttpUtil, EquipmentMDNSSearchManager equipmentSearchManager) {
 
         if (instance == null)
             instance = new CheckIpHttpUtil(iHttpUtil, equipmentSearchManager);
@@ -75,7 +74,7 @@ public class CheckIpHttpUtil implements IHttpUtil {
         return instance;
     }
 
-    private CheckIpHttpUtil(IHttpUtil iHttpUtil, EquipmentSearchManager equipmentSearchManager) {
+    private CheckIpHttpUtil(IHttpUtil iHttpUtil, EquipmentMDNSSearchManager equipmentSearchManager) {
 
         mIHttpUtil = iHttpUtil;
 
@@ -183,7 +182,7 @@ public class CheckIpHttpUtil implements IHttpUtil {
 
     private void searchIp(final HttpRequest httpRequest) {
 
-        mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
+        mEquipmentSearchManager.startDiscovery(new EquipmentFoundedListener() {
             @Override
             public void call(Equipment equipment) {
 

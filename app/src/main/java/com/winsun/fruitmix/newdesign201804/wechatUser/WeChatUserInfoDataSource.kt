@@ -5,7 +5,16 @@ import com.winsun.fruitmix.user.User
 
 object WeChatUserInfoDataSource {
 
-    lateinit var weChatTokenUserWrapper: WeChatTokenUserWrapper
+    var weChatTokenUserWrapper: WeChatTokenUserWrapper = WeChatTokenUserWrapper()
+
+    init {
+
+        weChatTokenUserWrapper.avatarUrl = ""
+        weChatTokenUserWrapper.nickName = "Test"
+        weChatTokenUserWrapper.guid = ""
+        weChatTokenUserWrapper.token = ""
+
+    }
 
 }
 

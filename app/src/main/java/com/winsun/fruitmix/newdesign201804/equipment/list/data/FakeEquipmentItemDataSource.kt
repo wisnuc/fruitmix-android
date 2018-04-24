@@ -1,16 +1,23 @@
-package com.winsun.fruitmix.newdesign201804.equipment.list
+package com.winsun.fruitmix.newdesign201804.equipment.list.data
 
+import android.util.Log
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
+import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentItem
+import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentType
 
-class FakeEquipmentItemDataSource : EquipmentItemDataSource {
+private const val TAG = "FakeEquipmentItemData"
+
+object FakeEquipmentItemDataSource : EquipmentItemDataSource {
 
     private val equipmentItems: MutableList<EquipmentItem> = mutableListOf()
 
-    private var cacheDirty = true
+    private var cacheDirty:Boolean
 
     init {
+
+        cacheDirty = true
 
         equipmentItems.add(EquipmentItem(EquipmentType.CLOUD_CONNECTED, "test1"))
         equipmentItems.add(EquipmentItem(EquipmentType.CLOUD_UNCONNECTED, "test2"))
@@ -21,12 +28,13 @@ class FakeEquipmentItemDataSource : EquipmentItemDataSource {
 
     }
 
-
     override fun getEquipmentItems(baseLoadDataCallback: BaseLoadDataCallback<EquipmentItem>) {
 
-        baseLoadDataCallback.onSucceed(equipmentItems, OperationSuccess())
-
         cacheDirty = false
+
+        Log.d(TAG, "cacheDirty: ${isCacheDirty()}")
+
+        baseLoadDataCallback.onSucceed(equipmentItems, OperationSuccess())
 
     }
 
@@ -36,9 +44,19 @@ class FakeEquipmentItemDataSource : EquipmentItemDataSource {
 
         cacheDirty = true
 
+        Log.d(TAG, "cacheDirty: ${isCacheDirty()}")
+
+        baseOperateCallback.onSucceed()
+
+    }
+
+    fun resetCacheDirty(){
+        cacheDirty = true
     }
 
 
-    override fun isCacheDirty() = cacheDirty
+    override fun isCacheDirty():Boolean{
+        return cacheDirty
+    }
 
 }

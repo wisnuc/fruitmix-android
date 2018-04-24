@@ -7,9 +7,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.winsun.fruitmix.BaseActivity;
@@ -20,12 +18,13 @@ import com.winsun.fruitmix.equipment.manage.data.EquipmentInfoDataSource;
 import com.winsun.fruitmix.equipment.manage.data.InjectEquipmentInfoDataSource;
 import com.winsun.fruitmix.equipment.manage.presenter.ManageEquipmentPresenter;
 import com.winsun.fruitmix.equipment.search.data.Equipment;
+import com.winsun.fruitmix.equipment.search.data.EquipmentFoundedListener;
+import com.winsun.fruitmix.equipment.search.data.EquipmentMDNSSearchManager;
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.equipment.search.data.InjectEquipment;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.util.Util;
-import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
 
 import java.lang.ref.WeakReference;
 
@@ -235,7 +234,7 @@ public class ShutDownEquipmentActivity extends BaseActivity implements ManageEqu
 
         mEquipmentSearchManager = InjectEquipment.provideEquipmentSearchManager(this);
 
-        mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
+        mEquipmentSearchManager.startDiscovery(new EquipmentFoundedListener() {
             @Override
             public void call(Equipment equipment) {
 

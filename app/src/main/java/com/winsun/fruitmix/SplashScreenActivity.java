@@ -14,6 +14,7 @@ import com.winsun.fruitmix.init.system.InitSystem;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.newdesign201804.introduction.ProductIntroductionActivity;
+import com.winsun.fruitmix.newdesign201804.login.LoginEntranceActivity;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.util.ToastUtil;
@@ -168,13 +169,11 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
 
-/*        if (systemSettingDataSource.needShowProductIntroduction()) {
+        if (systemSettingDataSource.needShowProductIntroduction()) {
             intent.setClass(SplashScreenActivity.this, ProductIntroductionActivity.class);
         } else {
             intent.setClass(SplashScreenActivity.this, LoginEntranceActivity.class);
-        }*/
-
-        intent.setClass(SplashScreenActivity.this, ProductIntroductionActivity.class);
+        }
 
         startActivity(intent);
 

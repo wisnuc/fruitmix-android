@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <include
         android:id="@+id/equipment_detail_title"
@@ -28,22 +28,33 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/unboundEquipmentRecyclerView"
         android:layout_width="0dp"
-        android:layout_height="300dp"
+        android:layout_height="250dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="24dp"
         android:layout_marginLeft="24dp"
         android:layout_marginRight="24dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@id/view3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView48" />
 
+    <View
+        android:id="@+id/view3"
+        android:layout_width="0dp"
+        android:layout_height="1px"
+        android:layout_marginBottom="52dp"
+        android:background="@color/divide_bg"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <Button
         android:id="@+id/reinitializeBtn"
-        style="@style/NoPaddingButton"
         android:layout_width="wrap_content"
         android:layout_height="36dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginLeft="24dp"
         android:layout_marginStart="24dp"
         android:background="@drawable/white_btn_bg"
@@ -54,11 +65,10 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/button7"
-        style="@style/NoPaddingButton"
+        android:id="@+id/got_it_btn"
         android:layout_width="64dp"
         android:layout_height="36dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="24dp"
         android:layout_marginRight="24dp"
         android:background="@drawable/white_btn_bg"
@@ -68,18 +78,16 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
-        android:id="@+id/button8"
-        style="@style/NoPaddingButton"
+        android:id="@+id/cancel_btn"
         android:layout_width="64dp"
         android:layout_height="36dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/white_btn_bg"
         android:text="@string/cancel"
         android:textColor="@color/new_design_primary_color"
-        android:visibility="gone"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button7" />
+        app:layout_constraintEnd_toStartOf="@+id/got_it_btn" />
 
 
 </android.support.constraint.ConstraintLayout>

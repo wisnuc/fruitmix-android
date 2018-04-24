@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.winsun.fruitmix.R;
@@ -26,6 +25,8 @@ import com.winsun.fruitmix.component.UserAvatar;
 import com.winsun.fruitmix.databinding.EquipmentItemBinding;
 import com.winsun.fruitmix.databinding.EquipmentUserItemBinding;
 import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource;
+import com.winsun.fruitmix.equipment.search.data.EquipmentFoundedListener;
+import com.winsun.fruitmix.equipment.search.data.EquipmentMDNSSearchManager;
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
 import com.winsun.fruitmix.login.LoginUseCase;
@@ -414,7 +415,7 @@ public class EquipmentPresenter implements ActiveView {
 
         mEquipmentSearchManager = equipmentSearchView.getEquipmentSearchManager();
 
-        mEquipmentSearchManager.startDiscovery(new EquipmentSearchManager.IEquipmentDiscoveryListener() {
+        mEquipmentSearchManager.startDiscovery(new EquipmentFoundedListener() {
             @Override
             public void call(Equipment equipment) {
 

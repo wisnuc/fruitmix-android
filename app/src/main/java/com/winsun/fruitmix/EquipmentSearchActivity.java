@@ -30,12 +30,13 @@ import com.winsun.fruitmix.equipment.search.EquipmentSearchViewModel;
 import com.winsun.fruitmix.equipment.search.WeChatLoginListener;
 import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource;
 
+import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
 import com.winsun.fruitmix.equipment.search.data.InjectEquipment;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.login.InjectLoginUseCase;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.equipment.search.data.Equipment;
-import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager;
+import com.winsun.fruitmix.equipment.search.data.EquipmentMDNSSearchManager;
 import com.winsun.fruitmix.retrieve.file.from.other.app.RetrieveFilePresenter;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.services.ButlerService;

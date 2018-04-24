@@ -1,9 +1,7 @@
 package com.winsun.fruitmix.newdesign201804.equipment.add
 
 import android.content.Intent
-import android.graphics.PorterDuff
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.view.LayoutInflater
@@ -11,14 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
-import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.dialog.BottomMenuDialogFactory
-import com.winsun.fruitmix.equipment.search.data.InjectEquipment
 import com.winsun.fruitmix.model.BottomMenuItem
-import com.winsun.fruitmix.model.operationResult.OperationResult
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeEquipmentSearchManger
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeNewEquipmentInfoDataSource
-import com.winsun.fruitmix.newdesign201804.equipment.list.FakeEquipmentItemDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.list.data.FakeEquipmentItemDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.list.data.InjectEquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.ReinitializationActivity
 import kotlinx.android.synthetic.main.activity_add_equipment.*
 
@@ -37,9 +34,9 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
 
         }
 
-        addEquipmentPresenter = AddEquipmentPresenter(InjectEquipment.provideEquipmentSearchManager(this),
+        addEquipmentPresenter = AddEquipmentPresenter(FakeEquipmentSearchManger(),
                 this, this, this, FakeNewEquipmentInfoDataSource(),
-                FakeEquipmentItemDataSource())
+                InjectEquipmentItemDataSource.inject(this))
 
         new_equipment_viewPager.adapter = addEquipmentPresenter.getViewPagerAdapter()
 
@@ -68,6 +65,14 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
                 ContextCompat.getColor(this, R.color.new_design_progressbar_color),
                 android.graphics.PorterDuff.Mode.SRC_IN)
 
+        addEquipmentPresenter.startSearchState()
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        addEquipmentPresenter.onDestroy()
     }
 
     override fun generateContent(root: ViewGroup?): View {
@@ -87,6 +92,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
         search_progressbar.visibility = View.VISIBLE
 
         refresh_layout.visibility = View.INVISIBLE
+        viewpager_indicator.visibility = View.INVISIBLE
 
         new_equipment_viewPager.visibility = View.INVISIBLE
 
@@ -99,7 +105,10 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
         search_progressbar.visibility = View.INVISIBLE
 
         if (showEquipmentViewPager) {
+
             new_equipment_viewPager.visibility = View.VISIBLE
+            viewpager_indicator.visibility = View.VISIBLE
+
             refresh_layout.visibility = View.INVISIBLE
 
             operate_btn.visibility = View.VISIBLE
@@ -109,14 +118,20 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
             add_equipment_title.setText(R.string.undiscovered_equipment)
 
             new_equipment_viewPager.visibility = View.INVISIBLE
+            viewpager_indicator.visibility = View.INVISIBLE
+
             refresh_layout.visibility = View.VISIBLE
 
             operate_btn.visibility = View.INVISIBLE
+
         }
 
     }
 
     override fun searchSucceedState() {
+
+        if (new_equipment_viewPager.currentItem == 0)
+            addEquipmentPresenter.onPageSelect(0)
 
         searchTimeoutState(true)
 
@@ -127,6 +142,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
         operate_btn.setBackgroundResource(R.drawable.green_btn_bg)
 
         operate_btn.setText(R.string.use_exist_disk_data)
+        operate_btn.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white))
 
     }
 
@@ -135,6 +151,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
         operate_btn.setBackgroundResource(R.drawable.white_btn_bg)
 
         operate_btn.setText(R.string.use_exist_disk_data)
+        operate_btn.setTextColor(ContextCompat.getColor(this, R.color.twenty_six_percent_black))
 
     }
 
@@ -143,6 +160,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
         operate_btn.setBackgroundResource(R.drawable.green_btn_bg)
 
         operate_btn.setText(R.string.add_immediately)
+        operate_btn.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white))
 
     }
 
@@ -151,6 +169,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
         operate_btn.setBackgroundResource(R.drawable.green_btn_bg)
 
         operate_btn.setText(R.string.next_step)
+        operate_btn.setTextColor(ContextCompat.getColor(this, R.color.eighty_seven_percent_white))
 
     }
 

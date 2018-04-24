@@ -758,6 +758,10 @@
     <string name="add_immediately">Add immediately</string>
     <string name="use_exist_disk_data">Use exist disk data</string>
 
+    <string name="select_disk_hint">Please click the device icon to select the disk</string>
+
+    <string name="yes">Yes</string>
+
     <!-- reinitialization -->
     <string name="select_disk_usage_mode">Select disk usage mode</string>
     <string name="select_mode">Select mode</string>
