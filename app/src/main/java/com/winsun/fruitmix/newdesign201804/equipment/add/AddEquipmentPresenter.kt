@@ -51,7 +51,7 @@ interface EquipmentUIState {
 
 interface AddEquipmentView : BaseView {
 
-    fun enterReinitialization()
+    fun enterReinitialization(equipmentName:String)
 
 }
 
@@ -399,7 +399,7 @@ private class ReinitializationEquipmentState(equipmentUIState: EquipmentUIState,
 
     override fun operateBtnOnClick(context: Context, addEquipmentPresenter: AddEquipmentPresenter, btn: View) {
 
-        addEquipmentPresenter.addEquipmentView.enterReinitialization()
+        addEquipmentPresenter.addEquipmentView.enterReinitialization(reinitializationEquipmentInfo.equipmentName)
 
     }
 
@@ -439,7 +439,7 @@ private fun showUnboundEquipmentDetail(context: Context, unBoundEquipmentInfo: U
     view.equipment_name.text = unBoundEquipmentInfo.equipmentName
 
     view.reinitializeBtn.setOnClickListener {
-        addEquipmentPresenter.addEquipmentView.enterReinitialization()
+        addEquipmentPresenter.addEquipmentView.enterReinitialization(unBoundEquipmentInfo.equipmentName)
     }
 
     view.unboundEquipmentRecyclerView.layoutManager = LinearLayoutManager(context)

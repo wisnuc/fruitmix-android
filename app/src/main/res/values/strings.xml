@@ -784,4 +784,7 @@
     <string name="single">SINGLE</string>
     <string name="raid1">RAID1</string>
 
+    <string name="add_time">Add Time</string>
+    <string name="usage_mode">Usage Mode</string>
+
 </resources>

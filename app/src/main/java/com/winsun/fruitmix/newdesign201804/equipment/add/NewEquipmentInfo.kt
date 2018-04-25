@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.newdesign201804.equipment.add
 
+import android.content.Context
+import com.winsun.fruitmix.R
 import com.winsun.fruitmix.user.User
 
 open class BaseNewEquipmentInfo(val equipmentName: String, val equipmentIP: String)
@@ -20,6 +22,13 @@ enum class DiskMode {
     SINGLE, RAID1
 }
 
-data class UnboundEquipmentDiskInfo(val originalEquipmentName: String, val diskMode: DiskMode, val availableDiskSize: Long, val totalDiskSize: Long)
+fun convertDiskMode(diskMode: DiskMode,context:Context):String{
+   return when (diskMode) {
+        DiskMode.SINGLE -> context.getString(R.string.single)
+        DiskMode.RAID1 -> context.getString(R.string.raid1)
+    }
+}
 
-data class AvailableEquipmentDiskInfo(val admin: User, val availableDiskSize: Long, val totalDiskSize: Long)
+data class UnboundEquipmentDiskInfo(val originalEquipmentName: String, val diskMode: DiskMode, val availableDiskSize: Double, val totalDiskSize: Double)
+
+data class AvailableEquipmentDiskInfo(val admin: User, val availableDiskSize: Double, val totalDiskSize: Double)

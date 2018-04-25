@@ -7,7 +7,7 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 
-data class DiskItem(val brand: String, val capacity: Long)
+data class DiskItem(val brand: String, val capacity: Double)
 
 class HandleAbnormalEquipmentPresenter {
 

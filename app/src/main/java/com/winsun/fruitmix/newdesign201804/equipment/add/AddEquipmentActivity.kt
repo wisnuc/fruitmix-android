@@ -16,6 +16,7 @@ import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeEquipmentSearc
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeNewEquipmentInfoDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.FakeEquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.InjectEquipmentItemDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.REINITIAL_EQUIPMENT_NAME_KEY
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.ReinitializationActivity
 import kotlinx.android.synthetic.main.activity_add_equipment.*
 
@@ -218,8 +219,13 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
         startActivity(Intent(this, AddEquipmentByIpActivity::class.java))
     }
 
-    override fun enterReinitialization() {
-        startActivity(Intent(this, ReinitializationActivity::class.java))
+    override fun enterReinitialization(equipmentName: String) {
+
+        val intent = Intent(this, ReinitializationActivity::class.java)
+        intent.putExtra(REINITIAL_EQUIPMENT_NAME_KEY, equipmentName)
+
+        startActivity(intent)
+
     }
 
 }

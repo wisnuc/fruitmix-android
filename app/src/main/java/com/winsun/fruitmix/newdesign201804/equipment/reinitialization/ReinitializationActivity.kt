@@ -6,20 +6,39 @@ import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.newdesign201804.equipment.list.data.FakeEquipmentItemDataSource
+import com.winsun.fruitmix.newdesign201804.wechatUser.WeChatUserInfoDataSource
+import com.winsun.fruitmix.user.User
+import com.winsun.fruitmix.util.Util
+import kotlinx.android.synthetic.main.activity_reinitialization.*
+
+const val REINITIAL_EQUIPMENT_NAME_KEY = "equipment_name_key"
 
 class ReinitializationActivity : BaseToolbarActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        TODO()
+        val equipmentName = intent.getStringExtra(REINITIAL_EQUIPMENT_NAME_KEY)
+
+        val user = User()
+
+        val weChatTokenUserWrapper = WeChatUserInfoDataSource.weChatTokenUserWrapper
+
+        user.avatar = weChatTokenUserWrapper.avatarUrl
+        user.userName = weChatTokenUserWrapper.nickName
+        user.defaultAvatar = Util.getUserNameForAvatar(user.userName)
+
+        val reinitializationPresenter = ReinitializationPresenter(reinitializationViewPager.context,
+                user, reinitializationViewPager, { finish() }, equipmentName, FakeEquipmentItemDataSource)
+
+        reinitializationPresenter.init()
+
     }
 
     override fun generateContent(root: ViewGroup?): View {
 
-        View.inflate(this,R.layout.reinitialization_succeed,null)
-
-        return LayoutInflater.from(this).inflate(R.layout.activity_reinitialization,root,false)
+        return LayoutInflater.from(this).inflate(R.layout.activity_reinitialization, root, false)
 
     }
 

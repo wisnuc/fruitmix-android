@@ -32,10 +32,7 @@ class UnboundEquipmentRecyclerViewAdapter : BaseRecyclerViewAdapter<SimpleViewHo
 
         view?.original_equipment_name?.text = unboundEquipmentDiskInfo.originalEquipmentName
 
-        view?.disk_mode?.text = when (unboundEquipmentDiskInfo.diskMode) {
-            DiskMode.SINGLE -> context?.getString(R.string.single)
-            DiskMode.RAID1 -> context?.getString(R.string.raid1)
-        }
+        view?.disk_mode?.text = convertDiskMode(unboundEquipmentDiskInfo.diskMode,context!!)
 
         view?.disk_num?.text = "$position/$itemCount"
 

@@ -96,6 +96,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/select_mode_title">
 
                 <RadioButton
+                    android:id="@+id/singleModeRadioBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/single"
@@ -103,6 +104,7 @@
                     android:textSize="14dp" />
 
                 <RadioButton
+                    android:id="@+id/raid1ModeRadioBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="48dp"
