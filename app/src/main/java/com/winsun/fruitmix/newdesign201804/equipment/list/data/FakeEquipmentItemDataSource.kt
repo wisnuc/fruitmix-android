@@ -4,43 +4,67 @@ import android.util.Log
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
+import com.winsun.fruitmix.newdesign201804.equipment.abnormal.data.DiskItemInfo
+import com.winsun.fruitmix.newdesign201804.equipment.abnormal.data.DiskState
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.DiskMode
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentItem
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentType
+import com.winsun.fruitmix.newdesign201804.equipment.model.*
+import com.winsun.fruitmix.util.Util
 
 private const val TAG = "FakeEquipmentItemData"
 
 object FakeEquipmentItemDataSource : EquipmentItemDataSource {
 
-    private val equipmentItems: MutableList<EquipmentItem> = mutableListOf()
+    private val baseEquipmentItems: MutableList<BaseEquipmentItem> = mutableListOf()
+    private val baseEquipmentItemMaps = mutableMapOf<String, BaseEquipmentItem>()
 
-    private var cacheDirty:Boolean
+    private var cacheDirty: Boolean
 
     init {
 
         cacheDirty = true
 
-        equipmentItems.add(EquipmentItem(EquipmentType.CLOUD_CONNECTED, "test1"))
-        equipmentItems.add(EquipmentItem(EquipmentType.CLOUD_UNCONNECTED, "test2"))
-        equipmentItems.add(EquipmentItem(EquipmentType.DISK_ABNORMAL, "test3"))
-        equipmentItems.add(EquipmentItem(EquipmentType.POWER_OFF, "test4"))
-        equipmentItems.add(EquipmentItem(EquipmentType.UNDER_REVIEW, "test5"))
-        equipmentItems.add(EquipmentItem(EquipmentType.OFFLINE, "test6"))
+        baseEquipmentItems.add(CloudConnectEquipItem("test1", Util.createLocalUUid()))
+        baseEquipmentItems.add(CloudUnConnectedEquipmentItem("test2", Util.createLocalUUid()))
+
+        baseEquipmentItems.add(DiskAbnormalEquipmentItem("test3", Util.createLocalUUid(), DiskMode.SINGLE,
+                mutableListOf(DiskItemInfo(DiskState.NORMAL, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
+                        DiskItemInfo(DiskState.NEW_AVAILABLE, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
+                        DiskItemInfo(DiskState.LOST, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"))))
+
+        baseEquipmentItems.add(DiskAbnormalEquipmentItem("test3-raid1", Util.createLocalUUid(), DiskMode.RAID1,
+                mutableListOf(DiskItemInfo(DiskState.NORMAL, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
+                        DiskItemInfo(DiskState.NEW_AVAILABLE, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
+                        DiskItemInfo(DiskState.LOST, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"))))
+
+        baseEquipmentItems.add(PowerOffEquipmentItem("test4", Util.createLocalUUid()))
+        baseEquipmentItems.add(UnderReviewEquipmentItem("test5", Util.createLocalUUid()))
+        baseEquipmentItems.add(OfflineEquipmentItem("test6", Util.createLocalUUid()))
+
+        baseEquipmentItems.forEach {
+            baseEquipmentItemMaps[it.uuid] = it
+        }
 
     }
 
-    override fun getEquipmentItems(baseLoadDataCallback: BaseLoadDataCallback<EquipmentItem>) {
+    override fun getEquipmentItems(baseLoadDataCallback: BaseLoadDataCallback<BaseEquipmentItem>) {
 
         cacheDirty = false
 
         Log.d(TAG, "cacheDirty: ${isCacheDirty()}")
 
-        baseLoadDataCallback.onSucceed(equipmentItems, OperationSuccess())
+        baseLoadDataCallback.onSucceed(baseEquipmentItems, OperationSuccess())
 
     }
 
-    override fun addEquipmentItems(equipmentItem: EquipmentItem, baseOperateCallback: BaseOperateCallback) {
+    override fun getEquipmentItemInCache(itemUUID: String): BaseEquipmentItem? {
+        return baseEquipmentItemMaps[itemUUID]
+    }
 
-        equipmentItems.add(equipmentItem)
+    override fun addEquipmentItems(baseEquipmentItem: BaseEquipmentItem, baseOperateCallback: BaseOperateCallback) {
+
+        baseEquipmentItems.add(baseEquipmentItem)
 
         cacheDirty = true
 
@@ -50,12 +74,12 @@ object FakeEquipmentItemDataSource : EquipmentItemDataSource {
 
     }
 
-    fun resetCacheDirty(){
+    fun resetCacheDirty() {
         cacheDirty = true
     }
 
 
-    override fun isCacheDirty():Boolean{
+    override fun isCacheDirty(): Boolean {
         return cacheDirty
     }
 

@@ -19,12 +19,14 @@ import com.winsun.fruitmix.equipment.search.data.Equipment
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager
 import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.operationResult.OperationResult
-import com.winsun.fruitmix.newdesign201804.equipment.add.data.NewEquipmentInfoDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.*
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentItem
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentType
-import com.winsun.fruitmix.newdesign201804.equipment.list.data.FakeEquipmentItemDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.model.BaseEquipmentItem
+import com.winsun.fruitmix.newdesign201804.equipment.model.CloudConnectEquipItem
 import com.winsun.fruitmix.util.FileUtil
+import com.winsun.fruitmix.util.Util
 import kotlinx.android.synthetic.main.available_equipment_detail.view.*
 import kotlinx.android.synthetic.main.equipment_detail_title.view.*
 import kotlinx.android.synthetic.main.unbound_equipment_detail.view.*
@@ -51,7 +53,7 @@ interface EquipmentUIState {
 
 interface AddEquipmentView : BaseView {
 
-    fun enterReinitialization(equipmentName:String)
+    fun enterReinitialization(equipmentName: String)
 
 }
 
@@ -226,9 +228,9 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
 
     fun getItemSize() = baseNewEquipmentStates.size
 
-    fun addEquipmentItem(equipmentItem: EquipmentItem, baseOperateCallback: BaseOperateCallback) {
+    fun addEquipmentItem(baseEquipmentItem: BaseEquipmentItem, baseOperateCallback: BaseOperateCallback) {
 
-        equipmentItemDataSource.addEquipmentItems(equipmentItem, baseOperateCallback)
+        equipmentItemDataSource.addEquipmentItems(baseEquipmentItem, baseOperateCallback)
 
     }
 
@@ -323,12 +325,12 @@ private class AvailableEquipmentState(equipmentUIState: EquipmentUIState,
 }
 
 private fun addEquipment(addEquipmentPresenter: AddEquipmentPresenter, context: Context, btn: View, name: String) {
-    val equipmentItem = EquipmentItem(EquipmentType.CLOUD_CONNECTED, name)
+    val baseEquipmentItem = CloudConnectEquipItem(name,Util.createLocalUUid())
 
     addEquipmentPresenter.addEquipmentView.showProgressDialog(context.getString(R.string.operating_title,
             context.getString(R.string.add_equipment)))
 
-    addEquipmentPresenter.addEquipmentItem(equipmentItem, object : BaseOperateCallback {
+    addEquipmentPresenter.addEquipmentItem(baseEquipmentItem, object : BaseOperateCallback {
         override fun onSucceed() {
 
             addEquipmentPresenter.addEquipmentView.dismissDialog()

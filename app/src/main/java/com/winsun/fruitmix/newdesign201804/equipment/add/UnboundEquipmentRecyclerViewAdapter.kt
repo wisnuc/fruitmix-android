@@ -3,6 +3,8 @@ package com.winsun.fruitmix.newdesign201804.equipment.add
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.UnboundEquipmentDiskInfo
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.convertDiskMode
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.util.FileUtil
@@ -32,16 +34,16 @@ class UnboundEquipmentRecyclerViewAdapter : BaseRecyclerViewAdapter<SimpleViewHo
 
         view?.original_equipment_name?.text = unboundEquipmentDiskInfo.originalEquipmentName
 
-        view?.disk_mode?.text = convertDiskMode(unboundEquipmentDiskInfo.diskMode,context!!)
+        view?.disk_mode?.text = convertDiskMode(unboundEquipmentDiskInfo.diskMode, context!!)
 
-        view?.disk_num?.text = "$position/$itemCount"
+        view.disk_num?.text = "$position/$itemCount"
 
-        view?.disk_space?.text = "${FileUtil.formatFileSize(unboundEquipmentDiskInfo.availableDiskSize)}/${FileUtil.formatFileSize(unboundEquipmentDiskInfo.totalDiskSize)}"
+        view.disk_space?.text = "${FileUtil.formatFileSize(unboundEquipmentDiskInfo.availableDiskSize)}/${FileUtil.formatFileSize(unboundEquipmentDiskInfo.totalDiskSize)}"
 
         if (position == selectUnboundEquipmentDiskInfoPosition)
-            view?.select_volume_radioButton?.isChecked = true
+            view.select_volume_radioButton?.isChecked = true
 
-        view?.select_volume_radioButton?.setOnClickListener {
+        view.select_volume_radioButton?.setOnClickListener {
             selectUnboundEquipmentDiskInfoPosition = holder.adapterPosition
         }
 

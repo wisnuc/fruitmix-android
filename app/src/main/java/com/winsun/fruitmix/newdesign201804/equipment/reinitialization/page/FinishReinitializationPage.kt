@@ -6,8 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
-import com.winsun.fruitmix.newdesign201804.equipment.add.DiskMode
-import com.winsun.fruitmix.newdesign201804.equipment.add.convertDiskMode
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.DiskMode
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.convertDiskMode
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.data.ReinitializationEquipmentDiskInfo
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
@@ -16,12 +16,13 @@ import com.winsun.fruitmix.util.FileUtil
 import com.winsun.fruitmix.util.Util
 import kotlinx.android.synthetic.main.reinitialization_equipment_item.view.*
 import kotlinx.android.synthetic.main.reinitialization_succeed.view.*
-import kotlinx.android.synthetic.main.unbound_equipment_detail.view.*
 
 private data class ReinitializationEquipmentItem(val iconResID: Int, val itemExplain: String, val itemInfo: String)
 
-class FinishReinitializationPage(val context: Context, val admin: User, private val selectEquipmentDiskInfos: List<ReinitializationEquipmentDiskInfo>,
-                                 private val diskMode: DiskMode, private val gotIt:()->Unit) : InitialPage {
+class FinishReinitializationPage(val context: Context, val admin: User, private val gotIt:()->Unit) : InitialPage {
+
+    private var mSelectEquipmentDiskInfos: List<ReinitializationEquipmentDiskInfo> = listOf()
+    private var mDiskMode = DiskMode.SINGLE
 
     private val view = LayoutInflater.from(context).inflate(R.layout.reinitialization_succeed, null)
 
@@ -29,15 +30,22 @@ class FinishReinitializationPage(val context: Context, val admin: User, private 
         return view
     }
 
+    fun setData(selectEquipmentDiskInfo: List<ReinitializationEquipmentDiskInfo>,diskMode: DiskMode){
+        mSelectEquipmentDiskInfos = selectEquipmentDiskInfo
+        mDiskMode = diskMode
+    }
+
     override fun refreshView() {
 
-        view.got_it_btn.setOnClickListener {
+        view.gotItBtn.setOnClickListener {
             gotIt()
         }
 
         view.equipment_info_recyclerview.layoutManager = LinearLayoutManager(context)
 
         val reinitializationEquipmentItemAdapter = ReinitializationEquipmentItemAdapter()
+
+        view.equipment_info_recyclerview.adapter = reinitializationEquipmentItemAdapter
 
         val reinitializationEquipmentItems = mutableListOf<ReinitializationEquipmentItem>()
 
@@ -48,12 +56,12 @@ class FinishReinitializationPage(val context: Context, val admin: User, private 
                 Util.formatDate(System.currentTimeMillis())))
 
         reinitializationEquipmentItems.add(ReinitializationEquipmentItem(R.drawable.disk_icon_green, context.getString(R.string.usage_mode),
-                convertDiskMode(diskMode, context)))
+                convertDiskMode(mDiskMode, context)))
 
         var availableDiskSize = 0.0
         var totalDiskSize = 0.0
 
-        selectEquipmentDiskInfos.forEach {
+        mSelectEquipmentDiskInfos.forEach {
             availableDiskSize += it.availableDiskSize
             totalDiskSize += it.totalDiskSize
         }

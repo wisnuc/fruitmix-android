@@ -13,9 +13,11 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
+import com.winsun.fruitmix.newdesign201804.equipment.abnormal.EQUIPMENT_ITEM_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.equipment.abnormal.HandleAbnormalEquipmentActivity
 import com.winsun.fruitmix.newdesign201804.equipment.add.AddEquipmentActivity
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.model.*
 import com.winsun.fruitmix.newdesign201804.login.LanLoginActivity
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewHolder
@@ -37,11 +39,11 @@ class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemD
         Log.d(TAG, "cache is dirty: " + equipmentItemDataSource.isCacheDirty())
 
         if (equipmentItemDataSource.isCacheDirty())
-            equipmentItemDataSource.getEquipmentItems(object : BaseLoadDataCallbackWrapper<EquipmentItem>(
+            equipmentItemDataSource.getEquipmentItems(object : BaseLoadDataCallbackWrapper<BaseEquipmentItem>(
 
-                    object : BaseLoadDataCallbackImpl<EquipmentItem>() {
+                    object : BaseLoadDataCallbackImpl<BaseEquipmentItem>() {
 
-                        override fun onSucceed(data: MutableList<EquipmentItem>?, operationResult: OperationResult?) {
+                        override fun onSucceed(data: MutableList<BaseEquipmentItem>?, operationResult: OperationResult?) {
                             super.onSucceed(data, operationResult)
 
                             equipmentItems.clear()
@@ -106,25 +108,30 @@ class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemD
 
                 holder?.itemView?.equipment_name?.text = equipmentItem.name
 
-                holder?.itemView?.equipment_state_tv?.text = getEquipmentTypeStr(context!!, equipmentItem.equipment_TYPE)
+                holder?.itemView?.equipment_state_tv?.text = equipmentItem.getEquipmentTypeStr(context!!)
 
-                holder.itemView.equipment_state_icon.setImageResource(getEquipmentTypeIconId(equipmentItem.equipment_TYPE))
+                holder.itemView.equipment_state_icon.setImageResource(equipmentItem.getEquipmentTypeIconId())
 
                 holder.itemView.setOnClickListener {
 
-                    when (equipmentItem.equipment_TYPE) {
-                        EquipmentType.CLOUD_UNCONNECTED -> {
+                    when (equipmentItem) {
+                        is CloudUnConnectedEquipmentItem -> {
                             val intent = Intent(context, LanLoginActivity::class.java)
                             context.startActivity(intent)
                         }
-                        EquipmentType.UNDER_REVIEW -> showMessageDialog(context, R.string.under_review,
+                        is UnderReviewEquipmentItem -> showMessageDialog(context, R.string.under_review,
                                 context.getString(R.string.under_review_message, "Mark"))
-                        EquipmentType.POWER_OFF -> showMessageDialog(context, R.string.equipment_already_power_off_title,
+                        is PowerOffEquipmentItem -> showMessageDialog(context, R.string.equipment_already_power_off_title,
                                 context.getString(R.string.equipment_already_power_off_message, "2018年4月11日17:40:10"))
-                        EquipmentType.OFFLINE -> showMessageDialog(context, R.string.equipment_already_offline_title,
+                        is OfflineEquipmentItem -> showMessageDialog(context, R.string.equipment_already_offline_title,
                                 context.getString(R.string.equipment_already_offline_message))
-                        EquipmentType.DISK_ABNORMAL -> {
-                            context.startActivity(Intent(context, HandleAbnormalEquipmentActivity::class.java))
+                        is DiskAbnormalEquipmentItem -> {
+
+                            val intent = Intent(context, HandleAbnormalEquipmentActivity::class.java)
+                            intent.putExtra(EQUIPMENT_ITEM_UUID_KEY, equipmentItem.uuid)
+
+                            context.startActivity(intent)
+
                         }
                         else -> {
 
@@ -170,7 +177,7 @@ class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemD
     }
 
 
-    private class EquipmentViewItem(var equipmentItem: EquipmentItem) : ViewItem {
+    private class EquipmentViewItem(var equipmentItem: BaseEquipmentItem) : ViewItem {
 
         override fun getType(): Int {
 

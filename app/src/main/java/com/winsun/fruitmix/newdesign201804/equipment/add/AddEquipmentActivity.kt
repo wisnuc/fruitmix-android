@@ -14,11 +14,14 @@ import com.winsun.fruitmix.dialog.BottomMenuDialogFactory
 import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeEquipmentSearchManger
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeNewEquipmentInfoDataSource
-import com.winsun.fruitmix.newdesign201804.equipment.list.data.FakeEquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.InjectEquipmentItemDataSource
-import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.REINITIAL_EQUIPMENT_NAME_KEY
+import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.REINITIALIZE_EQUIPMENT_NAME_KEY
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.ReinitializationActivity
 import kotlinx.android.synthetic.main.activity_add_equipment.*
+
+const val REINITIALIZATION_ACTIVITY_REQUEST_CODE = 0x1002
+
+const val FINISH_REINITIALIZATION_RESULT_CODE = 0x1003
 
 class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, EquipmentUIState, AddEquipmentView {
 
@@ -27,7 +30,11 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setToolbarWhiteStyle(toolbarViewModel)
+        setStatusBarToolbarBgColor(R.color.new_design_primary_color)
+
         toolbarViewModel.showMenu.set(true)
+        toolbarViewModel.menuResID.set(R.drawable.more_icon_white)
 
         toolbarViewModel.setToolbarMenuBtnOnClickListener {
 
@@ -222,9 +229,16 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
     override fun enterReinitialization(equipmentName: String) {
 
         val intent = Intent(this, ReinitializationActivity::class.java)
-        intent.putExtra(REINITIAL_EQUIPMENT_NAME_KEY, equipmentName)
+        intent.putExtra(REINITIALIZE_EQUIPMENT_NAME_KEY, equipmentName)
 
-        startActivity(intent)
+        startActivityForResult(intent, REINITIALIZATION_ACTIVITY_REQUEST_CODE)
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        if (requestCode == REINITIALIZATION_ACTIVITY_REQUEST_CODE && resultCode == FINISH_REINITIALIZATION_RESULT_CODE)
+            finish()
 
     }
 

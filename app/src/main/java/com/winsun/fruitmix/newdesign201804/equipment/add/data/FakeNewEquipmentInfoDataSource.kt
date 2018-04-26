@@ -3,7 +3,6 @@ package com.winsun.fruitmix.newdesign201804.equipment.add.data
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.equipment.search.data.Equipment
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
-import com.winsun.fruitmix.newdesign201804.equipment.add.*
 import com.winsun.fruitmix.user.User
 
 class FakeNewEquipmentInfoDataSource : NewEquipmentInfoDataSource {
@@ -13,7 +12,7 @@ class FakeNewEquipmentInfoDataSource : NewEquipmentInfoDataSource {
 
     override fun getAvailableEquipmentInfo(equipment: Equipment, baseLoadDataCallback: BaseLoadDataCallback<AvailableEquipmentInfo>) {
 
-        val availableEquipmentDiskInfo = AvailableEquipmentDiskInfo(createTestUser(), 6 * 1024 * 1024 * 1024L, 15 * 1024 * 1024 * 1024L)
+        val availableEquipmentDiskInfo = AvailableEquipmentDiskInfo(createTestUser(), 6.0 * 1024 * 1024 * 1024, 15.0 * 1024 * 1024 * 1024)
 
         val availableEquipmentInfo = AvailableEquipmentInfo(createTestEquipmentName(), equipment.hosts[0], availableEquipmentDiskInfo)
 
@@ -28,7 +27,7 @@ class FakeNewEquipmentInfoDataSource : NewEquipmentInfoDataSource {
         for (i in 0..unboundDiskCount) {
 
             val unboundEquipmentDiskInfo = UnboundEquipmentDiskInfo("TestOriginalEquipment$i",
-                    DiskMode.RAID1, 2 * 1024 * 1024 * 1024L, 12 * 1024 * 1024 * 1024L)
+                    DiskMode.RAID1, 2.0 * 1024 * 1024 * 1024, 12.0 * 1024 * 1024 * 1024)
 
             unboundDiskInfos.add(unboundEquipmentDiskInfo)
 

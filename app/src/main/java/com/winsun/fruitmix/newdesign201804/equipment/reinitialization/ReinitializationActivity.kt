@@ -6,20 +6,24 @@ import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.newdesign201804.equipment.add.FINISH_REINITIALIZATION_RESULT_CODE
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.FakeEquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.wechatUser.WeChatUserInfoDataSource
 import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.util.Util
 import kotlinx.android.synthetic.main.activity_reinitialization.*
 
-const val REINITIAL_EQUIPMENT_NAME_KEY = "equipment_name_key"
+const val REINITIALIZE_EQUIPMENT_NAME_KEY = "reinitialize_equipment_name_key"
 
 class ReinitializationActivity : BaseToolbarActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val equipmentName = intent.getStringExtra(REINITIAL_EQUIPMENT_NAME_KEY)
+        setToolbarWhiteStyle(toolbarViewModel)
+        setStatusBarToolbarBgColor(R.color.new_design_primary_color)
+
+        val equipmentName = intent.getStringExtra(REINITIALIZE_EQUIPMENT_NAME_KEY)
 
         val user = User()
 
@@ -30,7 +34,12 @@ class ReinitializationActivity : BaseToolbarActivity() {
         user.defaultAvatar = Util.getUserNameForAvatar(user.userName)
 
         val reinitializationPresenter = ReinitializationPresenter(reinitializationViewPager.context,
-                user, reinitializationViewPager, { finish() }, equipmentName, FakeEquipmentItemDataSource)
+                user, reinitializationViewPager, {
+
+            setResult(FINISH_REINITIALIZATION_RESULT_CODE)
+            finish()
+
+        }, equipmentName, FakeEquipmentItemDataSource)
 
         reinitializationPresenter.init()
 

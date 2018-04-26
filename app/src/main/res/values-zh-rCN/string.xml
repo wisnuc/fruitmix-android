@@ -758,4 +758,8 @@
     <string name="add_time">添加时间</string>
     <string name="usage_mode">使用模式</string>
 
+    <string name="disk_brand_space">%1$s-%2$s</string>
+    <string name="lost_disk_description">· %1$s %2$s 序列号:%3$s</string>
+
+
 </resources>

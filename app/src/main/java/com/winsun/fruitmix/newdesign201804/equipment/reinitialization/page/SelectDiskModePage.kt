@@ -6,8 +6,9 @@ import android.support.v7.widget.GridLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
 import com.winsun.fruitmix.R
-import com.winsun.fruitmix.newdesign201804.equipment.add.DiskMode
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.DiskMode
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.data.ReinitializationEquipmentDiskInfo
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
@@ -21,7 +22,11 @@ class SelectDiskModePage(val context: Context, private val reinitializationEquip
 
     private val view = LayoutInflater.from(context).inflate(R.layout.select_disk_mode_viewpager_item, null)
 
-    private var selectReinitializationEquipmentDiskInfos:MutableList<ReinitializationEquipmentDiskInfo> = mutableListOf()
+    private lateinit var selectReinitializationEquipmentDiskInfos: List<ReinitializationEquipmentDiskInfo>
+
+    private lateinit var singleModeRadioButton: RadioButton
+    private lateinit var raid1ModeRadioButton: RadioButton
+    private var currentMode = DiskMode.SINGLE
 
     override fun getView(): View {
         return view
@@ -29,15 +34,13 @@ class SelectDiskModePage(val context: Context, private val reinitializationEquip
 
     override fun refreshView() {
 
-        selectReinitializationEquipmentDiskInfos.addAll(reinitializationEquipmentDiskInfos)
+        selectReinitializationEquipmentDiskInfos = reinitializationEquipmentDiskInfos
 
         view.selectModeRecyclerView.layoutManager = GridLayoutManager(context, 4)
         view.selectModeRecyclerView.itemAnimator = DefaultItemAnimator()
 
-        val singleModeRadioButton = view.singleModeRadioBtn
-        val raid1ModeRadioButton = view.raid1ModeRadioBtn
-
-        var currentMode = DiskMode.SINGLE
+        singleModeRadioButton = view.singleModeRadioBtn
+        raid1ModeRadioButton = view.raid1ModeRadioBtn
 
         singleModeRadioButton.setOnClickListener {
             currentMode = DiskMode.SINGLE
@@ -48,27 +51,7 @@ class SelectDiskModePage(val context: Context, private val reinitializationEquip
         }
 
         val selectDiskItemRecyclerViewAdapter = SelectDiskItemRecyclerViewAdapter {
-
-            raid1ModeRadioButton.isEnabled = it.size >= 2
-
-            var availableDiskSize = 0.0
-            var totalDiskSize = 0.0
-
-            it.forEach {
-                availableDiskSize += it.availableDiskSize
-                totalDiskSize += it.totalDiskSize
-            }
-
-            if (currentMode == DiskMode.SINGLE) {
-                view.available_capacity.text = FileUtil.formatFileSize(availableDiskSize)
-                view.total_disk_capacity.text = FileUtil.formatFileSize(totalDiskSize)
-            } else if (currentMode == DiskMode.RAID1) {
-                view.available_capacity.text = FileUtil.formatFileSize(availableDiskSize)
-                view.total_disk_capacity.text = FileUtil.formatFileSize(totalDiskSize)
-            }
-
-            selectReinitializationEquipmentDiskInfos = it
-
+            handleSelectItemCountChanged(it)
         }
 
         view.selectModeRecyclerView.adapter = selectDiskItemRecyclerViewAdapter
@@ -76,10 +59,36 @@ class SelectDiskModePage(val context: Context, private val reinitializationEquip
         selectDiskItemRecyclerViewAdapter.setItemList(reinitializationEquipmentDiskInfos)
         selectDiskItemRecyclerViewAdapter.notifyDataSetChanged()
 
+        handleSelectItemCountChanged(selectReinitializationEquipmentDiskInfos)
+
         view.next_step.setOnClickListener {
 
-            nextStep(selectReinitializationEquipmentDiskInfos,currentMode)
+            nextStep(selectReinitializationEquipmentDiskInfos, currentMode)
         }
+
+
+    }
+
+    private fun handleSelectItemCountChanged(selectItems: List<ReinitializationEquipmentDiskInfo>) {
+        raid1ModeRadioButton.isEnabled = selectItems.size >= 2
+
+        var availableDiskSize = 0.0
+        var totalDiskSize = 0.0
+
+        selectItems.forEach {
+            availableDiskSize += it.availableDiskSize
+            totalDiskSize += it.totalDiskSize
+        }
+
+        if (currentMode == DiskMode.SINGLE) {
+            view.available_capacity.text = FileUtil.formatFileSize(availableDiskSize)
+            view.total_disk_capacity.text = FileUtil.formatFileSize(totalDiskSize)
+        } else if (currentMode == DiskMode.RAID1) {
+            view.available_capacity.text = FileUtil.formatFileSize(availableDiskSize)
+            view.total_disk_capacity.text = FileUtil.formatFileSize(totalDiskSize)
+        }
+
+        selectReinitializationEquipmentDiskInfos = selectItems
 
     }
 
@@ -96,7 +105,7 @@ class SelectDiskModePage(val context: Context, private val reinitializationEquip
 
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): SimpleViewHolder {
 
-            val view = LayoutInflater.from(context).inflate(R.layout.select_disk_item, parent, false)
+            val view = LayoutInflater.from(parent?.context).inflate(R.layout.select_disk_item, parent, false)
 
             return SimpleViewHolder(view)
 
@@ -106,14 +115,18 @@ class SelectDiskModePage(val context: Context, private val reinitializationEquip
 
             val reinitializationEquipmentDiskInfo = mItemList[position]
 
-            holder?.itemView?.disk_item_tv?.text = reinitializationEquipmentDiskInfo.brand + "-" + FileUtil.formatFileSize(reinitializationEquipmentDiskInfo.totalDiskSize)
+            val view = holder?.itemView
 
-            holder?.itemView?.checkBox?.setOnClickListener {
+            view?.disk_item_tv?.text = view?.context?.getString(R.string.disk_brand_space,reinitializationEquipmentDiskInfo.brand, FileUtil.formatFileSize(reinitializationEquipmentDiskInfo.totalDiskSize))
 
-                if (holder.itemView.checkBox.isChecked)
-                    selectItems.remove(reinitializationEquipmentDiskInfo)
-                else
+            view?.checkBox?.isChecked = selectItems.contains(reinitializationEquipmentDiskInfo)
+
+            view?.checkBox?.setOnCheckedChangeListener { buttonView, isChecked ->
+
+                if (isChecked)
                     selectItems.add(reinitializationEquipmentDiskInfo)
+                else
+                    selectItems.remove(reinitializationEquipmentDiskInfo)
 
                 onSelectItemCountChanged(selectItems)
 

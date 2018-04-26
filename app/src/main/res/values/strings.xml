@@ -787,4 +787,7 @@
     <string name="add_time">Add Time</string>
     <string name="usage_mode">Usage Mode</string>
 
+    <string name="disk_brand_space">%1$s-%2$s</string>
+    <string name="lost_disk_description">· %1$s %2$s Serial Number:%3$s</string>
+
 </resources>

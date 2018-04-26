@@ -4,12 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".newdesign201804.equipment.abnormal.HandleAbnormalEquipmentActivity">
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerView2"
+        android:id="@+id/diskInfoRecyclerView"
         android:layout_width="0dp"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
         android:layout_marginLeft="12dp"
         android:layout_marginRight="12dp"
@@ -20,7 +21,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView63"
+        android:id="@+id/diskModeTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
@@ -30,7 +31,7 @@
         android:textColor="@color/eighty_seven_percent_black"
         android:textSize="14dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recyclerView2"
+        app:layout_constraintTop_toBottomOf="@+id/diskInfoRecyclerView"
         tools:text="@string/single" />
 
     <TextView
@@ -44,7 +45,7 @@
         android:textColor="@color/fifty_four_percent_black"
         android:textSize="12dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView63" />
+        app:layout_constraintTop_toBottomOf="@+id/diskModeTextView" />
 
     <View
         android:id="@+id/view"
@@ -78,9 +79,9 @@
         app:layout_constraintTop_toTopOf="@+id/imageView18" />
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerView3"
+        android:id="@+id/lostDiskInfoRecyclerView"
         android:layout_width="0dp"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
@@ -104,7 +105,7 @@
         android:textSize="14dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/recyclerView3" />
+        app:layout_constraintTop_toBottomOf="@+id/lostDiskInfoRecyclerView" />
 
     <TextView
         android:id="@+id/textView67"
@@ -120,8 +121,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView66" />
 
     <Button
-        android:id="@+id/button13"
-        style="@style/NoPaddingButton"
+        android:id="@+id/repairBtn"
         android:layout_width="wrap_content"
         android:layout_height="36dp"
         android:layout_marginEnd="16dp"
@@ -134,8 +134,7 @@
         app:layout_constraintTop_toBottomOf="@+id/textView67" />
 
     <Button
-        android:id="@+id/button14"
-        style="@style/NoPaddingButton"
+        android:id="@+id/continueUseBtn"
         android:layout_width="wrap_content"
         android:layout_height="36dp"
         android:layout_marginEnd="16dp"
@@ -144,7 +143,7 @@
         android:background="@drawable/white_btn_bg"
         android:text="@string/continue_to_use"
         android:textColor="@color/new_design_primary_color"
-        app:layout_constraintEnd_toStartOf="@+id/button13"
+        app:layout_constraintEnd_toStartOf="@+id/repairBtn"
         app:layout_constraintTop_toBottomOf="@+id/textView67" />
 
 

@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.newdesign201804.equipment.add
+package com.winsun.fruitmix.newdesign201804.equipment.add.data
 
 import android.content.Context
 import com.winsun.fruitmix.R
@@ -22,7 +22,7 @@ enum class DiskMode {
     SINGLE, RAID1
 }
 
-fun convertDiskMode(diskMode: DiskMode,context:Context):String{
+fun convertDiskMode(diskMode: DiskMode, context:Context):String{
    return when (diskMode) {
         DiskMode.SINGLE -> context.getString(R.string.single)
         DiskMode.RAID1 -> context.getString(R.string.raid1)

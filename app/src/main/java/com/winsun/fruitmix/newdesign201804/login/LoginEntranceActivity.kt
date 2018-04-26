@@ -15,6 +15,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentListActivity
 import com.winsun.fruitmix.newdesign201804.wechatUser.WeChatUserInfoDataSource
 import com.winsun.fruitmix.token.data.InjectTokenRemoteDataSource
+import com.winsun.fruitmix.util.Util
 import kotlinx.android.synthetic.main.activity_login_entrance.*
 
 class LoginEntranceActivity : AppCompatActivity() {
@@ -22,6 +23,8 @@ class LoginEntranceActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login_entrance)
+
+        Util.setStatusBarColor(this, R.color.new_design_primary_color)
 
         user_protocol.paint.flags = Paint.UNDERLINE_TEXT_FLAG
 
@@ -37,12 +40,12 @@ class LoginEntranceActivity : AppCompatActivity() {
 
         wechat_login_layout.setOnClickListener {
 
-/*            loginPresenter.loginWithWechat(this, object : BaseOperateCallbackImpl() {
-                override fun onSucceed() {
-                    enterEquipmentListActivity()
-                }
+            /*            loginPresenter.loginWithWechat(this, object : BaseOperateCallbackImpl() {
+                            override fun onSucceed() {
+                                enterEquipmentListActivity()
+                            }
 
-            })*/
+                        })*/
 
             enterEquipmentListActivity()
 

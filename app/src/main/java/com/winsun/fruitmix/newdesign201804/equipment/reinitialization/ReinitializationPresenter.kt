@@ -6,20 +6,22 @@ import android.support.v4.view.ViewPager
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
-import com.winsun.fruitmix.newdesign201804.equipment.add.DiskMode
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.DiskMode
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentItem
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentType
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.model.CloudConnectEquipItem
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.data.ReinitializationEquipmentDiskInfo
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.page.FinishReinitializationPage
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.page.InitialPage
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.page.SelectDiskModePage
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.page.SetPasswordPage
 import com.winsun.fruitmix.user.User
+import com.winsun.fruitmix.util.Util
 
-public class ReinitializationPresenter(val context: Context, val admin: User, val pager: ViewPager,
-                                       private val finishActivity: () -> Unit, val equipmentName: String,
-                                       private val equipmentItemDataSource: EquipmentItemDataSource) {
+class ReinitializationPresenter(val context: Context, val admin: User, val pager: ViewPager,
+                                private val finishActivityWhenFinishReinitialization: () -> Unit, val equipmentName: String,
+                                private val equipmentItemDataSource: EquipmentItemDataSource) {
 
     private val reinitializationEquipmentDiskInfos: MutableList<ReinitializationEquipmentDiskInfo> = mutableListOf()
 
@@ -44,8 +46,12 @@ public class ReinitializationPresenter(val context: Context, val admin: User, va
 
         selectDiskModePage = SelectDiskModePage(context, reinitializationEquipmentDiskInfos,
                 { selectReinitializationEquipmentDiskInfos, diskMode ->
+
                     mSelectReinitializationEquipmentDiskInfos = selectReinitializationEquipmentDiskInfos
                     mSelectDiskMode = diskMode
+
+                    pager.currentItem = 1
+
                 })
 
         setPasswordPage = SetPasswordPage(context, admin, {
@@ -56,17 +62,20 @@ public class ReinitializationPresenter(val context: Context, val admin: User, va
 
             setPassword = it
 
-            equipmentItemDataSource.addEquipmentItems(EquipmentItem(EquipmentType.CLOUD_CONNECTED, equipmentName),
+            equipmentItemDataSource.addEquipmentItems(CloudConnectEquipItem(equipmentName,Util.createLocalUUid()),
                     object : BaseOperateCallbackImpl() {})
+
+            finishReinitializationPage.setData(mSelectReinitializationEquipmentDiskInfos, mSelectDiskMode)
+            finishReinitializationPage.refreshView()
 
             pager.currentItem = 2
 
         })
 
-        finishReinitializationPage = FinishReinitializationPage(context, admin, mSelectReinitializationEquipmentDiskInfos,
-                mSelectDiskMode, {
+        finishReinitializationPage = FinishReinitializationPage(context, admin, {
 
-            finishActivity()
+
+            finishActivityWhenFinishReinitialization()
 
         })
 

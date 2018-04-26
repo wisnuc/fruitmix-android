@@ -7,7 +7,7 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="0dp"
-        android:layout_height="400dp"
+        android:layout_height="350dp"
         android:background="@color/new_design_primary_color"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -44,7 +44,7 @@
     <android.support.v7.widget.CardView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="120dp"
+        android:layout_marginBottom="100dp"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
@@ -99,6 +99,7 @@
                     android:id="@+id/singleModeRadioBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:checked="true"
                     android:text="@string/single"
                     android:textColor="@color/eighty_seven_percent_black"
                     android:textSize="14dp" />
@@ -108,7 +109,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="48dp"
-                    android:checked="true"
                     android:text="@string/raid1"
                     android:textColor="@color/eighty_seven_percent_black"
                     android:textSize="14dp" />
