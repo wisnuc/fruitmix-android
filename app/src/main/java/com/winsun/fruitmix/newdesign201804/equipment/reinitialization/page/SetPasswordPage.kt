@@ -8,10 +8,12 @@ import android.view.View
 import android.widget.Button
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.http.InjectHttp
+import com.winsun.fruitmix.newdesign201804.component.UserNameAvatarContainer
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.presenter.SetPasswordPresenter
 import com.winsun.fruitmix.user.OperateUserViewModel
 import com.winsun.fruitmix.user.User
 import kotlinx.android.synthetic.main.set_password_reinitialization.view.*
+import kotlinx.android.synthetic.main.user_name_avatar_container.view.*
 
 class SetPasswordPage(val context: Context, val currentUser: User,
                       val preStep: () -> Unit, val nextStep: (setPassword: String) -> Unit) : InitialPage {
@@ -26,10 +28,8 @@ class SetPasswordPage(val context: Context, val currentUser: User,
 
     override fun refreshView() {
 
-        view.userAvatar4.setUser(currentUser,
-                InjectHttp.provideImageGifLoaderInstance(context).getImageLoader(context))
-
-        view.userNameTv.text = currentUser.userName
+        val userNameAvatarContainer = UserNameAvatarContainer(view.user_name_avatar_container,currentUser)
+        userNameAvatarContainer.initView(context)
 
         setBtnEnableOrNot(view.nextStepBtn, true)
 

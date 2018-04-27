@@ -117,6 +117,8 @@ class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemD
                     when (equipmentItem) {
                         is CloudUnConnectedEquipmentItem -> {
                             val intent = Intent(context, LanLoginActivity::class.java)
+
+                            intent.putExtra(EQUIPMENT_ITEM_UUID_KEY,equipmentItem.uuid)
                             context.startActivity(intent)
                         }
                         is UnderReviewEquipmentItem -> showMessageDialog(context, R.string.under_review,

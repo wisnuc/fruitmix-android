@@ -9,6 +9,8 @@ import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.anim.AnimatorBuilder
 import com.winsun.fruitmix.databinding.ActivityLanLoginBinding
+import com.winsun.fruitmix.newdesign201804.equipment.abnormal.EQUIPMENT_ITEM_UUID_KEY
+import com.winsun.fruitmix.newdesign201804.equipment.list.data.InjectEquipmentItemDataSource
 import com.winsun.fruitmix.util.Util
 
 class LanLoginActivity : BaseToolbarActivity() {
@@ -28,6 +30,11 @@ class LanLoginActivity : BaseToolbarActivity() {
         mActivityLanLoginBinding.forgetPasswordIcon.setOnClickListener {
             handleForgetPasswordOnClick()
         }
+
+        val itemUUID = intent.getStringExtra(EQUIPMENT_ITEM_UUID_KEY)
+
+        val lanLoginPresenter = LanLoginPresenter(itemUUID, InjectEquipmentItemDataSource.inject(this))
+        lanLoginPresenter.initView(mActivityLanLoginBinding.root)
 
     }
 

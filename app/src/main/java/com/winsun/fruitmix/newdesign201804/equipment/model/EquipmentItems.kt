@@ -4,6 +4,7 @@ import android.content.Context
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.newdesign201804.equipment.abnormal.data.DiskItemInfo
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.DiskMode
+import com.winsun.fruitmix.user.User
 
 abstract class BaseEquipmentItem(val name: String,val uuid:String) {
 
@@ -24,7 +25,7 @@ class CloudConnectEquipItem(name: String,uuid: String) : BaseEquipmentItem(name,
 
 }
 
-class CloudUnConnectedEquipmentItem(name: String,uuid: String) : BaseEquipmentItem(name,uuid) {
+class CloudUnConnectedEquipmentItem(val loginUser:User,val type:String,name: String,uuid: String) : BaseEquipmentItem(name,uuid) {
 
     override fun getEquipmentTypeIconId(): Int {
         return R.drawable.cloud_unconnected

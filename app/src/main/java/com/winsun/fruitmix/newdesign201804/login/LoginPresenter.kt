@@ -30,7 +30,7 @@ public class LoginPresenter(val tokenDataSource: TokenDataSource, val wechatUser
 
     }
 
-    fun handleGetCodeSucceed(code: String?, baseOperateCallback: BaseOperateCallback) {
+    private fun handleGetCodeSucceed(code: String?, baseOperateCallback: BaseOperateCallback) {
 
         tokenDataSource.getCloudToken(code, object : BaseLoadDataCallback<WeChatTokenUserWrapper> {
 

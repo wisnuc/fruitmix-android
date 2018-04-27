@@ -779,7 +779,8 @@
     <string name="continue_to_use">Continue to use</string>
     <string name="repair">Repair</string>
 
-    <string name="repair_immediately">Repair immediately</string>
+    <string name="repair_immediately_dialog_title">Repair immediately</string>
+    <string name="repair_dialog_title">Repair?</string>
 
     <string name="single">SINGLE</string>
     <string name="raid1">RAID1</string>
@@ -789,5 +790,18 @@
 
     <string name="disk_brand_space">%1$s-%2$s</string>
     <string name="lost_disk_description">· %1$s %2$s Serial Number:%3$s</string>
+
+    <!-- repair -->
+
+    <string name="continue_to_use_dialog_title">Continue to use?</string>
+    <string name="lost_disk_data_not_retrieve">The data of the lost disk will not be retrieved</string>
+    <string name="lost_disk_data_exist">The data is not lost, but the disk is currently being used. If the data is corrupted, the data can not be retrieved</string>
+
+    <string name="raid1_repair">It usually takes 24 hours to repair RAID 1.</string>
+
+    <string name="raid1_lost_disk_data_not_retrieve">The data of the lost disk will not be retrieved. It may take about 24 hours to repair RAID 1. Now?</string>
+
+    <string name="shutdown_hint">In the device shutdown, please close the APP</string>
+
 
 </resources>

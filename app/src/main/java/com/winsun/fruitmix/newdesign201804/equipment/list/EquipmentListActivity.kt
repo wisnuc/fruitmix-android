@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.equipment.list
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.DefaultItemAnimator
@@ -10,6 +11,7 @@ import com.winsun.fruitmix.callback.ActiveView
 import com.winsun.fruitmix.http.InjectHttp
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.FakeEquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.InjectEquipmentItemDataSource
+import com.winsun.fruitmix.newdesign201804.user.UserInfoActivity
 import com.winsun.fruitmix.newdesign201804.wechatUser.WeChatUserInfoDataSource
 import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.util.Util
@@ -27,15 +29,18 @@ class EquipmentListActivity : AppCompatActivity(), ActiveView {
 
         Util.setStatusBarColor(this, R.color.new_design_primary_color)
 
-        val user = User()
-
         val weChatTokenUserWrapper = WeChatUserInfoDataSource.weChatTokenUserWrapper
 
-        user.avatar = weChatTokenUserWrapper.avatarUrl
-        user.userName = weChatTokenUserWrapper.nickName
-        user.defaultAvatar = Util.getUserNameForAvatar(user.userName)
+        val user = WeChatUserInfoDataSource.getUser()
 
         userAvatar.setUser(user, InjectHttp.provideImageGifLoaderInstance(this).getImageLoader(this))
+
+        userAvatar.setOnClickListener {
+
+            val intent = Intent(this, UserInfoActivity::class.java)
+            startActivity(intent)
+
+        }
 
         userName.text = weChatTokenUserWrapper.nickName
 

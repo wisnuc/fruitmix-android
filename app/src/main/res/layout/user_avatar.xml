@@ -40,13 +40,13 @@
 
         </FrameLayout>
 
-
         <com.winsun.fruitmix.component.CircleImageView
             android:id="@+id/avatar_imageview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            app:civ_border_width="0dp" />
+            app:civ_border_width="8dp"
+            app:civ_border_color="@color/avatar_ring_color"/>
 
     </FrameLayout>
 

@@ -40,7 +40,7 @@ class LoginEntranceActivity : AppCompatActivity() {
 
         wechat_login_layout.setOnClickListener {
 
-            /*            loginPresenter.loginWithWechat(this, object : BaseOperateCallbackImpl() {
+/*                        loginPresenter.loginWithWechat(this, object : BaseOperateCallbackImpl() {
                             override fun onSucceed() {
                                 enterEquipmentListActivity()
                             }

@@ -2,6 +2,7 @@ package com.winsun.fruitmix.newdesign201804.equipment.abnormal
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
@@ -19,6 +20,8 @@ const val EQUIPMENT_ITEM_UUID_KEY = "equipment_item_uuid_key"
 
 class HandleAbnormalEquipmentActivity : BaseToolbarActivity() {
 
+    private lateinit var view: View
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -26,7 +29,9 @@ class HandleAbnormalEquipmentActivity : BaseToolbarActivity() {
         setToolbarWhiteStyle(toolbarViewModel)
 
         toolbarViewModel.navigationIconResId.set(R.drawable.white_clear)
+
         toolbarViewModel.showSelect.set(true)
+        toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_white))
         toolbarViewModel.selectTextResID.set(R.string.shutdown)
 
         val itemUUID = intent.getStringExtra(EQUIPMENT_ITEM_UUID_KEY)
@@ -40,15 +45,20 @@ class HandleAbnormalEquipmentActivity : BaseToolbarActivity() {
         lostDiskInfoRecyclerView.itemAnimator = DefaultItemAnimator()
 
         handleAbnormalEquipmentPresenter.initView(
-                diskInfoRecyclerView,lostDiskInfoRecyclerView,diskModeTextView,this
+                view,this
         )
+
+        toolbarViewModel.setToolbarSelectBtnOnClickListener {
+            handleAbnormalEquipmentPresenter.handleShutdownBtnOnClick(view)
+        }
 
     }
 
     override fun generateContent(root: ViewGroup?): View {
 
-        return LayoutInflater.from(this).inflate(R.layout.activity_handle_abnormal_equipment,root,false)
+        view =  LayoutInflater.from(this).inflate(R.layout.activity_handle_abnormal_equipment,root,false)
 
+        return view
     }
 
     override fun getToolbarTitle(): String {

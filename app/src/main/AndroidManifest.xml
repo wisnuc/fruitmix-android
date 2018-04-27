@@ -234,6 +234,9 @@
         <activity
             android:name=".newdesign201804.equipment.abnormal.HandleAbnormalEquipmentActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.user.UserInfoActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

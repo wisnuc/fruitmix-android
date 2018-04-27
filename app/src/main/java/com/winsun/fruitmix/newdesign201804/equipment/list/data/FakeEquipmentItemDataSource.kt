@@ -10,6 +10,8 @@ import com.winsun.fruitmix.newdesign201804.equipment.add.data.DiskMode
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentItem
 import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentType
 import com.winsun.fruitmix.newdesign201804.equipment.model.*
+import com.winsun.fruitmix.newdesign201804.wechatUser.WeChatUserInfoDataSource
+import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.util.Util
 
 private const val TAG = "FakeEquipmentItemData"
@@ -25,17 +27,36 @@ object FakeEquipmentItemDataSource : EquipmentItemDataSource {
 
         cacheDirty = true
 
+        val user = WeChatUserInfoDataSource.getUser()
+
         baseEquipmentItems.add(CloudConnectEquipItem("test1", Util.createLocalUUid()))
-        baseEquipmentItems.add(CloudUnConnectedEquipmentItem("test2", Util.createLocalUUid()))
+        baseEquipmentItems.add(CloudUnConnectedEquipmentItem(user,"WS215i","test2", Util.createLocalUUid()))
 
         baseEquipmentItems.add(DiskAbnormalEquipmentItem("test3", Util.createLocalUUid(), DiskMode.SINGLE,
+                mutableListOf(DiskItemInfo(DiskState.LOST, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"))))
+
+        baseEquipmentItems.add(DiskAbnormalEquipmentItem("test3", Util.createLocalUUid(), DiskMode.SINGLE,
+                mutableListOf(DiskItemInfo(DiskState.NORMAL, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
+                        DiskItemInfo(DiskState.LOST, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"))))
+
+        baseEquipmentItems.add(DiskAbnormalEquipmentItem("test3-raid1", Util.createLocalUUid(), DiskMode.RAID1,
+                mutableListOf(DiskItemInfo(DiskState.NORMAL, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
+                        DiskItemInfo(DiskState.LOST, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"))))
+
+        baseEquipmentItems.add(DiskAbnormalEquipmentItem("test3-raid1", Util.createLocalUUid(), DiskMode.RAID1,
                 mutableListOf(DiskItemInfo(DiskState.NORMAL, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
                         DiskItemInfo(DiskState.NEW_AVAILABLE, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
                         DiskItemInfo(DiskState.LOST, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"))))
 
         baseEquipmentItems.add(DiskAbnormalEquipmentItem("test3-raid1", Util.createLocalUUid(), DiskMode.RAID1,
                 mutableListOf(DiskItemInfo(DiskState.NORMAL, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
+                        DiskItemInfo(DiskState.LOST, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
+                        DiskItemInfo(DiskState.LOST, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"))))
+
+        baseEquipmentItems.add(DiskAbnormalEquipmentItem("test3-raid1", Util.createLocalUUid(), DiskMode.RAID1,
+                mutableListOf(DiskItemInfo(DiskState.NORMAL, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
                         DiskItemInfo(DiskState.NEW_AVAILABLE, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
+                        DiskItemInfo(DiskState.LOST, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"),
                         DiskItemInfo(DiskState.LOST, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"))))
 
         baseEquipmentItems.add(PowerOffEquipmentItem("test4", Util.createLocalUUid()))

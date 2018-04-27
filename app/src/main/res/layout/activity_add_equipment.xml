@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="16dp"
     android:background="@color/white"
+    android:paddingLeft="16dp"
     android:paddingRight="16dp"
     tools:context=".newdesign201804.equipment.add.AddEquipmentActivity">
 
@@ -107,11 +107,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="43dp"
         android:visibility="visible"
+        app:ci_animator="@animator/indicator_no_animator"
         app:ci_drawable="@drawable/viewpager_indicator_select_item_bg"
         app:ci_drawable_unselected="@drawable/viewpager_indicator_unselect_item_bg"
-        app:ci_height="5dp"
+        app:ci_height="8dp"
         app:ci_margin="8dp"
-        app:ci_width="5dp"
+        app:ci_width="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/new_equipment_viewPager" />

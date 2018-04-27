@@ -750,7 +750,8 @@
     <string name="continue_to_use">继续使用</string>
     <string name="repair">修复</string>
 
-    <string name="repair_immediately">立即修复</string>
+    <string name="repair_immediately_dialog_title">立即修复?</string>
+    <string name="repair_dialog_title">修复?</string>
 
     <string name="single">SINGLE</string>
     <string name="raid1">RAID1</string>
@@ -760,6 +761,18 @@
 
     <string name="disk_brand_space">%1$s-%2$s</string>
     <string name="lost_disk_description">· %1$s %2$s 序列号:%3$s</string>
+
+    <!-- repair -->
+
+    <string name="continue_to_use_dialog_title">继续使用?</string>
+    <string name="lost_disk_data_not_retrieve">丢失磁盘的数据将无法找回</string>
+    <string name="lost_disk_data_exist">数据未丢失，但当前正使用磁盘如果损坏则数据不可找回</string>
+    
+    <string name="raid1_repair">修复RAID 1时间一般需要24小时.</string>
+
+    <string name="raid1_lost_disk_data_not_retrieve">丢失磁盘的数据将无法找回。修复RAID 1可能需要约计24小时，现在开始吗?</string>
+
+    <string name="shutdown_hint">设备关机中，请关闭APP</string>
 
 
 </resources>

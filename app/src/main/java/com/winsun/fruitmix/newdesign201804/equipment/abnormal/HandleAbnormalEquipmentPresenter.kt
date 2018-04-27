@@ -1,6 +1,8 @@
 package com.winsun.fruitmix.newdesign201804.equipment.abnormal
 
 import android.content.Context
+import android.support.design.widget.Snackbar
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +12,8 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.abnormal.data.DiskItemInfo
 import com.winsun.fruitmix.newdesign201804.equipment.abnormal.data.DiskState
+import com.winsun.fruitmix.newdesign201804.equipment.abnormal.strategy.HandleAbnormalEquipmentStrategyFactory
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.DiskMode
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.convertDiskMode
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.model.DiskAbnormalEquipmentItem
@@ -18,17 +22,17 @@ import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.util.FileUtil
 import kotlinx.android.synthetic.main.abnormal_disk_item.view.*
 import kotlinx.android.synthetic.main.abnormal_disk_item_info.view.*
+import kotlinx.android.synthetic.main.activity_handle_abnormal_equipment.view.*
 
 
-class HandleAbnormalEquipmentPresenter (val itemUUID:String,val equipmentItemDataSource: EquipmentItemDataSource){
+class HandleAbnormalEquipmentPresenter(val itemUUID: String, val equipmentItemDataSource: EquipmentItemDataSource) {
 
 
-    fun initView(abnormalDiskItemRecyclerView: RecyclerView, abnormalDiskItemInfoRecyclerView: RecyclerView,
-                 diskModeTextView:TextView,context:Context) {
+    fun initView(rootView: View, context: Context) {
 
         val item = equipmentItemDataSource.getEquipmentItemInCache(itemUUID) as DiskAbnormalEquipmentItem
 
-        diskModeTextView.text = convertDiskMode(item.diskMode,context)
+        rootView.diskModeTextView.text = convertDiskMode(item.diskMode, context)
 
         val diskItemInfos = item.diskItemInfos
 
@@ -36,17 +40,34 @@ class HandleAbnormalEquipmentPresenter (val itemUUID:String,val equipmentItemDat
 
         val abnormalDiskInfoAdapter = AbnormalDiskInfoAdapter()
 
-        abnormalDiskItemRecyclerView.adapter = abnormalDiskAdapter
-        abnormalDiskItemInfoRecyclerView.adapter = abnormalDiskInfoAdapter
+        rootView.diskInfoRecyclerView.adapter = abnormalDiskAdapter
+        rootView.lostDiskInfoRecyclerView.adapter = abnormalDiskInfoAdapter
 
-        abnormalDiskAdapter.setItemList(diskItemInfos)
+        if (diskItemInfos.any { it.diskState == DiskState.NEW_AVAILABLE })
+            abnormalDiskAdapter.setItemList(diskItemInfos.filter { it.diskState != DiskState.LOST })
+        else
+            abnormalDiskAdapter.setItemList(diskItemInfos)
+
         abnormalDiskAdapter.notifyDataSetChanged()
 
         abnormalDiskInfoAdapter.setItemList(diskItemInfos.filter { it.diskState == DiskState.LOST })
         abnormalDiskAdapter.notifyDataSetChanged()
 
+        val handleAbnormalEquipmentStrategy = HandleAbnormalEquipmentStrategyFactory(item).generateStrategy()
+
+        rootView.continueUseBtn.visibility = if (handleAbnormalEquipmentStrategy.canContinueUse()) View.VISIBLE else View.GONE
+        rootView.repairBtn.visibility = if (handleAbnormalEquipmentStrategy.canRepair()) View.VISIBLE else View.GONE
+
+        rootView.continueUseBtn.setOnClickListener { handleAbnormalEquipmentStrategy.onContinueUseClick(context) }
+        rootView.repairBtn.setOnClickListener { handleAbnormalEquipmentStrategy.onRepairClick(context) }
+
     }
 
+    fun handleShutdownBtnOnClick(view: View) {
+
+        Snackbar.make(view, R.string.shutdown_hint, Snackbar.LENGTH_SHORT).show()
+
+    }
 
     private inner class AbnormalDiskAdapter : BaseRecyclerViewAdapter<SimpleViewHolder, DiskItemInfo>() {
 

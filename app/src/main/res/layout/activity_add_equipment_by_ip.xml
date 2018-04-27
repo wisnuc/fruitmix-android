@@ -19,15 +19,12 @@
 
     <EditText
         android:id="@+id/ip_edit_one"
+        style="@style/InputIpEditTextStyle"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="43dp"
-        android:hint=""
-        android:inputType="number"
-        android:textColor="@color/eighty_seven_percent_black"
-        android:textSize="21dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView33" />
 
@@ -44,12 +41,9 @@
 
     <EditText
         android:id="@+id/ip_edit_two"
+        style="@style/InputIpEditTextStyle"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:hint=""
-        android:inputType="number"
-        android:textColor="@color/eighty_seven_percent_black"
-        android:textSize="21dp"
         app:layout_constraintStart_toEndOf="@+id/textView35"
         app:layout_constraintTop_toTopOf="@+id/ip_edit_one" />
 
@@ -66,12 +60,9 @@
 
     <EditText
         android:id="@+id/ip_edit_three"
+        style="@style/InputIpEditTextStyle"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:hint=""
-        android:inputType="number"
-        android:textColor="@color/eighty_seven_percent_black"
-        android:textSize="21dp"
         app:layout_constraintStart_toEndOf="@id/textView36"
         app:layout_constraintTop_toTopOf="@+id/ip_edit_two" />
 
@@ -88,12 +79,9 @@
 
     <EditText
         android:id="@+id/ip_edit_four"
+        style="@style/InputIpEditTextStyle"
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:hint=""
-        android:inputType="number"
-        android:textColor="@color/eighty_seven_percent_black"
-        android:textSize="21dp"
         app:layout_constraintStart_toEndOf="@id/textView37"
         app:layout_constraintTop_toTopOf="@+id/ip_edit_two" />
 

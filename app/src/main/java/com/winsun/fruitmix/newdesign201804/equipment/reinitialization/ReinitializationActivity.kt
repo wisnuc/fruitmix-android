@@ -25,13 +25,7 @@ class ReinitializationActivity : BaseToolbarActivity() {
 
         val equipmentName = intent.getStringExtra(REINITIALIZE_EQUIPMENT_NAME_KEY)
 
-        val user = User()
-
-        val weChatTokenUserWrapper = WeChatUserInfoDataSource.weChatTokenUserWrapper
-
-        user.avatar = weChatTokenUserWrapper.avatarUrl
-        user.userName = weChatTokenUserWrapper.nickName
-        user.defaultAvatar = Util.getUserNameForAvatar(user.userName)
+        val user = WeChatUserInfoDataSource.getUser()
 
         val reinitializationPresenter = ReinitializationPresenter(reinitializationViewPager.context,
                 user, reinitializationViewPager, {
