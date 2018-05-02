@@ -2,24 +2,20 @@ package com.winsun.fruitmix.newdesign201804.equipment.abnormal
 
 import android.content.Context
 import android.support.design.widget.Snackbar
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import com.winsun.fruitmix.R
-import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.abnormal.data.DiskItemInfo
 import com.winsun.fruitmix.newdesign201804.equipment.abnormal.data.DiskState
 import com.winsun.fruitmix.newdesign201804.equipment.abnormal.strategy.HandleAbnormalEquipmentStrategyFactory
-import com.winsun.fruitmix.newdesign201804.equipment.add.data.DiskMode
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.convertDiskMode
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.model.DiskAbnormalEquipmentItem
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.util.FileUtil
+import com.winsun.fruitmix.util.SnackbarUtil
 import kotlinx.android.synthetic.main.abnormal_disk_item.view.*
 import kotlinx.android.synthetic.main.abnormal_disk_item_info.view.*
 import kotlinx.android.synthetic.main.activity_handle_abnormal_equipment.view.*
@@ -65,7 +61,7 @@ class HandleAbnormalEquipmentPresenter(val itemUUID: String, val equipmentItemDa
 
     fun handleShutdownBtnOnClick(view: View) {
 
-        Snackbar.make(view, R.string.shutdown_hint, Snackbar.LENGTH_SHORT).show()
+        SnackbarUtil.showSnackBar(view,Snackbar.LENGTH_SHORT,R.string.shutdown_hint)
 
     }
 

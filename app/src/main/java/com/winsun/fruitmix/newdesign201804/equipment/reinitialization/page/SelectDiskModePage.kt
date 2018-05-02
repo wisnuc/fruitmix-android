@@ -42,6 +42,20 @@ class SelectDiskModePage(val context: Context, private val reinitializationEquip
         singleModeRadioButton = view.singleModeRadioBtn
         raid1ModeRadioButton = view.raid1ModeRadioBtn
 
+        if (reinitializationEquipmentDiskInfos.isEmpty()) {
+
+            singleModeRadioButton.isEnabled = false
+            raid1ModeRadioButton.isEnabled = false
+            view.next_step.setBtnEnableOrNot(false)
+
+        } else {
+
+            singleModeRadioButton.isEnabled = true
+            raid1ModeRadioButton.isEnabled = true
+            view.next_step.setBtnEnableOrNot(true)
+
+        }
+
         singleModeRadioButton.setOnClickListener {
             currentMode = DiskMode.SINGLE
         }
@@ -64,6 +78,7 @@ class SelectDiskModePage(val context: Context, private val reinitializationEquip
         view.next_step.setOnClickListener {
 
             nextStep(selectReinitializationEquipmentDiskInfos, currentMode)
+
         }
 
 
@@ -117,7 +132,7 @@ class SelectDiskModePage(val context: Context, private val reinitializationEquip
 
             val view = holder?.itemView
 
-            view?.disk_item_tv?.text = view?.context?.getString(R.string.disk_brand_space,reinitializationEquipmentDiskInfo.brand, FileUtil.formatFileSize(reinitializationEquipmentDiskInfo.totalDiskSize))
+            view?.disk_item_tv?.text = view?.context?.getString(R.string.disk_brand_space, reinitializationEquipmentDiskInfo.brand, FileUtil.formatFileSize(reinitializationEquipmentDiskInfo.totalDiskSize))
 
             view?.checkBox?.isChecked = selectItems.contains(reinitializationEquipmentDiskInfo)
 

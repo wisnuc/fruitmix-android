@@ -741,6 +741,13 @@
 
     <string name="setting_admin_password">设置管理员密码</string>
 
+    <string name="reinitialization_succeed">设备添加成功</string>
+    <string name="reinitialization_failure">添加失败</string>
+    
+    <string name="reinitialization_failure_hint">请重新尝试或更换磁盘后再尝试</string>
+
+    <!-- repair -->
+
     <string name="disk_loss">磁盘丢失</string>
     <string name="lost_disk">丢失的磁盘</string>
 
@@ -762,7 +769,6 @@
     <string name="disk_brand_space">%1$s-%2$s</string>
     <string name="lost_disk_description">· %1$s %2$s 序列号:%3$s</string>
 
-    <!-- repair -->
 
     <string name="continue_to_use_dialog_title">继续使用?</string>
     <string name="lost_disk_data_not_retrieve">丢失磁盘的数据将无法找回</string>

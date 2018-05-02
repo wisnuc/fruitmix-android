@@ -28,10 +28,10 @@ class SetPasswordPage(val context: Context, val currentUser: User,
 
     override fun refreshView() {
 
-        val userNameAvatarContainer = UserNameAvatarContainer(view.user_name_avatar_container,currentUser)
+        val userNameAvatarContainer = UserNameAvatarContainer(view.user_name_avatar_container, currentUser)
         userNameAvatarContainer.initView(context)
 
-        setBtnEnableOrNot(view.nextStepBtn, true)
+        view.nextStepBtn.setBtnEnableOrNot(true)
 
         val setPasswordPresenter = SetPasswordPresenter()
 
@@ -53,11 +53,15 @@ class SetPasswordPage(val context: Context, val currentUser: User,
 
             } else {
 
-                view.password_textinputlayout.isErrorEnabled = operateUserViewModel.userPasswordErrorEnable.get()
-                view.password_textinputlayout.error = operateUserViewModel.userPasswordError.get()
+                if (operateUserViewModel.userPasswordErrorEnable.get())
+                    view.password_textinputlayout.error = operateUserViewModel.userPasswordError.get()
+                else
+                    view.password_textinputlayout.error = ""
 
-                view.confirmPasswordTextInputLayout.isErrorEnabled = operateUserViewModel.userConfirmPasswordErrorEnable.get()
-                view.confirmPasswordTextInputLayout.error = operateUserViewModel.userConfirmPasswordError.get()
+                if (operateUserViewModel.userConfirmPasswordErrorEnable.get())
+                    view.confirmPasswordTextInputLayout.error = operateUserViewModel.userConfirmPasswordError.get()
+                else
+                    view.confirmPasswordTextInputLayout.error = ""
 
             }
 
@@ -65,16 +69,18 @@ class SetPasswordPage(val context: Context, val currentUser: User,
 
     }
 
-    private fun setBtnEnableOrNot(btn: Button, enabled: Boolean) {
+}
 
-        if (enabled) {
-            btn.setBackgroundResource(R.drawable.green_btn_bg)
-            btn.setTextColor(ContextCompat.getColor(btn.context, R.color.eighty_seven_percent_white))
-        } else {
-            btn.setBackgroundColor(R.drawable.white_btn_bg)
-            btn.setTextColor(ContextCompat.getColor(btn.context, R.color.twenty_six_percent_black))
-        }
+fun Button.setBtnEnableOrNot(enabled: Boolean) {
 
+    this.isEnabled = enabled
+
+    if (enabled) {
+        this.setBackgroundResource(R.drawable.green_btn_bg)
+        this.setTextColor(ContextCompat.getColor(this.context, R.color.eighty_seven_percent_white))
+    } else {
+        this.setBackgroundResource(R.drawable.white_btn_bg)
+        this.setTextColor(ContextCompat.getColor(this.context, R.color.twenty_six_percent_black))
     }
 
 }

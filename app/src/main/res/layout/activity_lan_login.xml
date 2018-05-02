@@ -99,14 +99,18 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                app:errorEnabled="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/userNameTv">
+                app:layout_constraintTop_toBottomOf="@+id/userNameTv"
+                app:passwordToggleEnabled="true">
 
                 <android.support.design.widget.TextInputEditText
+                    android:id="@+id/lanPasswordEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/password_text"
+                    android:inputType="textPassword"
                     android:textColor="@color/eighty_seven_percent_black"
                     android:textSize="14dp" />
 

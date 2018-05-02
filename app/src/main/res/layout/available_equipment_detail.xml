@@ -4,102 +4,134 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="16dp"
-    android:layout_marginTop="16dp">
+    android:paddingBottom="32dp">
 
     <include
         android:id="@+id/equipment_detail_title"
         layout="@layout/equipment_detail_title" />
 
-    <ImageView
-        android:id="@+id/imageView12"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/user_info_layout"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/equipment_detail_title"
-        app:srcCompat="@drawable/user_icon_green" />
+        app:layout_constraintTop_toBottomOf="@+id/equipment_detail_title">
 
-    <TextView
-        android:id="@+id/admin_name_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="TextView"
-        android:textColor="@color/eighty_seven_percent_black"
-        android:textSize="16dp"
-        app:layout_constraintStart_toEndOf="@+id/imageView12"
-        app:layout_constraintTop_toBottomOf="@+id/equipment_detail_title" />
+        <ImageView
+            android:id="@+id/imageView12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/user_icon_green" />
 
-    <TextView
-        android:id="@+id/textView43"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/admin"
-        android:textColor="@color/fifty_four_percent_black"
-        android:textSize="14dp"
-        app:layout_constraintStart_toStartOf="@+id/admin_name_tv"
-        app:layout_constraintTop_toBottomOf="@+id/admin_name_tv" />
+        <TextView
+            android:id="@+id/admin_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="TextView"
+            android:textColor="@color/eighty_seven_percent_black"
+            android:textSize="16dp"
+            app:layout_constraintStart_toEndOf="@+id/imageView12"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/imageView13"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
+        <TextView
+            android:id="@+id/textView43"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/admin"
+            android:textColor="@color/fifty_four_percent_black"
+            android:textSize="14dp"
+            app:layout_constraintStart_toStartOf="@+id/admin_name_tv"
+            app:layout_constraintTop_toBottomOf="@+id/admin_name_tv" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/available_capacity_layout"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView12"
-        app:srcCompat="@drawable/disk_icon_green" />
+        app:layout_constraintTop_toBottomOf="@+id/user_info_layout">
 
-    <TextView
-        android:id="@+id/available_capacity_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:text="TextView"
-        android:textColor="@color/eighty_seven_percent_black"
-        android:textSize="16dp"
-        app:layout_constraintStart_toEndOf="@+id/imageView13"
-        app:layout_constraintTop_toTopOf="@+id/imageView13" />
+        <ImageView
+            android:id="@+id/imageView13"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/disk_icon_green" />
 
-    <TextView
-        android:id="@+id/textView45"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/available_capacity"
-        android:textColor="@color/fifty_four_percent_black"
-        android:textSize="14dp"
-        app:layout_constraintStart_toStartOf="@+id/available_capacity_tv"
-        app:layout_constraintTop_toBottomOf="@+id/available_capacity_tv" />
+        <TextView
+            android:id="@+id/available_capacity_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="TextView"
+            android:textColor="@color/eighty_seven_percent_black"
+            android:textSize="16dp"
+            app:layout_constraintStart_toEndOf="@+id/imageView13"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/total_capacity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="TextView"
-        android:textColor="@color/eighty_seven_percent_black"
-        android:textSize="16dp"
-        app:layout_constraintStart_toStartOf="@+id/textView45"
-        app:layout_constraintTop_toBottomOf="@+id/textView45" />
+        <TextView
+            android:id="@+id/textView45"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/available_capacity"
+            android:textColor="@color/fifty_four_percent_black"
+            android:textSize="14dp"
+            app:layout_constraintStart_toStartOf="@+id/available_capacity_tv"
+            app:layout_constraintTop_toBottomOf="@+id/available_capacity_tv" />
 
-    <TextView
-        android:id="@+id/textView47"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/total_capacity"
-        android:textColor="@color/fifty_four_percent_black"
-        android:textSize="14dp"
-        app:layout_constraintStart_toStartOf="@+id/total_capacity"
-        app:layout_constraintTop_toBottomOf="@+id/total_capacity" />
+    </android.support.constraint.ConstraintLayout>
 
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/available_capacity_layout"
+        app:layout_constraintTop_toBottomOf="@+id/available_capacity_layout">
+
+        <TextView
+            android:id="@+id/total_capacity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="48dp"
+            android:layout_marginStart="48dp"
+            android:layout_marginTop="8dp"
+            android:text="TextView"
+            android:textColor="@color/eighty_seven_percent_black"
+            android:textSize="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView47"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/total_capacity"
+            android:textColor="@color/fifty_four_percent_black"
+            android:textSize="14dp"
+            app:layout_constraintStart_toStartOf="@+id/total_capacity"
+            app:layout_constraintTop_toBottomOf="@+id/total_capacity" />
+
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

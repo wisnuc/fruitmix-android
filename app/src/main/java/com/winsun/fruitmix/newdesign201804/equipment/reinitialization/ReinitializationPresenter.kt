@@ -36,13 +36,13 @@ class ReinitializationPresenter(val context: Context, val admin: User, val pager
 
     fun init() {
 
-        reinitializationEquipmentDiskInfos.add(ReinitializationEquipmentDiskInfo(
+/*        reinitializationEquipmentDiskInfos.add(ReinitializationEquipmentDiskInfo(
                 "WD", 1.5 * 1024 * 1024 * 1024 * 1024, 2.0 * 1024 * 1024 * 1024 * 1024
         ))
 
         reinitializationEquipmentDiskInfos.add(ReinitializationEquipmentDiskInfo(
                 "WD", 1.2 * 1024 * 1024 * 1024 * 1024, 2.0 * 1024 * 1024 * 1024 * 1024
-        ))
+        ))*/
 
         selectDiskModePage = SelectDiskModePage(context, reinitializationEquipmentDiskInfos,
                 { selectReinitializationEquipmentDiskInfos, diskMode ->

@@ -770,6 +770,13 @@
 
     <string name="setting_admin_password">Setting the administrator password</string>
 
+    <string name="reinitialization_succeed">Equipment added successfully</string>
+    <string name="reinitialization_failure">Add failed</string>
+
+    <string name="reinitialization_failure_hint">Please try again or replace the disk before trying</string>
+
+    <!-- repair -->
+
     <string name="disk_loss">Disk Loss</string>
     <string name="lost_disk">Lost Disk</string>
 
@@ -790,8 +797,6 @@
 
     <string name="disk_brand_space">%1$s-%2$s</string>
     <string name="lost_disk_description">· %1$s %2$s Serial Number:%3$s</string>
-
-    <!-- repair -->
 
     <string name="continue_to_use_dialog_title">Continue to use?</string>
     <string name="lost_disk_data_not_retrieve">The data of the lost disk will not be retrieved</string>

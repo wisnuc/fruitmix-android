@@ -20,12 +20,11 @@ import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager
 import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.*
-import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentItem
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
-import com.winsun.fruitmix.newdesign201804.equipment.list.EquipmentType
 import com.winsun.fruitmix.newdesign201804.equipment.model.BaseEquipmentItem
 import com.winsun.fruitmix.newdesign201804.equipment.model.CloudConnectEquipItem
 import com.winsun.fruitmix.util.FileUtil
+import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
 import kotlinx.android.synthetic.main.available_equipment_detail.view.*
 import kotlinx.android.synthetic.main.equipment_detail_title.view.*
@@ -325,7 +324,7 @@ private class AvailableEquipmentState(equipmentUIState: EquipmentUIState,
 }
 
 private fun addEquipment(addEquipmentPresenter: AddEquipmentPresenter, context: Context, btn: View, name: String) {
-    val baseEquipmentItem = CloudConnectEquipItem(name,Util.createLocalUUid())
+    val baseEquipmentItem = CloudConnectEquipItem(name, Util.createLocalUUid())
 
     addEquipmentPresenter.addEquipmentView.showProgressDialog(context.getString(R.string.operating_title,
             context.getString(R.string.add_equipment)))
@@ -335,8 +334,7 @@ private fun addEquipment(addEquipmentPresenter: AddEquipmentPresenter, context: 
 
             addEquipmentPresenter.addEquipmentView.dismissDialog()
 
-            Snackbar.make(btn, context.getString(R.string.success, context.getString(R.string.add_equipment)), Snackbar.LENGTH_SHORT)
-                    .show()
+            SnackbarUtil.showSnackBar(btn, Snackbar.LENGTH_SHORT, messageStr = context.getString(R.string.success, context.getString(R.string.add_equipment)))
 
             addEquipmentPresenter.addEquipmentView.finishView()
 
@@ -346,8 +344,7 @@ private fun addEquipment(addEquipmentPresenter: AddEquipmentPresenter, context: 
 
             addEquipmentPresenter.addEquipmentView.dismissDialog()
 
-            Snackbar.make(btn, operationResult?.getResultMessage(context).toString(), Snackbar.LENGTH_SHORT)
-                    .show()
+            SnackbarUtil.showSnackBar(btn, Snackbar.LENGTH_SHORT, messageStr = operationResult?.getResultMessage(context).toString())
 
         }
     })
@@ -379,8 +376,9 @@ private class UnboundEquipmentState(equipmentUIState: EquipmentUIState,
         if (unBoundEquipmentInfo.selectBoundEquipmentDiskInfo != null)
             addEquipment(addEquipmentPresenter, context, btn, unBoundEquipmentInfo.equipmentName)
         else {
-            Snackbar.make(btn, context.getString(R.string.select_disk_hint), Snackbar.LENGTH_SHORT)
-                    .show()
+
+            SnackbarUtil.showSnackBar(btn, Snackbar.LENGTH_SHORT, R.string.select_disk_hint)
+
         }
     }
 }
