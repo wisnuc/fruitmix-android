@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.newdesign201804.equipment.add
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.os.Handler
 import android.os.Message
@@ -12,6 +14,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.anim.AnimatorBuilder
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
@@ -28,6 +31,7 @@ import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
 import kotlinx.android.synthetic.main.available_equipment_detail.view.*
 import kotlinx.android.synthetic.main.equipment_detail_title.view.*
+import kotlinx.android.synthetic.main.equipment_list_item.view.*
 import kotlinx.android.synthetic.main.unbound_equipment_detail.view.*
 import java.util.*
 
@@ -100,15 +104,7 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
             customHandler.removeMessages(SEARCH_TIMEOUT)
             customHandler.sendEmptyMessageDelayed(SEARCH_SUCCEED, 3 * 1000)
 
-            convert(it, typeArray[type], object : BaseOperateCallbackImpl() {
-                override fun onSucceed() {
-                    super.onSucceed()
-
-                    equipmentViewPagerAdapter.setEquipmentStates(baseNewEquipmentStates)
-                    equipmentViewPagerAdapter.notifyDataSetChanged()
-
-                }
-            })
+            convert(it, typeArray[type], object : BaseOperateCallbackImpl() {})
             type++
 
         }
@@ -209,6 +205,10 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
 
         searchEquipmentUIState.searchSucceedState()
 
+        equipmentViewPagerAdapter.setEquipmentStates(baseNewEquipmentStates)
+        equipmentViewPagerAdapter.notifyDataSetChanged()
+
+
     }
 
     fun onPageSelect(position: Int) {
@@ -257,6 +257,8 @@ private class EquipmentViewPagerAdapter(val addEquipmentPresenter: AddEquipmentP
 
     private val mEquipmentStates: MutableList<EquipmentState> = mutableListOf()
 
+    private var findFirstEquipment = true
+
     fun setEquipmentStates(equipmentStates: List<EquipmentState>) {
         mEquipmentStates.clear()
         mEquipmentStates.addAll(equipmentStates)
@@ -266,6 +268,14 @@ private class EquipmentViewPagerAdapter(val addEquipmentPresenter: AddEquipmentP
 
         val view = View.inflate(container.context, R.layout.equipment_list_item, null)
 
+        if (findFirstEquipment) {
+
+            showEquipmentAnimation(view)
+
+            findFirstEquipment = false
+
+        }
+
         view.setOnClickListener {
             mEquipmentStates[position].equipmentIconOnClick(container.context, addEquipmentPresenter)
         }
@@ -273,6 +283,17 @@ private class EquipmentViewPagerAdapter(val addEquipmentPresenter: AddEquipmentP
         container.addView(view)
 
         return view
+    }
+
+    fun showEquipmentAnimation(view: View) {
+
+        AnimatorBuilder(view.context, R.animator.ring_scale, view.ringIconIv).startAnimator()
+
+        view.equipmentIconIv.alpha = 0f
+
+        AnimatorBuilder(view.context,R.animator.equipment_icon_alpha,view.equipmentIconIv).setStartDelay(1000)
+                .startAnimator()
+
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {

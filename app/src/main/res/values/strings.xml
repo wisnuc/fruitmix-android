@@ -808,5 +808,8 @@
 
     <string name="shutdown_hint">In the device shutdown, please close the APP</string>
 
+    <!-- file -->
+    <string name="search_file">Search File</string>
+
 
 </resources>

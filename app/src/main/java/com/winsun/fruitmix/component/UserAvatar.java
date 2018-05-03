@@ -48,6 +48,8 @@ public class UserAvatar extends FrameLayout {
 
     private boolean unregisterListenerWhenDetachFromWindow = true;
 
+    private AvatarLoadListener mAvatarLoadListener;
+
     public UserAvatar(@NonNull Context context) {
         super(context);
 
@@ -83,17 +85,28 @@ public class UserAvatar extends FrameLayout {
         this.unregisterListenerWhenDetachFromWindow = unregisterListenerWhenDetachFromWindow;
     }
 
+    public void registerAvatarLoadListener(AvatarLoadListener avatarLoadListener) {
+        mAvatarLoadListener = avatarLoadListener;
+    }
+
+    public void unregisterAvatarLoadListener() {
+        mAvatarLoadListener = null;
+    }
+
+
     public void setUser(User user, ImageLoader imageLoader) {
 
         String url = user.getAvatar();
 
         if (url.equals(User.DEFAULT_AVATAR) || !Patterns.WEB_URL.matcher(url).matches()) {
 
-            if(user instanceof DefaultCommentUser){
+            if (user instanceof DefaultCommentUser) {
 
                 avatarDefaultTextView.setText("");
 
                 avatarImageView.setBackgroundResource(R.drawable.user_name);
+
+                avatarLoadFinish();
 
                 return;
 
@@ -103,6 +116,8 @@ public class UserAvatar extends FrameLayout {
             avatarImageView.setVisibility(INVISIBLE);
 
             binding.setUser(user);
+
+            avatarLoadFinish();
 
         } else {
 
@@ -117,8 +132,13 @@ public class UserAvatar extends FrameLayout {
                 return;
             }*/
 
-            if (avatarImageView.getCurrentUrl() != null && url.equals(avatarImageView.getCurrentUrl()))
+            if (avatarImageView.getCurrentUrl() != null && url.equals(avatarImageView.getCurrentUrl())) {
+
+                avatarLoadFinish();
+
                 return;
+
+            }
 
             avatarImageView.setVisibility(INVISIBLE);
             avatarTextLayout.setVisibility(VISIBLE);
@@ -134,12 +154,16 @@ public class UserAvatar extends FrameLayout {
                     avatarTextLayout.setVisibility(INVISIBLE);
                     avatarImageView.setVisibility(VISIBLE);
 
+                    avatarLoadFinish();
+
                 }
 
                 @Override
                 public void onImageLoadFail(String url, View view) {
 
                     Log.d(TAG, "onImageLoadFail: " + url);
+
+                    avatarLoadFinish();
 
                 }
             });
@@ -152,4 +176,14 @@ public class UserAvatar extends FrameLayout {
 
     }
 
+    private void avatarLoadFinish() {
+        if (mAvatarLoadListener != null)
+            mAvatarLoadListener.onAvatarLoadFinish();
+    }
+
+    public interface AvatarLoadListener {
+        void onAvatarLoadFinish();
+    }
+
 }
+

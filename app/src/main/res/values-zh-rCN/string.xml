@@ -780,5 +780,9 @@
 
     <string name="shutdown_hint">设备关机中，请关闭APP</string>
 
+    <!-- file -->
+    <string name="search_file">搜索文件</string>
+
+
 
 </resources>
