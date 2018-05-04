@@ -782,7 +782,8 @@
 
     <!-- file -->
     <string name="search_file">搜索文件</string>
-
+    <string name="folder">文件夹</string>
+    <string name="name">名称</string>
 
 
 </resources>

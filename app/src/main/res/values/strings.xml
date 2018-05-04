@@ -810,6 +810,8 @@
 
     <!-- file -->
     <string name="search_file">Search File</string>
+    <string name="folder">Folder</string>
+    <string name="name">Name</string>
 
 
 </resources>
