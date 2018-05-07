@@ -12,6 +12,8 @@ public class BottomMenuItem {
 
     private int iconResID;
 
+    private int rightResID;
+
     private String text;
     private AbstractCommand command;
     private Dialog dialog;
@@ -36,6 +38,14 @@ public class BottomMenuItem {
 
     public int getIconResID() {
         return iconResID;
+    }
+
+    public void setRightResID(int rightResID) {
+        this.rightResID = rightResID;
+    }
+
+    public int getRightResID() {
+        return rightResID;
     }
 
     public String getText() {

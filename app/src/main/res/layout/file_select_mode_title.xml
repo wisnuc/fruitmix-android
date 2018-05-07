@@ -6,9 +6,8 @@
     android:layout_height="56dp"
     android:background="@color/new_design_primary_color">
 
-
     <ImageView
-        android:id="@+id/imageView24"
+        android:id="@+id/exitBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
@@ -19,7 +18,7 @@
         app:srcCompat="@drawable/white_clear" />
 
     <TextView
-        android:id="@+id/textView39"
+        android:id="@+id/selectCountTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="32dp"
@@ -28,12 +27,12 @@
         android:textColor="@color/eighty_seven_percent_white"
         android:textSize="18dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView24"
+        app:layout_constraintStart_toEndOf="@+id/exitBtn"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="16" />
 
     <ImageView
-        android:id="@+id/imageView25"
+        android:id="@+id/moreBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
@@ -44,24 +43,24 @@
         app:srcCompat="@drawable/horizontal_more_icon_white" />
 
     <ImageView
-        android:id="@+id/imageView26"
+        android:id="@+id/downloadBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/imageView25"
+        app:layout_constraintEnd_toStartOf="@+id/moreBtn"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/white_download" />
 
     <ImageView
-        android:id="@+id/imageView27"
+        android:id="@+id/moveBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/imageView26"
+        app:layout_constraintEnd_toStartOf="@+id/downloadBtn"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/white_move" />
 

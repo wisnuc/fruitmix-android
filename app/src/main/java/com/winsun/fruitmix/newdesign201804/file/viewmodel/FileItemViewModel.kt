@@ -7,6 +7,7 @@ import android.databinding.ObservableInt
 open class FileItemViewModel {
 
     val isSelectMode = ObservableBoolean()
+    val isSelected = ObservableBoolean()
 
     val folderName = ObservableField<String>()
     val fileTypeResID = ObservableInt()

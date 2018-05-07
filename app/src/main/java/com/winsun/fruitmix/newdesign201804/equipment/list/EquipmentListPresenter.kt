@@ -19,6 +19,7 @@ import com.winsun.fruitmix.newdesign201804.equipment.add.AddEquipmentActivity
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.model.*
 import com.winsun.fruitmix.newdesign201804.login.LanLoginActivity
+import com.winsun.fruitmix.newdesign201804.mainpage.MainPageActivity
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewHolder
 import kotlinx.android.synthetic.main.my_equipment_item.view.*
@@ -118,7 +119,7 @@ class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemD
                         is CloudUnConnectedEquipmentItem -> {
                             val intent = Intent(context, LanLoginActivity::class.java)
 
-                            intent.putExtra(EQUIPMENT_ITEM_UUID_KEY,equipmentItem.uuid)
+                            intent.putExtra(EQUIPMENT_ITEM_UUID_KEY, equipmentItem.uuid)
                             context.startActivity(intent)
                         }
                         is UnderReviewEquipmentItem -> showMessageDialog(context, R.string.under_review,
@@ -132,6 +133,12 @@ class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemD
                             val intent = Intent(context, HandleAbnormalEquipmentActivity::class.java)
                             intent.putExtra(EQUIPMENT_ITEM_UUID_KEY, equipmentItem.uuid)
 
+                            context.startActivity(intent)
+
+                        }
+                        is CloudConnectEquipItem -> {
+
+                            val intent = Intent(context, MainPageActivity::class.java)
                             context.startActivity(intent)
 
                         }

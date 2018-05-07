@@ -32,7 +32,7 @@
                 android:id="@+id/select_file_icon_bg"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@drawable/round_circle"
+                android:background="@{fileItemViewModel.isSelected()?@drawable/item_selected_state:@drawable/round_circle,default=@drawable/round_circle}"
                 android:visibility="@{fileItemViewModel.isSelectMode()?View.VISIBLE:View.INVISIBLE,default=invisible}" />
 
             <ImageView
@@ -40,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                app:srcCompat="@drawable/ic_folder" />
+                android:src="@{fileItemViewModel.fileTypeResID,default=@drawable/ic_folder}" />
 
         </FrameLayout>
 

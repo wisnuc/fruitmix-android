@@ -8,6 +8,8 @@ import com.winsun.fruitmix.BaseActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.FilePageBinding
 import com.winsun.fruitmix.interfaces.Page
+import com.winsun.fruitmix.newdesign201804.file.data.InjectFileDataSource
+import com.winsun.fruitmix.newdesign201804.file.presenter.FilePresenter
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 
@@ -18,6 +20,8 @@ class FilePage(activity: Activity) :Page{
     private val noContentViewModel = NoContentViewModel()
     private val loadingViewModel = LoadingViewModel(activity)
 
+    private var filePresenter:FilePresenter
+
     init {
 
         noContentViewModel.noContentImgResId = R.drawable.no_file
@@ -26,7 +30,8 @@ class FilePage(activity: Activity) :Page{
         filePageBinding.loadingViewModel = loadingViewModel
         filePageBinding.noContentViewModel = noContentViewModel
 
-
+        filePresenter = FilePresenter(InjectFileDataSource.inject(activity),
+                noContentViewModel,loadingViewModel,filePageBinding)
 
     }
 
@@ -45,6 +50,8 @@ class FilePage(activity: Activity) :Page{
     }
 
     override fun refreshView() {
+
+        filePresenter.initView()
 
     }
 

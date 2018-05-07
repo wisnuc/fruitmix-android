@@ -769,7 +769,6 @@
     <string name="disk_brand_space">%1$s-%2$s</string>
     <string name="lost_disk_description">· %1$s %2$s 序列号:%3$s</string>
 
-
     <string name="continue_to_use_dialog_title">继续使用?</string>
     <string name="lost_disk_data_not_retrieve">丢失磁盘的数据将无法找回</string>
     <string name="lost_disk_data_exist">数据未丢失，但当前正使用磁盘如果损坏则数据不可找回</string>
@@ -785,5 +784,10 @@
     <string name="folder">文件夹</string>
     <string name="name">名称</string>
 
+    <string name="sort_by_name">按名称的正序与倒序</string>
+    <string name="sort_by_modify_time">按修改日期的正序与倒序</string>
+    <string name="sort_by_create_time">按创建日期的正序与倒序</string>
+    <string name="sort_by_capacity">按容量大小的正序与倒序</string>
+    
 
 </resources>

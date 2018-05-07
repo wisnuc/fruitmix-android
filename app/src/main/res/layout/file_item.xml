@@ -73,7 +73,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/item_selected_state" />
+                android:background="@{fileItemViewModel.isSelected()?@drawable/item_selected_state:@drawable/round_circle,default=@drawable/round_circle}" />
 
         </android.support.constraint.ConstraintLayout>
 
