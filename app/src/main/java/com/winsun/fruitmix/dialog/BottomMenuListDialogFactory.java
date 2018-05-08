@@ -17,6 +17,8 @@ import com.winsun.fruitmix.databinding.BottomSheetDialogItemBinding;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.recyclerview.BindingViewHolder;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,39 +26,19 @@ import java.util.List;
  * Created by Administrator on 2016/11/18.
  */
 
-public class BottomMenuDialogFactory implements DialogFactory {
+public class BottomMenuListDialogFactory extends BaseBottomMenuDialogFactory {
 
-    private List<BottomMenuItem> bottomMenuItems;
-
-    public BottomMenuDialogFactory(List<BottomMenuItem> bottomMenuItems) {
-        this.bottomMenuItems = bottomMenuItems;
+    public BottomMenuListDialogFactory(@NotNull List<? extends BottomMenuItem> bottomMenuItems) {
+        super(bottomMenuItems);
     }
 
+    @NotNull
     @Override
-    public Dialog createDialog(Context context) {
-
-        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
-
-        View bottomSheetView = createBottomSheetView(context, bottomMenuItems);
-
-        bottomSheetDialog.setContentView(bottomSheetView);
-
-        View parent = (View) bottomSheetView.getParent();
-        BottomSheetBehavior behavior = BottomSheetBehavior.from(parent);
-        behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
-        for (BottomMenuItem bottomMenuItem : bottomMenuItems) {
-            bottomMenuItem.setDialog(bottomSheetDialog);
-        }
-
-        return bottomSheetDialog;
-    }
-
-    private View createBottomSheetView(Context context, List<BottomMenuItem> bottomMenuItems) {
+    public View createBottomSheetView(@NotNull Context context, @NotNull List<? extends BottomMenuItem> bottomMenuItems) {
 
         View bottomSheetView = View.inflate(context, R.layout.list_dialog_layout, null);
 
-        RecyclerView bottomSheetRecyclerView = (RecyclerView) bottomSheetView.findViewById(R.id.recyclerview);
+        RecyclerView bottomSheetRecyclerView = bottomSheetView.findViewById(R.id.recyclerview);
 
         BottomSheetRecyclerViewAdapter bottomSheetRecyclerViewAdapter = new BottomSheetRecyclerViewAdapter(context);
 
@@ -68,6 +50,7 @@ public class BottomMenuDialogFactory implements DialogFactory {
         bottomSheetRecyclerViewAdapter.notifyDataSetChanged();
 
         return bottomSheetView;
+
     }
 
     private class BottomSheetRecyclerViewAdapter extends RecyclerView.Adapter<BindingViewHolder> {
@@ -99,7 +82,7 @@ public class BottomMenuDialogFactory implements DialogFactory {
             return bottomMenuItems.size();
         }
 
-        void setBottomMenuItems(List<BottomMenuItem> bottomMenuItems) {
+        void setBottomMenuItems(List<? extends BottomMenuItem> bottomMenuItems) {
             this.bottomMenuItems.clear();
             this.bottomMenuItems.addAll(bottomMenuItems);
         }

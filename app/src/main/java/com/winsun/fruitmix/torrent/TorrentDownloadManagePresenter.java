@@ -32,7 +32,7 @@ import com.winsun.fruitmix.databinding.TorrentDownloadedChildItemBinding;
 import com.winsun.fruitmix.databinding.TorrentDownloadedGroupItemBinding;
 import com.winsun.fruitmix.databinding.TorrentDownloadingChildItemBinding;
 import com.winsun.fruitmix.databinding.TorrentDownloadingGroupItemBinding;
-import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
+import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory;
 import com.winsun.fruitmix.interfaces.BaseView;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -828,7 +828,7 @@ public class TorrentDownloadManagePresenter implements ActiveView {
 
     private Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems, Context context) {
 
-        Dialog dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(context);
+        Dialog dialog = new BottomMenuListDialogFactory(bottomMenuItems).createDialog(context);
 
         for (BottomMenuItem bottomMenuItem : bottomMenuItems) {
             bottomMenuItem.setDialog(dialog);

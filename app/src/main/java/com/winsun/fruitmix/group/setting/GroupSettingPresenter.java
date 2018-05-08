@@ -21,7 +21,7 @@ import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.databinding.AddReduceGroupMemberItemBinding;
 import com.winsun.fruitmix.databinding.GroupMemberItemBinding;
 import com.winsun.fruitmix.databinding.ModifyGroupNameLayoutBinding;
-import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
+import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
@@ -203,7 +203,7 @@ public class GroupSettingPresenter implements ActiveView {
         }
 
 
-        new BottomMenuDialogFactory(bottomMenuItems).createDialog(mGroupSettingView.getContext()).show();
+        new BottomMenuListDialogFactory(bottomMenuItems).createDialog(mGroupSettingView.getContext()).show();
 
     }
 

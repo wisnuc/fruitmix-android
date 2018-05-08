@@ -22,7 +22,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
@@ -40,7 +39,7 @@ import com.winsun.fruitmix.command.ShowSelectModeViewCommand;
 import com.winsun.fruitmix.command.ShowUnSelectModeViewCommand;
 import com.winsun.fruitmix.databinding.RemoteFileItemLayoutBinding;
 import com.winsun.fruitmix.databinding.RemoteFolderItemLayoutBinding;
-import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
+import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.FileListViewDataSource;
@@ -988,7 +987,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
     public Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
 
-        Dialog dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(activity);
+        Dialog dialog = new BottomMenuListDialogFactory(bottomMenuItems).createDialog(activity);
 
         for (BottomMenuItem bottomMenuItem : bottomMenuItems) {
             bottomMenuItem.setDialog(dialog);

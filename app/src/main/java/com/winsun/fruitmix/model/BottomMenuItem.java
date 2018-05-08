@@ -20,6 +20,8 @@ public class BottomMenuItem {
 
     private boolean disable = false;
 
+    private boolean showSwitchBtn = false;
+
     public BottomMenuItem(int iconResID,String text, AbstractCommand command) {
         this.iconResID = iconResID;
         this.text = text;
@@ -62,5 +64,13 @@ public class BottomMenuItem {
 
     public void setDisable(boolean disable) {
         this.disable = disable;
+    }
+
+    public boolean isShowSwitchBtn() {
+        return showSwitchBtn;
+    }
+
+    public void setShowSwitchBtn(boolean showSwitchBtn) {
+        this.showSwitchBtn = showSwitchBtn;
     }
 }

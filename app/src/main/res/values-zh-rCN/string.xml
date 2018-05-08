@@ -788,6 +788,19 @@
     <string name="sort_by_modify_time">按修改日期的正序与倒序</string>
     <string name="sort_by_create_time">按创建日期的正序与倒序</string>
     <string name="sort_by_capacity">按容量大小的正序与倒序</string>
+
+    <string name="new_create">新建</string>
     
+    <string name="magnet_link">磁力链</string>
+    
+    <string name="rename">重命名</string>
+    <string name="move_to">移动至…</string>
+    <string name="offline_available">离线可用</string>
+    <string name="open_with_other_app">使用其他应用打开</string>
+    <string name="make_a_copy">制作副本</string>
+    <string name="edit_tag">编辑标签</string>
+    <string name="share_to_shared_folder">分享至共享文件夹</string>
+    <string name="copy_to">拷贝至…</string>
+
 
 </resources>

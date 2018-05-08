@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.R;
@@ -28,7 +27,7 @@ import com.winsun.fruitmix.databinding.DownloadedFileItemBinding;
 import com.winsun.fruitmix.databinding.DownloadingFileItemBinding;
 import com.winsun.fruitmix.databinding.FileDownloadGroupItemBinding;
 import com.winsun.fruitmix.databinding.FragmentFileDownloadBinding;
-import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
+import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
@@ -497,7 +496,7 @@ public class FileDownloadFragment implements Page, OnViewSelectListener, IShowHi
 
     public Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
 
-        Dialog dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(activity);
+        Dialog dialog = new BottomMenuListDialogFactory(bottomMenuItems).createDialog(activity);
 
         for (BottomMenuItem bottomMenuItem : bottomMenuItems) {
             bottomMenuItem.setDialog(dialog);

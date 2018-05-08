@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.command.BaseAbstractCommand
-import com.winsun.fruitmix.dialog.BottomMenuDialogFactory
+import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
 import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeEquipmentSearchManger
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeNewEquipmentInfoDataSource
@@ -218,7 +218,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
 
         }))
 
-        BottomMenuDialogFactory(bottomMenuItems).createDialog(this).show()
+        BottomMenuListDialogFactory(bottomMenuItems).createDialog(this).show()
 
     }
 

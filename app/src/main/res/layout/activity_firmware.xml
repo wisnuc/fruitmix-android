@@ -71,7 +71,7 @@
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/textView3"
+                        android:id="@+id/fileNameTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="32dp"
@@ -91,7 +91,7 @@
                         android:layout_marginRight="16dp"
                         android:text="@{firmwareViewModel.currentFirmwareState}"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/textView3"
+                        app:layout_constraintTop_toTopOf="@+id/fileNameTextView"
                         tools:text="运行中" />
 
                 </android.support.constraint.ConstraintLayout>

@@ -12,11 +12,14 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.databinding.*
-import com.winsun.fruitmix.dialog.BottomMenuDialogFactory
+import com.winsun.fruitmix.dialog.BottomMenuGridDialogFactory
+import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
+import com.winsun.fruitmix.dialog.FileMenuBottomDialogFactory
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFolder
 import com.winsun.fruitmix.model.BottomMenuItem
+import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.component.FileSelectModeTitle
@@ -29,7 +32,6 @@ import com.winsun.fruitmix.recyclerview.BindingViewHolder
 import com.winsun.fruitmix.util.FileUtil
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
-import kotlinx.android.synthetic.main.file_page.view.*
 import kotlinx.android.synthetic.main.folder_item.view.*
 import kotlinx.android.synthetic.main.search_file_card.view.*
 
@@ -161,6 +163,25 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         }
 
+        view?.moreIv?.setOnClickListener {
+
+            val bottomMenuItems = mutableListOf<BottomMenuItem>()
+
+            val bottomMenuItem = BottomMenuItem(R.drawable.bottom_menu_folder, context.getString(R.string.folder), object : BaseAbstractCommand() {})
+
+            bottomMenuItems.add(bottomMenuItem)
+
+            val uploadBottomMenuItem = BottomMenuItem(R.drawable.upload, context.getString(R.string.upload), object : BaseAbstractCommand() {})
+
+            bottomMenuItems.add(uploadBottomMenuItem)
+
+            val magnetBottomMenuItem = BottomMenuItem(R.drawable.magnet_link, context.getString(R.string.magnet_link), object : BaseAbstractCommand() {})
+
+            bottomMenuItems.add(magnetBottomMenuItem)
+
+            BottomMenuGridDialogFactory(bottomMenuItems).createDialog(context).show()
+        }
+
     }
 
     private fun toggleOrientation() {
@@ -256,11 +277,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
                     val context = folderFileTitleBinding.nameTextView.context
 
-                    folderFileTitleBinding.nameTextView.setOnClickListener {
-                        showSortBottomDialog(context)
-                    }
-
-                    folderFileTitleBinding.sortImageView.setOnClickListener {
+                    folderFileTitleBinding.sortLayout.setOnClickListener {
                         showSortBottomDialog(context)
                     }
 
@@ -269,7 +286,9 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
                     val itemFile = viewItem as ItemFile
 
-                    val fileItemViewModel = FileItemViewModel()
+                    val fileItemViewModel = FileItemViewModel {
+                        showFileMenuBottomDialog(itemFile.remoteFile)
+                    }
                     fillGenerateFileItemViewModel(fileItemViewModel, itemFile.remoteFile)
 
                     fileItemViewModel.isSelectMode.set(isSelectMode)
@@ -379,6 +398,39 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         }
 
+        private fun showFileMenuBottomDialog(abstractRemoteFile: AbstractRemoteFile) {
+
+            val bottomMenuItems = mutableListOf<BottomMenuItem>()
+
+            bottomMenuItems.add(BottomMenuItem(R.drawable.modify_icon, context.getString(R.string.rename), object : BaseAbstractCommand() {}))
+
+            bottomMenuItems.add(BottomMenuItem(R.drawable.black_move, context.getString(R.string.move_to), object : BaseAbstractCommand() {}))
+
+            val bottomMenuItem = BottomMenuItem(R.drawable.offline_available, context.getString(R.string.offline_available), object : BaseAbstractCommand() {})
+            bottomMenuItem.isShowSwitchBtn = true
+
+            bottomMenuItems.add(bottomMenuItem)
+
+            bottomMenuItems.add(BottomMenuItem(R.drawable.open_with_other_app, context.getString(R.string.open_with_other_app), object : BaseAbstractCommand() {}))
+
+            bottomMenuItems.add(DivideBottomMenuItem())
+
+            bottomMenuItems.add(BottomMenuItem(R.drawable.make_a_copy, context.getString(R.string.make_a_copy), object : BaseAbstractCommand() {}))
+
+            bottomMenuItems.add(BottomMenuItem(R.drawable.edit_tag, context.getString(R.string.edit_tag), object : BaseAbstractCommand() {}))
+
+            bottomMenuItems.add(BottomMenuItem(R.drawable.share_to_shared_folder, context.getString(R.string.share_to_shared_folder), object : BaseAbstractCommand() {}))
+
+            bottomMenuItems.add(BottomMenuItem(R.drawable.copy_to, context.getString(R.string.copy_to), object : BaseAbstractCommand() {}))
+
+            bottomMenuItems.add(BottomMenuItem(R.drawable.delete_download_task, context.getString(R.string.delete_text), object : BaseAbstractCommand() {}))
+
+            FileMenuBottomDialogFactory(abstractRemoteFile, bottomMenuItems).createDialog(context).show()
+
+            R.layout.folder_detail
+
+        }
+
         private fun showSortBottomDialog(context: Context) {
 
             val bottomMenuItems = mutableListOf<BottomMenuItem>()
@@ -402,7 +454,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
             }))
 
-            BottomMenuDialogFactory(bottomMenuItems).createDialog(context).show()
+            BottomMenuListDialogFactory(bottomMenuItems).createDialog(context).show()
 
         }
 

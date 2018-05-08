@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.BR;
 import com.winsun.fruitmix.R;
@@ -31,7 +30,7 @@ import com.winsun.fruitmix.command.MacroCommand;
 import com.winsun.fruitmix.command.NullCommand;
 import com.winsun.fruitmix.command.OpenFileCommand;
 import com.winsun.fruitmix.databinding.RemoteFileItemLayoutBinding;
-import com.winsun.fruitmix.dialog.BottomMenuDialogFactory;
+import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.TaskState;
@@ -300,7 +299,7 @@ public class FileListPresenter {
 
     private Dialog getBottomSheetDialog(List<BottomMenuItem> bottomMenuItems) {
 
-        Dialog dialog = new BottomMenuDialogFactory(bottomMenuItems).createDialog(mActivity);
+        Dialog dialog = new BottomMenuListDialogFactory(bottomMenuItems).createDialog(mActivity);
 
         for (BottomMenuItem bottomMenuItem : bottomMenuItems) {
             bottomMenuItem.setDialog(dialog);

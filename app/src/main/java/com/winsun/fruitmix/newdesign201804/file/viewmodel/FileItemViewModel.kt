@@ -4,7 +4,7 @@ import android.databinding.ObservableBoolean
 import android.databinding.ObservableField
 import android.databinding.ObservableInt
 
-open class FileItemViewModel {
+open class FileItemViewModel(private val doHandleMoreBtnOnClick:()->Unit) {
 
     val isSelectMode = ObservableBoolean()
     val isSelected = ObservableBoolean()
@@ -14,5 +14,9 @@ open class FileItemViewModel {
 
     val fileFormatTime = ObservableField<String>()
     val fileFormatSize = ObservableField<String>()
+
+    fun handleMoreBtnOnClick(){
+        doHandleMoreBtnOnClick()
+    }
 
 }
