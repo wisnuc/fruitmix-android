@@ -822,4 +822,14 @@
 
     <string name="magnet_link">Magnet Link</string>
 
+    <string name="rename">Rename</string>
+    <string name="move_to">Move to…</string>
+    <string name="offline_available">Offline Available</string>
+    <string name="open_with_other_app">Open with other app</string>
+    <string name="make_a_copy">Make a copy</string>
+    <string name="edit_tag">Edit tag</string>
+    <string name="share_to_shared_folder">Share to shared folder</string>
+    <string name="copy_to">Copy to…</string>
+    <string name="move">Move</string>
+
 </resources>

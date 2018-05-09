@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.newdesign201804.file.data
+package com.winsun.fruitmix.newdesign201804.file.list.data
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile

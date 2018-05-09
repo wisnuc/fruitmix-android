@@ -801,6 +801,6 @@
     <string name="edit_tag">编辑标签</string>
     <string name="share_to_shared_folder">分享至共享文件夹</string>
     <string name="copy_to">拷贝至…</string>
-
+    <string name="move">移动</string>
 
 </resources>

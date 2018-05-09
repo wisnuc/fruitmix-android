@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.newdesign201804.file.viewmodel
+package com.winsun.fruitmix.newdesign201804.file.list.viewmodel
 
 import android.databinding.ObservableBoolean
 

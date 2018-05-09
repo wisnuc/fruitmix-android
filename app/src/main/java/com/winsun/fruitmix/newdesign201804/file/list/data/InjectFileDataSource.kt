@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.newdesign201804.file.data
+package com.winsun.fruitmix.newdesign201804.file.list.data
 
 import android.content.Context
 

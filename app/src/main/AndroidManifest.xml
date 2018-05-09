@@ -240,6 +240,9 @@
         <activity
             android:name=".newdesign201804.mainpage.MainPageActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.file.move.MoveFileActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

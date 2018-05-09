@@ -7,7 +7,7 @@
 
         <variable
             name="fileItemViewModel"
-            type="com.winsun.fruitmix.newdesign201804.file.viewmodel.FileItemViewModel" />
+            type="com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel" />
 
         <import type="android.view.View" />
 

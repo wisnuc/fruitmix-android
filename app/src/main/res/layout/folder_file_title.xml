@@ -7,7 +7,7 @@
 
         <variable
             name="folderFileTitleViewModel"
-            type="com.winsun.fruitmix.newdesign201804.file.viewmodel.FolderFileTitleViewModel" />
+            type="com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel" />
 
         <import type="android.view.View" />
 
