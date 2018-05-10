@@ -18,7 +18,7 @@
 
     <item
         android:id="@+id/file"
-        android:icon="@drawable/ic_storage"
+        android:icon="@drawable/ic_folder"
         android:title="@string/files" />
 
 </menu>

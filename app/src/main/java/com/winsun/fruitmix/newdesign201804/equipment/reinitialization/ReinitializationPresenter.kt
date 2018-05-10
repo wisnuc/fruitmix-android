@@ -21,6 +21,7 @@ import com.winsun.fruitmix.util.Util
 
 class ReinitializationPresenter(val context: Context, val admin: User, val pager: ViewPager,
                                 private val finishActivityWhenFinishReinitialization: () -> Unit, val equipmentName: String,
+                                val equipmentIP:String,
                                 private val equipmentItemDataSource: EquipmentItemDataSource) {
 
     private val reinitializationEquipmentDiskInfos: MutableList<ReinitializationEquipmentDiskInfo> = mutableListOf()
@@ -62,7 +63,7 @@ class ReinitializationPresenter(val context: Context, val admin: User, val pager
 
             setPassword = it
 
-            equipmentItemDataSource.addEquipmentItems(CloudConnectEquipItem(equipmentName,Util.createLocalUUid()),
+            equipmentItemDataSource.addEquipmentItems(CloudConnectEquipItem(equipmentName,Util.createLocalUUid(),equipmentIP),
                     object : BaseOperateCallbackImpl() {})
 
             finishReinitializationPage.setData(mSelectReinitializationEquipmentDiskInfos, mSelectDiskMode)

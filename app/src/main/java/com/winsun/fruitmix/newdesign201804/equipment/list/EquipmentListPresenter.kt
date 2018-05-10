@@ -18,6 +18,8 @@ import com.winsun.fruitmix.newdesign201804.equipment.abnormal.HandleAbnormalEqui
 import com.winsun.fruitmix.newdesign201804.equipment.add.AddEquipmentActivity
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.model.*
+import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.EQUIPMENT_IP_KEY
+import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.EQUIPMENT_NAME_KEY
 import com.winsun.fruitmix.newdesign201804.login.LanLoginActivity
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPageActivity
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
@@ -139,6 +141,9 @@ class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemD
                         is CloudConnectEquipItem -> {
 
                             val intent = Intent(context, MainPageActivity::class.java)
+                            intent.putExtra(EQUIPMENT_IP_KEY, equipmentItem.name)
+                            intent.putExtra(EQUIPMENT_NAME_KEY, equipmentItem.ip)
+
                             context.startActivity(intent)
 
                         }

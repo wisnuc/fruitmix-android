@@ -798,7 +798,7 @@ public class UploadMediaUseCase {
                 localFile.setName(fileName);
 
             localFile.setPath(media.getOriginalPhotoPath());
-            localFile.setSize(file.length() + "");
+            localFile.setSize(file.length());
 
             Log.d(TAG, "upload file: media uuid: " + media.getUuid() + " media originalPath: " + media.getOriginalPhotoPath()
                     + " fileName: " + localFile.getName());

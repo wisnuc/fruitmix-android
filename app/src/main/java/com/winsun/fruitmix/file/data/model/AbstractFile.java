@@ -17,6 +17,8 @@ public abstract class AbstractFile {
 
     private int fileTypeResID;
 
+    private long size;
+
     public abstract boolean isFolder();
 
     public String getName() {
@@ -42,6 +44,15 @@ public abstract class AbstractFile {
     public void setTime(long time) {
         this.time = time;
     }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
 
     public String getDateText() {
 

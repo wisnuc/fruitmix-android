@@ -803,4 +803,14 @@
     <string name="copy_to">拷贝至…</string>
     <string name="move">移动</string>
 
+    <string name="drawer_file_title">文件</string>
+    <string name="permission_manage">权限管理</string>
+
+    <!-- drawer -->
+    <string name="tag">标签</string>
+    <string name="offline_file">离线文件</string>
+    <string name="shared_folder">共享文件夹</string>
+    <string name="transmission_task">传输任务</string>
+
+
 </resources>

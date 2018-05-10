@@ -9,11 +9,11 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.newdesign201804.equipment.add.FINISH_REINITIALIZATION_RESULT_CODE
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.FakeEquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.wechatUser.WeChatUserInfoDataSource
-import com.winsun.fruitmix.user.User
-import com.winsun.fruitmix.util.Util
 import kotlinx.android.synthetic.main.activity_reinitialization.*
 
-const val REINITIALIZE_EQUIPMENT_NAME_KEY = "reinitialize_equipment_name_key"
+const val EQUIPMENT_NAME_KEY = "reinitialize_equipment_name_key"
+
+const val EQUIPMENT_IP_KEY = "reinitialize_equipment_ip_key"
 
 class ReinitializationActivity : BaseToolbarActivity() {
 
@@ -23,7 +23,9 @@ class ReinitializationActivity : BaseToolbarActivity() {
         setToolbarWhiteStyle(toolbarViewModel)
         setStatusBarToolbarBgColor(R.color.new_design_primary_color)
 
-        val equipmentName = intent.getStringExtra(REINITIALIZE_EQUIPMENT_NAME_KEY)
+        val equipmentName = intent.getStringExtra(EQUIPMENT_NAME_KEY)
+
+        val equipmentIP = intent.getStringExtra(EQUIPMENT_IP_KEY)
 
         val user = WeChatUserInfoDataSource.getUser()
 
@@ -33,7 +35,7 @@ class ReinitializationActivity : BaseToolbarActivity() {
             setResult(FINISH_REINITIALIZATION_RESULT_CODE)
             finish()
 
-        }, equipmentName, FakeEquipmentItemDataSource)
+        }, equipmentName, equipmentIP,FakeEquipmentItemDataSource)
 
         reinitializationPresenter.init()
 

@@ -13,7 +13,7 @@ abstract class BaseEquipmentItem(val name: String,val uuid:String) {
 
 }
 
-class CloudConnectEquipItem(name: String,uuid: String) : BaseEquipmentItem(name,uuid) {
+class CloudConnectEquipItem(name: String,uuid: String,val ip:String) : BaseEquipmentItem(name,uuid) {
 
     override fun getEquipmentTypeStr(context: Context): String {
         return ""

@@ -564,7 +564,7 @@ public class UploadFileUseCase {
         final LocalFile localFile = new LocalFile();
 
         localFile.setFileHash(fileUploadItem.getFileUUID());
-        localFile.setSize(fileUploadItem.getFileSize() + "");
+        localFile.setSize(fileUploadItem.getFileSize());
 
         localFile.setPath(uploadFilePath);
 

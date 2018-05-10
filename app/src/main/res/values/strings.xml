@@ -832,4 +832,14 @@
     <string name="copy_to">Copy to…</string>
     <string name="move">Move</string>
 
+    <string name="drawer_file_title">File</string>
+    <string name="permission_manage">Permission Manage</string>
+
+    <!-- drawer -->
+    <string name="tag">Tag</string>
+    <string name="offline_file">Offline File</string>
+    <string name="shared_folder">Shared Folder</string>
+    <string name="transmission_task">Transmission Task</string>
+
+
 </resources>

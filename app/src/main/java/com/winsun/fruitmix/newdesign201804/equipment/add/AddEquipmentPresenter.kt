@@ -56,7 +56,7 @@ interface EquipmentUIState {
 
 interface AddEquipmentView : BaseView {
 
-    fun enterReinitialization(equipmentName: String)
+    fun enterReinitialization(baseNewEquipmentInfo: BaseNewEquipmentInfo)
 
 }
 
@@ -338,14 +338,15 @@ private class AvailableEquipmentState(equipmentUIState: EquipmentUIState,
 
     override fun operateBtnOnClick(context: Context, addEquipmentPresenter: AddEquipmentPresenter, btn: View) {
 
-        addEquipment(addEquipmentPresenter, context, btn, availableEquipmentInfo.equipmentName)
+        addEquipment(addEquipmentPresenter, context, btn, availableEquipmentInfo)
 
     }
 
 }
 
-private fun addEquipment(addEquipmentPresenter: AddEquipmentPresenter, context: Context, btn: View, name: String) {
-    val baseEquipmentItem = CloudConnectEquipItem(name, Util.createLocalUUid())
+private fun addEquipment(addEquipmentPresenter: AddEquipmentPresenter, context: Context, btn: View, baseNewEquipmentInfo: BaseNewEquipmentInfo) {
+    val baseEquipmentItem = CloudConnectEquipItem(baseNewEquipmentInfo.equipmentName, Util.createLocalUUid(),
+            baseNewEquipmentInfo.equipmentIP)
 
     addEquipmentPresenter.addEquipmentView.showProgressDialog(context.getString(R.string.operating_title,
             context.getString(R.string.add_equipment)))
@@ -395,7 +396,7 @@ private class UnboundEquipmentState(equipmentUIState: EquipmentUIState,
     override fun operateBtnOnClick(context: Context, addEquipmentPresenter: AddEquipmentPresenter, btn: View) {
 
         if (unBoundEquipmentInfo.selectBoundEquipmentDiskInfo != null)
-            addEquipment(addEquipmentPresenter, context, btn, unBoundEquipmentInfo.equipmentName)
+            addEquipment(addEquipmentPresenter, context, btn, unBoundEquipmentInfo)
         else {
 
             SnackbarUtil.showSnackBar(btn, Snackbar.LENGTH_SHORT, R.string.select_disk_hint)
@@ -420,7 +421,7 @@ private class ReinitializationEquipmentState(equipmentUIState: EquipmentUIState,
 
     override fun operateBtnOnClick(context: Context, addEquipmentPresenter: AddEquipmentPresenter, btn: View) {
 
-        addEquipmentPresenter.addEquipmentView.enterReinitialization(reinitializationEquipmentInfo.equipmentName)
+        addEquipmentPresenter.addEquipmentView.enterReinitialization(reinitializationEquipmentInfo)
 
     }
 
@@ -460,7 +461,7 @@ private fun showUnboundEquipmentDetail(context: Context, unBoundEquipmentInfo: U
     view.equipment_name.text = unBoundEquipmentInfo.equipmentName
 
     view.reinitializeBtn.setOnClickListener {
-        addEquipmentPresenter.addEquipmentView.enterReinitialization(unBoundEquipmentInfo.equipmentName)
+        addEquipmentPresenter.addEquipmentView.enterReinitialization(unBoundEquipmentInfo)
     }
 
     view.unboundEquipmentRecyclerView.layoutManager = LinearLayoutManager(context)

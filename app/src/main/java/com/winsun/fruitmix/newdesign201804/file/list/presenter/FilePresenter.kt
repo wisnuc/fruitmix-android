@@ -16,6 +16,7 @@ import com.winsun.fruitmix.databinding.*
 import com.winsun.fruitmix.dialog.BottomMenuGridDialogFactory
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
 import com.winsun.fruitmix.dialog.FileMenuBottomDialogFactory
+import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFolder
@@ -39,7 +40,7 @@ import kotlinx.android.synthetic.main.search_file_card.view.*
 
 private const val SPAN_COUNT = 2
 
-private val mSelectFiles = mutableListOf<AbstractRemoteFile>()
+private val mSelectFiles = mutableListOf<AbstractFile>()
 private var mIsSelectMode = false
 
 public class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
@@ -238,12 +239,12 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     }
 
-    private fun doHandleOnLongClick(abstractRemoteFile: AbstractRemoteFile) {
+    private fun doHandleOnLongClick(abstractFile: AbstractFile) {
 
         if (mIsSelectMode)
             return
 
-        mSelectFiles.add(abstractRemoteFile)
+        mSelectFiles.add(abstractFile)
 
         fileSelectModeTitle.notifySelectCountChanged(mSelectFiles.size)
 
@@ -252,15 +253,15 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
     }
 
 
-    private fun doHandleItemOnClick(abstractRemoteFile: AbstractRemoteFile, position: Int) {
+    private fun doHandleItemOnClick(abstractFile: AbstractFile, position: Int) {
 
         if (!mIsSelectMode)
             return
 
-        if (mSelectFiles.contains(abstractRemoteFile))
-            mSelectFiles.remove(abstractRemoteFile)
+        if (mSelectFiles.contains(abstractFile))
+            mSelectFiles.remove(abstractFile)
         else
-            mSelectFiles.add(abstractRemoteFile)
+            mSelectFiles.add(abstractFile)
 
         if (mSelectFiles.isEmpty()) {
             quitSelectMode()
@@ -313,7 +314,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     }
 
-    private fun doShowFileMenuBottomDialog(context: Context, abstractRemoteFile: AbstractRemoteFile) {
+    private fun doShowFileMenuBottomDialog(context: Context, abstractFile: AbstractFile) {
 
         val bottomMenuItems = mutableListOf<BottomMenuItem>()
 
@@ -345,7 +346,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         bottomMenuItems.add(BottomMenuItem(R.drawable.delete_download_task, context.getString(R.string.delete_text), object : BaseAbstractCommand() {}))
 
-        FileMenuBottomDialogFactory(abstractRemoteFile, bottomMenuItems).createDialog(context).show()
+        FileMenuBottomDialogFactory(abstractFile, bottomMenuItems).createDialog(context).show()
 
         R.layout.folder_detail
 
@@ -361,13 +362,13 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
 }
 
-class FileRecyclerViewAdapter(val handleItemOnClick: (abstractRemoteFile: AbstractRemoteFile, position: Int) -> Unit,
-                              val handleItemOnLongClick: (abstractRemoteFile: AbstractRemoteFile) -> Unit,
-                              val doHandleMoreBtnOnClick: (abstractRemoteFile: AbstractRemoteFile) -> Unit) : BaseRecyclerViewAdapter<BindingViewHolder, ViewItem>() {
+class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile, position: Int) -> Unit,
+                              val handleItemOnLongClick: (abstractFile: AbstractFile) -> Unit,
+                              val doHandleMoreBtnOnClick: (abstractFile: AbstractFile) -> Unit) : BaseRecyclerViewAdapter<BindingViewHolder, ViewItem>() {
 
     var currentOrientation = ORIENTATION_GRID_TYPE
 
-    var selectFiles = mutableListOf<AbstractRemoteFile>()
+    var selectFiles = mutableListOf<AbstractFile>()
     var isSelectMode = false
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): BindingViewHolder {
@@ -529,11 +530,11 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractRemoteFile: Abstra
 
     }
 
-    private fun fillGenerateFileItemViewModel(fileItemViewModel: FileItemViewModel, abstractRemoteFile: AbstractRemoteFile) {
-        fileItemViewModel.fileTypeResID.set(abstractRemoteFile.fileTypeResID)
-        fileItemViewModel.fileFormatSize.set(FileUtil.formatFileSize(abstractRemoteFile.size))
-        fileItemViewModel.fileFormatTime.set(abstractRemoteFile.timeText)
-        fileItemViewModel.folderName.set(abstractRemoteFile.name)
+    private fun fillGenerateFileItemViewModel(fileItemViewModel: FileItemViewModel, abstractFile: AbstractFile) {
+        fileItemViewModel.fileTypeResID.set(abstractFile.fileTypeResID)
+        fileItemViewModel.fileFormatSize.set(FileUtil.formatFileSize(abstractFile.size))
+        fileItemViewModel.fileFormatTime.set(abstractFile.timeText)
+        fileItemViewModel.folderName.set(abstractFile.name)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -597,7 +598,7 @@ open class ItemFolderHead(val folderFileTitleViewModel: FolderFileTitleViewModel
 
 }
 
-class ItemFolder(val remoteFolder: RemoteFolder) : ViewItem {
+class ItemFolder(val remoteFolder: AbstractFile) : ViewItem {
     override fun getType(): Int {
         return ITEM_FOLDER
     }
@@ -615,7 +616,7 @@ class ItemFileHead(folderFileTitleViewModel: FolderFileTitleViewModel) : ItemFol
 
 }
 
-class ItemFile(val remoteFile: RemoteFile) : ViewItem {
+class ItemFile(val remoteFile: AbstractFile) : ViewItem {
     override fun getType(): Int {
         return ITEM_FILE
     }

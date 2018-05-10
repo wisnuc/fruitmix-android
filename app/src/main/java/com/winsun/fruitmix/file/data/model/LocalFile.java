@@ -14,7 +14,6 @@ import java.util.Date;
 public class LocalFile extends AbstractLocalFile {
 
     private String fileHash;
-    private String size;
 
     public LocalFile() {
 
@@ -28,14 +27,6 @@ public class LocalFile extends AbstractLocalFile {
 
     public void setFileHash(String fileHash) {
         this.fileHash = fileHash;
-    }
-
-    public String getSize() {
-        return size;
-    }
-
-    public void setSize(String size) {
-        this.size = size;
     }
 
     @Override

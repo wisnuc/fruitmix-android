@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.model.DivideBottomMenuItem
@@ -20,7 +21,7 @@ import kotlinx.android.synthetic.main.file_menu_opeate_item.view.*
 private const val BOTTOM_ITEM = 1
 private const val BOTTOM_DIVIDE = 2
 
-class FileMenuBottomDialogFactory(val abstractRemoteFile: AbstractRemoteFile, bottomMenuItems: List<BottomMenuItem>) : BaseBottomMenuDialogFactory(bottomMenuItems) {
+class FileMenuBottomDialogFactory(val abstractFile: AbstractFile, bottomMenuItems: List<BottomMenuItem>) : BaseBottomMenuDialogFactory(bottomMenuItems) {
 
     override fun createBottomSheetView(context: Context, bottomMenuItems: List<BottomMenuItem>): View {
 
@@ -28,11 +29,11 @@ class FileMenuBottomDialogFactory(val abstractRemoteFile: AbstractRemoteFile, bo
 
         val fileTypeIv = bottomSheetView.findViewById<ImageView>(R.id.fileTypeIconIv)
 
-        fileTypeIv.setImageResource(abstractRemoteFile.fileTypeResID)
+        fileTypeIv.setImageResource(abstractFile.fileTypeResID)
 
         val fileNameTv = bottomSheetView.findViewById<TextView>(R.id.fileNameTextView)
 
-        fileNameTv.text = abstractRemoteFile.name
+        fileNameTv.text = abstractFile.name
 
         val bottomSheetRecyclerView = bottomSheetView.findViewById<RecyclerView>(R.id.recyclerView)
 

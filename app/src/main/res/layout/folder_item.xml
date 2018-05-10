@@ -31,8 +31,8 @@
                 android:id="@+id/select_file_icon_bg"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:visibility="invisible"
-                android:background="@drawable/round_circle" />
+                android:background="@drawable/round_circle"
+                android:visibility="invisible" />
 
             <ImageView
                 android:id="@+id/imageView21"
@@ -57,13 +57,14 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="新建文件夹" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/imageView22"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginEnd="8dp"
-            android:onClick="@{()->fileItemViewModel.handleMoreBtnOnClick()}"
             android:layout_marginRight="8dp"
+            android:background="@null"
+            android:onClick="@{()->fileItemViewModel.handleMoreBtnOnClick()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

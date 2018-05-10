@@ -243,6 +243,15 @@
         <activity
             android:name=".newdesign201804.file.move.MoveFileActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.file.sharedFolder.SharedFolderActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.file.permissionManage.PermissionManageActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.file.offlineFile.OfflineFileActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

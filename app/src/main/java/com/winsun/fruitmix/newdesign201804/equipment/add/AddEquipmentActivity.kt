@@ -12,10 +12,12 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
 import com.winsun.fruitmix.model.BottomMenuItem
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.BaseNewEquipmentInfo
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeEquipmentSearchManger
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeNewEquipmentInfoDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.InjectEquipmentItemDataSource
-import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.REINITIALIZE_EQUIPMENT_NAME_KEY
+import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.EQUIPMENT_IP_KEY
+import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.EQUIPMENT_NAME_KEY
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.ReinitializationActivity
 import kotlinx.android.synthetic.main.activity_add_equipment.*
 
@@ -226,10 +228,11 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
         startActivity(Intent(this, AddEquipmentByIpActivity::class.java))
     }
 
-    override fun enterReinitialization(equipmentName: String) {
+    override fun enterReinitialization(baseNewEquipmentInfo: BaseNewEquipmentInfo) {
 
         val intent = Intent(this, ReinitializationActivity::class.java)
-        intent.putExtra(REINITIALIZE_EQUIPMENT_NAME_KEY, equipmentName)
+        intent.putExtra(EQUIPMENT_NAME_KEY, baseNewEquipmentInfo.equipmentName)
+        intent.putExtra(EQUIPMENT_IP_KEY, baseNewEquipmentInfo.equipmentIP)
 
         startActivityForResult(intent, REINITIALIZATION_ACTIVITY_REQUEST_CODE)
 
