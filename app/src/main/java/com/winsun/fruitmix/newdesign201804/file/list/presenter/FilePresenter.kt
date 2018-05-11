@@ -25,6 +25,9 @@ import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.component.FileSelectModeTitle
+import com.winsun.fruitmix.newdesign201804.file.detail.FILE_UUID_KEY
+import com.winsun.fruitmix.newdesign201804.file.detail.FileDetailActivity
+import com.winsun.fruitmix.newdesign201804.file.list.MainPageDividerItemDecoration
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
@@ -61,6 +64,8 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
     private val viewItems = mutableListOf<ViewItem>()
 
     private lateinit var fileSelectModeTitle: FileSelectModeTitle
+
+    private lateinit var mainPageDividerItemDecoration: MainPageDividerItemDecoration
 
     fun initView() {
 
@@ -116,12 +121,6 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     private fun initRecyclerView() {
 
-        filePageBinding.fileRecyclerView.itemAnimator = DefaultItemAnimator()
-
-        setRecyclerViewLayoutManager()
-
-        filePageBinding.fileRecyclerView.adapter = fileRecyclerViewAdapter
-
         fileRecyclerViewAdapter.currentOrientation = currentOrientation
 
         val folderViewItems = mutableListOf<ViewItem>()
@@ -130,9 +129,9 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
         currentFolderItems.forEach {
 
             if (it.isFolder) {
-                folderViewItems.add(ItemFolder(it as RemoteFolder))
+                folderViewItems.add(ItemFolder(FolderItemViewModel(it as RemoteFolder)))
             } else {
-                fileViewItems.add(ItemFile(it as RemoteFile))
+                fileViewItems.add(ItemFile(FileItemViewModel(it as RemoteFile)))
             }
 
         }
@@ -158,6 +157,14 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
             viewItems.addAll(fileViewItems)
 
         }
+
+        filePageBinding.fileRecyclerView.itemAnimator = DefaultItemAnimator()
+
+        mainPageDividerItemDecoration = MainPageDividerItemDecoration(SPAN_COUNT, viewItems.size)
+
+        setRecyclerViewLayoutManager()
+
+        filePageBinding.fileRecyclerView.adapter = fileRecyclerViewAdapter
 
         fileRecyclerViewAdapter.setItemList(viewItems)
         fileRecyclerViewAdapter.notifyDataSetChanged()
@@ -231,9 +238,13 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
             filePageBinding.fileRecyclerView.layoutManager = gridLayoutManager
 
+            filePageBinding.fileRecyclerView.addItemDecoration(mainPageDividerItemDecoration)
+
         } else if (currentOrientation == ORIENTATION_LIST_TYPE) {
 
             filePageBinding.fileRecyclerView.layoutManager = linearLayoutManager
+
+            filePageBinding.fileRecyclerView.removeItemDecoration(mainPageDividerItemDecoration)
 
         }
 
@@ -278,11 +289,11 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     }
 
-    fun useDefaultBackPressFunction():Boolean{
+    fun useDefaultBackPressFunction(): Boolean {
         return !mIsSelectMode
     }
 
-    fun onBackPressed(){
+    fun onBackPressed() {
         quitSelectMode()
     }
 
@@ -327,18 +338,26 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
             }
         }))
 
-        val bottomMenuItem = BottomMenuItem(R.drawable.offline_available, context.getString(R.string.offline_available), object : BaseAbstractCommand() {})
-        bottomMenuItem.isShowSwitchBtn = true
+        if (!abstractFile.isFolder) {
 
-        bottomMenuItems.add(bottomMenuItem)
+            val bottomMenuItem = BottomMenuItem(R.drawable.offline_available, context.getString(R.string.offline_available), object : BaseAbstractCommand() {})
+            bottomMenuItem.isShowSwitchBtn = true
+
+            bottomMenuItems.add(bottomMenuItem)
+
+        }
 
         bottomMenuItems.add(BottomMenuItem(R.drawable.open_with_other_app, context.getString(R.string.open_with_other_app), object : BaseAbstractCommand() {}))
 
         bottomMenuItems.add(DivideBottomMenuItem())
 
-        bottomMenuItems.add(BottomMenuItem(R.drawable.make_a_copy, context.getString(R.string.make_a_copy), object : BaseAbstractCommand() {}))
+        if (!abstractFile.isFolder) {
 
-        bottomMenuItems.add(BottomMenuItem(R.drawable.edit_tag, context.getString(R.string.edit_tag), object : BaseAbstractCommand() {}))
+            bottomMenuItems.add(BottomMenuItem(R.drawable.make_a_copy, context.getString(R.string.make_a_copy), object : BaseAbstractCommand() {}))
+
+            bottomMenuItems.add(BottomMenuItem(R.drawable.edit_tag, context.getString(R.string.edit_tag), object : BaseAbstractCommand() {}))
+
+        }
 
         bottomMenuItems.add(BottomMenuItem(R.drawable.share_to_shared_folder, context.getString(R.string.share_to_shared_folder), object : BaseAbstractCommand() {}))
 
@@ -346,9 +365,19 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         bottomMenuItems.add(BottomMenuItem(R.drawable.delete_download_task, context.getString(R.string.delete_text), object : BaseAbstractCommand() {}))
 
-        FileMenuBottomDialogFactory(abstractFile, bottomMenuItems).createDialog(context).show()
+        FileMenuBottomDialogFactory(abstractFile, bottomMenuItems, {
 
-        R.layout.folder_detail
+            val intent = Intent(context, FileDetailActivity::class.java)
+
+            val abstractRemoteFile = it as AbstractRemoteFile
+            intent.putExtra(FILE_UUID_KEY, abstractRemoteFile.uuid)
+
+            //TODO: check pass uuid
+
+            context.startActivity(intent)
+
+        }).createDialog(context).show()
+
 
     }
 
@@ -388,7 +417,6 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
             GRID_ITEM_FILE ->
                 FileItemBinding.inflate(LayoutInflater.from(parent?.context), parent, false)
 
-
             LIST_ITEM_FILE -> {
 
                 FileFolderListItemBinding.inflate(LayoutInflater.from(parent?.context), parent, false)
@@ -427,25 +455,27 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 val itemFile = viewItem as ItemFile
 
-                val fileItemViewModel = FileItemViewModel {
-                    doHandleMoreBtnOnClick(itemFile.remoteFile)
+                val fileItemViewModel = FileItemViewModel(itemFile.getFile()) {
+                    doHandleMoreBtnOnClick(itemFile.getFile())
                 }
-                fillGenerateFileItemViewModel(fileItemViewModel, itemFile.remoteFile)
+
+                fileItemViewModel.showMoreBtn.set(itemFile.fileItemViewModel.showMoreBtn.get())
+                fileItemViewModel.showOfflineAvailableIv.set(itemFile.fileItemViewModel.showOfflineAvailableIv.get())
 
                 fileItemViewModel.isSelectMode.set(isSelectMode)
-                fileItemViewModel.isSelected.set(selectFiles.contains(itemFile.remoteFile))
+                fileItemViewModel.isSelected.set(selectFiles.contains(itemFile.getFile()))
 
                 holder?.viewDataBinding?.setVariable(BR.fileItemViewModel, fileItemViewModel)
 
                 rootView?.setOnClickListener {
 
-                    handleItemOnClick(itemFile.remoteFile, position)
+                    handleItemOnClick(itemFile.getFile(), position)
 
                 }
 
                 rootView?.setOnLongClickListener {
 
-                    handleItemOnLongClick(itemFile.remoteFile)
+                    handleItemOnLongClick(itemFile.getFile())
 
                     return@setOnLongClickListener true
 
@@ -457,13 +487,17 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 val itemFolder = viewItem as ItemFolder
 
-                val folderItemViewModel = FolderItemViewModel()
-                fillGenerateFileItemViewModel(folderItemViewModel, itemFolder.remoteFolder)
+                val folderItemViewModel = FolderItemViewModel(itemFolder.getFile()) {
+                    doHandleMoreBtnOnClick(itemFolder.getFile())
+                }
 
                 if (currentOrientation == ORIENTATION_LIST_TYPE) {
 
                     folderItemViewModel.isSelectMode.set(isSelectMode)
-                    folderItemViewModel.isSelected.set(selectFiles.contains(itemFolder.remoteFolder))
+                    folderItemViewModel.isSelected.set(selectFiles.contains(itemFolder.getFile()))
+
+                    folderItemViewModel.showMoreBtn.set(itemFolder.folderFileTitleViewModel.showMoreBtn.get())
+                    folderItemViewModel.showOfflineAvailableIv.set(itemFolder.folderFileTitleViewModel.showOfflineAvailableIv.get())
 
                 } else {
 
@@ -471,7 +505,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                     view?.select_file_icon_bg?.visibility = if (isSelectMode) View.VISIBLE else View.INVISIBLE
                     view?.select_file_icon_bg?.setBackgroundResource(
-                            if (selectFiles.contains(itemFolder.remoteFolder)) R.drawable.item_selected_state
+                            if (selectFiles.contains(itemFolder.getFile())) R.drawable.item_selected_state
                             else R.drawable.round_circle)
 
                 }
@@ -482,13 +516,13 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 rootView?.setOnClickListener {
 
-                    handleItemOnClick(itemFolder.remoteFolder, position)
+                    handleItemOnClick(itemFolder.getFile(), position)
 
                 }
 
                 rootView?.setOnLongClickListener {
 
-                    handleItemOnLongClick(itemFolder.remoteFolder)
+                    handleItemOnLongClick(itemFolder.getFile())
 
                     return@setOnLongClickListener true
 
@@ -530,12 +564,6 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
     }
 
-    private fun fillGenerateFileItemViewModel(fileItemViewModel: FileItemViewModel, abstractFile: AbstractFile) {
-        fileItemViewModel.fileTypeResID.set(abstractFile.fileTypeResID)
-        fileItemViewModel.fileFormatSize.set(FileUtil.formatFileSize(abstractFile.size))
-        fileItemViewModel.fileFormatTime.set(abstractFile.timeText)
-        fileItemViewModel.folderName.set(abstractFile.name)
-    }
 
     override fun getItemViewType(position: Int): Int {
 
@@ -598,10 +626,15 @@ open class ItemFolderHead(val folderFileTitleViewModel: FolderFileTitleViewModel
 
 }
 
-class ItemFolder(val remoteFolder: AbstractFile) : ViewItem {
+class ItemFolder(val folderFileTitleViewModel: FolderItemViewModel) : ViewItem {
     override fun getType(): Int {
         return ITEM_FOLDER
     }
+
+    fun getFile(): AbstractFile {
+        return folderFileTitleViewModel.abstractFile
+    }
+
 }
 
 class ItemFileHead(folderFileTitleViewModel: FolderFileTitleViewModel) : ItemFolderHead(folderFileTitleViewModel) {
@@ -616,10 +649,15 @@ class ItemFileHead(folderFileTitleViewModel: FolderFileTitleViewModel) : ItemFol
 
 }
 
-class ItemFile(val remoteFile: AbstractFile) : ViewItem {
+class ItemFile(val fileItemViewModel: FileItemViewModel) : ViewItem {
     override fun getType(): Int {
         return ITEM_FILE
     }
+
+    fun getFile(): AbstractFile {
+        return fileItemViewModel.abstractFile
+    }
+
 }
 
 

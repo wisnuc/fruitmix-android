@@ -21,7 +21,8 @@ import kotlinx.android.synthetic.main.file_menu_opeate_item.view.*
 private const val BOTTOM_ITEM = 1
 private const val BOTTOM_DIVIDE = 2
 
-class FileMenuBottomDialogFactory(val abstractFile: AbstractFile, bottomMenuItems: List<BottomMenuItem>) : BaseBottomMenuDialogFactory(bottomMenuItems) {
+class FileMenuBottomDialogFactory(val abstractFile: AbstractFile, bottomMenuItems: List<BottomMenuItem>,
+                                  val detailImageViewOnClick:(abstractFile: AbstractFile)->Unit) : BaseBottomMenuDialogFactory(bottomMenuItems) {
 
     override fun createBottomSheetView(context: Context, bottomMenuItems: List<BottomMenuItem>): View {
 
@@ -34,6 +35,12 @@ class FileMenuBottomDialogFactory(val abstractFile: AbstractFile, bottomMenuItem
         val fileNameTv = bottomSheetView.findViewById<TextView>(R.id.fileNameTextView)
 
         fileNameTv.text = abstractFile.name
+
+        val detailIv = bottomSheetView.findViewById<ImageView>(R.id.detailImageView)
+
+        detailIv.setOnClickListener {
+            detailImageViewOnClick(abstractFile)
+        }
 
         val bottomSheetRecyclerView = bottomSheetView.findViewById<RecyclerView>(R.id.recyclerView)
 

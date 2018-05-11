@@ -6,7 +6,7 @@ class InjectFileDataSource{
 
     companion object {
         fun inject(context: Context): FileDataSource {
-            return FakeFileDataSource()
+            return FakeFileDataSource
         }
     }
 

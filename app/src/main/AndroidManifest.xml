@@ -252,6 +252,11 @@
         <activity
             android:name=".newdesign201804.file.offlineFile.OfflineFileActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.file.detail.FileDetailActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".newdesign201804.search.SearchActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

@@ -17,7 +17,9 @@ import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
+import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
+import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.permissionManage.PermissionManageActivity
 
 class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolderView: SharedFolderView) {
@@ -61,9 +63,13 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
         data.forEach {
 
             if (it.isFolder) {
-                folderViewItems.add(ItemFolder(it as RemoteFolder))
+
+                val folderItemViewModel = FolderItemViewModel(it as RemoteFolder)
+                folderViewItems.add(ItemFolder(folderItemViewModel))
             } else {
-                fileViewItems.add(ItemFile(it as RemoteFile))
+
+                val fileItemViewModel = FileItemViewModel(it as RemoteFile)
+                fileViewItems.add(ItemFile(fileItemViewModel))
             }
 
         }

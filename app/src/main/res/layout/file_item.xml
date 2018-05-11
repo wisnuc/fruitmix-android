@@ -14,7 +14,8 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/white">
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/constraintLayout4"
@@ -34,11 +35,11 @@
                 android:layout_marginRight="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
+                android:src="@{fileItemViewModel.fileTypeResID,default=@drawable/power_point}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:src="@{fileItemViewModel.fileTypeResID,default=@drawable/power_point}" />
+                app:layout_constraintTop_toTopOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
 
@@ -48,10 +49,10 @@
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_marginTop="1dp"
+            app:fileItemViewModel="@{fileItemViewModel}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout4"
-            app:fileItemViewModel="@{fileItemViewModel}" />
+            app:layout_constraintTop_toBottomOf="@+id/constraintLayout4" />
 
 
         <android.support.constraint.ConstraintLayout
@@ -69,11 +70,11 @@
                 android:id="@+id/item_select_state"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:background="@{fileItemViewModel.isSelected()?@drawable/item_selected_state:@drawable/round_circle,default=@drawable/round_circle}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:background="@{fileItemViewModel.isSelected()?@drawable/item_selected_state:@drawable/round_circle,default=@drawable/round_circle}" />
+                app:layout_constraintTop_toTopOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
 

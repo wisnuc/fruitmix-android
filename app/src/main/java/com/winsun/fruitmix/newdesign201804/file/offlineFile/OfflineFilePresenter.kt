@@ -6,6 +6,8 @@ import com.winsun.fruitmix.file.data.model.*
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
+import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
+import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.offlineFile.data.OfflineFileDataSource
 
 class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSource) {
@@ -47,9 +49,19 @@ class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSou
         data.forEach {
 
             if (it.isFolder) {
-                folderViewItems.add(ItemFolder(it as LocalFolder))
+
+                val folderItemViewModel = FolderItemViewModel(it as LocalFolder)
+                folderItemViewModel.showOfflineAvailableIv.set(true)
+                folderItemViewModel.showMoreBtn.set(false)
+
+                folderViewItems.add(ItemFolder(folderItemViewModel))
             } else {
-                fileViewItems.add(ItemFile(it as LocalFile))
+
+                val fileItemViewModel = FileItemViewModel(it as LocalFile)
+                fileItemViewModel.showOfflineAvailableIv.set(true)
+                fileItemViewModel.showMoreBtn.set(false)
+
+                fileViewItems.add(ItemFile(fileItemViewModel))
             }
 
         }

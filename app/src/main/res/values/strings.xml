@@ -835,11 +835,22 @@
     <string name="drawer_file_title">File</string>
     <string name="permission_manage">Permission Manage</string>
 
+    <!-- file detail -->
+    <string name="key_type">Type</string>
+    <string name="key_size">Size</string>
+    <string name="key_position">Position</string>
+    <string name="key_file_quantity">File Quantity</string>
+    <string name="key_media_quantity">Media Quantity</string>
+    <string name="key_create">Create</string>
+    <string name="key_modify">Modify</string>
+
     <!-- drawer -->
     <string name="tag">Tag</string>
     <string name="offline_file">Offline File</string>
     <string name="shared_folder">Shared Folder</string>
     <string name="transmission_task">Transmission Task</string>
 
+    <!-- search -->
+    <string name="file_type">File Type</string>
 
 </resources>

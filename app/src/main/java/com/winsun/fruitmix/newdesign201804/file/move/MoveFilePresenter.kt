@@ -10,9 +10,11 @@ import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
+import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
+import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 
-class MoveFilePresenter(val fileDataSource:FileDataSource,val activityMoveFileBinding: ActivityMoveFileBinding){
+class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFileBinding: ActivityMoveFileBinding) {
 
     private val context = activityMoveFileBinding.cancelBtn.context
 
@@ -20,9 +22,9 @@ class MoveFilePresenter(val fileDataSource:FileDataSource,val activityMoveFileBi
 
     private val currentFolderItems = mutableListOf<AbstractRemoteFile>()
 
-    fun initView(){
+    fun initView() {
 
-        fileDataSource.getFile(object :BaseLoadDataCallback<AbstractRemoteFile>{
+        fileDataSource.getFile(object : BaseLoadDataCallback<AbstractRemoteFile> {
 
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
@@ -38,16 +40,14 @@ class MoveFilePresenter(val fileDataSource:FileDataSource,val activityMoveFileBi
 
         })
 
-
     }
 
-    private fun initRecyclerViewAdapter(){
+    private fun initRecyclerViewAdapter() {
 
-        val fileRecyclerViewAdapter = FileRecyclerViewAdapter({
-            abstractRemoteFile, position ->
+        val fileRecyclerViewAdapter = FileRecyclerViewAdapter({ abstractRemoteFile, position ->
         }, {
 
-        },{
+        }, {
 
         })
 
@@ -62,9 +62,17 @@ class MoveFilePresenter(val fileDataSource:FileDataSource,val activityMoveFileBi
         currentFolderItems.forEach {
 
             if (it.isFolder) {
-                folderViewItems.add(ItemFolder(it as RemoteFolder))
+
+                val folderItemViewModel = FolderItemViewModel(it as RemoteFolder)
+                folderItemViewModel.showMoreBtn.set(false)
+
+                folderViewItems.add(ItemFolder(folderItemViewModel))
             } else {
-                fileViewItems.add(ItemFile(it as RemoteFile))
+
+                val fileItemViewModel = FileItemViewModel(it as RemoteFile)
+                fileItemViewModel.showMoreBtn.set(false)
+
+                fileViewItems.add(ItemFile(fileItemViewModel))
             }
 
         }
@@ -95,8 +103,6 @@ class MoveFilePresenter(val fileDataSource:FileDataSource,val activityMoveFileBi
         fileRecyclerViewAdapter.notifyDataSetChanged()
 
     }
-
-
 
 
 }
