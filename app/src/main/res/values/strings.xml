@@ -835,6 +835,8 @@
     <string name="drawer_file_title">File</string>
     <string name="permission_manage">Permission Manage</string>
 
+    <string name="select_all">Select All</string>
+
     <!-- file detail -->
     <string name="key_type">Type</string>
     <string name="key_size">Size</string>
@@ -852,5 +854,8 @@
 
     <!-- search -->
     <string name="file_type">File Type</string>
+
+    <string name="not_found">Not Found</string>
+
 
 </resources>

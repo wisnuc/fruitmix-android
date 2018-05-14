@@ -49,6 +49,8 @@ private var mIsSelectMode = false
 public class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
                            val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding) {
 
+    private val contentLayout = filePageBinding.contentLayout
+
     private lateinit var fileRecyclerViewAdapter: FileRecyclerViewAdapter
 
     private var currentOrientation = ORIENTATION_GRID_TYPE
@@ -169,7 +171,32 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
         fileRecyclerViewAdapter.setItemList(viewItems)
         fileRecyclerViewAdapter.notifyDataSetChanged()
 
+        filePageBinding.addFab.setOnClickListener {
+
+            showAddDialog()
+
+        }
+
     }
+
+    private fun showAddDialog() {
+        val bottomMenuItems = mutableListOf<BottomMenuItem>()
+
+        val bottomMenuItem = BottomMenuItem(R.drawable.bottom_menu_folder, context.getString(R.string.folder), object : BaseAbstractCommand() {})
+
+        bottomMenuItems.add(bottomMenuItem)
+
+        val uploadBottomMenuItem = BottomMenuItem(R.drawable.upload, context.getString(R.string.upload), object : BaseAbstractCommand() {})
+
+        bottomMenuItems.add(uploadBottomMenuItem)
+
+        val magnetBottomMenuItem = BottomMenuItem(R.drawable.magnet_link, context.getString(R.string.magnet_link), object : BaseAbstractCommand() {})
+
+        bottomMenuItems.add(magnetBottomMenuItem)
+
+        BottomMenuGridDialogFactory(bottomMenuItems).createDialog(context).show()
+    }
+
 
     private fun initToggleOrientationIv() {
 
@@ -183,22 +210,41 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         view?.moreIv?.setOnClickListener {
 
-            val bottomMenuItems = mutableListOf<BottomMenuItem>()
+            handleMoreIvClick()
 
-            val bottomMenuItem = BottomMenuItem(R.drawable.bottom_menu_folder, context.getString(R.string.folder), object : BaseAbstractCommand() {})
-
-            bottomMenuItems.add(bottomMenuItem)
-
-            val uploadBottomMenuItem = BottomMenuItem(R.drawable.upload, context.getString(R.string.upload), object : BaseAbstractCommand() {})
-
-            bottomMenuItems.add(uploadBottomMenuItem)
-
-            val magnetBottomMenuItem = BottomMenuItem(R.drawable.magnet_link, context.getString(R.string.magnet_link), object : BaseAbstractCommand() {})
-
-            bottomMenuItems.add(magnetBottomMenuItem)
-
-            BottomMenuGridDialogFactory(bottomMenuItems).createDialog(context).show()
         }
+
+    }
+
+    private fun handleMoreIvClick() {
+
+        val bottomMenuItems = listOf<BottomMenuItem>(
+
+                BottomMenuItem(0, context.getString(R.string.choose_text), object : BaseAbstractCommand() {
+
+                    override fun execute() {
+                        super.execute()
+
+                        enterSelectMode()
+                    }
+
+                }),
+                BottomMenuItem(0, context.getString(R.string.select_all), object : BaseAbstractCommand() {
+
+                    override fun execute() {
+                        super.execute()
+
+                        mSelectFiles.addAll(currentFolderItems)
+
+                        enterSelectMode()
+
+                    }
+
+                })
+
+        )
+
+        BottomMenuListDialogFactory(bottomMenuItems).createDialog(context).show()
 
     }
 
@@ -484,17 +530,19 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
             }
 
             GRID_ITEM_FOLDER, LIST_ITEM_FOLDER -> {
-
+                
                 val itemFolder = viewItem as ItemFolder
 
                 val folderItemViewModel = FolderItemViewModel(itemFolder.getFile()) {
                     doHandleMoreBtnOnClick(itemFolder.getFile())
                 }
 
+                val isSelected = selectFiles.contains(itemFolder.getFile())
+
                 if (currentOrientation == ORIENTATION_LIST_TYPE) {
 
                     folderItemViewModel.isSelectMode.set(isSelectMode)
-                    folderItemViewModel.isSelected.set(selectFiles.contains(itemFolder.getFile()))
+                    folderItemViewModel.isSelected.set(isSelected)
 
                     folderItemViewModel.showMoreBtn.set(itemFolder.folderFileTitleViewModel.showMoreBtn.get())
                     folderItemViewModel.showOfflineAvailableIv.set(itemFolder.folderFileTitleViewModel.showOfflineAvailableIv.get())
@@ -503,10 +551,13 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                     val view = holder?.viewDataBinding?.root
 
+                    view?.fileTypeImageView?.visibility = if (isSelected) View.INVISIBLE else View.VISIBLE
+
                     view?.select_file_icon_bg?.visibility = if (isSelectMode) View.VISIBLE else View.INVISIBLE
                     view?.select_file_icon_bg?.setBackgroundResource(
-                            if (selectFiles.contains(itemFolder.getFile())) R.drawable.item_selected_state
+                            if (isSelected) R.drawable.item_selected_state
                             else R.drawable.round_circle)
+
 
                 }
 

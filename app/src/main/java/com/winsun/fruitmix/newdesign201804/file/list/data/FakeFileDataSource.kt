@@ -100,4 +100,32 @@ object FakeFileDataSource : FileDataSource {
 
     }
 
+    override fun searchFile(keys: List<String>, baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>) {
+
+        val searchResults = mutableListOf<AbstractRemoteFile>()
+
+        abstractRemoteFiles.forEach {
+
+            val abstractRemoteFile = it
+
+            var checkPassCount = 0
+
+            keys.forEach {
+
+                if (abstractRemoteFile.name.contains(it))
+                    checkPassCount++
+
+            }
+
+            if (checkPassCount == keys.size)
+                searchResults.add(abstractRemoteFile)
+
+        }
+
+        baseLoadDataCallback.onSucceed(searchResults, OperationSuccess())
+
+
+    }
+
+
 }

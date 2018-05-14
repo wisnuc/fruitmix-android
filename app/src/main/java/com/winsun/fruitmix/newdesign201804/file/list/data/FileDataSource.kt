@@ -10,4 +10,6 @@ public interface FileDataSource{
 
     fun getFileByUUID(uuid:String):AbstractFile?
 
+    fun searchFile(keys:List<String>,baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>)
+
 }

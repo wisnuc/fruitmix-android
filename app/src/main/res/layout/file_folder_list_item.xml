@@ -36,11 +36,12 @@
                 android:visibility="@{fileItemViewModel.isSelectMode()?View.VISIBLE:View.INVISIBLE,default=invisible}" />
 
             <ImageView
-                android:id="@+id/imageView21"
+                android:id="@+id/fileTypeImageView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@{fileItemViewModel.fileTypeResID,default=@drawable/ic_folder}" />
+                android:src="@{fileItemViewModel.fileTypeResID,default=@drawable/ic_folder}"
+                android:visibility="@{fileItemViewModel.isSelected()?View.INVISIBLE:View.VISIBLE,default=visible}" />
 
         </FrameLayout>
 

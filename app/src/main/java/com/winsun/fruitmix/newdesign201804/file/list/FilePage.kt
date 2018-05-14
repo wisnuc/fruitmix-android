@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.TextView
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.FilePageBinding
 import com.winsun.fruitmix.interfaces.Page
@@ -14,6 +15,7 @@ import com.winsun.fruitmix.newdesign201804.file.offlineFile.OfflineFileActivity
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.SharedFolderActivity
 import com.winsun.fruitmix.newdesign201804.mainpage.DrawerItem
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPage
+import com.winsun.fruitmix.newdesign201804.search.SearchActivity
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import kotlin.math.acos
@@ -61,6 +63,15 @@ class FilePage(val activity: Activity) : MainPage {
         drawerItems = mutableListOf(
                 task, shareToSharedFolder, localFolder, tag
         )
+
+        val searchTextView = filePageBinding.searchFileCard?.findViewById<TextView>(R.id.searchTextView)
+
+        searchTextView?.setOnClickListener {
+
+            val intent = Intent(activity, SearchActivity::class.java)
+            activity.startActivity(intent)
+
+        }
 
     }
 

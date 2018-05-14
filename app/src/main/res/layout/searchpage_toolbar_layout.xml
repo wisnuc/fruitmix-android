@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
+
+        <import type="android.view.View" />
+
+    </data>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:elevation="@dimen/appbar_elevation"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:transitionName="@string/transition_toolbar"
+        android:visibility="@{toolbarViewModel.showToolbar?View.VISIBLE:View.GONE}"
+        app:navigationIcon="@{toolbarViewModel.navigationIconResId,default=@drawable/ic_back_black}"
+        app:navigationOnClickListener="@{()-> toolbarViewModel.toolbarNavigationOnClick()}"
+        app:popupTheme="@style/AppTheme.PopupOverlay">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical">
+
+            <FrameLayout
+                android:id="@+id/right_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="15dp">
+
+                <ImageView
+                    android:id="@+id/downloading_file_item_menu"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:onClick="@{()->toolbarViewModel.toolbarMenuBtnOnClick()}"
+                    android:src="@{toolbarViewModel.menuResID,default=@drawable/ic_more_vert_black}"
+                    android:visibility="@{toolbarViewModel.showMenu?View.VISIBLE:View.GONE,default=visible}" />
+
+            </FrameLayout>
+
+            <EditText
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="32dp"
+                android:layout_toLeftOf="@id/right_layout"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:hint="@string/search_file"
+                android:inputType="text"
+                android:maxLines="1"
+                android:text="@{toolbarViewModel.titleText}"
+                android:textColor="@{toolbarViewModel.titleTextColorResID,default=@color/eighty_seven_percent_black}"
+                android:textSize="18dp" />
+
+        </RelativeLayout>
+
+
+    </android.support.v7.widget.Toolbar>
+
+
+</layout>

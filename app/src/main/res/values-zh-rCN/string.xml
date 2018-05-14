@@ -805,6 +805,8 @@
 
     <string name="drawer_file_title">文件</string>
     <string name="permission_manage">权限管理</string>
+    
+    <string name="select_all">全选</string>
 
     <!-- file detail -->
     <string name="key_type">类型</string>
@@ -824,4 +826,7 @@
     <!-- search -->
     <string name="file_type">文件类型</string>
 
+    <string name="not_found">未搜索到</string>
+    
+    
 </resources>

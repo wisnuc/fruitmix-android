@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".newdesign201804.search.SearchActivity">
 
     <data>
 
@@ -11,14 +14,20 @@
             name="noContentViewModel"
             type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
 
+        <variable
+            name="toolbarViewModel"
+            type="com.winsun.fruitmix.viewmodel.ToolbarViewModel" />
+
     </data>
 
-    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".newdesign201804.search.SearchActivity">
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/searchpage_toolbar_layout"
+            app:toolbarViewModel="@{toolbarViewModel}" />
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/title"
@@ -26,10 +35,10 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/toolbar">
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/fileTypeTitleTv"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:gravity="center_vertical"
@@ -37,16 +46,18 @@
                 android:text="@string/file_type"
                 android:textColor="@color/fifty_four_percent_black"
                 android:textSize="12dp"
-                android:visibility="visible"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/searchTypeRecyclerView"
+                android:id="@+id/selectedSearchTypeItemRecyclerView"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:visibility="invisible"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -54,9 +65,21 @@
         </android.support.constraint.ConstraintLayout>
 
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/contentRecyclerView"
+            android:id="@+id/searchTypeItemRecyclerView"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/searchedFileRecyclerView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/white"
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -69,18 +92,18 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title"
             app:loadingViewModel="@{loadingViewModel}" />
 
         <include
             layout="@layout/new_no_content_layout"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title"
             app:noContentViewModel="@{noContentViewModel}" />
 
 
