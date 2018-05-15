@@ -259,6 +259,9 @@
             android:name=".newdesign201804.search.SearchActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|adjustPan" />
+        <activity
+            android:name=".newdesign201804.file.transmissionTask.TransmissionTaskActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

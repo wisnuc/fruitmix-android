@@ -13,7 +13,7 @@ import com.winsun.fruitmix.interfaces.BaseView;
 
 public class ToolbarViewModel {
 
-    public final ObservableInt navigationIconResId = new ObservableInt(R.drawable.ic_back_black);
+    public final ObservableInt navigationIconResId = new ObservableInt(R.drawable.back_black);
 
     public final ObservableField<String> titleText = new ObservableField<>();
 

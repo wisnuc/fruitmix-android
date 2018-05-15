@@ -857,5 +857,10 @@
 
     <string name="not_found">Not Found</string>
 
+    <!-- transmission task -->
+    <string name="start_all_task">Start all task</string>
+    <string name="pause_all_task">Pause all task</string>
+    <string name="clear_completed_task">Clear completed task</string>
+
 
 </resources>

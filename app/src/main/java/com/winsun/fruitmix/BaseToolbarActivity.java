@@ -57,7 +57,7 @@ public abstract class BaseToolbarActivity extends BaseActivity {
 
         toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
 
-        toolbarViewModel.navigationIconResId.set(R.drawable.ic_back);
+        toolbarViewModel.navigationIconResId.set(R.drawable.left_arrow_white);
 
     }
 

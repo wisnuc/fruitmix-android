@@ -827,6 +827,12 @@
     <string name="file_type">文件类型</string>
 
     <string name="not_found">未搜索到</string>
-    
+
+    <!-- transmission task -->
+    <string name="start_all_task">开始全部任务</string>
+    <string name="pause_all_task">暂停全部任务</string>
+    <string name="clear_completed_task">清除已完成任务</string>
+
+
     
 </resources>

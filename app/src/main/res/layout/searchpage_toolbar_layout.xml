@@ -22,7 +22,7 @@
         android:theme="@style/AppTheme.AppBarOverlay"
         android:transitionName="@string/transition_toolbar"
         android:visibility="@{toolbarViewModel.showToolbar?View.VISIBLE:View.GONE}"
-        app:navigationIcon="@{toolbarViewModel.navigationIconResId,default=@drawable/ic_back_black}"
+        app:navigationIcon="@{toolbarViewModel.navigationIconResId,default=@drawable/back_black}"
         app:navigationOnClickListener="@{()-> toolbarViewModel.toolbarNavigationOnClick()}"
         app:popupTheme="@style/AppTheme.PopupOverlay">
 

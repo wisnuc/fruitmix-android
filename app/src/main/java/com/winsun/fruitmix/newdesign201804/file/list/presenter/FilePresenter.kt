@@ -530,7 +530,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
             }
 
             GRID_ITEM_FOLDER, LIST_ITEM_FOLDER -> {
-                
+
                 val itemFolder = viewItem as ItemFolder
 
                 val folderItemViewModel = FolderItemViewModel(itemFolder.getFile()) {
