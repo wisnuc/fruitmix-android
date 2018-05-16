@@ -50,7 +50,7 @@
             android:gravity="center_vertical">
 
             <TextView
-                android:id="@+id/speed"
+                android:id="@+id/speedTextView"
                 android:layout_width="108dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
@@ -65,7 +65,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="8dp"
-                android:layout_toLeftOf="@id/speed"
+                android:layout_toLeftOf="@id/speedTextView"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="@{viewmodel.name}"

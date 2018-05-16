@@ -16,6 +16,8 @@ import kotlinx.android.synthetic.main.activity_transmission_task.*
 
 class TransmissionTaskActivity : BaseToolbarActivity() {
 
+    private lateinit var transmissionTaskPresenter: TransmissionTaskPresenter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -28,7 +30,7 @@ class TransmissionTaskActivity : BaseToolbarActivity() {
 
         }
 
-        val transmissionTaskPresenter = TransmissionTaskPresenter(InjectTransmissionTaskDataSource.provideInstance(this))
+        transmissionTaskPresenter = TransmissionTaskPresenter(InjectTransmissionTaskDataSource.provideInstance(this))
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -53,17 +55,42 @@ class TransmissionTaskActivity : BaseToolbarActivity() {
 
                 BottomMenuItem(0, getString(R.string.start_all_task), object : BaseAbstractCommand() {
 
+                    override fun execute() {
+                        super.execute()
+
+                        transmissionTaskPresenter.startAllTask()
+                    }
+
                 }),
                 BottomMenuItem(0, getString(R.string.pause_all_task), object : BaseAbstractCommand() {
 
+                    override fun execute() {
+                        super.execute()
+
+                        transmissionTaskPresenter.pauseAllTask()
+                    }
+
                 }),
                 BottomMenuItem(0, getString(R.string.clear_completed_task), object : BaseAbstractCommand() {
+
+                    override fun execute() {
+                        super.execute()
+
+                        transmissionTaskPresenter.clearAllFinishedTask()
+                    }
 
                 })
 
         )
 
         BottomMenuListDialogFactory(bottomMenuItems).createDialog(this).show()
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        transmissionTaskPresenter.onDestroy()
 
     }
 

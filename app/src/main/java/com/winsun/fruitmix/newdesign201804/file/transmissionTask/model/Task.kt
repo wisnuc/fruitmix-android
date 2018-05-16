@@ -60,6 +60,10 @@ abstract class Task(val abstractFile: AbstractFile) {
 
     }
 
+    fun getCurrentState():TaskState{
+        return currentTaskState
+    }
+
 }
 
 interface TaskStateObserver {

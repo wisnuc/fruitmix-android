@@ -45,6 +45,8 @@
 
     <color name="twenty_six_percent_black">#42000000</color>
 
+    <color name="twelve_percent_black">#1F000000</color>
+
     <color name="eighty_seven_percent_white">#DEFFFFFF</color>
     <color name="fifty_four_percent_white">#8AFFFFFF</color>
 
@@ -71,12 +73,13 @@
     <color name="all_pause">#03a9f5</color>
 
     <color name="new_design_primary_color">#009788</color>
-
     <color name="new_design_progressbar_color">#f2f1f4</color>
 
     <color name="lan_login_primary_color">#00bcd5</color>
-    
+
     <color name="avatar_ring_color">#29A597</color>
+
+    <color name="round_progress_color">#1F009788</color>
 
     <!-- finish add by liang.wu-->
 

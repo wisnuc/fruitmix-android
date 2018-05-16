@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask
 
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.ViewGroup
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter
 import com.winsun.fruitmix.R
@@ -9,9 +10,7 @@ import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.component.inflateView
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TaskState
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TaskStateObserver
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 
@@ -43,13 +42,45 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
     }
 
-    private fun handleGetTask(data: MutableList<Task>?) {
+    fun onDestroy() {
 
-        val taskContainers = mutableListOf<TaskContainer>()
+        taskContainers.forEach {
+            it.destroy()
+        }
+
+    }
+
+    fun startAllTask() {
+
+        taskContainers.forEach {
+            it.task.startTask()
+        }
+
+    }
+
+    fun pauseAllTask() {
+
+        taskContainers.forEach {
+            it.task.pauseTask()
+        }
+
+    }
+
+    fun clearAllFinishedTask() {
+
+
+    }
+
+
+    private fun handleGetTask(data: MutableList<Task>?) {
 
         data?.forEach {
 
-            taskContainers.add(TaskContainer(it))
+            val taskContainer = TaskContainer(it)
+
+            it.init()
+
+            taskContainers.add(taskContainer)
 
         }
 
@@ -57,9 +88,20 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
         transmissionTaskAdapter.notifyDataSetChanged()
 
+        data?.forEach {
+
+            if (it is SMBTask)
+                it.setCurrentState(FinishTaskState(it))
+            else if (it is CopyTask)
+                it.setCurrentState(ErrorTaskState(it))
+            else
+                it.startTask()
+
+        }
+
     }
 
-    inner class TransmissionTaskAdapter : RecyclerSwipeAdapter<SimpleViewHolder>() {
+    private inner class TransmissionTaskAdapter : RecyclerSwipeAdapter<SimpleViewHolder>() {
 
         private val mItemList: MutableList<TaskContainer> = mutableListOf()
 
@@ -95,14 +137,14 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
             view?.taskFileNameTv?.text = task.abstractFile.name
             view?.taskTypeIv?.setImageResource(task.getTypeResID())
 
+            view?.taskStateIcon?.refresh(task.getCurrentState())
 
         }
-
 
     }
 
 
-    inner class TaskContainer(val task: Task) : TaskStateObserver {
+    private inner class TaskContainer(val task: Task) : TaskStateObserver {
 
         init {
             task.registerObserver(this)
@@ -115,6 +157,8 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
         override fun notifyStateChanged(currentState: TaskState) {
 
             val position = taskContainers.indexOf(this)
+
+            Log.d("Task", "notifyStateChanged position: $position")
 
             transmissionTaskAdapter.notifyItemChanged(position)
 

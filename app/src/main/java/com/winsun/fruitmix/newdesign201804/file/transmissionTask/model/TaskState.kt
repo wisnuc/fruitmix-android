@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask.model
 
-abstract class TaskState(val task: Task){
+abstract class TaskState(val task: Task) {
 
     abstract fun start()
 
@@ -14,15 +14,15 @@ abstract class TaskState(val task: Task){
 
 }
 
-class InitialTaskState(task: Task):TaskState(task){
-
-    init {
-        start()
-    }
+class InitialTaskState(task: Task) : TaskState(task) {
 
     override fun start() {
 
-        task.setCurrentState(StartTaskState(task))
+        val startTaskState = StartTaskState(task)
+
+        task.setCurrentState(startTaskState)
+
+        startTaskState.start()
 
     }
 
@@ -44,11 +44,7 @@ class InitialTaskState(task: Task):TaskState(task){
 
 }
 
-class StartTaskState(task: Task):TaskState(task){
-
-    init {
-        start()
-    }
+class StartTaskState(task: Task) : TaskState(task) {
 
     override fun start() {
 
@@ -56,7 +52,7 @@ class StartTaskState(task: Task):TaskState(task){
 
         task.executeTask()
 
-        task.setCurrentState(StartingTaskState("",task))
+        task.setCurrentState(StartingTaskState(10, "51.3KB/s", task))
 
     }
 
@@ -78,7 +74,7 @@ class StartTaskState(task: Task):TaskState(task){
 
 }
 
-class StartingTaskState(var speed:String,task: Task):TaskState(task){
+class StartingTaskState(var progress: Int, var speed: String, task: Task) : TaskState(task) {
 
 
     override fun start() {
@@ -87,7 +83,7 @@ class StartingTaskState(var speed:String,task: Task):TaskState(task){
 
     override fun pause() {
 
-        task.setCurrentState(PauseTaskState(task))
+        task.setCurrentState(PauseTaskState(progress,speed,task))
 
     }
 
@@ -106,10 +102,14 @@ class StartingTaskState(var speed:String,task: Task):TaskState(task){
 
 }
 
-class PauseTaskState(task: Task):TaskState(task){
+class PauseTaskState(var progress: Int, var speed: String, task: Task) : TaskState(task) {
 
     override fun start() {
+
+        task.setCurrentState(StartingTaskState(progress,speed,task))
+
     }
+
 
     override fun pause() {
 
@@ -117,7 +117,7 @@ class PauseTaskState(task: Task):TaskState(task){
 
     override fun resume() {
 
-        task.setCurrentState(StartTaskState(task))
+        task.setCurrentState(StartingTaskState(progress,speed,task))
 
     }
 
@@ -131,7 +131,7 @@ class PauseTaskState(task: Task):TaskState(task){
 
 }
 
-class FinishTaskState(task: Task):TaskState(task){
+class FinishTaskState(task: Task) : TaskState(task) {
 
     override fun start() {
 
@@ -151,7 +151,7 @@ class FinishTaskState(task: Task):TaskState(task){
 
 }
 
-class ErrorTaskState(task: Task):TaskState(task){
+class ErrorTaskState(task: Task) : TaskState(task) {
     override fun start() {
 
     }

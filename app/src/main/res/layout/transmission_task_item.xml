@@ -89,6 +89,18 @@
             app:layout_constraintStart_toEndOf="@+id/taskTypeIv"
             tools:text="1.23GB" />
 
+        <com.winsun.fruitmix.newdesign201804.component.TaskStateIcon
+            android:id="@+id/taskStateIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <View
             android:layout_width="0dp"
             android:layout_height="1px"
