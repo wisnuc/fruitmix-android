@@ -27,7 +27,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
     fun initView(recyclerView: RecyclerView) {
 
-        fileDataSource.getFile(object : BaseLoadDataCallback<AbstractRemoteFile> {
+        fileDataSource.getFile("","",object : BaseLoadDataCallback<AbstractRemoteFile> {
 
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 

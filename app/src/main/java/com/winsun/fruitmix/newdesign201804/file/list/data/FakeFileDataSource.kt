@@ -14,13 +14,15 @@ object FakeFileDataSource : FileDataSource {
 
     private val abstractRemoteFileMap = mutableMapOf<String, AbstractFile>()
 
+    private val abstractRemoteFolder1UUID = Util.createLocalUUid()
+
     init {
 
         val abstractRemoteFile = RemoteFolder()
         abstractRemoteFile.name = "test1"
         abstractRemoteFile.time = 1525404501
         abstractRemoteFile.size = 10 * 1024 * 1024
-        abstractRemoteFile.uuid = Util.createLocalUUid()
+        abstractRemoteFile.uuid = abstractRemoteFolder1UUID
 
         abstractRemoteFiles.add(abstractRemoteFile)
 
@@ -88,9 +90,32 @@ object FakeFileDataSource : FileDataSource {
 
     }
 
-    override fun getFile(baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>) {
+    override fun getFile(rootUUID: String, folderUUID: String, baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>) {
 
-        baseLoadDataCallback.onSucceed(abstractRemoteFiles, OperationSuccess())
+        if (folderUUID == abstractRemoteFolder1UUID) {
+
+            val files = mutableListOf<AbstractRemoteFile>()
+
+            val abstractRemoteFile = RemoteFolder()
+            abstractRemoteFile.name = "testLevel1"
+            abstractRemoteFile.time = 1525404501
+            abstractRemoteFile.size = 10 * 1024 * 1024
+            abstractRemoteFile.uuid = Util.createLocalUUid()
+
+            files.add(abstractRemoteFile)
+
+            val abstractRemoteFile2 = RemoteFile()
+            abstractRemoteFile2.name = "testLevel2"
+            abstractRemoteFile2.time = 1525404501
+            abstractRemoteFile2.size = 10 * 1024 * 1024
+            abstractRemoteFile2.uuid = Util.createLocalUUid()
+
+            files.add(abstractRemoteFile2)
+
+            baseLoadDataCallback.onSucceed(files, OperationSuccess())
+
+        } else
+            baseLoadDataCallback.onSucceed(abstractRemoteFiles, OperationSuccess())
 
     }
 

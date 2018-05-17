@@ -4,11 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.TextView
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.FilePageBinding
-import com.winsun.fruitmix.interfaces.Page
-import com.winsun.fruitmix.mainpage.MainPagePresenterImpl
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.FilePresenter
 import com.winsun.fruitmix.newdesign201804.file.offlineFile.OfflineFileActivity
@@ -16,11 +13,9 @@ import com.winsun.fruitmix.newdesign201804.file.sharedFolder.SharedFolderActivit
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.TransmissionTaskActivity
 import com.winsun.fruitmix.newdesign201804.mainpage.DrawerItem
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPage
-import com.winsun.fruitmix.newdesign201804.search.SearchActivity
 import com.winsun.fruitmix.util.Util
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
-import kotlin.math.acos
 
 class FilePage(val activity: Activity) : MainPage {
 
@@ -32,6 +27,8 @@ class FilePage(val activity: Activity) : MainPage {
     private var filePresenter: FilePresenter
 
     private var drawerItems: MutableList<DrawerItem>
+
+    private var initPage = true
 
     init {
 
@@ -46,19 +43,19 @@ class FilePage(val activity: Activity) : MainPage {
 
         val task = DrawerItem(R.drawable.transfer_menu_icon, activity.getString(R.string.transmission_task), {
 
-            Util.startActivity(activity,TransmissionTaskActivity::class.java)
+            Util.startActivity(activity, TransmissionTaskActivity::class.java)
 
         })
 
         val shareToSharedFolder = DrawerItem(R.drawable.shared_folder, activity.getString(R.string.shared_folder), {
 
-            Util.startActivity(activity,SharedFolderActivity::class.java)
+            Util.startActivity(activity, SharedFolderActivity::class.java)
 
         })
 
         val localFolder = DrawerItem(R.drawable.offline_available, activity.getString(R.string.offline_file), {
 
-            Util.startActivity(activity,OfflineFileActivity::class.java)
+            Util.startActivity(activity, OfflineFileActivity::class.java)
 
         })
 
@@ -67,15 +64,6 @@ class FilePage(val activity: Activity) : MainPage {
         drawerItems = mutableListOf(
                 task, shareToSharedFolder, localFolder, tag
         )
-
-        val searchTextView = filePageBinding.searchFileCard?.findViewById<TextView>(R.id.searchTextView)
-
-        searchTextView?.setOnClickListener {
-
-            Util.startActivity(activity,SearchActivity::class.java)
-
-        }
-
     }
 
     fun generateView() {
@@ -94,7 +82,11 @@ class FilePage(val activity: Activity) : MainPage {
 
     override fun refreshView() {
 
-        filePresenter.initView()
+        if (initPage) {
+            filePresenter.initView()
+
+            initPage = false
+        }
 
     }
 
@@ -132,6 +124,34 @@ class FilePage(val activity: Activity) : MainPage {
 
     override fun getDrawerItems(): List<DrawerItem> {
         return drawerItems
+    }
+
+    override fun toggleOrientation() {
+        filePresenter.toggleOrientation()
+    }
+
+    override fun handleMoreIvClick() {
+        filePresenter.handleMoreIvClick()
+    }
+
+    override fun quitSelectMode() {
+        filePresenter.quitSelectMode()
+    }
+
+    fun registerFilePageSelectActionListener(filePageSelectActionListener: FilePageSelectActionListener) {
+        filePresenter.registerFilePageSelectActionListener(filePageSelectActionListener)
+    }
+
+    fun unregisterFilePageSelectActionListener(filePageSelectActionListener: FilePageSelectActionListener) {
+        filePresenter.unregisterFilePageSelectActionListener(filePageSelectActionListener)
+    }
+
+    fun registerFilePageActionListener(filePageActionListener: FilePageActionListener) {
+        filePresenter.registerFilePageActionListener(filePageActionListener)
+    }
+
+    fun unregisterFilePageActionListener(filePageActionListener: FilePageActionListener) {
+        filePresenter.unregisterFilePageActionListener(filePageActionListener)
     }
 
 

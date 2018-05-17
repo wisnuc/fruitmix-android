@@ -5,7 +5,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.winsun.fruitmix.util.Util
 
-class MainPageDividerItemDecoration(var spanCount: Int, val totalItemCount: Int) : RecyclerView.ItemDecoration() {
+class MainPageDividerItemDecoration(var spanCount: Int, var totalItemCount: Int) : RecyclerView.ItemDecoration() {
 
     override fun getItemOffsets(outRect: Rect?, view: View?, parent: RecyclerView?, state: RecyclerView.State?) {
 

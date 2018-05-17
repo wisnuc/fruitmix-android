@@ -6,7 +6,7 @@ import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 
 public interface FileDataSource{
 
-    fun getFile(baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>)
+    fun getFile(rootUUID:String,folderUUID:String,baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>)
 
     fun getFileByUUID(uuid:String):AbstractFile?
 

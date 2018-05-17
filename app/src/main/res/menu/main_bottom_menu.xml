@@ -6,12 +6,14 @@
         android:icon="@drawable/ic_folder"
         android:title="@string/files" />
 
-<!--
     <item
         android:id="@+id/photo"
-        android:icon="@drawable/ic_photo"
+        android:icon="@drawable/photo"
         android:title="@string/photo" />
--->
 
+    <item
+        android:id="@+id/share"
+        android:icon="@drawable/share"
+        android:title="@string/share_text" />
 
 </menu>

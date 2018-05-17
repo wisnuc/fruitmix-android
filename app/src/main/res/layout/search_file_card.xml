@@ -10,14 +10,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/imageView8"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+        <ImageButton
+            android:id="@+id/searchLeftIv"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@null"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -35,8 +32,19 @@
             android:textColor="@color/fifty_four_percent_black"
             android:textSize="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/toggleOrientationIv"
-            app:layout_constraintStart_toEndOf="@+id/imageView8"
+            app:layout_constraintEnd_toStartOf="@+id/searchIv"
+            app:layout_constraintStart_toEndOf="@+id/searchLeftIv"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/searchIv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="16dp"
+            android:src="@drawable/search_black"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/toggleOrientationIv"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView

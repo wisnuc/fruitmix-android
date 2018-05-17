@@ -24,9 +24,10 @@ import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
-import com.winsun.fruitmix.newdesign201804.component.FileSelectModeTitle
 import com.winsun.fruitmix.newdesign201804.file.detail.FILE_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.detail.FileDetailActivity
+import com.winsun.fruitmix.newdesign201804.file.list.FilePageActionListener
+import com.winsun.fruitmix.newdesign201804.file.list.FilePageSelectActionListener
 import com.winsun.fruitmix.newdesign201804.file.list.MainPageDividerItemDecoration
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
@@ -35,16 +36,16 @@ import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewMod
 import com.winsun.fruitmix.newdesign201804.file.move.MoveFileActivity
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BindingViewHolder
-import com.winsun.fruitmix.util.FileUtil
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import kotlinx.android.synthetic.main.folder_item.view.*
-import kotlinx.android.synthetic.main.search_file_card.view.*
 
 private const val SPAN_COUNT = 2
 
 private val mSelectFiles = mutableListOf<AbstractFile>()
 private var mIsSelectMode = false
+
+private const val rootFolderUUID = "rootFolderUUID"
 
 public class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
                            val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding) {
@@ -65,9 +66,17 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     private val viewItems = mutableListOf<ViewItem>()
 
-    private lateinit var fileSelectModeTitle: FileSelectModeTitle
-
     private lateinit var mainPageDividerItemDecoration: MainPageDividerItemDecoration
+
+    private val filePageSelectActionListeners = mutableListOf<FilePageSelectActionListener>()
+    private val filePageActionListeners = mutableListOf<FilePageActionListener>()
+
+    private var currentFolderUUID = rootFolderUUID
+    private var currentFolderName = ""
+
+    private val retrievedFolderUUIDs = mutableListOf<String>()
+    private val retrievedFolderNames = mutableListOf<String>()
+
 
     fun initView() {
 
@@ -79,12 +88,6 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
             doShowFileMenuBottomDialog(context, it)
         })
 
-        fileSelectModeTitle = FileSelectModeTitle(filePageBinding.fileSelectModeTitle!!,
-                { quitSelectMode() },
-                { enterMovePage() },
-                {},
-                {})
-
         gridLayoutManager.spanSizeLookup.isSpanIndexCacheEnabled = true
 
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
@@ -93,38 +96,49 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
             }
         }
 
-        loadingViewModel.showLoading.set(true)
+        initRecyclerView()
 
-        fileDataSource.getFile(object : BaseLoadDataCallback<AbstractRemoteFile> {
+        gotoNextFolder(rootFolderUUID, "")
 
-            override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+    }
 
-                loadingViewModel.showLoading.set(false)
-                noContentViewModel.showNoContent.set(false)
+    fun registerFilePageSelectActionListener(filePageSelectActionListener: FilePageSelectActionListener) {
+        filePageSelectActionListeners.add(filePageSelectActionListener)
+    }
 
-                currentFolderItems.addAll(data!!)
+    fun unregisterFilePageSelectActionListener(filePageSelectActionListener: FilePageSelectActionListener) {
+        filePageSelectActionListeners.remove(filePageSelectActionListener)
+    }
 
-                initRecyclerView()
+    fun registerFilePageActionListener(filePageActionListener: FilePageActionListener) {
+        filePageActionListeners.add(filePageActionListener)
+    }
 
-                initToggleOrientationIv()
-
-            }
-
-            override fun onFail(operationResult: OperationResult?) {
-
-                loadingViewModel.showLoading.set(false)
-                noContentViewModel.showNoContent.set(true)
-
-            }
-
-        })
-
+    fun unregisterFilePageActionListener(filePageActionListener: FilePageActionListener) {
+        filePageActionListeners.remove(filePageActionListener)
     }
 
     private fun initRecyclerView() {
 
         fileRecyclerViewAdapter.currentOrientation = currentOrientation
 
+        filePageBinding.fileRecyclerView.adapter = fileRecyclerViewAdapter
+
+        filePageBinding.addFab.setOnClickListener {
+
+            showAddDialog()
+
+        }
+
+        filePageBinding.fileRecyclerView.itemAnimator = DefaultItemAnimator()
+
+        mainPageDividerItemDecoration = MainPageDividerItemDecoration(SPAN_COUNT, 0)
+
+        setRecyclerViewLayoutManager()
+
+    }
+
+    private fun refreshData() {
         val folderViewItems = mutableListOf<ViewItem>()
         val fileViewItems = mutableListOf<ViewItem>()
 
@@ -137,6 +151,8 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
             }
 
         }
+
+        viewItems.clear()
 
         val fileTitleViewModel = FolderFileTitleViewModel()
 
@@ -160,22 +176,10 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         }
 
-        filePageBinding.fileRecyclerView.itemAnimator = DefaultItemAnimator()
-
-        mainPageDividerItemDecoration = MainPageDividerItemDecoration(SPAN_COUNT, viewItems.size)
-
-        setRecyclerViewLayoutManager()
-
-        filePageBinding.fileRecyclerView.adapter = fileRecyclerViewAdapter
+        mainPageDividerItemDecoration.totalItemCount = viewItems.size
 
         fileRecyclerViewAdapter.setItemList(viewItems)
         fileRecyclerViewAdapter.notifyDataSetChanged()
-
-        filePageBinding.addFab.setOnClickListener {
-
-            showAddDialog()
-
-        }
 
     }
 
@@ -197,26 +201,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
         BottomMenuGridDialogFactory(bottomMenuItems).createDialog(context).show()
     }
 
-
-    private fun initToggleOrientationIv() {
-
-        val view = filePageBinding.searchFileCard
-
-        view?.toggleOrientationIv?.setOnClickListener {
-
-            toggleOrientation()
-
-        }
-
-        view?.moreIv?.setOnClickListener {
-
-            handleMoreIvClick()
-
-        }
-
-    }
-
-    private fun handleMoreIvClick() {
+    fun handleMoreIvClick() {
 
         val bottomMenuItems = listOf<BottomMenuItem>(
 
@@ -248,7 +233,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     }
 
-    private fun toggleOrientation() {
+    fun toggleOrientation() {
 
         currentOrientation = if (currentOrientation == ORIENTATION_GRID_TYPE)
             ORIENTATION_LIST_TYPE
@@ -261,20 +246,6 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         fileRecyclerViewAdapter.setItemList(viewItems)
         fileRecyclerViewAdapter.notifyDataSetChanged()
-
-    }
-
-    private fun toggleTitle() {
-
-        if (mIsSelectMode) {
-            filePageBinding.fileSelectModeTitle?.visibility = View.VISIBLE
-            filePageBinding.searchFileCard?.visibility = View.INVISIBLE
-        } else {
-
-            filePageBinding.searchFileCard?.visibility = View.VISIBLE
-            filePageBinding.fileSelectModeTitle?.visibility = View.INVISIBLE
-
-        }
 
     }
 
@@ -303,8 +274,6 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         mSelectFiles.add(abstractFile)
 
-        fileSelectModeTitle.notifySelectCountChanged(mSelectFiles.size)
-
         enterSelectMode()
 
     }
@@ -312,38 +281,170 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     private fun doHandleItemOnClick(abstractFile: AbstractFile, position: Int) {
 
-        if (!mIsSelectMode)
-            return
+        if (mIsSelectMode) {
 
-        if (mSelectFiles.contains(abstractFile))
-            mSelectFiles.remove(abstractFile)
-        else
-            mSelectFiles.add(abstractFile)
+            if (mSelectFiles.contains(abstractFile))
+                mSelectFiles.remove(abstractFile)
+            else
+                mSelectFiles.add(abstractFile)
 
-        if (mSelectFiles.isEmpty()) {
-            quitSelectMode()
+            if (mSelectFiles.isEmpty()) {
+                quitSelectMode()
+            } else {
+
+                fileRecyclerViewAdapter.selectFiles = mSelectFiles
+                fileRecyclerViewAdapter.isSelectMode = mIsSelectMode
+
+                fileRecyclerViewAdapter.notifyItemChanged(position)
+
+                filePageSelectActionListeners.forEach {
+                    it.notifySelectCountChange(mSelectFiles.size)
+                }
+
+            }
+
         } else {
 
-            fileSelectModeTitle.notifySelectCountChanged(mSelectFiles.size)
+            if (abstractFile is AbstractRemoteFile) {
 
-            fileRecyclerViewAdapter.selectFiles = mSelectFiles
-            fileRecyclerViewAdapter.isSelectMode = mIsSelectMode
+                if (abstractFile is RemoteFolder) {
 
-            fileRecyclerViewAdapter.notifyItemChanged(position)
+                    gotoNextFolder(abstractFile.uuid, abstractFile.name)
+
+                } else {
+
+
+                }
+
+
+            } else {
+
+
+            }
+
+        }
+
+
+    }
+
+    private fun handleGetFileSucceed(data: MutableList<AbstractRemoteFile>?) {
+
+        loadingViewModel.showLoading.set(false)
+
+        if (data?.size == 0)
+            noContentViewModel.showNoContent.set(true)
+        else {
+
+            noContentViewModel.showNoContent.set(false)
+
+            currentFolderItems.clear()
+            currentFolderItems.addAll(data!!)
+
+            refreshData()
+
+        }
+
+        if (notRootFolder()) {
+
+            filePageActionListeners.forEach {
+                it.notifyFolderLevelChanged(false, currentFolderName)
+            }
+
+        } else {
+
+            filePageActionListeners.forEach {
+                it.notifyFolderLevelChanged(true)
+            }
 
         }
 
     }
 
+
     fun useDefaultBackPressFunction(): Boolean {
-        return !mIsSelectMode
+
+        return when {
+            mIsSelectMode -> false
+            notRootFolder() -> false
+            else -> true
+        }
+    }
+
+    private fun notRootFolder(): Boolean {
+        return currentFolderUUID != rootFolderUUID
     }
 
     fun onBackPressed() {
-        quitSelectMode()
+
+        if (mIsSelectMode)
+            quitSelectMode()
+        else if (notRootFolder()) {
+            goToPreFolder()
+        }
+
     }
 
+    private fun gotoNextFolder(uuid: String, name: String) {
+
+        loadingViewModel.showLoading.set(true)
+
+        fileDataSource.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+            override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+
+                currentFolderUUID = uuid
+                currentFolderName = name
+
+                retrievedFolderNames.add(currentFolderName)
+                retrievedFolderUUIDs.add(currentFolderUUID)
+
+                handleGetFileSucceed(data)
+
+            }
+
+            override fun onFail(operationResult: OperationResult?) {
+
+                loadingViewModel.showLoading.set(false)
+                noContentViewModel.showNoContent.set(true)
+
+            }
+        })
+
+    }
+
+    private fun goToPreFolder() {
+
+        retrievedFolderUUIDs.removeAt(retrievedFolderUUIDs.lastIndex)
+        val uuid = retrievedFolderUUIDs.last()
+
+        retrievedFolderNames.removeAt(retrievedFolderNames.lastIndex)
+        val name = retrievedFolderNames.last()
+
+        loadingViewModel.showLoading.set(true)
+
+        fileDataSource.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+            override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+
+                currentFolderUUID = uuid
+                currentFolderName = name
+
+                handleGetFileSucceed(data)
+
+            }
+
+            override fun onFail(operationResult: OperationResult?) {
+
+                loadingViewModel.showLoading.set(false)
+                noContentViewModel.showNoContent.set(true)
+
+            }
+        })
+
+    }
+
+
     private fun enterSelectMode() {
+
+        filePageBinding.addFab.visibility = View.INVISIBLE
 
         mIsSelectMode = true
 
@@ -352,11 +453,17 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         fileRecyclerViewAdapter.notifyDataSetChanged()
 
-        toggleTitle()
+        filePageSelectActionListeners.forEach {
+            it.notifySelectModeChange(mIsSelectMode)
+
+            it.notifySelectCountChange(mSelectFiles.size)
+        }
 
     }
 
-    private fun quitSelectMode() {
+    fun quitSelectMode() {
+
+        filePageBinding.addFab.visibility = View.VISIBLE
 
         mSelectFiles.clear()
 
@@ -367,7 +474,11 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         fileRecyclerViewAdapter.notifyDataSetChanged()
 
-        toggleTitle()
+        filePageSelectActionListeners.forEach {
+            it.notifySelectModeChange(mIsSelectMode)
+
+            it.notifySelectCountChange(mSelectFiles.size)
+        }
 
     }
 
@@ -433,7 +544,6 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
         context.startActivity(intent)
 
     }
-
 
 }
 

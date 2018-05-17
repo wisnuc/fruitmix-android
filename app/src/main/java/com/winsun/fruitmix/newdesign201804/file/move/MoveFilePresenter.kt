@@ -24,7 +24,7 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
     fun initView() {
 
-        fileDataSource.getFile(object : BaseLoadDataCallback<AbstractRemoteFile> {
+        fileDataSource.getFile("","",object : BaseLoadDataCallback<AbstractRemoteFile> {
 
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
