@@ -3,7 +3,7 @@ package com.winsun.fruitmix.list.data;
 import android.content.Context;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.file.data.FileListViewDataSource;
+import com.winsun.fruitmix.file.data.FileListDataSource;
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
 import com.winsun.fruitmix.file.data.download.param.FileFromBoxDownloadParam;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
@@ -20,7 +20,7 @@ import java.util.List;
  * Created by Administrator on 2018/2/25.
  */
 
-public class FileInTweetViewDataSource implements FileListViewDataSource {
+public class FileInTweetDataSource implements FileListDataSource {
 
     private String mCurrentUserUUID;
 
@@ -32,8 +32,8 @@ public class FileInTweetViewDataSource implements FileListViewDataSource {
 
     private String stationID;
 
-    public FileInTweetViewDataSource(Context context, StationFileRepository stationFileRepository,
-                                     FileComment fileComment, String currentUserUUID) {
+    public FileInTweetDataSource(Context context, StationFileRepository stationFileRepository,
+                                 FileComment fileComment, String currentUserUUID) {
         mStationFileRepository = stationFileRepository;
         this.groupUUID = fileComment.getGroupUUID();
         this.stationID = fileComment.getStationID();

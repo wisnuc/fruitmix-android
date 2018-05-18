@@ -30,7 +30,8 @@ object FakeEquipmentItemDataSource : EquipmentItemDataSource {
         val user = WeChatUserInfoDataSource.getUser()
 
         baseEquipmentItems.add(CloudConnectEquipItem("test1", Util.createLocalUUid(), "10.10.9.229"))
-        baseEquipmentItems.add(CloudUnConnectedEquipmentItem(user, "WS215i", "test2", Util.createLocalUUid()))
+        baseEquipmentItems.add(CloudUnConnectedEquipmentItem(user, "WS215i", "test2", Util.createLocalUUid(),
+                "10.10.9.187"))
 
         baseEquipmentItems.add(DiskAbnormalEquipmentItem("test3", Util.createLocalUUid(), DiskMode.SINGLE,
                 mutableListOf(DiskItemInfo(DiskState.LOST, "WD", 2.0 * 1024 * 1024, "WCC3F1EF8S8U"))))

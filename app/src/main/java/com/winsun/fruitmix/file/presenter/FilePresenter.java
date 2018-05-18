@@ -42,7 +42,7 @@ import com.winsun.fruitmix.databinding.RemoteFolderItemLayoutBinding;
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.file.data.FileListViewDataSource;
+import com.winsun.fruitmix.file.data.FileListDataSource;
 import com.winsun.fruitmix.file.data.download.TaskState;
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
 import com.winsun.fruitmix.file.data.model.FinishedTaskItemWrapper;
@@ -163,12 +163,12 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
     private boolean canEnterFolderWhenSelectMode = false;
 
-    private FileListViewDataSource mFileListViewDataSource;
+    private FileListDataSource mFileListDataSource;
 
     public FilePresenter(final Activity activity, FileView fileView, FileListSelectModeListener fileListSelectModeListener, StationFileRepository stationFileRepository,
                          NetworkStateManager networkStateManager, NoContentViewModel noContentViewModel, LoadingViewModel loadingViewModel, FileViewModel fileViewModel,
                          HandleFileListOperateCallback handleFileListOperateCallback, UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource,
-                         FileTaskManager fileTaskManager, FileListViewDataSource fileListViewDataSource) {
+                         FileTaskManager fileTaskManager, FileListDataSource fileListDataSource) {
         this.activity = activity;
         this.fileView = fileView;
         this.fileListSelectModeListener = fileListSelectModeListener;
@@ -202,7 +202,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
         init();
 
-        mFileListViewDataSource = fileListViewDataSource;
+        mFileListDataSource = fileListDataSource;
     }
 
     private void initCurrentUserUUIDAndRootUUID(UserDataRepository userDataRepository, SystemSettingDataSource systemSettingDataSource) {
@@ -304,7 +304,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
     private FileDownloadParam createFileDownloadParam(AbstractRemoteFile abstractRemoteFile) {
 
-        return mFileListViewDataSource.createFileDownloadParam(abstractRemoteFile);
+        return mFileListDataSource.createFileDownloadParam(abstractRemoteFile);
 
     }
 
@@ -322,13 +322,13 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
             initCurrentUserUUIDAndRootUUID(userDataRepository, systemSettingDataSource);
 
-            mFileListViewDataSource.setCurrentUserUUID(currentUserUUID);
+            mFileListDataSource.setCurrentUserUUID(currentUserUUID);
 
             if (force) {
 
                 init();
 
-                mFileListViewDataSource.reset(activity);
+                mFileListDataSource.reset(activity);
 
             }
 
@@ -350,7 +350,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
         fileViewModel.swipeRefreshEnabled.set(true);
 
-        mFileListViewDataSource.getFilesInCurrentFolder(activity, new BaseLoadDataCallbackWrapper<AbstractRemoteFile>(
+        mFileListDataSource.getFilesInCurrentFolder(activity, new BaseLoadDataCallbackWrapper<AbstractRemoteFile>(
                 new BaseLoadDataCallback<AbstractRemoteFile>() {
                     @Override
                     public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
@@ -373,7 +373,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
         preHandleBeforeGetFile();
 
-        mFileListViewDataSource.getFilesInCurrentFolder(activity, new BaseLoadDataCallbackWrapper<AbstractRemoteFile>(
+        mFileListDataSource.getFilesInCurrentFolder(activity, new BaseLoadDataCallbackWrapper<AbstractRemoteFile>(
                 new BaseLoadDataCallback<AbstractRemoteFile>() {
                     @Override
                     public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
@@ -404,7 +404,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
         preHandleBeforeGetFile();
 
-        mFileListViewDataSource.getFilesInFolder(activity, parentFolder, new BaseLoadDataCallbackWrapper<>(
+        mFileListDataSource.getFilesInFolder(activity, parentFolder, new BaseLoadDataCallbackWrapper<>(
                 new BaseLoadDataCallback<AbstractRemoteFile>() {
                     @Override
                     public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
@@ -726,7 +726,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
     public String getCurrentFolderName() {
 //        return currentFolderName;
 
-        return mFileListViewDataSource.getCurrentFolderName();
+        return mFileListDataSource.getCurrentFolderName();
     }
 
     public boolean handleBackPressedOrNot() {
@@ -737,7 +737,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
 //        return !currentFolderUUID.equals(rootUUID);
 
-        return mFileListViewDataSource.checkCanGoToUpperLevel();
+        return mFileListDataSource.checkCanGoToUpperLevel();
 
     }
 
@@ -757,7 +757,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
         if (loadingViewModel.showLoading.get() && !noContentViewModel.showNoContent.get())
             return;
 
-        mFileListViewDataSource.getFilesInParentFolder(activity,
+        mFileListDataSource.getFilesInParentFolder(activity,
                 new BaseLoadDataCallbackWrapper<>(
                         new BaseLoadDataCallback<AbstractRemoteFile>() {
                             @Override
@@ -776,7 +776,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                 )
         );
 
-        handleFileListOperateCallback.handleFileListOperate(mFileListViewDataSource.getCurrentFolderName());
+        handleFileListOperateCallback.handleFileListOperate(mFileListDataSource.getCurrentFolderName());
 
  /*       retrievedFolderUUIDList.remove(retrievedFolderUUIDList.size() - 1);
         currentFolderUUID = retrievedFolderUUIDList.get(retrievedFolderUUIDList.size() - 1);
@@ -1185,7 +1185,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                     getFile(abstractRemoteFile);
 
-                    handleFileListOperateCallback.handleFileListOperate(mFileListViewDataSource.getCurrentFolderName());
+                    handleFileListOperateCallback.handleFileListOperate(mFileListDataSource.getCurrentFolderName());
                 }
             });
 

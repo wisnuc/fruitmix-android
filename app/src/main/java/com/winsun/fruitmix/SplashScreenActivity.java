@@ -9,12 +9,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.umeng.analytics.MobclickAgent;
+import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.init.system.InitSystem;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.newdesign201804.introduction.ProductIntroductionActivity;
+import com.winsun.fruitmix.newdesign201804.login.InjectLoginCase;
 import com.winsun.fruitmix.newdesign201804.login.LoginEntranceActivity;
+import com.winsun.fruitmix.newdesign201804.mainpage.MainPageActivity;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.util.ToastUtil;
@@ -24,6 +27,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+
+import static com.winsun.fruitmix.newdesign201804.equipment.reinitialization.ReinitializationActivityKt.EQUIPMENT_IP_KEY;
+import static com.winsun.fruitmix.newdesign201804.equipment.reinitialization.ReinitializationActivityKt.EQUIPMENT_NAME_KEY;
 
 /**
  * Created by Administrator on 2016/5/9.
@@ -153,7 +159,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
     private void welcome() {
 
-        Intent intent = new Intent();
+        final Intent intent = new Intent();
 
 /*
         if (loginWithNoParamResult) {
@@ -167,17 +173,37 @@ public class SplashScreenActivity extends AppCompatActivity {
         }
 */
 
-        SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
+        final SystemSettingDataSource systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(this);
 
         if (systemSettingDataSource.needShowProductIntroduction()) {
             intent.setClass(SplashScreenActivity.this, ProductIntroductionActivity.class);
         } else {
-            intent.setClass(SplashScreenActivity.this, LoginEntranceActivity.class);
+
+            com.winsun.fruitmix.newdesign201804.login.LoginUseCase loginUseCase = InjectLoginCase.Companion.provideInstance(this);
+
+            loginUseCase.loginWithNoParam(new BaseOperateCallback() {
+                @Override
+                public void onSucceed() {
+
+                    MainPageActivity.Companion.start(mContext, systemSettingDataSource.getCurrentEquipmentIp(), "");
+
+                    finish();
+                }
+
+                @Override
+                public void onFail(OperationResult operationResult) {
+
+                    intent.setClass(SplashScreenActivity.this, LoginEntranceActivity.class);
+
+                    startActivity(intent);
+
+                    finish();
+
+                }
+            });
+
         }
 
-        startActivity(intent);
-
-        finish();
 
     }
 

@@ -1,16 +1,22 @@
 package com.winsun.fruitmix.newdesign201804.file.list.presenter
 
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
+import android.support.design.widget.Snackbar
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import com.winsun.fruitmix.BR
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
+import com.winsun.fruitmix.callback.BaseOperateCallback
+import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.databinding.*
 import com.winsun.fruitmix.dialog.BottomMenuGridDialogFactory
@@ -20,6 +26,9 @@ import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFolder
+import com.winsun.fruitmix.file.data.station.StationFileRepository
+import com.winsun.fruitmix.http.HttpResponse
+import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.model.ViewItem
@@ -34,8 +43,12 @@ import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.move.MoveFileActivity
+import com.winsun.fruitmix.parser.RemoteMkDirParser
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BindingViewHolder
+import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
+import com.winsun.fruitmix.user.datasource.InjectUser
+import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import kotlinx.android.synthetic.main.folder_item.view.*
@@ -45,10 +58,9 @@ private const val SPAN_COUNT = 2
 private val mSelectFiles = mutableListOf<AbstractFile>()
 private var mIsSelectMode = false
 
-private const val rootFolderUUID = "rootFolderUUID"
-
-public class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
-                           val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding) {
+public class FilePresenter(val stationFileRepository: StationFileRepository, val noContentViewModel: NoContentViewModel,
+                           val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding,
+                           val baseView: BaseView) {
 
     private val contentLayout = filePageBinding.contentLayout
 
@@ -71,6 +83,8 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
     private val filePageSelectActionListeners = mutableListOf<FilePageSelectActionListener>()
     private val filePageActionListeners = mutableListOf<FilePageActionListener>()
 
+    private var rootFolderUUID = ""
+
     private var currentFolderUUID = rootFolderUUID
     private var currentFolderName = ""
 
@@ -79,6 +93,13 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
 
     fun initView() {
+
+        val currentUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(context)
+                .currentLoginUserUUID
+
+        val currentUser = InjectUser.provideRepository(context).getUserByUUID(currentUserUUID)
+
+        rootFolderUUID = currentUser.home
 
         fileRecyclerViewAdapter = FileRecyclerViewAdapter({ remoteFile, position ->
             doHandleItemOnClick(remoteFile, position)
@@ -186,7 +207,13 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
     private fun showAddDialog() {
         val bottomMenuItems = mutableListOf<BottomMenuItem>()
 
-        val bottomMenuItem = BottomMenuItem(R.drawable.bottom_menu_folder, context.getString(R.string.folder), object : BaseAbstractCommand() {})
+        val bottomMenuItem = BottomMenuItem(R.drawable.bottom_menu_folder, context.getString(R.string.folder), object : BaseAbstractCommand() {
+            override fun execute() {
+                super.execute()
+
+                createFolder()
+            }
+        })
 
         bottomMenuItems.add(bottomMenuItem)
 
@@ -199,6 +226,63 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
         bottomMenuItems.add(magnetBottomMenuItem)
 
         BottomMenuGridDialogFactory(bottomMenuItems).createDialog(context).show()
+    }
+
+    private fun createFolder(){
+
+        val editText = EditText(context)
+
+        editText.hint = context.getString(R.string.no_title_folder)
+
+        AlertDialog.Builder(context).setTitle(context.getString(R.string.new_create)+context.getString(R.string.folder))
+                .setView(editText)
+                .setPositiveButton(R.string.new_create) { dialog, which ->
+
+                    var folderName = editText.text.toString()
+
+                    if (folderName.isEmpty())
+                        folderName = editText.hint.toString()
+
+                    doCreateFolder(folderName)
+
+                }
+                .setNegativeButton(R.string.cancel){dialog, which ->  }
+                .create().show()
+
+    }
+
+    private fun doCreateFolder(folderName:String){
+
+        baseView.showProgressDialog(context.getString(R.string.operating_title,context.getString(R.string.create)))
+
+        stationFileRepository.createFolder(folderName,rootFolderUUID,currentFolderUUID,object :BaseOperateDataCallback<HttpResponse>{
+
+            override fun onSucceed(data: HttpResponse?, result: OperationResult?) {
+
+                baseView.dismissDialog()
+
+                val parser = RemoteMkDirParser()
+
+                val newFolder = parser.parse(data?.responseData)
+
+                currentFolderItems.add(newFolder)
+
+                refreshData()
+
+            }
+
+            override fun onFail(operationResult: OperationResult?) {
+
+                baseView.dismissDialog()
+
+                SnackbarUtil.showSnackBar(filePageBinding.root,Snackbar.LENGTH_SHORT,
+                        messageStr = operationResult?.getResultMessage(context)!!)
+
+            }
+
+        })
+
+
     }
 
     fun handleMoreIvClick() {
@@ -255,13 +339,13 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
             filePageBinding.fileRecyclerView.layoutManager = gridLayoutManager
 
-            filePageBinding.fileRecyclerView.addItemDecoration(mainPageDividerItemDecoration)
+//            filePageBinding.fileRecyclerView.addItemDecoration(mainPageDividerItemDecoration)
 
         } else if (currentOrientation == ORIENTATION_LIST_TYPE) {
 
             filePageBinding.fileRecyclerView.layoutManager = linearLayoutManager
 
-            filePageBinding.fileRecyclerView.removeItemDecoration(mainPageDividerItemDecoration)
+//            filePageBinding.fileRecyclerView.removeItemDecoration(mainPageDividerItemDecoration)
 
         }
 
@@ -388,7 +472,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         loadingViewModel.showLoading.set(true)
 
-        fileDataSource.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+        stationFileRepository.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
                 currentFolderUUID = uuid
@@ -421,7 +505,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         loadingViewModel.showLoading.set(true)
 
-        fileDataSource.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+        stationFileRepository.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
                 currentFolderUUID = uuid

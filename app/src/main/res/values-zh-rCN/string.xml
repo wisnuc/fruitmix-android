@@ -808,6 +808,8 @@
     
     <string name="select_all">全选</string>
 
+    <string name="no_title_folder">无标题文件夹</string>
+
     <!-- file detail -->
     <string name="key_type">类型</string>
     <string name="key_size">大小</string>
@@ -832,7 +834,6 @@
     <string name="start_all_task">开始全部任务</string>
     <string name="pause_all_task">暂停全部任务</string>
     <string name="clear_completed_task">清除已完成任务</string>
-
 
     
 </resources>

@@ -140,7 +140,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
             FileFromBoxDownloadParam fileFromBoxDownloadParam = (FileFromBoxDownloadParam) fileDownloadParam;
 
             httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
-                    fileFromBoxDownloadParam.getBoxUUID(),fileFromBoxDownloadParam.getStationID(), mSCloudToken);
+                    fileFromBoxDownloadParam.getBoxUUID(), fileFromBoxDownloadParam.getStationID(), mSCloudToken);
 
         } else {
 
@@ -326,7 +326,6 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         return httpRequestFactory.createHttpPostFileRequest(path, "");
     }
-
 
     @Override
     public OperationResult uploadFileWithProgress(LocalFile file, FileUploadState fileUploadState, String driveUUID, String dirUUID) {

@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.mainpage
 
+import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -7,6 +8,7 @@ import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.widget.LinearLayoutManager
 import android.view.*
+import com.winsun.fruitmix.BaseActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.newdesign201804.component.FileSelectModeTitle
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.EQUIPMENT_IP_KEY
@@ -30,7 +32,23 @@ private const val PAGE_FILE = 0
 private const val PAGE_MEDIA = 1
 private const val PAGE_SHARE = 2
 
-class MainPageActivity : AppCompatActivity(), DrawerView, FilePageSelectActionListener, FilePageActionListener {
+
+
+class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListener, FilePageActionListener {
+
+    companion object {
+
+        fun start(context:Context,ip:String,name:String){
+
+            val intent = Intent(context, MainPageActivity::class.java)
+            intent.putExtra(EQUIPMENT_IP_KEY, ip)
+            intent.putExtra(EQUIPMENT_NAME_KEY, name)
+
+            context.startActivity(intent)
+
+        }
+
+    }
 
     private lateinit var filePage: FilePage
     private lateinit var mediaPage: MediaPage
@@ -284,6 +302,7 @@ class MainPageActivity : AppCompatActivity(), DrawerView, FilePageSelectActionLi
             search_file_card.visibility = View.INVISIBLE
 
             bottomNavigationView.visibility = View.GONE
+
         } else {
             search_file_card?.visibility = View.VISIBLE
             file_select_mode_title.visibility = View.INVISIBLE

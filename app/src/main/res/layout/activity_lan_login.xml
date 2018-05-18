@@ -117,7 +117,7 @@
             </android.support.design.widget.TextInputLayout>
 
             <Button
-                android:id="@+id/button4"
+                android:id="@+id/loginBtn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -137,7 +137,7 @@
                 android:textColor="@color/eighty_seven_percent_black"
                 android:textSize="12dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button4" />
+                app:layout_constraintTop_toBottomOf="@+id/loginBtn" />
 
             <ImageView
                 android:id="@+id/forget_password_icon"

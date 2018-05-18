@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.newdesign201804.file.permissionManage
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
@@ -13,6 +12,7 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.http.InjectHttp
 import com.winsun.fruitmix.model.operationResult.OperationResult
+import com.winsun.fruitmix.newdesign201804.user.FakeUserDataRepository
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.user.User

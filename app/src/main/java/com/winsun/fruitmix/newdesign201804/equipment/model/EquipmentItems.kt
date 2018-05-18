@@ -6,14 +6,14 @@ import com.winsun.fruitmix.newdesign201804.equipment.abnormal.data.DiskItemInfo
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.DiskMode
 import com.winsun.fruitmix.user.User
 
-abstract class BaseEquipmentItem(val name: String,val uuid:String) {
+abstract class BaseEquipmentItem(val ip: String, val name: String, val uuid: String) {
 
     abstract fun getEquipmentTypeStr(context: Context): String
     abstract fun getEquipmentTypeIconId(): Int
 
 }
 
-class CloudConnectEquipItem(name: String,uuid: String,val ip:String) : BaseEquipmentItem(name,uuid) {
+class CloudConnectEquipItem(name: String, uuid: String, ip: String) : BaseEquipmentItem(ip, name, uuid) {
 
     override fun getEquipmentTypeStr(context: Context): String {
         return ""
@@ -25,7 +25,7 @@ class CloudConnectEquipItem(name: String,uuid: String,val ip:String) : BaseEquip
 
 }
 
-class CloudUnConnectedEquipmentItem(val loginUser:User,val type:String,name: String,uuid: String) : BaseEquipmentItem(name,uuid) {
+class CloudUnConnectedEquipmentItem(val loginUser: User, val type: String, name: String, uuid: String, ip: String) : BaseEquipmentItem(ip, name, uuid) {
 
     override fun getEquipmentTypeIconId(): Int {
         return R.drawable.cloud_unconnected
@@ -37,7 +37,7 @@ class CloudUnConnectedEquipmentItem(val loginUser:User,val type:String,name: Str
 
 }
 
-class PowerOffEquipmentItem(name: String,uuid: String) : BaseEquipmentItem(name,uuid) {
+class PowerOffEquipmentItem(name: String, uuid: String, ip: String = "") : BaseEquipmentItem(ip, name, uuid) {
 
     override fun getEquipmentTypeIconId(): Int {
         return R.drawable.cloud_unconnected
@@ -49,7 +49,7 @@ class PowerOffEquipmentItem(name: String,uuid: String) : BaseEquipmentItem(name,
 
 }
 
-class OfflineEquipmentItem(name: String,uuid: String) : BaseEquipmentItem(name,uuid) {
+class OfflineEquipmentItem(name: String, uuid: String, ip: String = "") : BaseEquipmentItem(ip, name, uuid) {
 
     override fun getEquipmentTypeIconId(): Int {
         return R.drawable.cloud_unconnected
@@ -61,7 +61,7 @@ class OfflineEquipmentItem(name: String,uuid: String) : BaseEquipmentItem(name,u
 
 }
 
-class UnderReviewEquipmentItem(name: String,uuid: String) : BaseEquipmentItem(name,uuid) {
+class UnderReviewEquipmentItem(name: String, uuid: String, ip: String = "") : BaseEquipmentItem(ip, name, uuid) {
 
     override fun getEquipmentTypeIconId(): Int {
         return R.drawable.under_review
@@ -73,7 +73,8 @@ class UnderReviewEquipmentItem(name: String,uuid: String) : BaseEquipmentItem(na
 
 }
 
-class DiskAbnormalEquipmentItem(name: String,uuid: String, val diskMode: DiskMode, val diskItemInfos: MutableList<DiskItemInfo>) : BaseEquipmentItem(name,uuid) {
+class DiskAbnormalEquipmentItem(name: String, uuid: String, val diskMode: DiskMode,
+                                val diskItemInfos: MutableList<DiskItemInfo>, ip: String = "") : BaseEquipmentItem(ip, name, uuid) {
 
     override fun getEquipmentTypeIconId(): Int {
         return R.drawable.disk_warning_corner

@@ -10,7 +10,7 @@ import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
  * Created by Administrator on 2018/2/24.
  */
 
-public interface FileListViewDataSource {
+public interface FileListDataSource {
 
     void reset(Context context);
 

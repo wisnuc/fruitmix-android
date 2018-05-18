@@ -178,7 +178,6 @@ public class HttpRequestFactory {
 
         setStationID(systemSettingDataSource.getCurrentLoginStationID());
 
-
     }
 
     public void setCurrentData(String token, String gateway) {

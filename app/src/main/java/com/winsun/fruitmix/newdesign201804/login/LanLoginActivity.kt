@@ -2,16 +2,21 @@ package com.winsun.fruitmix.newdesign201804.login
 
 import android.animation.ValueAnimator
 import android.os.Bundle
+import android.support.design.widget.Snackbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.anim.AnimatorBuilder
+import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.databinding.ActivityLanLoginBinding
+import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.abnormal.EQUIPMENT_ITEM_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.InjectEquipmentItemDataSource
+import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
+import kotlinx.android.synthetic.main.activity_lan_login.view.*
 
 class LanLoginActivity : BaseToolbarActivity() {
 
@@ -36,6 +41,33 @@ class LanLoginActivity : BaseToolbarActivity() {
         val lanLoginPresenter = LanLoginPresenter(itemUUID, InjectEquipmentItemDataSource.inject(this))
         lanLoginPresenter.initView(mActivityLanLoginBinding.root)
 
+
+        mActivityLanLoginBinding.loginBtn.setOnClickListener {
+
+            val password = mActivityLanLoginBinding.lanPasswordEditText.text.toString()
+
+            showProgressDialog(getString(R.string.operating_title,getString(R.string.login)))
+
+            lanLoginPresenter.lanLogin(password,object :BaseOperateCallback{
+                override fun onFail(operationResult: OperationResult?) {
+
+                    dismissDialog()
+
+                    SnackbarUtil.showSnackBar(mActivityLanLoginBinding.forgetPasswordTv, Snackbar.LENGTH_SHORT,
+                            messageStr = getString(R.string.fail,getString(R.string.login)))
+                }
+
+                override fun onSucceed() {
+
+                    dismissDialog()
+
+                    finish()
+
+                }
+            })
+
+        }
+
     }
 
     private fun handleForgetPasswordOnClick() {
@@ -47,6 +79,8 @@ class LanLoginActivity : BaseToolbarActivity() {
 
         createAnimator(mActivityLanLoginBinding.forgetPasswordExplainLayout, 0, Util.dip2px(this, 100f))
                 .start()
+
+        R.layout.activity_lan_login
 
     }
 
@@ -67,7 +101,6 @@ class LanLoginActivity : BaseToolbarActivity() {
         return valueAnimator
 
     }
-
 
     override fun generateContent(root: ViewGroup?): View {
 

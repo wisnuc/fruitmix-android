@@ -2,11 +2,9 @@ package com.winsun.fruitmix.fragment;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -26,26 +24,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.PersonInfoActivity;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.SharpCurveInterpolator;
-import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.component.fab.menu.FabMenuItemOnClickDefaultListener;
 import com.winsun.fruitmix.component.fab.menu.FabMenuItemOnClickListener;
 import com.winsun.fruitmix.component.fab.menu.FabMenuLayoutViewComponent;
-import com.winsun.fruitmix.contact.ContactListActivity;
 import com.winsun.fruitmix.databinding.NavPagerMainBinding;
-import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
-import com.winsun.fruitmix.eventbus.MqttMessageEvent;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.eventbus.RetrieveVideoThumbnailEvent;
-import com.winsun.fruitmix.file.data.FileFragmentViewDataSource;
-import com.winsun.fruitmix.file.data.FileListViewDataSource;
+import com.winsun.fruitmix.file.data.FileFragmentDataSource;
+import com.winsun.fruitmix.file.data.FileListDataSource;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
@@ -53,7 +46,6 @@ import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.group.setting.GroupSettingActivity;
-import com.winsun.fruitmix.group.view.GroupListPage;
 import com.winsun.fruitmix.inbox.view.InboxListPage;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
@@ -66,7 +58,6 @@ import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.anim.AnimatorBuilder;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
 import com.winsun.fruitmix.mediaModule.model.Video;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.OperationResultType;
 import com.winsun.fruitmix.mqtt.MqttUseCase;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
@@ -85,7 +76,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -623,9 +613,9 @@ public class MediaMainFragment extends Fragment implements IPhotoListListener,
 
         StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(getContext());
 
-        FileListViewDataSource fileListViewDataSource = new FileFragmentViewDataSource(getActivity(), stationFileRepository);
+        FileListDataSource fileListDataSource = new FileFragmentDataSource(getActivity(), stationFileRepository);
 
-        fileFragment = new FileFragment(getActivity(), this, this, fileListViewDataSource);
+        fileFragment = new FileFragment(getActivity(), this, this, fileListDataSource);
 
         pageList = new ArrayList<>();
 

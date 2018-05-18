@@ -26,7 +26,7 @@ import com.winsun.fruitmix.component.fab.menu.FabMenuItemOnClickListener;
 import com.winsun.fruitmix.component.fab.menu.FabMenuLayoutViewComponent;
 import com.winsun.fruitmix.databinding.ActivityTweetContentListBinding;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
-import com.winsun.fruitmix.file.data.FileListViewDataSource;
+import com.winsun.fruitmix.file.data.FileListDataSource;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
@@ -38,18 +38,14 @@ import com.winsun.fruitmix.group.data.model.MediaComment;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
-import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.interfaces.IPhotoListListener;
-import com.winsun.fruitmix.list.data.FileInTweetViewDataSource;
+import com.winsun.fruitmix.list.data.FileInTweetDataSource;
 import com.winsun.fruitmix.list.data.InjectMediaInTweetDataRepository;
-import com.winsun.fruitmix.list.data.MediaInTweetDataRepository;
 import com.winsun.fruitmix.list.data.MediaInTweetListConverter;
-import com.winsun.fruitmix.list.data.MediaInTweetRemoteDataSource;
 import com.winsun.fruitmix.media.MediaDataSourceRepository;
 import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.RevealToolbarViewModel;
@@ -204,11 +200,11 @@ public class TweetContentListActivity extends BaseActivity implements FileListSe
 
             StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(this);
 
-            FileListViewDataSource fileListViewDataSource = new FileInTweetViewDataSource(this, stationFileRepository,
+            FileListDataSource fileListDataSource = new FileInTweetDataSource(this, stationFileRepository,
                     (FileComment) mUserComment, InjectSystemSettingDataSource.provideSystemSettingDataSource(this).getCurrentLoginUserUUID());
 
             mFileFragment = new FileFragment(this, this, this,
-                    fileListViewDataSource);
+                    fileListDataSource);
 
             activityTweetContentListBinding.containerLayout.removeAllViews();
 

@@ -1,12 +1,9 @@
 package com.winsun.fruitmix.file.data;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackWrapper;
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
 import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloadParam;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
@@ -28,7 +25,7 @@ import java.util.List;
  * Created by Administrator on 2018/2/24.
  */
 
-public class FileFragmentViewDataSource implements FileListViewDataSource {
+public class FileFragmentDataSource implements FileListDataSource {
 
     private static final String SHARED_DRIVE_UUID = "shared_drive_uuid";
 
@@ -53,7 +50,7 @@ public class FileFragmentViewDataSource implements FileListViewDataSource {
 
     private String mCurrentUserUUID;
 
-    public FileFragmentViewDataSource(Context context, StationFileRepository stationFileRepository) {
+    public FileFragmentDataSource(Context context, StationFileRepository stationFileRepository) {
 
         reset(context);
 

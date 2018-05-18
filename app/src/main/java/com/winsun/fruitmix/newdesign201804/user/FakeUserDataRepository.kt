@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.newdesign201804.file.permissionManage
+package com.winsun.fruitmix.newdesign201804.user
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.model.operationResult.OperationSuccess

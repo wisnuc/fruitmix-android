@@ -17,12 +17,10 @@ import com.winsun.fruitmix.databinding.FragmentFileBinding;
 import com.winsun.fruitmix.eventbus.TaskStateChangedEvent;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 
-import com.winsun.fruitmix.file.data.FileFragmentViewDataSource;
-import com.winsun.fruitmix.file.data.FileListViewDataSource;
+import com.winsun.fruitmix.file.data.FileListDataSource;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.model.FileTaskManager;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
-import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.presenter.FilePresenter;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.FileView;
@@ -32,9 +30,7 @@ import com.winsun.fruitmix.interfaces.Page;
 import com.winsun.fruitmix.model.BottomMenuItem;
 import com.winsun.fruitmix.interfaces.IShowHideFragmentListener;
 import com.winsun.fruitmix.network.InjectNetworkStateManager;
-import com.winsun.fruitmix.stations.InjectStation;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
-import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.viewmodel.LoadingViewModel;
 import com.winsun.fruitmix.viewmodel.NoContentViewModel;
@@ -65,7 +61,7 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
     private boolean initFileRecyclerView = false;
 
     public FileFragment(final Activity activity, FileListSelectModeListener fileListSelectModeListener, HandleFileListOperateCallback handleFileListOperateCallback,
-                        FileListViewDataSource fileListViewDataSource) {
+                        FileListDataSource fileListDataSource) {
 
         this.activity = activity;
 
@@ -75,7 +71,7 @@ public class FileFragment implements Page, IShowHideFragmentListener, FileView {
                 InjectNetworkStateManager.provideNetworkStateManager(activity), noContentViewModel, loadingViewModel, fileViewModel, handleFileListOperateCallback,
                 InjectUser.provideRepository(activity),
                 InjectSystemSettingDataSource.provideSystemSettingDataSource(activity), FileTaskManager.getInstance(),
-                fileListViewDataSource);
+                fileListDataSource);
 
         initSwipeRefreshLayout();
 

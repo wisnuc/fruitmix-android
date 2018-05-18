@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import kotlinx.android.synthetic.main.activity_shared_folder.*
 
@@ -24,7 +25,8 @@ class SharedFolderActivity : BaseToolbarActivity(),SharedFolderView {
 
         }
 
-        val sharedFolderPresenter = SharedFolderPresenter(InjectFileDataSource.inject(this),this)
+        val sharedFolderPresenter = SharedFolderPresenter(
+                InjectStationFileRepository.provideStationFileRepository(this),this)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 

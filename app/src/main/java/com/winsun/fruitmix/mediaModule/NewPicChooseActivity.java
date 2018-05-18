@@ -7,7 +7,6 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.winsun.fruitmix.BaseActivity;
 import com.winsun.fruitmix.R;
@@ -15,15 +14,13 @@ import com.winsun.fruitmix.callback.ActiveView;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallbackWrapper;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.databinding.NewActivityAlbumPicChooseBinding;
-import com.winsun.fruitmix.file.data.FileFragmentViewDataSource;
-import com.winsun.fruitmix.file.data.FileListViewDataSource;
+import com.winsun.fruitmix.file.data.FileFragmentDataSource;
+import com.winsun.fruitmix.file.data.FileListDataSource;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
-import com.winsun.fruitmix.file.view.LocalFileFragment;
 import com.winsun.fruitmix.file.view.fragment.FileFragment;
 import com.winsun.fruitmix.file.view.interfaces.FileListSelectModeListener;
 import com.winsun.fruitmix.file.view.interfaces.HandleFileListOperateCallback;
@@ -153,9 +150,9 @@ public class NewPicChooseActivity extends BaseActivity implements IPhotoListList
 
             StationFileRepository stationFileRepository = InjectStationFileRepository.provideStationFileRepository(this);
 
-            FileListViewDataSource fileListViewDataSource = new FileFragmentViewDataSource(this, stationFileRepository);
+            FileListDataSource fileListDataSource = new FileFragmentDataSource(this, stationFileRepository);
 
-            mFileFragment = new FileFragment(this, this, this, fileListViewDataSource);
+            mFileFragment = new FileFragment(this, this, this, fileListDataSource);
 
             mFileFragment.setCanEnterFolderWhenSelectMode(true);
 

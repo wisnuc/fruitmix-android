@@ -140,11 +140,7 @@ class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemD
                         }
                         is CloudConnectEquipItem -> {
 
-                            val intent = Intent(context, MainPageActivity::class.java)
-                            intent.putExtra(EQUIPMENT_IP_KEY, equipmentItem.name)
-                            intent.putExtra(EQUIPMENT_NAME_KEY, equipmentItem.ip)
-
-                            context.startActivity(intent)
+                            MainPageActivity.start(context,equipmentItem.ip,equipmentItem.name)
 
                         }
                         else -> {
