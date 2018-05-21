@@ -40,7 +40,7 @@ class FilePage(val activity: BaseActivity) : MainPage {
         filePageBinding.loadingViewModel = loadingViewModel
         filePageBinding.noContentViewModel = noContentViewModel
 
-        filePresenter = FilePresenter(InjectStationFileRepository.provideStationFileRepository(activity),
+        filePresenter = FilePresenter(InjectFileDataSource.inject(activity),
                 noContentViewModel, loadingViewModel, filePageBinding,activity)
 
         val task = DrawerItem(R.drawable.transfer_menu_icon, activity.getString(R.string.transmission_task), {

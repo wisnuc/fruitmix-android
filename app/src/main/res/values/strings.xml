@@ -839,6 +839,9 @@
 
     <string name="no_title_folder">No title folder</string>
 
+    <!-- file operation -->
+    <string name="new_name_empty_hint">Please enter a new name</string>
+
     <!-- file detail -->
     <string name="key_type">Type</string>
     <string name="key_size">Size</string>

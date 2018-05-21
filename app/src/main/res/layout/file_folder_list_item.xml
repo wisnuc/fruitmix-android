@@ -54,22 +54,27 @@
             android:layout_marginRight="16dp"
             android:background="@null"
             android:onClick="@{()->fileItemViewModel.handleMoreBtnOnClick()}"
+            android:src="@drawable/horizontal_more_icon_black"
             android:visibility="@{fileItemViewModel.showMoreBtn?View.VISIBLE:View.INVISIBLE,default=visible}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/horizontal_more_icon_black" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView40"
-            android:layout_width="wrap_content"
+            android:id="@+id/folderNameTv"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="56dp"
             android:layout_marginLeft="32dp"
+            android:layout_marginRight="56dp"
             android:layout_marginStart="32dp"
             android:layout_marginTop="16dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="@{fileItemViewModel.folderName}"
-            android:textColor="@color/eighty_seven_percent_black"
+            android:textColor="@{fileItemViewModel.isDisable()?@color/twenty_six_percent_black:@color/eighty_seven_percent_black,default=@color/eighty_seven_percent_black}"
             android:textSize="14dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/icon"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="新建文件夹" />
@@ -82,8 +87,8 @@
             android:paddingRight="8dp"
             android:src="@drawable/offline_available_12dp"
             android:visibility="@{fileItemViewModel.showOfflineAvailableIv?View.VISIBLE:View.GONE,default=gone}"
-            app:layout_constraintStart_toStartOf="@id/textView40"
-            app:layout_constraintTop_toBottomOf="@+id/textView40" />
+            app:layout_constraintStart_toStartOf="@+id/folderNameTv"
+            app:layout_constraintTop_toBottomOf="@+id/folderNameTv" />
 
         <TextView
             android:id="@+id/textView41"
@@ -92,11 +97,11 @@
             android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"
             android:text="@{fileItemViewModel.fileFormatTime}"
-            android:textColor="@color/fifty_four_percent_black"
+            android:textColor="@{fileItemViewModel.isDisable()?@color/twenty_six_percent_black:@color/fifty_four_percent_black,default=@color/fifty_four_percent_black}"
             android:textSize="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/offlineAvailableIv"
-            app:layout_constraintTop_toBottomOf="@+id/textView40"
+            app:layout_constraintTop_toBottomOf="@+id/folderNameTv"
             tools:text="2016.02.02" />
 
         <TextView
@@ -107,7 +112,7 @@
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
             android:text="@{fileItemViewModel.fileFormatSize}"
-            android:textColor="@color/fifty_four_percent_black"
+            android:textColor="@{fileItemViewModel.isDisable()?@color/twenty_six_percent_black:@color/fifty_four_percent_black,default=@color/fifty_four_percent_black}"
             android:textSize="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/textView41"
@@ -119,7 +124,7 @@
             android:layout_height="1px"
             android:background="@color/divide_bg"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="@id/textView40" />
+            app:layout_constraintLeft_toLeftOf="@+id/folderNameTv" />
 
 
     </android.support.constraint.ConstraintLayout>

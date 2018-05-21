@@ -6,7 +6,7 @@ import android.databinding.ObservableInt
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.util.FileUtil
 
-open class FileItemViewModel(val abstractFile: AbstractFile,private val doHandleMoreBtnOnClick: () -> Unit = {}) {
+open class FileItemViewModel(val abstractFile: AbstractFile,var doHandleMoreBtnOnClick: () -> Unit = {}) {
 
     val isSelectMode = ObservableBoolean()
 
@@ -20,6 +20,8 @@ open class FileItemViewModel(val abstractFile: AbstractFile,private val doHandle
 
     val showOfflineAvailableIv = ObservableBoolean(false)
     val showMoreBtn = ObservableBoolean(true)
+
+    val isDisable = ObservableBoolean(false)
 
     init {
 

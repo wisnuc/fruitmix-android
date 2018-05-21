@@ -13,7 +13,9 @@ import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import kotlinx.android.synthetic.main.activity_shared_folder.*
 
-class SharedFolderActivity : BaseToolbarActivity(),SharedFolderView {
+class SharedFolderActivity : BaseToolbarActivity(), SharedFolderView {
+
+    private lateinit var sharedFolderPresenter: SharedFolderPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,8 +27,8 @@ class SharedFolderActivity : BaseToolbarActivity(),SharedFolderView {
 
         }
 
-        val sharedFolderPresenter = SharedFolderPresenter(
-                InjectStationFileRepository.provideStationFileRepository(this),this)
+        sharedFolderPresenter = SharedFolderPresenter(
+                InjectFileDataSource.inject(this), this)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -44,6 +46,15 @@ class SharedFolderActivity : BaseToolbarActivity(),SharedFolderView {
 
     override fun getContext(): Context {
         return this
+    }
+
+    override fun onBackPressed() {
+
+        if (sharedFolderPresenter.notRoot())
+            sharedFolderPresenter.onBackPressed()
+        else
+            super.onBackPressed()
+
     }
 
 }

@@ -8,11 +8,14 @@ import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.ActivityMoveFileBinding
+import com.winsun.fruitmix.newdesign201804.file.detail.FILE_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 
 class MoveFileActivity : BaseToolbarActivity() {
 
     private lateinit var activityMoveFileBinding: ActivityMoveFileBinding
+
+    private lateinit var moveFilePresenter: MoveFilePresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,15 +23,13 @@ class MoveFileActivity : BaseToolbarActivity() {
         toolbarViewModel.showMenu.set(true)
         toolbarViewModel.menuResID.set(R.drawable.new_folder)
 
-        toolbarViewModel.setToolbarMenuBtnOnClickListener {
-
-        }
-
         activityMoveFileBinding.cancelBtn.setOnClickListener {
             cancelMove()
         }
 
-        val moveFilePresenter = MoveFilePresenter(InjectFileDataSource.inject(this),activityMoveFileBinding)
+        moveFilePresenter = MoveFilePresenter(InjectFileDataSource.inject(this), activityMoveFileBinding,
+                toolbarViewModel)
+
         moveFilePresenter.initView()
 
     }
@@ -47,6 +48,15 @@ class MoveFileActivity : BaseToolbarActivity() {
 
     private fun cancelMove() {
         finish()
+    }
+
+    override fun onBackPressed() {
+
+        if (moveFilePresenter.notRoot())
+            moveFilePresenter.onBackPressed()
+        else
+            super.onBackPressed()
+
     }
 
 }

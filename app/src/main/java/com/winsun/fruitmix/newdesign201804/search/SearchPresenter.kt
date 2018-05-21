@@ -143,7 +143,9 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
         searchedFileRecyclerView.layoutManager = LinearLayoutManager(context)
 
         fileRecyclerViewAdapter = FileRecyclerViewAdapter({ abstractFile, position ->
-        }, {}, {})
+        }, {}, {
+            abstractFile, position ->
+        })
 
         fileRecyclerViewAdapter.currentOrientation = ORIENTATION_LIST_TYPE
 

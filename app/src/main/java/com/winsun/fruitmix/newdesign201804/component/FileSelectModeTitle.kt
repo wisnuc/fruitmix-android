@@ -2,9 +2,11 @@ package com.winsun.fruitmix.newdesign201804.component
 
 import android.view.View
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import kotlinx.android.synthetic.main.file_select_mode_title.view.*
 
-public class FileSelectModeTitle(val view: View, val exitBtnOnClick: () -> Unit, val moveBtnOnClick: () -> Unit,
+public class FileSelectModeTitle(val view: View,
+                                 val exitBtnOnClick: () -> Unit, val moveBtnOnClick: () -> Unit,
                                  val downloadBtnOnClick: () -> Unit, val moreBtnOnClick: () -> Unit) {
 
     init {

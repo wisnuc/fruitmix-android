@@ -37,6 +37,8 @@ class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSou
         }, {
 
         }, {
+            file,position->
+
         })
 
         fileRecyclerViewAdapter.currentOrientation = ORIENTATION_LIST_TYPE

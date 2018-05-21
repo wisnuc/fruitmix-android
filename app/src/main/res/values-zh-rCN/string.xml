@@ -810,6 +810,9 @@
 
     <string name="no_title_folder">无标题文件夹</string>
 
+    <!-- file operation -->
+    <string name="new_name_empty_hint">请输入新名称</string>
+
     <!-- file detail -->
     <string name="key_type">类型</string>
     <string name="key_size">大小</string>

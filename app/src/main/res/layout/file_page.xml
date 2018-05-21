@@ -38,6 +38,16 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <include
+                layout="@layout/new_no_content_layout"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:noContentViewModel="@{noContentViewModel}" />
+
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/addFab"
                 android:layout_width="wrap_content"
@@ -61,16 +71,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:loadingViewModel="@{loadingViewModel}" />
-
-        <include
-            layout="@layout/new_no_content_layout"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:noContentViewModel="@{noContentViewModel}" />
 
 
     </android.support.constraint.ConstraintLayout>

@@ -43,6 +43,7 @@ import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.move.MoveFileActivity
+import com.winsun.fruitmix.newdesign201804.file.move.SelectMoveFileDataSource
 import com.winsun.fruitmix.parser.RemoteMkDirParser
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BindingViewHolder
@@ -58,7 +59,7 @@ private const val SPAN_COUNT = 2
 private val mSelectFiles = mutableListOf<AbstractFile>()
 private var mIsSelectMode = false
 
-public class FilePresenter(val stationFileRepository: StationFileRepository, val noContentViewModel: NoContentViewModel,
+public class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
                            val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding,
                            val baseView: BaseView) {
 
@@ -105,8 +106,8 @@ public class FilePresenter(val stationFileRepository: StationFileRepository, val
             doHandleItemOnClick(remoteFile, position)
         }, {
             doHandleOnLongClick(it)
-        }, {
-            doShowFileMenuBottomDialog(context, it)
+        }, { remoteFile, position ->
+            doShowFileMenuBottomDialog(context, remoteFile, position)
         })
 
         gridLayoutManager.spanSizeLookup.isSpanIndexCacheEnabled = true
@@ -228,13 +229,13 @@ public class FilePresenter(val stationFileRepository: StationFileRepository, val
         BottomMenuGridDialogFactory(bottomMenuItems).createDialog(context).show()
     }
 
-    private fun createFolder(){
+    private fun createFolder() {
 
         val editText = EditText(context)
 
         editText.hint = context.getString(R.string.no_title_folder)
 
-        AlertDialog.Builder(context).setTitle(context.getString(R.string.new_create)+context.getString(R.string.folder))
+        AlertDialog.Builder(context).setTitle(context.getString(R.string.new_create) + context.getString(R.string.folder))
                 .setView(editText)
                 .setPositiveButton(R.string.new_create) { dialog, which ->
 
@@ -246,16 +247,16 @@ public class FilePresenter(val stationFileRepository: StationFileRepository, val
                     doCreateFolder(folderName)
 
                 }
-                .setNegativeButton(R.string.cancel){dialog, which ->  }
+                .setNegativeButton(R.string.cancel) { dialog, which -> }
                 .create().show()
 
     }
 
-    private fun doCreateFolder(folderName:String){
+    private fun doCreateFolder(folderName: String) {
 
-        baseView.showProgressDialog(context.getString(R.string.operating_title,context.getString(R.string.create)))
+        baseView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.create)))
 
-        stationFileRepository.createFolder(folderName,rootFolderUUID,currentFolderUUID,object :BaseOperateDataCallback<HttpResponse>{
+        fileDataSource.createFolder(folderName, rootFolderUUID, currentFolderUUID, object : BaseOperateDataCallback<HttpResponse> {
 
             override fun onSucceed(data: HttpResponse?, result: OperationResult?) {
 
@@ -275,7 +276,7 @@ public class FilePresenter(val stationFileRepository: StationFileRepository, val
 
                 baseView.dismissDialog()
 
-                SnackbarUtil.showSnackBar(filePageBinding.root,Snackbar.LENGTH_SHORT,
+                SnackbarUtil.showSnackBar(filePageBinding.root, Snackbar.LENGTH_SHORT,
                         messageStr = operationResult?.getResultMessage(context)!!)
 
             }
@@ -472,7 +473,7 @@ public class FilePresenter(val stationFileRepository: StationFileRepository, val
 
         loadingViewModel.showLoading.set(true)
 
-        stationFileRepository.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+        fileDataSource.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
                 currentFolderUUID = uuid
@@ -505,7 +506,7 @@ public class FilePresenter(val stationFileRepository: StationFileRepository, val
 
         loadingViewModel.showLoading.set(true)
 
-        stationFileRepository.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+        fileDataSource.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
                 currentFolderUUID = uuid
@@ -566,11 +567,17 @@ public class FilePresenter(val stationFileRepository: StationFileRepository, val
 
     }
 
-    private fun doShowFileMenuBottomDialog(context: Context, abstractFile: AbstractFile) {
+    private fun doShowFileMenuBottomDialog(context: Context, abstractFile: AbstractFile, position: Int) {
 
         val bottomMenuItems = mutableListOf<BottomMenuItem>()
 
-        bottomMenuItems.add(BottomMenuItem(R.drawable.modify_icon, context.getString(R.string.rename), object : BaseAbstractCommand() {}))
+        bottomMenuItems.add(BottomMenuItem(R.drawable.modify_icon, context.getString(R.string.rename), object : BaseAbstractCommand() {
+            override fun execute() {
+                super.execute()
+
+                rename(abstractFile, position)
+            }
+        }))
 
         bottomMenuItems.add(BottomMenuItem(R.drawable.black_move, context.getString(R.string.move_to), object : BaseAbstractCommand() {
             override fun execute() {
@@ -622,7 +629,61 @@ public class FilePresenter(val stationFileRepository: StationFileRepository, val
 
     }
 
+    private fun rename(abstractFile: AbstractFile, position: Int) {
+
+        val editText = EditText(context)
+        editText.hint = abstractFile.name
+
+        AlertDialog.Builder(context).setTitle(context.getString(R.string.rename))
+                .setView(editText)
+                .setPositiveButton(R.string.rename, { dialog, which ->
+
+                    val oldName = abstractFile.name
+                    val newName = editText.text.toString()
+
+                    if (newName.isEmpty()) {
+                        SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.new_name_empty_hint)
+                    } else if (oldName != newName) {
+                        doRename(oldName, newName, abstractFile, position)
+                    }
+
+                })
+                .setNegativeButton(R.string.cancel, { dialog, which -> })
+                .create().show()
+
+    }
+
+    private fun doRename(oldName: String, newName: String, abstractFile: AbstractFile, position: Int) {
+
+        baseView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.rename)))
+
+        fileDataSource.renameFile(oldName, newName, rootFolderUUID, currentFolderUUID, object : BaseOperateCallback {
+
+            override fun onFail(operationResult: OperationResult?) {
+
+                baseView.dismissDialog()
+                SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT,
+                        messageStr = operationResult!!.getResultMessage(context))
+            }
+
+            override fun onSucceed() {
+
+                baseView.dismissDialog()
+
+                abstractFile.name = newName
+
+                fileRecyclerViewAdapter.notifyItemChanged(position)
+
+            }
+
+        })
+
+    }
+
+
     private fun enterMovePage() {
+
+        SelectMoveFileDataSource.saveSelectFiles(mSelectFiles)
 
         val intent = Intent(context, MoveFileActivity::class.java)
         context.startActivity(intent)
@@ -633,7 +694,7 @@ public class FilePresenter(val stationFileRepository: StationFileRepository, val
 
 class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile, position: Int) -> Unit,
                               val handleItemOnLongClick: (abstractFile: AbstractFile) -> Unit,
-                              val doHandleMoreBtnOnClick: (abstractFile: AbstractFile) -> Unit) : BaseRecyclerViewAdapter<BindingViewHolder, ViewItem>() {
+                              val doHandleMoreBtnOnClick: (abstractFile: AbstractFile, position: Int) -> Unit) : BaseRecyclerViewAdapter<BindingViewHolder, ViewItem>() {
 
     var currentOrientation = ORIENTATION_GRID_TYPE
 
@@ -695,17 +756,14 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 val itemFile = viewItem as ItemFile
 
-                val fileItemViewModel = FileItemViewModel(itemFile.getFile()) {
-                    doHandleMoreBtnOnClick(itemFile.getFile())
+                itemFile.fileItemViewModel.doHandleMoreBtnOnClick = {
+                    doHandleMoreBtnOnClick(itemFile.getFile(), position)
                 }
 
-                fileItemViewModel.showMoreBtn.set(itemFile.fileItemViewModel.showMoreBtn.get())
-                fileItemViewModel.showOfflineAvailableIv.set(itemFile.fileItemViewModel.showOfflineAvailableIv.get())
+                itemFile.fileItemViewModel.isSelectMode.set(isSelectMode)
+                itemFile.fileItemViewModel.isSelected.set(selectFiles.contains(itemFile.getFile()))
 
-                fileItemViewModel.isSelectMode.set(isSelectMode)
-                fileItemViewModel.isSelected.set(selectFiles.contains(itemFile.getFile()))
-
-                holder?.viewDataBinding?.setVariable(BR.fileItemViewModel, fileItemViewModel)
+                holder?.viewDataBinding?.setVariable(BR.fileItemViewModel, itemFile.fileItemViewModel)
 
                 rootView?.setOnClickListener {
 
@@ -727,19 +785,17 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 val itemFolder = viewItem as ItemFolder
 
-                val folderItemViewModel = FolderItemViewModel(itemFolder.getFile()) {
-                    doHandleMoreBtnOnClick(itemFolder.getFile())
+                itemFolder.folderFileTitleViewModel.doHandleMoreBtnOnClick = {
+                    doHandleMoreBtnOnClick(itemFolder.getFile(), position)
+
                 }
 
                 val isSelected = selectFiles.contains(itemFolder.getFile())
 
                 if (currentOrientation == ORIENTATION_LIST_TYPE) {
 
-                    folderItemViewModel.isSelectMode.set(isSelectMode)
-                    folderItemViewModel.isSelected.set(isSelected)
-
-                    folderItemViewModel.showMoreBtn.set(itemFolder.folderFileTitleViewModel.showMoreBtn.get())
-                    folderItemViewModel.showOfflineAvailableIv.set(itemFolder.folderFileTitleViewModel.showOfflineAvailableIv.get())
+                    itemFolder.folderFileTitleViewModel.isSelectMode.set(isSelectMode)
+                    itemFolder.folderFileTitleViewModel.isSelected.set(isSelected)
 
                 } else {
 
@@ -752,10 +808,9 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
                             if (isSelected) R.drawable.item_selected_state
                             else R.drawable.round_circle)
 
-
                 }
 
-                holder?.viewDataBinding?.setVariable(BR.fileItemViewModel, folderItemViewModel)
+                holder?.viewDataBinding?.setVariable(BR.fileItemViewModel, itemFolder.folderFileTitleViewModel)
 
                 val rootView = holder?.viewDataBinding?.root
 
