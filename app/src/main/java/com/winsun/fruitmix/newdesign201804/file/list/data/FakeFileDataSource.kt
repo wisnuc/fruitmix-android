@@ -3,12 +3,15 @@ package com.winsun.fruitmix.newdesign201804.file.list.data
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
+import com.winsun.fruitmix.file.data.download.param.FileDownloadParam
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFolder
 import com.winsun.fruitmix.http.HttpResponse
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TaskState
 import com.winsun.fruitmix.util.Util
 
 object FakeFileDataSource : FileDataSource {
@@ -163,6 +166,18 @@ object FakeFileDataSource : FileDataSource {
     }
 
     override fun renameFile(oldName: String, newName: String, driveUUID: String, dirUUID: String, callback: BaseOperateCallback) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun copyFile(srcFolder: AbstractRemoteFile, targetFolder: AbstractRemoteFile, entries: List<AbstractRemoteFile>, callback: BaseOperateCallback) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun moveFile(srcFolder: AbstractRemoteFile, targetFolder: AbstractRemoteFile, entries: List<AbstractRemoteFile>, callback: BaseOperateCallback) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun downloadFile(fileDownloadParam: FileDownloadParam, task: Task) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

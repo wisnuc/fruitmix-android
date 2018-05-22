@@ -126,7 +126,6 @@ public class DownloadFileCommand extends AbstractCommand {
 
         }
 
-
         fileTaskManager.addFileDownloadItem(fileDownloadItem, stationFileRepository,
                 networkStateManager, currentUserUUID);
 

@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.list.presenter
 
+import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -22,6 +23,7 @@ import com.winsun.fruitmix.databinding.*
 import com.winsun.fruitmix.dialog.BottomMenuGridDialogFactory
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
 import com.winsun.fruitmix.dialog.FileMenuBottomDialogFactory
+import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloadParam
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFile
@@ -33,6 +35,7 @@ import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
+import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.detail.FILE_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.detail.FileDetailActivity
 import com.winsun.fruitmix.newdesign201804.file.list.FilePageActionListener
@@ -42,13 +45,15 @@ import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
-import com.winsun.fruitmix.newdesign201804.file.move.MoveFileActivity
-import com.winsun.fruitmix.newdesign201804.file.move.SelectMoveFileDataSource
+import com.winsun.fruitmix.newdesign201804.file.move.*
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.parser.RemoteMkDirParser
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BindingViewHolder
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 import com.winsun.fruitmix.user.datasource.InjectUser
+import com.winsun.fruitmix.util.FileUtil
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
@@ -398,6 +403,55 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
                 } else {
 
+                    if (FileUtil.checkFileExistInDownloadFolder(abstractFile.name))
+                        FileUtil.openAbstractRemoteFile(context, abstractFile.name)
+                    else {
+
+                        val fileDownloadParam = FileFromStationFolderDownloadParam(abstractFile.uuid,
+                                abstractFile.parentFolderUUID, abstractFile.rootFolderUUID, abstractFile.name)
+
+                        val task = DownloadTask(abstractFile, fileDataSource, fileDownloadParam,
+                                context.getCurrentUserUUID(), ThreadManagerImpl.getInstance())
+
+                        task.init()
+
+                        val taskProgressDialog = ProgressDialog(context)
+                        taskProgressDialog.setTitle(context.getString(R.string.downloading))
+                        taskProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
+                        taskProgressDialog.isIndeterminate = false
+
+                        taskProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.cancel), { dialog, which ->
+
+                            task.cancelTask()
+
+                            dialog.dismiss()
+
+                        })
+
+                        taskProgressDialog.setCancelable(false)
+                        taskProgressDialog.max = 100
+
+                        task.registerObserver(object : TaskStateObserver {
+                            override fun notifyStateChanged(currentState: TaskState) {
+
+                                if (currentState is StartingTaskState)
+                                    taskProgressDialog.progress = currentState.progress
+                                else if(currentState is FinishTaskState){
+
+                                    taskProgressDialog.dismiss()
+
+                                    FileUtil.openAbstractRemoteFile(context,abstractFile.name)
+
+                                }
+
+                            }
+                        })
+
+                        task.startTask()
+
+                        taskProgressDialog.show()
+
+                    }
 
                 }
 
@@ -582,7 +636,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
         bottomMenuItems.add(BottomMenuItem(R.drawable.black_move, context.getString(R.string.move_to), object : BaseAbstractCommand() {
             override fun execute() {
                 super.execute()
-                enterMovePage()
+                enterMovePage(abstractFile)
             }
         }))
 
@@ -609,7 +663,15 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         bottomMenuItems.add(BottomMenuItem(R.drawable.share_to_shared_folder, context.getString(R.string.share_to_shared_folder), object : BaseAbstractCommand() {}))
 
-        bottomMenuItems.add(BottomMenuItem(R.drawable.copy_to, context.getString(R.string.copy_to), object : BaseAbstractCommand() {}))
+        bottomMenuItems.add(BottomMenuItem(R.drawable.copy_to, context.getString(R.string.copy_to), object : BaseAbstractCommand() {
+
+            override fun execute() {
+                super.execute()
+
+                enterCopyPage(abstractFile)
+            }
+
+        }))
 
         bottomMenuItems.add(BottomMenuItem(R.drawable.delete_download_task, context.getString(R.string.delete_text), object : BaseAbstractCommand() {}))
 
@@ -681,12 +743,29 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
     }
 
 
-    private fun enterMovePage() {
+    private fun enterMovePage(abstractFile: AbstractFile) {
 
-        SelectMoveFileDataSource.saveSelectFiles(mSelectFiles)
+        mSelectFiles.add(abstractFile)
 
-        val intent = Intent(context, MoveFileActivity::class.java)
-        context.startActivity(intent)
+        MoveFileActivity.start(context, mSelectFiles, FILE_OPERATE_MOVE)
+
+    }
+
+    private fun enterCopyPage(abstractFile: AbstractFile) {
+
+        mSelectFiles.add(abstractFile)
+
+        MoveFileActivity.start(context, mSelectFiles, FILE_OPERATE_COPY)
+
+    }
+
+    fun enterMovePageWhenSelectMode() {
+
+        if (mSelectFiles.isEmpty())
+            SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.no_select_file)
+        else {
+            MoveFileActivity.start(context, mSelectFiles, FILE_OPERATE_MOVE)
+        }
 
     }
 

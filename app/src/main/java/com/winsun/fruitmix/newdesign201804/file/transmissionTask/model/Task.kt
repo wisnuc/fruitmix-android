@@ -1,9 +1,16 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask.model
 
+import android.util.Log
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.file.data.download.param.FileDownloadParam
 import com.winsun.fruitmix.file.data.model.AbstractFile
+import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
+import com.winsun.fruitmix.thread.manage.ThreadManager
+import com.winsun.fruitmix.util.FileUtil
+import java.io.File
+import java.util.concurrent.Future
 
-abstract class Task(val abstractFile: AbstractFile) {
+abstract class Task(val abstractFile: AbstractFile,val max:Int = 100) {
 
     abstract fun getTypeResID(): Int
 
@@ -60,7 +67,7 @@ abstract class Task(val abstractFile: AbstractFile) {
 
     }
 
-    fun getCurrentState():TaskState{
+    fun getCurrentState(): TaskState {
         return currentTaskState
     }
 
@@ -89,9 +96,13 @@ class UploadTask(abstractFile: AbstractFile, val updateTaskParam: UploadTaskPara
 
 }
 
-data class DownloadTaskParam(val downloadFolderUUID: String)
+private const val DOWNLOAD_TASK_TAG="download_task"
 
-class DownloadTask(abstractFile: AbstractFile, val downloadTaskParam: DownloadTaskParam) : Task(abstractFile) {
+class DownloadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
+                   val currentUserUUID: String, val threadManager: ThreadManager) : Task(abstractFile) {
+
+    private lateinit var future: Future<Boolean>
+
     override fun getTypeResID(): Int {
 
         return R.drawable.download
@@ -99,9 +110,24 @@ class DownloadTask(abstractFile: AbstractFile, val downloadTaskParam: DownloadTa
 
     override fun executeTask() {
 
+        val downloadFileCallable = DownloadFileCallable(fileDataSource, fileDownloadParam, this, currentUserUUID)
+
+        future = threadManager.runOnCacheThread(downloadFileCallable)
+
     }
 
     override fun cancelTask() {
+        future.cancel(true)
+
+        val downloadFile = File(FileUtil.getDownloadFileStoreFolderPath(), abstractFile.name)
+
+        if (downloadFile.exists()) {
+
+            val result = downloadFile.delete()
+
+            Log.d(DOWNLOAD_TASK_TAG, "cancel download,delete file result: $result")
+
+        }
 
     }
 

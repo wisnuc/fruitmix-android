@@ -76,14 +76,13 @@ class StartTaskState(task: Task) : TaskState(task) {
 
 class StartingTaskState(var progress: Int, var speed: String, task: Task) : TaskState(task) {
 
-
     override fun start() {
 
     }
 
     override fun pause() {
 
-        task.setCurrentState(PauseTaskState(progress,speed,task))
+        task.setCurrentState(PauseTaskState(progress, speed, task))
 
     }
 
@@ -100,13 +99,24 @@ class StartingTaskState(var progress: Int, var speed: String, task: Task) : Task
 
     }
 
+    fun setCurrentDownloadFileSize(currentDownloadedSize: Long) {
+
+        if (currentDownloadedSize == 0L && task.abstractFile.size == 0L)
+            progress = task.max
+
+        val currentProgress = (currentDownloadedSize * task.max / task.abstractFile.size).toFloat()
+
+        progress = currentProgress.toInt()
+
+    }
+
 }
 
 class PauseTaskState(var progress: Int, var speed: String, task: Task) : TaskState(task) {
 
     override fun start() {
 
-        task.setCurrentState(StartingTaskState(progress,speed,task))
+        task.setCurrentState(StartingTaskState(progress, speed, task))
 
     }
 
@@ -117,7 +127,7 @@ class PauseTaskState(var progress: Int, var speed: String, task: Task) : TaskSta
 
     override fun resume() {
 
-        task.setCurrentState(StartingTaskState(progress,speed,task))
+        task.setCurrentState(StartingTaskState(progress, speed, task))
 
     }
 

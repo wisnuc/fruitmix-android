@@ -25,6 +25,10 @@ import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.download.FileDownloadingState;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.ErrorTaskState;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.FinishTaskState;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.StartingTaskState;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -658,6 +662,117 @@ public class FileUtil {
         }
 
         return false;
+
+    }
+
+    public static boolean writeResponseBodyToFolder(ResponseBody responseBody, Task task) {
+
+        checkIfNoExistThenCreateDownloadFileStoreFolder();
+
+        File downloadFolder = new File(getDownloadFileStoreFolderPath());
+
+        if (!downloadFolder.exists())
+            createDownloadFileStoreFolder();
+
+        File downloadFile = new File(getDownloadFileStoreFolderPath(), task.getAbstractFile().getName());
+
+        StartingTaskState startingTaskState = new StartingTaskState(0,"0KB/s",task);
+
+        task.setCurrentState(startingTaskState);
+
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+
+        byte[] fileBuffer = new byte[4096];
+
+        try {
+
+            long contentLength = responseBody.contentLength();
+
+            Log.d(TAG, "writeResponseBodyToFolder: contentLength: " + contentLength);
+
+            long fileDownloadedSize = 0;
+
+            if (downloadFile.createNewFile() || downloadFile.isFile()) {
+
+                inputStream = responseBody.byteStream();
+
+                outputStream = new FileOutputStream(downloadFile);
+
+                while (true) {
+                    int read = inputStream.read(fileBuffer);
+
+                    if (read == -1) {
+                        break;
+                    }
+
+                    outputStream.write(fileBuffer, 0, read);
+
+                    fileDownloadedSize += read;
+
+                    Log.d(TAG, "writeResponseBodyToFolder: fileDownloadedSize: " + fileDownloadedSize +
+                    " totalSize:" + task.getAbstractFile().getSize());
+
+                    startingTaskState.setCurrentDownloadFileSize(fileDownloadedSize);
+
+                    task.setCurrentState(startingTaskState);
+
+                }
+
+                outputStream.flush();
+
+                task.setCurrentState(new FinishTaskState(task));
+
+                return true;
+
+            } else {
+
+                task.setCurrentState(new ErrorTaskState(task));
+
+                return false;
+
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+
+            task.setCurrentState(new ErrorTaskState(task));
+
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            task.setCurrentState(new ErrorTaskState(task));
+
+            if (downloadFile.exists()) {
+
+                boolean result = downloadFile.delete();
+
+                Log.d(TAG, "writeResponseBodyToFolder: io exception occur,delete file: " + result);
+
+            }
+
+            return false;
+        } finally {
+
+            try {
+
+                if (responseBody != null)
+                    responseBody.close();
+
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+
+        }
 
     }
 

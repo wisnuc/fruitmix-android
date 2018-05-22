@@ -1,15 +1,17 @@
 package com.winsun.fruitmix.newdesign201804.file.list.data;
 
-import android.content.Context;
-
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
+import com.winsun.fruitmix.callback.BaseOperateCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
+import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.http.HttpResponse;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TaskState;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 
 import org.jetbrains.annotations.NotNull;
@@ -79,5 +81,36 @@ public class FileDataRepository extends BaseDataRepository implements FileDataSo
 
     }
 
+    @Override
+    public void copyFile(@NotNull final AbstractRemoteFile srcFolder, @NotNull final AbstractRemoteFile targetFolder, @NotNull final List<? extends AbstractRemoteFile> entries, @NotNull final BaseOperateCallback callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                mFileNewOperateDataSource.copyFile(srcFolder, targetFolder, entries, createOperateCallbackRunOnMainThread(callback));
+            }
+        });
+
+
+    }
+
+    @Override
+    public void moveFile(@NotNull final AbstractRemoteFile srcFolder, @NotNull final AbstractRemoteFile targetFolder, @NotNull final List<? extends AbstractRemoteFile> entries, @NotNull final BaseOperateCallback callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                mFileNewOperateDataSource.moveFile(srcFolder, targetFolder, entries, createOperateCallbackRunOnMainThread(callback));
+            }
+        });
+
+    }
+
+    @Override
+    public void downloadFile(@NotNull FileDownloadParam fileDownloadParam, @NotNull Task task) {
+
+        mFileNewOperateDataSource.downloadFile(fileDownloadParam, task, new BaseOperateCallbackImpl());
+
+    }
 
 }

@@ -314,10 +314,7 @@ class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListene
     }
 
     private fun enterMovePage() {
-
-        val intent = Intent(this, MoveFileActivity::class.java)
-        startActivity(intent)
-
+        filePage.moveBtnOnClick()
     }
 
 

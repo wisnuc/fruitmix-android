@@ -851,6 +851,11 @@
     <string name="key_create">Create</string>
     <string name="key_modify">Modify</string>
 
+    <!-- file operation -->
+    <string name="create_copy_task">Create copy task</string>
+    <string name="create_move_task">Create move task</string>
+
+
     <!-- drawer -->
     <string name="tag">Tag</string>
     <string name="offline_file">Offline File</string>
@@ -867,5 +872,7 @@
     <string name="pause_all_task">Pause all task</string>
     <string name="clear_completed_task">Clear completed task</string>
 
+    <!-- select mode -->
+    <string name="no_select_file">Please select file</string>
 
 </resources>

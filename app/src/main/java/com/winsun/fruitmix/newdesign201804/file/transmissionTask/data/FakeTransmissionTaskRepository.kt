@@ -2,6 +2,7 @@ package com.winsun.fruitmix.newdesign201804.file.transmissionTask.data
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
+import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloadParam
 import com.winsun.fruitmix.file.data.model.RemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFolder
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
@@ -41,13 +42,6 @@ object FakeTransmissionTaskRepository : TransmissionTaskDataSource {
         xlsx.size = 1070243L
 
         tasks.add(CopyTask(xlsx, CopyTaskParam("")))
-
-        val pdf = RemoteFile()
-        pdf.uuid = Util.createLocalUUid()
-        pdf.name = "嘎啊.pdf"
-        pdf.size = 1320703L
-
-        tasks.add(DownloadTask(pdf, DownloadTaskParam("")))
 
         val smb = RemoteFile()
         smb.uuid = Util.createLocalUUid()

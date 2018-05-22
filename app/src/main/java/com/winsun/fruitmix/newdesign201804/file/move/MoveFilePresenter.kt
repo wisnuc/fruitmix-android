@@ -1,13 +1,17 @@
 package com.winsun.fruitmix.newdesign201804.file.move
 
+import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
+import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.databinding.ActivityMoveFileBinding
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFolder
+import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserHome
@@ -18,12 +22,14 @@ import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.ShareRootDataUseCase
+import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel
 
 private const val rootUUID = "rootUUID"
 
 class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFileBinding: ActivityMoveFileBinding,
-                        val toolbarViewModel: ToolbarViewModel) {
+                        val toolbarViewModel: ToolbarViewModel, val moveFileView: MoveFileView,
+                        val fileOperation: Int) {
 
     private val context = activityMoveFileBinding.cancelBtn.context
 
@@ -64,8 +70,21 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
         getRoot()
 
-        moveBtn.setOnClickListener {
-            doMove()
+        if (fileOperation == FILE_OPERATE_MOVE) {
+
+            moveBtn.text = context.getText(R.string.move_to)
+
+            moveBtn.setOnClickListener {
+                doMove()
+            }
+
+        } else if (fileOperation == FILE_OPERATE_COPY) {
+
+            moveBtn.text = context.getText(R.string.copy_to)
+
+            moveBtn.setOnClickListener {
+                doCopy()
+            }
         }
 
     }
@@ -126,6 +145,7 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
             retrievedFolders.add(remoteFolder)
 
             refreshData()
+
         }
 
     }
@@ -180,6 +200,8 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
         fileRecyclerViewAdapter.setItemList(viewItems)
         fileRecyclerViewAdapter.notifyDataSetChanged()
+
+        refreshMoveState(selectFiles[0] as AbstractRemoteFile)
 
     }
 
@@ -257,21 +279,99 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
         val remoteFile = retrievedFolders.last()
 
         if (remoteFile.uuid == rootUUID)
-            toolbarViewModel.titleText.set(context.getString(R.string.move_to))
+
+            toolbarViewModel.titleText.set(moveFileView.getRootTitleText())
         else
             toolbarViewModel.titleText.set(remoteFile.name)
 
     }
 
-    private fun refreshMoveState(abstractFile: AbstractFile) {
+    private fun refreshMoveState(abstractRemoteFile: AbstractRemoteFile) {
 
+        val currentRetrievedFolder = retrievedFolders.last()
+
+        if (currentRetrievedFolder.uuid != rootUUID && abstractRemoteFile.parentFolderUUID != currentRetrievedFolder.uuid) {
+
+            moveBtn.isEnabled = true
+
+            moveBtn.setTextColor(ContextCompat.getColor(context, R.color.new_design_primary_color))
+
+        } else {
+            moveBtn.isEnabled = false
+
+            moveBtn.setTextColor(ContextCompat.getColor(context, R.color.twenty_six_percent_black))
+        }
 
     }
 
     private fun doMove() {
 
+        val (srcFile, targetFile, entries) = doFileOperate()
+
+        moveFileView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.create_move_task)))
+
+        fileDataSource.moveFile(srcFile as AbstractRemoteFile, targetFile,
+                entries, object : BaseOperateCallback {
+            override fun onFail(operationResult: OperationResult?) {
+
+                moveFileView.dismissDialog()
+
+                SnackbarUtil.showSnackBar(moveBtn, Snackbar.LENGTH_SHORT, messageStr = operationResult!!.getResultMessage(context))
+            }
+
+            override fun onSucceed() {
+
+                moveFileView.dismissDialog()
+
+                SnackbarUtil.showSnackBar(moveBtn, Snackbar.LENGTH_SHORT, messageStr = "创建移动任务成功，请到任务列表中查看")
+
+            }
+        })
 
     }
 
+    private fun doFileOperate(): Triple<AbstractFile, RemoteFolder, MutableList<AbstractRemoteFile>> {
+        val srcFile = selectFiles[0]
+
+        val targetFile = RemoteFolder()
+        val currentRetrievedFolder = retrievedFolders.last()
+
+        targetFile.rootFolderUUID = currentRetrievedFolder.rootFolderUUID
+        targetFile.parentFolderUUID = currentRetrievedFolder.uuid
+
+        val entries = mutableListOf<AbstractRemoteFile>()
+        selectFiles.forEach {
+            entries.add(it as AbstractRemoteFile)
+        }
+        return Triple(srcFile, targetFile, entries)
+    }
+
+
+    private fun doCopy() {
+
+        val (srcFile, targetFile, entries) = doFileOperate()
+
+        moveFileView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.create_copy_task)))
+
+        fileDataSource.copyFile(srcFile as AbstractRemoteFile, targetFile,
+                entries, object : BaseOperateCallback {
+            override fun onFail(operationResult: OperationResult?) {
+
+                moveFileView.dismissDialog()
+
+                SnackbarUtil.showSnackBar(moveBtn, Snackbar.LENGTH_SHORT, messageStr = operationResult!!.getResultMessage(context))
+            }
+
+            override fun onSucceed() {
+
+                moveFileView.dismissDialog()
+
+                SnackbarUtil.showSnackBar(moveBtn, Snackbar.LENGTH_SHORT, messageStr = "创建拷贝任务成功，请到任务列表中查看")
+
+            }
+        })
+
+
+    }
 
 }
