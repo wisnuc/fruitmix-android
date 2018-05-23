@@ -36,6 +36,7 @@ public class BottomMenuItem {
         command.execute();
 
         dialog.dismiss();
+
     }
 
     public int getIconResID() {

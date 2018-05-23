@@ -26,6 +26,7 @@ import com.winsun.fruitmix.newdesign201804.equipment.add.data.*
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.model.BaseEquipmentItem
 import com.winsun.fruitmix.newdesign201804.equipment.model.CloudConnectEquipItem
+import com.winsun.fruitmix.newdesign201804.equipment.model.CloudUnConnectedEquipmentItem
 import com.winsun.fruitmix.util.FileUtil
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
@@ -98,19 +99,27 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
 
         equipmentSearchManager.startDiscovery {
 
-            if (!checkEquipmentIsFounded(it))
-                return@startDiscovery
-
-            customHandler.removeMessages(SEARCH_TIMEOUT)
-            customHandler.sendEmptyMessageDelayed(SEARCH_SUCCEED, 3 * 1000)
-
-            convert(it, typeArray[type], object : BaseOperateCallbackImpl() {})
-            type++
+            handleEquipmentFounded(it)
 
         }
 
         customHandler.sendEmptyMessageDelayed(SEARCH_TIMEOUT, SEARCH_TIMEOUT_SECOND)
 
+    }
+
+    fun handleIpByManual(equipment: Equipment) {
+        handleEquipmentFounded(equipment)
+    }
+
+    private fun handleEquipmentFounded(it: Equipment) {
+        if (!checkEquipmentIsFounded(it))
+            return
+
+        customHandler.removeMessages(SEARCH_TIMEOUT)
+        customHandler.sendEmptyMessageDelayed(SEARCH_SUCCEED, 3 * 1000)
+
+        convert(it, typeArray[type], object : BaseOperateCallbackImpl() {})
+        type++
     }
 
     private fun checkEquipmentIsFounded(equipment: Equipment): Boolean {
@@ -146,6 +155,18 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
 
     private fun convert(equipment: Equipment, type: Int, baseOperateCallback: BaseOperateCallback) {
 
+        newEquipmentInfoDataSource.getAvailableEquipmentInfo(equipment, object : BaseLoadDataCallbackImpl<AvailableEquipmentInfo>() {
+
+            override fun onSucceed(data: MutableList<AvailableEquipmentInfo>?, operationResult: OperationResult?) {
+                super.onSucceed(data, operationResult)
+
+                baseNewEquipmentStates.add(convert(data!![0]))
+
+                baseOperateCallback.onSucceed()
+
+            }
+        })
+/*
         when (type) {
             0 -> newEquipmentInfoDataSource.getAvailableEquipmentInfo(equipment, object : BaseLoadDataCallbackImpl<AvailableEquipmentInfo>() {
                 override fun onSucceed(data: MutableList<AvailableEquipmentInfo>?, operationResult: OperationResult?) {
@@ -179,6 +200,7 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
             })
 
         }
+*/
 
     }
 
@@ -291,7 +313,7 @@ private class EquipmentViewPagerAdapter(val addEquipmentPresenter: AddEquipmentP
 
         view.equipmentIconIv.alpha = 0f
 
-        AnimatorBuilder(view.context,R.animator.equipment_icon_alpha,view.equipmentIconIv).setStartDelay(1000)
+        AnimatorBuilder(view.context, R.animator.equipment_icon_alpha, view.equipmentIconIv).setStartDelay(1000)
                 .startAnimator()
 
     }
@@ -345,7 +367,12 @@ private class AvailableEquipmentState(equipmentUIState: EquipmentUIState,
 }
 
 private fun addEquipment(addEquipmentPresenter: AddEquipmentPresenter, context: Context, btn: View, baseNewEquipmentInfo: BaseNewEquipmentInfo) {
-    val baseEquipmentItem = CloudConnectEquipItem(baseNewEquipmentInfo.equipmentName, Util.createLocalUUid(),
+
+    val availableEquipmentInfo = baseNewEquipmentInfo as AvailableEquipmentInfo
+
+    val baseEquipmentItem = CloudUnConnectedEquipmentItem(availableEquipmentInfo.availableEquipmentDiskInfo.admin,
+            "ws215i",
+            baseNewEquipmentInfo.equipmentName, Util.createLocalUUid(),
             baseNewEquipmentInfo.equipmentIP)
 
     addEquipmentPresenter.addEquipmentView.showProgressDialog(context.getString(R.string.operating_title,

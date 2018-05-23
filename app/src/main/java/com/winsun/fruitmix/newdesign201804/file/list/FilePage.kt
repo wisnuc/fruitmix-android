@@ -8,13 +8,16 @@ import com.winsun.fruitmix.BaseActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.FilePageBinding
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
+import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.FilePresenter
 import com.winsun.fruitmix.newdesign201804.file.offlineFile.OfflineFileActivity
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.SharedFolderActivity
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.TransmissionTaskActivity
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.mainpage.DrawerItem
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPage
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 import com.winsun.fruitmix.util.Util
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
@@ -41,7 +44,9 @@ class FilePage(val activity: BaseActivity) : MainPage {
         filePageBinding.noContentViewModel = noContentViewModel
 
         filePresenter = FilePresenter(InjectFileDataSource.inject(activity),
-                noContentViewModel, loadingViewModel, filePageBinding,activity)
+                noContentViewModel, loadingViewModel, filePageBinding,activity,
+                activity.getCurrentUserUUID(),ThreadManagerImpl.getInstance(),
+                InjectTransmissionTaskDataSource.provideInstance(activity))
 
         val task = DrawerItem(R.drawable.transfer_menu_icon, activity.getString(R.string.transmission_task), {
 

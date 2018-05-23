@@ -1,5 +1,11 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask.model
 
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
+import android.util.Log
+import com.winsun.fruitmix.util.FileUtil
+
 abstract class TaskState(val task: Task) {
 
     abstract fun start()
@@ -11,6 +17,11 @@ abstract class TaskState(val task: Task) {
     abstract fun cancel()
 
     abstract fun restart()
+
+    open fun onStartState() {}
+    open fun onFinishState() {}
+
+    abstract fun getType(): Int
 
 }
 
@@ -42,6 +53,10 @@ class InitialTaskState(task: Task) : TaskState(task) {
 
     }
 
+    override fun getType(): Int {
+        return 0
+    }
+
 }
 
 class StartTaskState(task: Task) : TaskState(task) {
@@ -52,8 +67,6 @@ class StartTaskState(task: Task) : TaskState(task) {
 
         task.executeTask()
 
-        task.setCurrentState(StartingTaskState(10, "51.3KB/s", task))
-
     }
 
     override fun pause() {
@@ -72,9 +85,38 @@ class StartTaskState(task: Task) : TaskState(task) {
 
     }
 
+    override fun getType(): Int {
+        return 1
+    }
 }
 
+private const val UPDATE_SPEED = 0x1001
+
+private const val DELAY_TIME = 1000L
+
 class StartingTaskState(var progress: Int, var speed: String, task: Task) : TaskState(task) {
+
+    var currentDownloadedSize = 0L
+
+    var lastDownloadSize = 0L
+
+    private lateinit var speedHandler: SpeedHandler
+
+    override fun onStartState() {
+        super.onStartState()
+
+        speedHandler = SpeedHandler(Looper.getMainLooper(), this)
+
+        speedHandler.sendEmptyMessageDelayed(UPDATE_SPEED, DELAY_TIME)
+
+    }
+
+    override fun onFinishState() {
+        super.onFinishState()
+
+        speedHandler.removeMessages(UPDATE_SPEED)
+
+    }
 
     override fun start() {
 
@@ -83,6 +125,8 @@ class StartingTaskState(var progress: Int, var speed: String, task: Task) : Task
     override fun pause() {
 
         task.setCurrentState(PauseTaskState(progress, speed, task))
+
+        onFinishState()
 
     }
 
@@ -93,6 +137,8 @@ class StartingTaskState(var progress: Int, var speed: String, task: Task) : Task
 
         task.cancelTask()
 
+        onFinishState()
+
     }
 
     override fun restart() {
@@ -101,12 +147,45 @@ class StartingTaskState(var progress: Int, var speed: String, task: Task) : Task
 
     fun setCurrentDownloadFileSize(currentDownloadedSize: Long) {
 
+        this.currentDownloadedSize = currentDownloadedSize
+
         if (currentDownloadedSize == 0L && task.abstractFile.size == 0L)
             progress = task.max
 
         val currentProgress = (currentDownloadedSize * task.max / task.abstractFile.size).toFloat()
 
         progress = currentProgress.toInt()
+
+    }
+
+    override fun getType(): Int {
+        return 2
+    }
+
+}
+
+class SpeedHandler(looper: Looper, val taskState: StartingTaskState) : Handler(looper) {
+
+    override fun handleMessage(msg: Message?) {
+        super.handleMessage(msg)
+
+        when (msg?.what) {
+
+            UPDATE_SPEED -> {
+
+                val speedSize = taskState.currentDownloadedSize - taskState.lastDownloadSize
+
+                taskState.speed = FileUtil.formatFileSize(speedSize) + "/s"
+
+                taskState.lastDownloadSize = taskState.currentDownloadedSize
+
+                taskState.task.setCurrentState(taskState)
+
+                sendEmptyMessageDelayed(UPDATE_SPEED, DELAY_TIME)
+
+            }
+
+        }
 
     }
 
@@ -139,9 +218,21 @@ class PauseTaskState(var progress: Int, var speed: String, task: Task) : TaskSta
 
     }
 
+    override fun getType(): Int {
+        return 3
+    }
+
 }
 
+private const val FINISH_TASK_TAG = "finish_task_tag"
+
 class FinishTaskState(task: Task) : TaskState(task) {
+
+    override fun onStartState() {
+        super.onStartState()
+
+        Log.d(FINISH_TASK_TAG, "onStartState")
+    }
 
     override fun start() {
 
@@ -157,6 +248,10 @@ class FinishTaskState(task: Task) : TaskState(task) {
     }
 
     override fun restart() {
+    }
+
+    override fun getType(): Int {
+        return 4
     }
 
 }
@@ -177,6 +272,10 @@ class ErrorTaskState(task: Task) : TaskState(task) {
 
     override fun restart() {
         task.setCurrentState(StartTaskState(task))
+    }
+
+    override fun getType(): Int {
+        return 5
     }
 
 }

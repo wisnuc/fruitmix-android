@@ -11,6 +11,7 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.anim.AnimatorBuilder
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.databinding.ActivityLanLoginBinding
+import com.winsun.fruitmix.equipment.search.data.InjectEquipment
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.abnormal.EQUIPMENT_ITEM_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.InjectEquipmentItemDataSource
@@ -38,9 +39,10 @@ class LanLoginActivity : BaseToolbarActivity() {
 
         val itemUUID = intent.getStringExtra(EQUIPMENT_ITEM_UUID_KEY)
 
-        val lanLoginPresenter = LanLoginPresenter(itemUUID, InjectEquipmentItemDataSource.inject(this))
-        lanLoginPresenter.initView(mActivityLanLoginBinding.root)
+        val lanLoginPresenter = LanLoginPresenter(itemUUID, InjectEquipmentItemDataSource.inject(this),
+                InjectEquipment.provideEquipmentDataSource(this))
 
+        lanLoginPresenter.initView(mActivityLanLoginBinding.root)
 
         mActivityLanLoginBinding.loginBtn.setOnClickListener {
 

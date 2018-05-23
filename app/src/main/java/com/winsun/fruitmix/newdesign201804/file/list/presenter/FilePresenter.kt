@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.list.presenter
 
+import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
@@ -17,6 +18,7 @@ import com.winsun.fruitmix.BR
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
+import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.databinding.*
@@ -35,6 +37,7 @@ import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
+import com.winsun.fruitmix.newdesign201804.component.createFileDownloadParam
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.detail.FILE_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.detail.FileDetailActivity
@@ -46,11 +49,13 @@ import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.move.*
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.parser.RemoteMkDirParser
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BindingViewHolder
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
+import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 import com.winsun.fruitmix.user.datasource.InjectUser
 import com.winsun.fruitmix.util.FileUtil
@@ -66,7 +71,8 @@ private var mIsSelectMode = false
 
 public class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
                            val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding,
-                           val baseView: BaseView) {
+                           val baseView: BaseView, val currentUserUUID: String, val threadManager: ThreadManager,
+                           val transmissionTaskDataSource: TransmissionTaskDataSource) {
 
     private val contentLayout = filePageBinding.contentLayout
 
@@ -411,7 +417,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
                                 abstractFile.parentFolderUUID, abstractFile.rootFolderUUID, abstractFile.name)
 
                         val task = DownloadTask(abstractFile, fileDataSource, fileDownloadParam,
-                                context.getCurrentUserUUID(), ThreadManagerImpl.getInstance())
+                                currentUserUUID, threadManager)
 
                         task.init()
 
@@ -434,13 +440,17 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
                         task.registerObserver(object : TaskStateObserver {
                             override fun notifyStateChanged(currentState: TaskState) {
 
-                                if (currentState is StartingTaskState)
+                                if (currentState is StartingTaskState) {
+
                                     taskProgressDialog.progress = currentState.progress
-                                else if(currentState is FinishTaskState){
+
+                                    taskProgressDialog.setProgressNumberFormat(currentState.speed)
+
+                                } else if (currentState is FinishTaskState) {
 
                                     taskProgressDialog.dismiss()
 
-                                    FileUtil.openAbstractRemoteFile(context,abstractFile.name)
+                                    FileUtil.openAbstractRemoteFile(context, abstractFile.name)
 
                                 }
 
@@ -542,6 +552,12 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
             override fun onFail(operationResult: OperationResult?) {
 
+                currentFolderUUID = uuid
+                currentFolderName = name
+
+                retrievedFolderNames.add(currentFolderName)
+                retrievedFolderUUIDs.add(currentFolderUUID)
+
                 loadingViewModel.showLoading.set(false)
                 noContentViewModel.showNoContent.set(true)
 
@@ -571,6 +587,9 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
             }
 
             override fun onFail(operationResult: OperationResult?) {
+
+                currentFolderUUID = uuid
+                currentFolderName = name
 
                 loadingViewModel.showLoading.set(false)
                 noContentViewModel.showNoContent.set(true)
@@ -642,7 +661,25 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         if (!abstractFile.isFolder) {
 
-            val bottomMenuItem = BottomMenuItem(R.drawable.offline_available, context.getString(R.string.offline_available), object : BaseAbstractCommand() {})
+            val bottomMenuItem = BottomMenuItem(R.drawable.offline_available, context.getString(R.string.offline_available), object : BaseAbstractCommand() {
+
+                override fun execute() {
+                    super.execute()
+
+                    val abstractRemoteFile = abstractFile as AbstractRemoteFile
+
+                    val fileDownloadParam = abstractRemoteFile.createFileDownloadParam()
+
+                    val downloadTask = DownloadTask(abstractRemoteFile, fileDataSource, fileDownloadParam,
+                            currentUserUUID, threadManager)
+
+                    transmissionTaskDataSource.addTransmissionTask(downloadTask, object : BaseOperateCallbackImpl(){})
+
+                    SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, messageStr = "任务创建成功,请到传输任务列表中确认")
+
+                }
+
+            })
             bottomMenuItem.isShowSwitchBtn = true
 
             bottomMenuItems.add(bottomMenuItem)
@@ -675,7 +712,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         bottomMenuItems.add(BottomMenuItem(R.drawable.delete_download_task, context.getString(R.string.delete_text), object : BaseAbstractCommand() {}))
 
-        FileMenuBottomDialogFactory(abstractFile, bottomMenuItems, {
+        val dialog = FileMenuBottomDialogFactory(abstractFile, bottomMenuItems, {
 
             val intent = Intent(context, FileDetailActivity::class.java)
 
@@ -686,7 +723,9 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
             context.startActivity(intent)
 
-        }).createDialog(context).show()
+        }).createDialog(context)
+
+        dialog.show()
 
 
     }

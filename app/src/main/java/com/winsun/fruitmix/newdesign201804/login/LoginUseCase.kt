@@ -3,10 +3,12 @@ package com.winsun.fruitmix.newdesign201804.login
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl
 import com.winsun.fruitmix.callback.BaseOperateCallback
+import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory
 import com.winsun.fruitmix.model.operationResult.OperationFail
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
+import com.winsun.fruitmix.stations.StationsDataSource
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource
 import com.winsun.fruitmix.token.data.TokenDataSource
 import com.winsun.fruitmix.token.param.StationTokenParam
@@ -14,7 +16,8 @@ import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.user.datasource.UserDataRepository
 
 class LoginUseCase(val tokenDataSource: TokenDataSource, val systemSettingDataSource: SystemSettingDataSource,
-                   val httpRequestFactory: HttpRequestFactory, val userDataRepository: UserDataRepository) {
+                   val httpRequestFactory: HttpRequestFactory, val userDataRepository: UserDataRepository,
+                   val stationsDataSource: StationsDataSource) {
 
     fun loginWithNoParam(baseOperateCallback: BaseOperateCallback) {
 
@@ -25,9 +28,19 @@ class LoginUseCase(val tokenDataSource: TokenDataSource, val systemSettingDataSo
             val loginUserUUID = systemSettingDataSource.currentLoginUserUUID
             val gateway = systemSettingDataSource.currentEquipmentIp
 
-            initSystem(token, gateway)
+            stationsDataSource.checkStationIP(gateway, object : BaseOperateDataCallback<Boolean> {
+                override fun onFail(operationResult: OperationResult?) {
+                    baseOperateCallback.onFail(OperationFail("ip is unreachable"))
+                }
 
-            getUser(loginUserUUID, baseOperateCallback)
+                override fun onSucceed(data: Boolean?, result: OperationResult?) {
+                    initSystem(token, gateway)
+
+                    getUser(loginUserUUID, baseOperateCallback)
+
+                }
+            })
+
 
         } else
             baseOperateCallback.onFail(OperationFail("no token"))

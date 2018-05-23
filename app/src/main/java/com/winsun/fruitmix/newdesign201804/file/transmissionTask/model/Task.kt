@@ -10,7 +10,7 @@ import com.winsun.fruitmix.util.FileUtil
 import java.io.File
 import java.util.concurrent.Future
 
-abstract class Task(val abstractFile: AbstractFile,val max:Int = 100) {
+abstract class Task(val abstractFile: AbstractFile, val max: Int = 100) {
 
     abstract fun getTypeResID(): Int
 
@@ -57,7 +57,16 @@ abstract class Task(val abstractFile: AbstractFile,val max:Int = 100) {
         taskStateObservers.remove(taskStateObserver)
     }
 
+    @Synchronized
     fun setCurrentState(taskState: TaskState) {
+
+        if(taskState.getType() != currentTaskState.getType()){
+
+            currentTaskState.onFinishState()
+
+            taskState.onStartState()
+
+        }
 
         currentTaskState = taskState
 
@@ -67,6 +76,7 @@ abstract class Task(val abstractFile: AbstractFile,val max:Int = 100) {
 
     }
 
+    @Synchronized
     fun getCurrentState(): TaskState {
         return currentTaskState
     }
@@ -96,7 +106,7 @@ class UploadTask(abstractFile: AbstractFile, val updateTaskParam: UploadTaskPara
 
 }
 
-private const val DOWNLOAD_TASK_TAG="download_task"
+private const val DOWNLOAD_TASK_TAG = "download_task"
 
 class DownloadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
                    val currentUserUUID: String, val threadManager: ThreadManager) : Task(abstractFile) {
@@ -156,6 +166,7 @@ class SMBTask(abstractFile: AbstractFile, val smbTaskParam: SMBTaskParam) : Task
     override fun getTypeResID(): Int {
 
         return R.drawable.smb_task
+
     }
 
     override fun executeTask() {

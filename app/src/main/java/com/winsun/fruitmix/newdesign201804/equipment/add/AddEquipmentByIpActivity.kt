@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.equipment.add
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.view.LayoutInflater
@@ -56,6 +57,13 @@ class AddEquipmentByIpActivity : BaseToolbarActivity() {
             3001) ?: return
 
         //TODO:return ip and port for search equipment
+
+        val intent = Intent()
+        intent.putExtra(IP_BY_MANUAL, ip)
+        intent.putExtra(PORT_BY_MANUAL, portNum)
+
+        setResult(IP_BY_MANUAL_ACTIVITY_RESULT_CODE, intent)
+        finish()
 
     }
 

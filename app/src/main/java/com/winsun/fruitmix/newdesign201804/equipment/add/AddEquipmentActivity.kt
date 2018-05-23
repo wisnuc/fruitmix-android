@@ -11,10 +11,14 @@ import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
+import com.winsun.fruitmix.equipment.search.data.Equipment
+import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager
+import com.winsun.fruitmix.equipment.search.data.InjectEquipment
 import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.BaseNewEquipmentInfo
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeEquipmentSearchManger
 import com.winsun.fruitmix.newdesign201804.equipment.add.data.FakeNewEquipmentInfoDataSource
+import com.winsun.fruitmix.newdesign201804.equipment.add.data.InjectNewEquipmentInfoDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.InjectEquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.EQUIPMENT_IP_KEY
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.EQUIPMENT_NAME_KEY
@@ -22,8 +26,14 @@ import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.Reinitiali
 import kotlinx.android.synthetic.main.activity_add_equipment.*
 
 const val REINITIALIZATION_ACTIVITY_REQUEST_CODE = 0x1002
-
 const val FINISH_REINITIALIZATION_RESULT_CODE = 0x1003
+
+const val IP_BY_MANUAL_ACTIVITY_REQUEST_CODE = 0x1004
+const val IP_BY_MANUAL_ACTIVITY_RESULT_CODE = 0x1005
+
+const val IP_BY_MANUAL = "ip_by_manual"
+const val PORT_BY_MANUAL = "port_by_manual"
+
 
 class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, EquipmentUIState, AddEquipmentView {
 
@@ -44,8 +54,8 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
 
         }
 
-        addEquipmentPresenter = AddEquipmentPresenter(FakeEquipmentSearchManger(),
-                this, this, this, FakeNewEquipmentInfoDataSource(),
+        addEquipmentPresenter = AddEquipmentPresenter(InjectEquipment.provideEquipmentSearchManager(this),
+                this, this, this, InjectNewEquipmentInfoDataSource.inject(this),
                 InjectEquipmentItemDataSource.inject(this))
 
         new_equipment_viewPager.adapter = addEquipmentPresenter.getViewPagerAdapter()
@@ -225,7 +235,10 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
     }
 
     private fun enterAddEquipmentByIp() {
-        startActivity(Intent(this, AddEquipmentByIpActivity::class.java))
+
+        val intent = Intent(this, AddEquipmentByIpActivity::class.java)
+
+        startActivityForResult(intent, IP_BY_MANUAL_ACTIVITY_REQUEST_CODE)
     }
 
     override fun enterReinitialization(baseNewEquipmentInfo: BaseNewEquipmentInfo) {
@@ -242,6 +255,16 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
 
         if (requestCode == REINITIALIZATION_ACTIVITY_REQUEST_CODE && resultCode == FINISH_REINITIALIZATION_RESULT_CODE)
             finish()
+        else if (requestCode == IP_BY_MANUAL_ACTIVITY_REQUEST_CODE && resultCode == IP_BY_MANUAL_ACTIVITY_RESULT_CODE) {
+
+            val ip = data?.getStringExtra(IP_BY_MANUAL)
+            val port = data?.getIntExtra(PORT_BY_MANUAL, 3001)
+
+            val equipment = Equipment("", listOf(ip), port!!)
+
+            addEquipmentPresenter.handleIpByManual(equipment)
+
+        }
 
     }
 

@@ -740,7 +740,9 @@ public class Util {
 
         String hostName = bonjourService.getHostname();
 
-        if (hostName == null || !hostName.contains("wisnuc")) return false;
+        Log.d(TAG, "checkBonjourService: " + hostName);
+
+        if (hostName == null || (!hostName.startsWith("wisnuc") && !hostName.startsWith("phi"))) return false;
 
         Log.d(TAG, "call: hostName: " + hostName);
 

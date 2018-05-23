@@ -7,7 +7,7 @@ public class InjectTransmissionTaskDataSource {
     companion object {
 
         fun provideInstance(context: Context): TransmissionTaskDataSource {
-            return FakeTransmissionTaskRepository
+            return TransmissionTaskRepository
         }
 
     }

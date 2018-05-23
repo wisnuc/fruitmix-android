@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
+import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.component.inflateView
@@ -13,10 +14,13 @@ import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.Transmissi
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
+import com.winsun.fruitmix.thread.manage.ThreadManager
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 
 import kotlinx.android.synthetic.main.transmission_task_item.view.*
 
-class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTaskDataSource) {
+class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTaskDataSource,
+                                val threadManager: ThreadManager) {
 
     private val transmissionTaskAdapter = TransmissionTaskAdapter()
 
@@ -70,7 +74,6 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
 
     }
-
 
     private fun handleGetTask(data: MutableList<Task>?) {
 
@@ -139,6 +142,25 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
             view?.taskStateIcon?.refresh(task.getCurrentState())
 
+            view?.deleteTv?.setOnClickListener {
+
+                task.cancelTask()
+
+                transmissionTaskDataSource.deleteTransmissionTask(task, object : BaseOperateCallbackImpl() {
+                    override fun onSucceed() {
+                        super.onSucceed()
+
+                        taskContainers.remove(taskContainer)
+
+                        transmissionTaskAdapter.setItemList(taskContainers)
+
+                        transmissionTaskAdapter.notifyItemRemoved(holder.adapterPosition)
+
+                    }
+                })
+
+            }
+
         }
 
     }
@@ -156,11 +178,17 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
         override fun notifyStateChanged(currentState: TaskState) {
 
-            val position = taskContainers.indexOf(this)
+            threadManager.runOnMainThread {
 
-            Log.d("Task", "notifyStateChanged position: $position")
+                //TODO:on main thread when set task state and notify
 
-            transmissionTaskAdapter.notifyItemChanged(position)
+                val position = taskContainers.indexOf(this)
+
+                Log.d("Task", "notifyStateChanged position: $position")
+
+                transmissionTaskAdapter.notifyItemChanged(position)
+
+            }
 
         }
 

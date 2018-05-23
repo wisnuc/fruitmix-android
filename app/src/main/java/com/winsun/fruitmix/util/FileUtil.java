@@ -715,8 +715,12 @@ public class FileUtil {
 
                     startingTaskState.setCurrentDownloadFileSize(fileDownloadedSize);
 
+                    Log.d(TAG, "writeResponseBodyToFolder: setCurrentDownloadFileSize");
+                    
                     task.setCurrentState(startingTaskState);
 
+                    Log.d(TAG, "writeResponseBodyToFolder: setCurrentState");
+                    
                 }
 
                 outputStream.flush();

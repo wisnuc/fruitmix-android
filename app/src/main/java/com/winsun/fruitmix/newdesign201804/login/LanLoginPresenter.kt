@@ -5,6 +5,7 @@ import android.view.View
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.equipment.search.data.Equipment
+import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource
 import com.winsun.fruitmix.equipment.search.data.InjectEquipment
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
@@ -14,7 +15,8 @@ import com.winsun.fruitmix.token.param.StationTokenParam
 import com.winsun.fruitmix.user.User
 import kotlinx.android.synthetic.main.activity_lan_login.view.*
 
-class LanLoginPresenter(private val itemUUID: String, private val equipmentItemDataSource: EquipmentItemDataSource) {
+class LanLoginPresenter(private val itemUUID: String, private val equipmentItemDataSource: EquipmentItemDataSource,
+                        val equipmentDataSource: EquipmentDataSource) {
 
     private lateinit var context: Context
 
@@ -38,12 +40,10 @@ class LanLoginPresenter(private val itemUUID: String, private val equipmentItemD
 
     private fun getUserInfo(equipmentIP: String, rootView: View) {
 
-        val equipmentDataRepository = InjectEquipment.provideEquipmentDataSource(context)
-
         val equipment = Equipment()
         equipment.hosts = listOf(equipmentIP)
 
-        equipmentDataRepository.getUsersInEquipment(equipment, object : BaseLoadDataCallback<User> {
+        equipmentDataSource.getUsersInEquipment(equipment, object : BaseLoadDataCallback<User> {
             override fun onFail(operationResult: OperationResult?) {
 
             }

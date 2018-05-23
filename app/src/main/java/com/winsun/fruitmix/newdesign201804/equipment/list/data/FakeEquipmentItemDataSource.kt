@@ -88,6 +88,8 @@ object FakeEquipmentItemDataSource : EquipmentItemDataSource {
 
         baseEquipmentItems.add(baseEquipmentItem)
 
+        baseEquipmentItemMaps[baseEquipmentItem.uuid] = baseEquipmentItem
+
         cacheDirty = true
 
         Log.d(TAG, "cacheDirty: ${isCacheDirty()}")

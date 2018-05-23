@@ -55,6 +55,8 @@ public class EquipmentMDNSSearchManager implements EquipmentSearchManager{
 
     public void startDiscovery(final EquipmentFoundedListener listener) {
 
+        Log.d(TAG, "startDiscovery: ");
+        
         mSubscription = mRxDnssd.browse(SERVICE_PORT, DEMAIN)
                 .compose(mRxDnssd.resolve())
                 .compose(mRxDnssd.queryRecords())
@@ -63,6 +65,8 @@ public class EquipmentMDNSSearchManager implements EquipmentSearchManager{
                 .subscribe(new Action1<BonjourService>() {
                     @Override
                     public void call(BonjourService bonjourService) {
+
+                        Log.d(TAG, "call: " + bonjourService);
 
                         if (!Util.checkBonjourService(bonjourService)) return;
 

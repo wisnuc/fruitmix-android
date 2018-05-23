@@ -4,6 +4,9 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.winsun.fruitmix.file.data.download.param.FileDownloadParam
+import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloadParam
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
 import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.user.datasource.InjectUser
@@ -23,4 +26,9 @@ fun Context.getCurrentUserHome(): String {
 
     return currentUser.home
 
+}
+
+fun AbstractRemoteFile.createFileDownloadParam(): FileDownloadParam {
+    return FileFromStationFolderDownloadParam(this.uuid,
+            this.parentFolderUUID, this.rootFolderUUID, this.name)
 }

@@ -63,4 +63,8 @@ object FakeTransmissionTaskRepository : TransmissionTaskDataSource {
 
     }
 
+    override fun deleteTransmissionTask(task: Task, baseOperateCallback: BaseOperateCallback) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }

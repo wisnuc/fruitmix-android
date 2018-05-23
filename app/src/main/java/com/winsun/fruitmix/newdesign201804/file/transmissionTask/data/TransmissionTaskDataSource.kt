@@ -10,4 +10,6 @@ interface TransmissionTaskDataSource {
 
     fun addTransmissionTask(task: Task,baseOperateCallback: BaseOperateCallback)
 
+    fun deleteTransmissionTask(task: Task,baseOperateCallback: BaseOperateCallback)
+
 }
