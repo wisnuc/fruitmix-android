@@ -30,4 +30,6 @@ interface FileDataSource{
 
     fun downloadFile(fileDownloadParam: FileDownloadParam, task: Task)
 
+    fun uploadFile(fileUploadParam: FileUploadParam,task: Task)
+
 }

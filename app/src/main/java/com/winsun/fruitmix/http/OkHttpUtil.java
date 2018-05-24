@@ -5,8 +5,13 @@ import android.util.Log;
 import com.android.volley.toolbox.ImageRequest;
 import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.file.data.upload.FileUploadState;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task;
+import com.winsun.fruitmix.newdesign201804.file.upload.ProgressUploadRequestBody;
+import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileInterface;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +36,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
  * Created by Administrator on 2016/12/22.
  */
 
-public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
+public class OkHttpUtil implements IHttpUtil, IHttpFileUtil,UploadFileInterface {
 
     public static final String TAG = OkHttpUtil.class.getSimpleName();
 
@@ -47,6 +52,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
         okHttpClient = new OkHttpClient.Builder().retryOnConnectionFailure(true).connectTimeout(ImageRequest.DEFAULT_IMAGE_TIMEOUT_MS, TimeUnit.MILLISECONDS)
                 .readTimeout(ImageRequest.DEFAULT_IMAGE_TIMEOUT_MS, TimeUnit.MILLISECONDS).writeTimeout(Util.HTTP_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .addInterceptor(createHttpInterceptor()).build();
+
     }
 
     public static OkHttpUtil getInstance() {
@@ -190,6 +196,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
         return builder.post(requestBody).build();
     }
 
+
     @Override
     public Request createUploadWithProgressRequest(HttpRequest httpRequest, RequestBody requestBody, FileUploadState fileUploadState) {
         Request.Builder builder;
@@ -197,6 +204,18 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil {
         builder = generateRequestBuilder(httpRequest);
 
         return builder.post(new ProgressRequestBody(requestBody, fileUploadState)).build();
+    }
+
+    @NotNull
+    @Override
+    public Request createUploadFileWithProgressRequest(@NotNull HttpRequest httpRequest, @NotNull RequestBody requestBody, @NotNull Task task) {
+
+        Request.Builder builder;
+
+        builder = generateRequestBuilder(httpRequest);
+
+        return builder.post(new ProgressUploadRequestBody(requestBody,task)).build();
+
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.mainpage
 
+import android.content.Intent
 import com.winsun.fruitmix.interfaces.Page
 import com.winsun.fruitmix.mainpage.MainPagePresenterImpl
 
@@ -13,6 +14,8 @@ interface MainPage : Page {
 
     fun toggleOrientation()
     fun handleMoreIvClick()
+
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
 
     fun quitSelectMode()
 

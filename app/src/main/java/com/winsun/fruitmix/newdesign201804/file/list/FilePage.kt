@@ -2,12 +2,12 @@ package com.winsun.fruitmix.newdesign201804.file.list
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import com.winsun.fruitmix.BaseActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.FilePageBinding
-import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.FilePresenter
@@ -15,6 +15,8 @@ import com.winsun.fruitmix.newdesign201804.file.offlineFile.OfflineFileActivity
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.SharedFolderActivity
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.TransmissionTaskActivity
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
+import com.winsun.fruitmix.newdesign201804.file.upload.FileBrowserActivity
+import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileUtil
 import com.winsun.fruitmix.newdesign201804.mainpage.DrawerItem
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPage
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
@@ -22,7 +24,11 @@ import com.winsun.fruitmix.util.Util
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 
-class FilePage(val activity: BaseActivity) : MainPage {
+const val FILE_BROWSER_REQUEST_CODE = 0x1001
+
+private const val TAG = "FilePage"
+
+class FilePage(val activity: BaseActivity) : MainPage, FileView {
 
     private val filePageBinding = FilePageBinding.inflate(LayoutInflater.from(activity), null, false)
 
@@ -44,8 +50,8 @@ class FilePage(val activity: BaseActivity) : MainPage {
         filePageBinding.noContentViewModel = noContentViewModel
 
         filePresenter = FilePresenter(InjectFileDataSource.inject(activity),
-                noContentViewModel, loadingViewModel, filePageBinding,activity,
-                activity.getCurrentUserUUID(),ThreadManagerImpl.getInstance(),
+                noContentViewModel, loadingViewModel, filePageBinding, activity,
+                this, activity.getCurrentUserUUID(), ThreadManagerImpl.getInstance(),
                 InjectTransmissionTaskDataSource.provideInstance(activity))
 
         val task = DrawerItem(R.drawable.transfer_menu_icon, activity.getString(R.string.transmission_task), {
@@ -109,6 +115,21 @@ class FilePage(val activity: BaseActivity) : MainPage {
 
     }
 
+    override fun enterFileBrowserActivity() {
+
+        val intent = Intent(activity,FileBrowserActivity::class.java)
+
+        activity.startActivityForResult(intent, FILE_BROWSER_REQUEST_CODE)
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        if (requestCode == FILE_BROWSER_REQUEST_CODE && resultCode == Activity.RESULT_OK)
+            filePresenter.onActivityResult(requestCode, resultCode, data)
+
+    }
+
     override fun onMapSharedElements(names: MutableList<String>?, sharedElements: MutableMap<String, View>?) {
 
     }
@@ -161,7 +182,7 @@ class FilePage(val activity: BaseActivity) : MainPage {
         filePresenter.unregisterFilePageActionListener(filePageActionListener)
     }
 
-    fun moveBtnOnClick(){
+    fun moveBtnOnClick() {
 
         filePresenter.enterMovePageWhenSelectMode()
 

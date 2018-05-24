@@ -713,9 +713,9 @@ public class FileUtil {
                     Log.d(TAG, "writeResponseBodyToFolder: fileDownloadedSize: " + fileDownloadedSize +
                     " totalSize:" + task.getAbstractFile().getSize());
 
-                    startingTaskState.setCurrentDownloadFileSize(fileDownloadedSize);
+                    startingTaskState.setCurrentHandleFileSize(fileDownloadedSize);
 
-                    Log.d(TAG, "writeResponseBodyToFolder: setCurrentDownloadFileSize");
+                    Log.d(TAG, "writeResponseBodyToFolder: setCurrentHandleFileSize");
                     
                     task.setCurrentState(startingTaskState);
 

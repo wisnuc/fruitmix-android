@@ -4,6 +4,7 @@ import com.winsun.fruitmix.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Administrator on 2016/10/25.
@@ -11,14 +12,29 @@ import java.util.Date;
 
 public class LocalFolder extends AbstractLocalFile {
 
+    public List<AbstractLocalFile> contents;
+
     public LocalFolder() {
 
         setFileTypeResID(R.drawable.folder_icon);
+
     }
 
     @Override
     public boolean isFolder() {
         return true;
+    }
+
+    public void addContent(AbstractLocalFile file) {
+        contents.add(file);
+    }
+
+    public void removeContent(AbstractLocalFile file) {
+        contents.remove(file);
+    }
+
+    public List<AbstractLocalFile> getContents() {
+        return contents;
     }
 
 }

@@ -872,6 +872,8 @@
     <string name="pause_all_task">Pause all task</string>
     <string name="clear_completed_task">Clear completed task</string>
 
+    <string name="add_task_hint">The task was successfully created, please confirm in the transfer task list</string>
+
     <!-- select mode -->
     <string name="no_select_file">Please select file</string>
 

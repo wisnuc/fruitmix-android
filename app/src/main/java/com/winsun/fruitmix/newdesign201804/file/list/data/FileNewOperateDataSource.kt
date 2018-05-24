@@ -11,19 +11,22 @@ import com.winsun.fruitmix.file.data.download.FileDownloadState
 import com.winsun.fruitmix.file.data.download.FileDownloadingState
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
+import com.winsun.fruitmix.file.data.model.LocalFile
+import com.winsun.fruitmix.file.data.model.LocalFolder
 import com.winsun.fruitmix.http.*
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory
 import com.winsun.fruitmix.model.operationResult.*
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.ErrorTaskState
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
+import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileInterface
 import com.winsun.fruitmix.util.FileUtil
+import com.winsun.fruitmix.util.Util
+import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.FileNotFoundException
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 import java.net.MalformedURLException
 import java.net.SocketTimeoutException
 
@@ -37,7 +40,7 @@ private const val TAG = "FileNewOperate"
 
 private const val TASKS = "/tasks"
 
-class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil: IHttpUtil)
+class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil: IHttpUtil,val uploadFileInterface: UploadFileInterface)
     : BaseRemoteDataSourceImpl(iHttpUtil, httpRequestFactory) {
 
     fun renameFile(oldName: String, newName: String, driveUUID: String, dirUUID: String, callback: BaseOperateCallback) {
@@ -189,6 +192,111 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
 
         }
 
+    }
+
+    fun uploadFile(fileUploadParam: FileUploadParam,task: Task){
+
+        uploadFileWithProgress(fileUploadParam,task)
+    }
+
+    private fun uploadFileWithProgress(fileUploadParam: FileUploadParam,task: Task): OperationResult {
+
+        val httpRequest = createUploadFileHttpRequest(fileUploadParam.driveUUID, fileUploadParam.dirUUID)
+
+        if (!wrapper.checkUrl(httpRequest.url)) {
+            return OperationMalformedUrlException()
+        }
+
+        Log.i(TAG, "uploadFile: start upload: " + httpRequest.url)
+
+        val request: Request
+        try {
+            request = uploadFileInterface.createUploadFileWithProgressRequest(httpRequest,
+                    getUploadFileRequestBody(httpRequest, fileUploadParam.abstractLocalFile as LocalFile), task)
+        } catch (e: JSONException) {
+            e.printStackTrace()
+
+            return OperationJSONException()
+        }
+
+        return handleUploadFileRequest(request)
+
+    }
+
+    private fun handleUploadFileRequest(request: Request): OperationResult {
+        val httpResponse: HttpResponse?
+        try {
+
+            httpResponse = iHttpUtil.remoteCallRequest(request)
+
+            return if (httpResponse != null && httpResponse.responseCode == 200)
+                OperationSuccess()
+            else
+                OperationNetworkException(httpResponse)
+
+        } catch (e: MalformedURLException) {
+
+            return OperationMalformedUrlException()
+
+        } catch (ex: SocketTimeoutException) {
+
+            return OperationSocketTimeoutException()
+
+        } catch (e: IOException) {
+            e.printStackTrace()
+
+            return OperationIOException()
+        }
+
+    }
+
+
+    private fun createUploadFileHttpRequest(driveUUID: String, dirUUID: String): HttpRequest {
+        val path = "$ROOT_DRIVE_PARAMETER/$driveUUID$DIRS$dirUUID/entries"
+
+        return httpRequestFactory.createHttpPostFileRequest(path, "")
+    }
+
+    @Throws(JSONException::class)
+    private fun getUploadFileRequestBody(httpRequest: HttpRequest, localFile: LocalFile): RequestBody {
+        val requestBody: RequestBody
+
+        if (httpRequest.body.isNotEmpty()) {
+
+            val jsonObject = JSONObject(httpRequest.body)
+
+            jsonObject.put(OP, "newfile")
+            jsonObject.put("toName", localFile.name)
+            jsonObject.put(Util.SHA_256_STRING, localFile.fileHash)
+            jsonObject.put(Util.SIZE_STRING, localFile.size)
+
+            val jsonObjectStr = jsonObject.toString()
+
+            Log.d(TAG, "uploadFile: $jsonObjectStr")
+
+            val textFormData = TextFormData(Util.MANIFEST_STRING, jsonObjectStr)
+            val fileFormData = FileFormData("", localFile.name, File(localFile.path))
+
+            requestBody = iHttpUtil.createFormDataRequestBody(listOf(textFormData), listOf(fileFormData))
+
+        } else {
+
+            val jsonObject = JSONObject()
+
+            jsonObject.put(OP, "newfile")
+            jsonObject.put(Util.SIZE_STRING, localFile.size)
+            jsonObject.put(Util.SHA_256_STRING, localFile.fileHash)
+
+            val jsonObjectStr = jsonObject.toString()
+
+            Log.d(TAG, "uploadFile: $jsonObjectStr")
+
+            val fileFormData = FileFormData(localFile.name, jsonObjectStr, File(localFile.path))
+
+            requestBody = iHttpUtil.createFormDataRequestBody(emptyList(), listOf(fileFormData))
+
+        }
+        return requestBody
     }
 
 

@@ -3,6 +3,7 @@ package com.winsun.fruitmix.http;
 import android.content.Context;
 
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
+import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileInterface;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 
 /**
@@ -34,7 +35,11 @@ public class InjectHttp {
         return OkHttpUtil.getInstance();
     }
 
-    public static ImageGifLoaderInstance provideImageGifLoaderInstance(Context context){
+    public static UploadFileInterface provideUploadFileInterface() {
+        return OkHttpUtil.getInstance();
+    }
+
+    public static ImageGifLoaderInstance provideImageGifLoaderInstance(Context context) {
 
         return ImageGifLoaderInstance.getInstance(InjectHttp.provideHttpRequestFactory(context));
 

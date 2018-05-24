@@ -5,12 +5,13 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
+import com.winsun.fruitmix.newdesign201804.file.list.data.FileUploadParam
 import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.util.FileUtil
 import java.io.File
 import java.util.concurrent.Future
 
-abstract class Task(val abstractFile: AbstractFile, val max: Int = 100) {
+abstract class Task(val abstractFile: AbstractFile, val threadManager: ThreadManager, val max: Int = 100) {
 
     abstract fun getTypeResID(): Int
 
@@ -47,7 +48,11 @@ abstract class Task(val abstractFile: AbstractFile, val max: Int = 100) {
 
     abstract fun executeTask()
 
-    abstract fun cancelTask()
+    open fun cancelTask() {
+
+        taskStateObservers.clear()
+
+    }
 
     fun registerObserver(taskStateObserver: TaskStateObserver) {
         taskStateObservers.add(taskStateObserver)
@@ -60,7 +65,7 @@ abstract class Task(val abstractFile: AbstractFile, val max: Int = 100) {
     @Synchronized
     fun setCurrentState(taskState: TaskState) {
 
-        if(taskState.getType() != currentTaskState.getType()){
+        if (taskState.getType() != currentTaskState.getType()) {
 
             currentTaskState.onFinishState()
 
@@ -70,8 +75,12 @@ abstract class Task(val abstractFile: AbstractFile, val max: Int = 100) {
 
         currentTaskState = taskState
 
-        taskStateObservers.forEach {
-            it.notifyStateChanged(currentTaskState)
+        threadManager.runOnMainThread {
+
+            taskStateObservers.forEach {
+                it.notifyStateChanged(currentTaskState)
+            }
+
         }
 
     }
@@ -89,18 +98,32 @@ interface TaskStateObserver {
 
 }
 
-data class UploadTaskParam(val updateFolderUUID: String)
+class UploadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource,
+                 val fileUploadParam: FileUploadParam,
+                 threadManager: ThreadManager) : Task(abstractFile, threadManager) {
 
-class UploadTask(abstractFile: AbstractFile, val updateTaskParam: UploadTaskParam) : Task(abstractFile) {
+    private lateinit var future: Future<Boolean>
+
     override fun getTypeResID(): Int {
         return R.drawable.upload
     }
 
     override fun executeTask() {
 
+        val uploadFileCallable = OperateFileCallable {
+            fileDataSource.uploadFile(fileUploadParam, this)
+        }
+
+        future = threadManager.runOnCacheThread(uploadFileCallable)
+
     }
 
     override fun cancelTask() {
+
+        super.cancelTask()
+
+        future.cancel(true)
+
 
     }
 
@@ -109,24 +132,32 @@ class UploadTask(abstractFile: AbstractFile, val updateTaskParam: UploadTaskPara
 private const val DOWNLOAD_TASK_TAG = "download_task"
 
 class DownloadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
-                   val currentUserUUID: String, val threadManager: ThreadManager) : Task(abstractFile) {
+                   val currentUserUUID: String, threadManager: ThreadManager) : Task(abstractFile, threadManager) {
 
     private lateinit var future: Future<Boolean>
 
     override fun getTypeResID(): Int {
 
         return R.drawable.download
+
     }
 
     override fun executeTask() {
 
-        val downloadFileCallable = DownloadFileCallable(fileDataSource, fileDownloadParam, this, currentUserUUID)
+        val downloadFileCallable = OperateFileCallable(
+                {
+                    fileDataSource.downloadFile(fileDownloadParam, this)
+                }
+        )
 
         future = threadManager.runOnCacheThread(downloadFileCallable)
 
     }
 
     override fun cancelTask() {
+
+        super.cancelTask()
+
         future.cancel(true)
 
         val downloadFile = File(FileUtil.getDownloadFileStoreFolderPath(), abstractFile.name)
@@ -145,7 +176,7 @@ class DownloadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSourc
 
 data class BTTaskParam(val btUrl: String)
 
-class BTTask(abstractFile: AbstractFile, val btTaskParam: BTTaskParam) : Task(abstractFile) {
+class BTTask(abstractFile: AbstractFile, threadManager: ThreadManager, val btTaskParam: BTTaskParam) : Task(abstractFile, threadManager) {
     override fun getTypeResID(): Int {
         return R.drawable.bt_task
     }
@@ -155,14 +186,14 @@ class BTTask(abstractFile: AbstractFile, val btTaskParam: BTTaskParam) : Task(ab
     }
 
     override fun cancelTask() {
-
+        super.cancelTask()
     }
 
 }
 
 data class SMBTaskParam(val smbUrl: String)
 
-class SMBTask(abstractFile: AbstractFile, val smbTaskParam: SMBTaskParam) : Task(abstractFile) {
+class SMBTask(abstractFile: AbstractFile, threadManager: ThreadManager, val smbTaskParam: SMBTaskParam) : Task(abstractFile, threadManager) {
     override fun getTypeResID(): Int {
 
         return R.drawable.smb_task
@@ -174,14 +205,14 @@ class SMBTask(abstractFile: AbstractFile, val smbTaskParam: SMBTaskParam) : Task
     }
 
     override fun cancelTask() {
-
+        super.cancelTask()
     }
 
 }
 
 data class MoveTaskParam(val targetFolderUUID: String)
 
-class MoveTask(abstractFile: AbstractFile, val moveTaskParam: MoveTaskParam) : Task(abstractFile) {
+class MoveTask(abstractFile: AbstractFile, threadManager: ThreadManager, val moveTaskParam: MoveTaskParam) : Task(abstractFile, threadManager) {
     override fun getTypeResID(): Int {
 
         return R.drawable.move_task
@@ -192,6 +223,7 @@ class MoveTask(abstractFile: AbstractFile, val moveTaskParam: MoveTaskParam) : T
     }
 
     override fun cancelTask() {
+        super.cancelTask()
 
     }
 
@@ -199,7 +231,7 @@ class MoveTask(abstractFile: AbstractFile, val moveTaskParam: MoveTaskParam) : T
 
 data class CopyTaskParam(val targetFolderUUID: String)
 
-class CopyTask(abstractFile: AbstractFile, val copyTaskParam: CopyTaskParam) : Task(abstractFile) {
+class CopyTask(abstractFile: AbstractFile, threadManager: ThreadManager, val copyTaskParam: CopyTaskParam) : Task(abstractFile, threadManager) {
     override fun getTypeResID(): Int {
 
         return R.drawable.copy_to
@@ -210,6 +242,7 @@ class CopyTask(abstractFile: AbstractFile, val copyTaskParam: CopyTaskParam) : T
     }
 
     override fun cancelTask() {
+        super.cancelTask()
 
     }
 

@@ -15,8 +15,10 @@ class InjectFileDataSource {
 
         fun injectFileNewOperateDataSource(context: Context): FileNewOperateDataSource {
 
+
+
             return FileNewOperateDataSource(InjectHttp.provideHttpRequestFactory(context),
-                    InjectHttp.provideIHttpUtil(context))
+                    InjectHttp.provideIHttpUtil(context),InjectHttp.provideUploadFileInterface())
 
         }
 

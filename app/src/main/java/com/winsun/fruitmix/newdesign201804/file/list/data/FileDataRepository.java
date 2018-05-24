@@ -113,4 +113,8 @@ public class FileDataRepository extends BaseDataRepository implements FileDataSo
 
     }
 
+    @Override
+    public void uploadFile(@NotNull FileUploadParam fileUploadParam, @NotNull Task task) {
+        mFileNewOperateDataSource.uploadFile(fileUploadParam,task);
+    }
 }

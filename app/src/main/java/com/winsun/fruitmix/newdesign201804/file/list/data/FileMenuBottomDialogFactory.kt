@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.dialog
+package com.winsun.fruitmix.newdesign201804.file.list.data
 
 import android.content.Context
 import android.support.v7.widget.LinearLayoutManager
@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.dialog.BaseBottomMenuDialogFactory
 import com.winsun.fruitmix.file.data.model.AbstractFile
-import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
@@ -22,7 +22,7 @@ private const val BOTTOM_ITEM = 1
 private const val BOTTOM_DIVIDE = 2
 
 class FileMenuBottomDialogFactory(val abstractFile: AbstractFile, bottomMenuItems: List<BottomMenuItem>,
-                                  val detailImageViewOnClick:(abstractFile: AbstractFile)->Unit) : BaseBottomMenuDialogFactory(bottomMenuItems) {
+                                  val detailImageViewOnClick: (abstractFile: AbstractFile) -> Unit) : BaseBottomMenuDialogFactory(bottomMenuItems) {
 
     override fun createBottomSheetView(context: Context, bottomMenuItems: List<BottomMenuItem>): View {
 
@@ -89,7 +89,16 @@ class FileMenuBottomDialogFactory(val abstractFile: AbstractFile, bottomMenuItem
                     bottomMenuItem.handleOnClickEvent()
                 }
 
-                view?.switchBtn?.visibility = if (bottomMenuItem.isShowSwitchBtn) View.VISIBLE else View.INVISIBLE
+                if (bottomMenuItem is FileWithSwitchBottomItem) {
+
+                    view?.switchBtn?.visibility = if (bottomMenuItem.isShowSwitchBtn()) View.VISIBLE else View.INVISIBLE
+
+                    view?.switchBtn?.setOnClickListener {
+                        bottomMenuItem.switchOnClick(bottomMenuItem)
+                    }
+
+                }
+
 
             }
 

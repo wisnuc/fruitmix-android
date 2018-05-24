@@ -19,8 +19,7 @@ import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 
 import kotlinx.android.synthetic.main.transmission_task_item.view.*
 
-class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTaskDataSource,
-                                val threadManager: ThreadManager) {
+class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTaskDataSource) {
 
     private val transmissionTaskAdapter = TransmissionTaskAdapter()
 
@@ -178,17 +177,11 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
         override fun notifyStateChanged(currentState: TaskState) {
 
-            threadManager.runOnMainThread {
+            val position = taskContainers.indexOf(this)
 
-                //TODO:on main thread when set task state and notify
+            Log.d("Task", "notifyStateChanged position: $position")
 
-                val position = taskContainers.indexOf(this)
-
-                Log.d("Task", "notifyStateChanged position: $position")
-
-                transmissionTaskAdapter.notifyItemChanged(position)
-
-            }
+            transmissionTaskAdapter.notifyItemChanged(position)
 
         }
 

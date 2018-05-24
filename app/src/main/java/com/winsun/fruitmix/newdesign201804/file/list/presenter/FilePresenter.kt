@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.newdesign201804.file.list.presenter
 
-import android.app.Dialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
@@ -24,13 +23,9 @@ import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.databinding.*
 import com.winsun.fruitmix.dialog.BottomMenuGridDialogFactory
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
-import com.winsun.fruitmix.dialog.FileMenuBottomDialogFactory
+import com.winsun.fruitmix.newdesign201804.file.list.data.FileMenuBottomDialogFactory
 import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloadParam
-import com.winsun.fruitmix.file.data.model.AbstractFile
-import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
-import com.winsun.fruitmix.file.data.model.RemoteFile
-import com.winsun.fruitmix.file.data.model.RemoteFolder
-import com.winsun.fruitmix.file.data.station.StationFileRepository
+import com.winsun.fruitmix.file.data.model.*
 import com.winsun.fruitmix.http.HttpResponse
 import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.BottomMenuItem
@@ -38,13 +33,15 @@ import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.component.createFileDownloadParam
-import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.detail.FILE_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.detail.FileDetailActivity
 import com.winsun.fruitmix.newdesign201804.file.list.FilePageActionListener
 import com.winsun.fruitmix.newdesign201804.file.list.FilePageSelectActionListener
+import com.winsun.fruitmix.newdesign201804.file.list.FileView
 import com.winsun.fruitmix.newdesign201804.file.list.MainPageDividerItemDecoration
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
+import com.winsun.fruitmix.newdesign201804.file.list.data.FileUploadParam
+import com.winsun.fruitmix.newdesign201804.file.list.data.FileWithSwitchBottomItem
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
@@ -56,13 +53,15 @@ import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BindingViewHolder
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
 import com.winsun.fruitmix.thread.manage.ThreadManager
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 import com.winsun.fruitmix.user.datasource.InjectUser
 import com.winsun.fruitmix.util.FileUtil
 import com.winsun.fruitmix.util.SnackbarUtil
+import com.winsun.fruitmix.util.Util
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import kotlinx.android.synthetic.main.folder_item.view.*
+import java.io.File
+import java.util.concurrent.Callable
 
 private const val SPAN_COUNT = 2
 
@@ -71,7 +70,8 @@ private var mIsSelectMode = false
 
 public class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
                            val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding,
-                           val baseView: BaseView, val currentUserUUID: String, val threadManager: ThreadManager,
+                           val baseView: BaseView, val fileView: FileView,
+                           val currentUserUUID: String, val threadManager: ThreadManager,
                            val transmissionTaskDataSource: TransmissionTaskDataSource) {
 
     private val contentLayout = filePageBinding.contentLayout
@@ -229,7 +229,16 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         bottomMenuItems.add(bottomMenuItem)
 
-        val uploadBottomMenuItem = BottomMenuItem(R.drawable.upload, context.getString(R.string.upload), object : BaseAbstractCommand() {})
+        val uploadBottomMenuItem = BottomMenuItem(R.drawable.upload, context.getString(R.string.upload), object : BaseAbstractCommand() {
+
+            override fun execute() {
+                super.execute()
+
+                fileView.enterFileBrowserActivity()
+
+            }
+
+        })
 
         bottomMenuItems.add(uploadBottomMenuItem)
 
@@ -294,6 +303,31 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         })
 
+
+    }
+
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        val localFile = SelectMoveFileDataSource.getSelectFiles()[0] as LocalFile
+
+        val filePath = localFile.path
+
+        val future = threadManager.runOnCacheThread(Callable<String> {
+            Util.calcSHA256OfFile(filePath)
+        })
+
+        val fileHash = future.get()
+
+        localFile.fileHash = fileHash
+        localFile.size = File(filePath).length()
+
+        val fileUploadParam = FileUploadParam(rootFolderUUID, currentFolderUUID, localFile)
+
+        val uploadTask = UploadTask(localFile, fileDataSource, fileUploadParam, threadManager)
+
+        transmissionTaskDataSource.addTransmissionTask(uploadTask, object : BaseOperateCallbackImpl() {})
+
+        SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
 
     }
 
@@ -451,6 +485,8 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
                                     taskProgressDialog.dismiss()
 
                                     FileUtil.openAbstractRemoteFile(context, abstractFile.name)
+
+                                    task.unregisterObserver(this)
 
                                 }
 
@@ -661,26 +697,24 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         if (!abstractFile.isFolder) {
 
-            val bottomMenuItem = BottomMenuItem(R.drawable.offline_available, context.getString(R.string.offline_available), object : BaseAbstractCommand() {
+            val bottomMenuItem = FileWithSwitchBottomItem(R.drawable.offline_available, context.getString(R.string.offline_available),
+                    object : BaseAbstractCommand() {}, {
 
-                override fun execute() {
-                    super.execute()
+                val abstractRemoteFile = abstractFile as AbstractRemoteFile
 
-                    val abstractRemoteFile = abstractFile as AbstractRemoteFile
+                val fileDownloadParam = abstractRemoteFile.createFileDownloadParam()
 
-                    val fileDownloadParam = abstractRemoteFile.createFileDownloadParam()
+                val downloadTask = DownloadTask(abstractRemoteFile, fileDataSource, fileDownloadParam,
+                        currentUserUUID, threadManager)
 
-                    val downloadTask = DownloadTask(abstractRemoteFile, fileDataSource, fileDownloadParam,
-                            currentUserUUID, threadManager)
+                transmissionTaskDataSource.addTransmissionTask(downloadTask, object : BaseOperateCallbackImpl() {})
 
-                    transmissionTaskDataSource.addTransmissionTask(downloadTask, object : BaseOperateCallbackImpl(){})
+                SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
 
-                    SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, messageStr = "任务创建成功,请到传输任务列表中确认")
+                it.dismissDialog()
 
-                }
 
             })
-            bottomMenuItem.isShowSwitchBtn = true
 
             bottomMenuItems.add(bottomMenuItem)
 

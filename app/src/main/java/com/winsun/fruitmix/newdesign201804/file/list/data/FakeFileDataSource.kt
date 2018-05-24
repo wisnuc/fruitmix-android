@@ -181,4 +181,7 @@ object FakeFileDataSource : FileDataSource {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    override fun uploadFile(fileUploadParam: FileUploadParam, task: Task) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }

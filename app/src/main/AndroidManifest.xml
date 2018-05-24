@@ -262,6 +262,9 @@
         <activity
             android:name=".newdesign201804.file.transmissionTask.TransmissionTaskActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".newdesign201804.file.upload.FileBrowserActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

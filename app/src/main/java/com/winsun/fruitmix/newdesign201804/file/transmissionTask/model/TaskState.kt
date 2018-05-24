@@ -96,7 +96,7 @@ private const val DELAY_TIME = 1000L
 
 class StartingTaskState(var progress: Int, var speed: String, task: Task) : TaskState(task) {
 
-    var currentDownloadedSize = 0L
+    var currentHandledSize = 0L
 
     var lastDownloadSize = 0L
 
@@ -145,14 +145,14 @@ class StartingTaskState(var progress: Int, var speed: String, task: Task) : Task
 
     }
 
-    fun setCurrentDownloadFileSize(currentDownloadedSize: Long) {
+    fun setCurrentHandleFileSize(currentHandledSize: Long) {
 
-        this.currentDownloadedSize = currentDownloadedSize
+        this.currentHandledSize = currentHandledSize
 
-        if (currentDownloadedSize == 0L && task.abstractFile.size == 0L)
+        if (currentHandledSize == 0L && task.abstractFile.size == 0L)
             progress = task.max
 
-        val currentProgress = (currentDownloadedSize * task.max / task.abstractFile.size).toFloat()
+        val currentProgress = (currentHandledSize * task.max / task.abstractFile.size).toFloat()
 
         progress = currentProgress.toInt()
 
@@ -173,11 +173,11 @@ class SpeedHandler(looper: Looper, val taskState: StartingTaskState) : Handler(l
 
             UPDATE_SPEED -> {
 
-                val speedSize = taskState.currentDownloadedSize - taskState.lastDownloadSize
+                val speedSize = taskState.currentHandledSize - taskState.lastDownloadSize
 
                 taskState.speed = FileUtil.formatFileSize(speedSize) + "/s"
 
-                taskState.lastDownloadSize = taskState.currentDownloadedSize
+                taskState.lastDownloadSize = taskState.currentHandledSize
 
                 taskState.task.setCurrentState(taskState)
 

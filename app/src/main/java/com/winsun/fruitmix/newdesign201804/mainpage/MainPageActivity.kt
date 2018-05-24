@@ -33,12 +33,11 @@ private const val PAGE_MEDIA = 1
 private const val PAGE_SHARE = 2
 
 
-
 class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListener, FilePageActionListener {
 
     companion object {
 
-        fun start(context:Context,ip:String,name:String){
+        fun start(context: Context, ip: String, name: String) {
 
             val intent = Intent(context, MainPageActivity::class.java)
             intent.putExtra(EQUIPMENT_IP_KEY, ip)
@@ -317,6 +316,12 @@ class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListene
         filePage.moveBtnOnClick()
     }
 
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+        mainPages[currentPagePosition].onActivityResult(requestCode, resultCode, data)
+
+    }
 
 }
 

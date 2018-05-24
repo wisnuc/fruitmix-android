@@ -31,8 +31,7 @@ class TransmissionTaskActivity : BaseToolbarActivity() {
 
         }
 
-        transmissionTaskPresenter = TransmissionTaskPresenter(InjectTransmissionTaskDataSource.provideInstance(this),
-                ThreadManagerImpl.getInstance())
+        transmissionTaskPresenter = TransmissionTaskPresenter(InjectTransmissionTaskDataSource.provideInstance(this))
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
