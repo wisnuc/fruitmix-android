@@ -36,6 +36,8 @@ class LoginUseCase(val tokenDataSource: TokenDataSource, val systemSettingDataSo
                 override fun onSucceed(data: Boolean?, result: OperationResult?) {
                     initSystem(token, gateway)
 
+                    userDataRepository.clearAllUsersInCache()
+
                     getUser(loginUserUUID, baseOperateCallback)
 
                 }

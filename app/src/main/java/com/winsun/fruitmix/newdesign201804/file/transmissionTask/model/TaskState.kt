@@ -6,6 +6,10 @@ import android.os.Message
 import android.util.Log
 import com.winsun.fruitmix.util.FileUtil
 
+enum class StateType {
+    INITIAL, START, STARTING, PAUSE, FINISH, ERROR
+}
+
 abstract class TaskState(val task: Task) {
 
     abstract fun start()
@@ -21,7 +25,7 @@ abstract class TaskState(val task: Task) {
     open fun onStartState() {}
     open fun onFinishState() {}
 
-    abstract fun getType(): Int
+    abstract fun getType(): StateType
 
 }
 
@@ -53,8 +57,8 @@ class InitialTaskState(task: Task) : TaskState(task) {
 
     }
 
-    override fun getType(): Int {
-        return 0
+    override fun getType(): StateType {
+        return StateType.INITIAL
     }
 
 }
@@ -85,8 +89,8 @@ class StartTaskState(task: Task) : TaskState(task) {
 
     }
 
-    override fun getType(): Int {
-        return 1
+    override fun getType(): StateType {
+        return StateType.START
     }
 }
 
@@ -158,8 +162,8 @@ class StartingTaskState(var progress: Int, var speed: String, task: Task) : Task
 
     }
 
-    override fun getType(): Int {
-        return 2
+    override fun getType(): StateType {
+        return StateType.STARTING
     }
 
 }
@@ -218,8 +222,8 @@ class PauseTaskState(var progress: Int, var speed: String, task: Task) : TaskSta
 
     }
 
-    override fun getType(): Int {
-        return 3
+    override fun getType(): StateType {
+        return StateType.PAUSE
     }
 
 }
@@ -250,8 +254,8 @@ class FinishTaskState(task: Task) : TaskState(task) {
     override fun restart() {
     }
 
-    override fun getType(): Int {
-        return 4
+    override fun getType(): StateType {
+        return StateType.FINISH
     }
 
 }
@@ -274,8 +278,8 @@ class ErrorTaskState(task: Task) : TaskState(task) {
         task.setCurrentState(StartTaskState(task))
     }
 
-    override fun getType(): Int {
-        return 5
+    override fun getType(): StateType {
+        return StateType.ERROR
     }
 
 }

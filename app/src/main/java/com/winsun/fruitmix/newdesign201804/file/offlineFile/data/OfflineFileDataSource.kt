@@ -5,6 +5,6 @@ import com.winsun.fruitmix.file.data.model.AbstractLocalFile
 
 interface OfflineFileDataSource {
 
-    fun getFile(baseLoadDataCallback: BaseLoadDataCallback<AbstractLocalFile>)
+    fun getFile(folderPath:String,filterPaths:List<String>,baseLoadDataCallback: BaseLoadDataCallback<AbstractLocalFile>)
 
 }

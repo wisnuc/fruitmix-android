@@ -56,8 +56,6 @@ class AddEquipmentByIpActivity : BaseToolbarActivity() {
         } else
             3001) ?: return
 
-        //TODO:return ip and port for search equipment
-
         val intent = Intent()
         intent.putExtra(IP_BY_MANUAL, ip)
         intent.putExtra(PORT_BY_MANUAL, portNum)

@@ -31,7 +31,7 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
-import com.winsun.fruitmix.parser.RemoteRootDriveFolderParser;
+import com.winsun.fruitmix.parser.RemoteRootDriveFoldersParser;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
@@ -42,7 +42,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
-import java.net.URLEncoder;
 import java.util.Collections;
 
 import okhttp3.Request;
@@ -93,7 +92,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(ROOT_DRIVE_PARAMETER);
 
-        wrapper.loadCall(httpRequest, callback, new RemoteRootDriveFolderParser());
+        wrapper.loadCall(httpRequest, callback, new RemoteRootDriveFoldersParser());
 
     }
 

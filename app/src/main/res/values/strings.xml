@@ -855,6 +855,11 @@
     <string name="create_copy_task">Create copy task</string>
     <string name="create_move_task">Create move task</string>
 
+    <!-- shared folder -->
+    <string name="shared_user">Shared User</string>
+    <string name="create_new_shared_disk">Create a new shared disk</string>
+
+    <string name="delete_or_not">Whether or not to delete</string>
 
     <!-- drawer -->
     <string name="tag">Tag</string>

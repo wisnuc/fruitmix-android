@@ -177,6 +177,11 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         if (systemSettingDataSource.needShowProductIntroduction()) {
             intent.setClass(SplashScreenActivity.this, ProductIntroductionActivity.class);
+
+            startActivity(intent);
+
+            finish();
+
         } else {
 
             com.winsun.fruitmix.newdesign201804.login.LoginUseCase loginUseCase = InjectLoginCase.Companion.provideInstance(this);

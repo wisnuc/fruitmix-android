@@ -8,7 +8,7 @@ import com.winsun.fruitmix.model.operationResult.OperationSuccess
 
 class FakeOfflineFileDataSource : OfflineFileDataSource {
 
-    override fun getFile(baseLoadDataCallback: BaseLoadDataCallback<AbstractLocalFile>) {
+    override fun getFile(folderPath:String,filterPaths:List<String>,baseLoadDataCallback: BaseLoadDataCallback<AbstractLocalFile>) {
 
         val abstractLocalFiles = mutableListOf<AbstractLocalFile>()
 

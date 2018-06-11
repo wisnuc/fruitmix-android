@@ -8,15 +8,32 @@ import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.databinding.ActivityOfflineFileBinding
 import com.winsun.fruitmix.newdesign201804.file.offlineFile.data.InjectOfflineFileDataSource
+import com.winsun.fruitmix.viewmodel.LoadingViewModel
+import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import kotlinx.android.synthetic.main.activity_offline_file.*
 
 class OfflineFileActivity : BaseToolbarActivity() {
 
+    private lateinit var activitiyOfflineFileBinding: ActivityOfflineFileBinding
+
+    private val loadingViewModel = LoadingViewModel(this)
+
+    private val noContentViewModel = NoContentViewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val offlineFilePresenter = OfflineFilePresenter(InjectOfflineFileDataSource.inject(this))
+        activitiyOfflineFileBinding.loadingViewModel = loadingViewModel
+
+        noContentViewModel.noContentImgResId = R.drawable.no_file
+        noContentViewModel.setNoContentText(getString(R.string.no_files))
+
+        activitiyOfflineFileBinding.noContentViewModel = noContentViewModel
+
+        val offlineFilePresenter = OfflineFilePresenter(InjectOfflineFileDataSource.inject(this),
+                loadingViewModel,noContentViewModel)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -25,7 +42,11 @@ class OfflineFileActivity : BaseToolbarActivity() {
     }
 
     override fun generateContent(root: ViewGroup?): View {
-        return LayoutInflater.from(this).inflate(R.layout.activity_offline_file, root, false)
+
+        activitiyOfflineFileBinding = ActivityOfflineFileBinding.inflate(LayoutInflater.from(this),
+                root, false)
+
+        return activitiyOfflineFileBinding.root
     }
 
     override fun getToolbarTitle(): String {

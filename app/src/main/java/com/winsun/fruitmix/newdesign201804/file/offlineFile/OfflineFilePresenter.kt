@@ -9,20 +9,42 @@ import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.offlineFile.data.OfflineFileDataSource
+import com.winsun.fruitmix.util.FileUtil
+import com.winsun.fruitmix.viewmodel.LoadingViewModel
+import com.winsun.fruitmix.viewmodel.NoContentViewModel
 
-class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSource) {
+class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSource,
+                           val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel) {
 
-    fun initView(recyclerView: RecyclerView){
+    private val rootFolderPath = FileUtil.getDownloadFileStoreFolderPath()
 
-        offlineFileDataSource.getFile(object :BaseLoadDataCallback<AbstractLocalFile>{
+    fun initView(recyclerView: RecyclerView) {
+
+        loadingViewModel.showLoading.set(true)
+
+        val filterPaths = listOf<String>(FileUtil.getAudioRecordFolderPath(), FileUtil.getLocalPhotoMiniThumbnailFolderPath(),
+                FileUtil.getLocalPhotoThumbnailFolderPath(), FileUtil.getOriginalPhotoFolderPath())
+
+        offlineFileDataSource.getFile(rootFolderPath, filterPaths, object : BaseLoadDataCallback<AbstractLocalFile> {
 
             override fun onSucceed(data: MutableList<AbstractLocalFile>?, operationResult: OperationResult?) {
 
-                initRecyclerViewAdapter(recyclerView,data!!)
+                loadingViewModel.showLoading.set(false)
+
+                if (data!!.isEmpty())
+                    noContentViewModel.showNoContent.set(true)
+                else {
+                    noContentViewModel.showNoContent.set(false)
+
+                    initRecyclerViewAdapter(recyclerView, data)
+                }
 
             }
 
             override fun onFail(operationResult: OperationResult?) {
+
+                loadingViewModel.showLoading.set(false)
+                noContentViewModel.showNoContent.set(true)
 
             }
 
@@ -31,13 +53,12 @@ class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSou
 
     }
 
-    private fun initRecyclerViewAdapter(recyclerView: RecyclerView,data: MutableList<AbstractLocalFile>){
+    private fun initRecyclerViewAdapter(recyclerView: RecyclerView, data: MutableList<AbstractLocalFile>) {
 
         val fileRecyclerViewAdapter = FileRecyclerViewAdapter({ file, position ->
         }, {
 
-        }, {
-            file,position->
+        }, { file, position ->
 
         })
 

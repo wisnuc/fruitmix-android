@@ -826,6 +826,12 @@
     <string name="create_copy_task">创建拷贝任务</string>
     <string name="create_move_task">创建移动任务</string>
 
+    <!-- shared folder -->
+    <string name="shared_user">共享用户</string>
+    <string name="create_new_shared_disk">创建新的指定共享盘</string>
+
+    <string name="delete_or_not">是否删除</string>
+
     <!-- drawer -->
     <string name="tag">标签</string>
     <string name="offline_file">离线文件</string>

@@ -71,6 +71,7 @@ class TaskStateIcon(context: Context?, val attrs: AttributeSet?) : FrameLayout(c
 
         } else if (taskState is FinishTaskState) {
 
+            speedTextView.visibility = View.INVISIBLE
             roundProgressBar.visibility = View.INVISIBLE
 
             taskStateImageView.visibility = View.VISIBLE
@@ -78,6 +79,7 @@ class TaskStateIcon(context: Context?, val attrs: AttributeSet?) : FrameLayout(c
 
         } else if (taskState is ErrorTaskState) {
 
+            speedTextView.visibility = View.INVISIBLE
             roundProgressBar.visibility = View.INVISIBLE
 
             taskStateImageView.visibility = View.VISIBLE

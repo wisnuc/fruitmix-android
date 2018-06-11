@@ -385,13 +385,13 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
             filePageBinding.fileRecyclerView.layoutManager = gridLayoutManager
 
-//            filePageBinding.fileRecyclerView.addItemDecoration(mainPageDividerItemDecoration)
+            filePageBinding.fileRecyclerView.addItemDecoration(mainPageDividerItemDecoration)
 
         } else if (currentOrientation == ORIENTATION_LIST_TYPE) {
 
             filePageBinding.fileRecyclerView.layoutManager = linearLayoutManager
 
-//            filePageBinding.fileRecyclerView.removeItemDecoration(mainPageDividerItemDecoration)
+            filePageBinding.fileRecyclerView.removeItemDecoration(mainPageDividerItemDecoration)
 
         }
 

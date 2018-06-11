@@ -451,6 +451,15 @@ public class HttpRequestFactory {
 
     }
 
+    public synchronized HttpRequest createHttpDeleteRequest(String httpPath,String body){
+
+        setDefaultFactoryState();
+
+        return currentDefaultHttpRequestFactory.createHttpDeleteRequest(httpPath,body);
+
+    }
+
+
     public synchronized HttpRequest createModifyPasswordRequest(String httpPath, String body, String userUUID, String originalPassword) {
 
         if (checkIsLoginWithWeChatCode()) {

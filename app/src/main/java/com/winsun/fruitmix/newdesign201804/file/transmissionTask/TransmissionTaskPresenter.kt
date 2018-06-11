@@ -141,6 +141,19 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
             view?.taskStateIcon?.refresh(task.getCurrentState())
 
+            //TODO: check pause download
+
+/*            view?.setOnClickListener {
+
+                val taskState = task.getCurrentState()
+
+                if (taskState is StartingTaskState)
+                    task.setCurrentState(PauseTaskState(taskState.progress, taskState.speed, task))
+                else if (taskState is PauseTaskState)
+                    task.setCurrentState(StartingTaskState(taskState.progress, taskState.speed, task))
+
+            }*/
+
             view?.deleteTv?.setOnClickListener {
 
                 task.cancelTask()
