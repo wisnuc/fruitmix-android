@@ -20,7 +20,7 @@ class NewEquipmentInfoRepository(val equipmentDataSource: EquipmentDataSource) :
 
                 val availableEquipmentDiskInfo = AvailableEquipmentDiskInfo(data!![0], 6.0 * 1024 * 1024 * 1024, 15.0 * 1024 * 1024 * 1024)
 
-                val availableEquipmentInfo = AvailableEquipmentInfo(equipment.equipmentName, equipment.hosts[0], availableEquipmentDiskInfo)
+                val availableEquipmentInfo = AvailableEquipmentInfo(equipment.hosts[0], equipment.hosts[0], availableEquipmentDiskInfo)
 
                 baseLoadDataCallback.onSucceed(listOf(availableEquipmentInfo), OperationSuccess())
 
@@ -37,6 +37,5 @@ class NewEquipmentInfoRepository(val equipmentDataSource: EquipmentDataSource) :
     override fun getReinitializationEquipmentInfo(equipment: Equipment, baseLoadDataCallback: BaseLoadDataCallback<ReinitializationEquipmentInfo>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
-
 
 }

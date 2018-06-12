@@ -16,13 +16,6 @@ object FakeTransmissionTaskRepository : TransmissionTaskDataSource {
 
     init {
 
-        val ppt = RemoteFile()
-        ppt.name = "我的文件选择.ppt"
-        ppt.size = 132070243L
-        ppt.uuid = Util.createLocalUUid()
-
-        tasks.add(BTTask(ppt, ThreadManagerImpl.getInstance(), BTTaskParam("")))
-
         val word = RemoteFile()
         word.name = "呵呵.doc"
         word.uuid = Util.createLocalUUid()
@@ -53,8 +46,7 @@ object FakeTransmissionTaskRepository : TransmissionTaskDataSource {
     }
 
     override fun addTransmissionTask(task: Task, baseOperateCallback: BaseOperateCallback) {
-
-
+        TODO("not implemented")
     }
 
     override fun deleteTransmissionTask(task: Task, baseOperateCallback: BaseOperateCallback) {

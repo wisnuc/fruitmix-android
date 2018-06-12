@@ -2,10 +2,13 @@ package com.winsun.fruitmix.newdesign201804.file.transmissionTask.model
 
 import android.util.Log
 import com.winsun.fruitmix.R
+import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileUploadParam
+import com.winsun.fruitmix.newdesign201804.file.transmission.TransmissionDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmission.model.Transmission
 import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.util.FileUtil
 import java.io.File
@@ -174,9 +177,10 @@ class DownloadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSourc
 
 }
 
-data class BTTaskParam(val btUrl: String)
+data class BTTaskParam(val transmission: Transmission)
 
-class BTTask(abstractFile: AbstractFile, threadManager: ThreadManager, val btTaskParam: BTTaskParam) : Task(abstractFile, threadManager) {
+class BTTask(abstractFile: AbstractFile, threadManager: ThreadManager, val btTaskParam: BTTaskParam,
+             val transmissionDataSource: TransmissionDataSource) : Task(abstractFile, threadManager) {
     override fun getTypeResID(): Int {
         return R.drawable.bt_task
     }
@@ -187,6 +191,10 @@ class BTTask(abstractFile: AbstractFile, threadManager: ThreadManager, val btTas
 
     override fun cancelTask() {
         super.cancelTask()
+
+        val transmission = btTaskParam.transmission
+
+        transmissionDataSource.destroyTransmission(transmission.id,transmission.uuid,object :BaseOperateCallbackImpl(){})
     }
 
 }

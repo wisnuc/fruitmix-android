@@ -12,6 +12,8 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.ActivityMoveFileBinding
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
+import com.winsun.fruitmix.viewmodel.LoadingViewModel
+import com.winsun.fruitmix.viewmodel.NoContentViewModel
 
 
 const val FILE_OPERATE_KEY = "file_operate_key"
@@ -49,6 +51,17 @@ class MoveFileActivity : BaseToolbarActivity(),MoveFileView {
 
         super.onCreate(savedInstanceState)
 
+        val noContentViewModel = NoContentViewModel()
+
+        noContentViewModel.noContentImgResId = R.drawable.no_file
+        noContentViewModel.setNoContentText(getString(R.string.no_files))
+
+        activityMoveFileBinding.noContentViewModel = noContentViewModel
+
+        val loadingViewModel = LoadingViewModel(this)
+
+        activityMoveFileBinding.loadingViewModel = loadingViewModel
+
         toolbarViewModel.showMenu.set(true)
         toolbarViewModel.menuResID.set(R.drawable.new_folder)
 
@@ -57,7 +70,7 @@ class MoveFileActivity : BaseToolbarActivity(),MoveFileView {
         }
 
         moveFilePresenter = MoveFilePresenter(InjectFileDataSource.inject(this), activityMoveFileBinding,
-                toolbarViewModel, this,fileOperation)
+                toolbarViewModel, this,loadingViewModel,noContentViewModel,fileOperation)
 
         moveFilePresenter.initView()
 

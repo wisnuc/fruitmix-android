@@ -13,6 +13,7 @@ import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.FilePresenter
 import com.winsun.fruitmix.newdesign201804.file.offlineFile.OfflineFileActivity
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.SharedFolderActivity
+import com.winsun.fruitmix.newdesign201804.file.transmission.InjectTransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.TransmissionTaskActivity
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.upload.FileBrowserActivity
@@ -52,7 +53,8 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
         filePresenter = FilePresenter(InjectFileDataSource.inject(activity),
                 noContentViewModel, loadingViewModel, filePageBinding, activity,
                 this, activity.getCurrentUserUUID(), ThreadManagerImpl.getInstance(),
-                InjectTransmissionTaskDataSource.provideInstance(activity))
+                InjectTransmissionTaskDataSource.provideInstance(activity),
+                InjectTransmissionDataSource.inject(activity))
 
         val task = DrawerItem(R.drawable.transfer_menu_icon, activity.getString(R.string.transmission_task), {
 
@@ -86,6 +88,8 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
 
         R.layout.folder_item
         R.layout.file_item
+
+        R.layout.folder_file_title
 
     }
 

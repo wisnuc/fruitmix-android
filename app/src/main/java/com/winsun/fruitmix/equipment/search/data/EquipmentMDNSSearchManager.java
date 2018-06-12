@@ -6,7 +6,6 @@ import android.util.Log;
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.github.druk.rxdnssd.RxDnssdBindable;
-import com.winsun.fruitmix.util.Util;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -55,7 +54,7 @@ public class EquipmentMDNSSearchManager implements EquipmentSearchManager{
 
     public void startDiscovery(final EquipmentFoundedListener listener) {
 
-        Log.d(TAG, "startDiscovery: ");
+        Log.d(TAG, "Equipment: startDiscovery");
         
         mSubscription = mRxDnssd.browse(SERVICE_PORT, DEMAIN)
                 .compose(mRxDnssd.resolve())
@@ -66,15 +65,15 @@ public class EquipmentMDNSSearchManager implements EquipmentSearchManager{
                     @Override
                     public void call(BonjourService bonjourService) {
 
-                        Log.d(TAG, "call: " + bonjourService);
+                        Log.d(TAG, "Equipment: " + bonjourService);
 
-                        if (!Util.checkBonjourService(bonjourService)) return;
+                        if (!Equipment.checkBonjourService(bonjourService)) return;
 
                         Equipment createdEquipment = Equipment.createEquipment(bonjourService);
 
                         if (createdEquipment == null) return;
 
-                        Log.d(TAG, "call: createEquipment: " + createdEquipment + " listener: " + listener);
+                        Log.d(TAG, "Equipment: createEquipment: " + createdEquipment + " listener: " + listener);
 
                         listener.call(createdEquipment);
 
@@ -82,7 +81,7 @@ public class EquipmentMDNSSearchManager implements EquipmentSearchManager{
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Log.e(TAG, "call: " + throwable);
+                        Log.e(TAG, "Equipment: " + throwable);
                     }
                 });
 

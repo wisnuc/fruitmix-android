@@ -49,8 +49,6 @@ import static org.mockito.Mockito.*;
 @Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
 public class UploadFileUseCaseTest {
 
-    //TODO:create upload file use case test
-
     private UploadFileUseCase mUploadFileUseCase;
 
     @Mock

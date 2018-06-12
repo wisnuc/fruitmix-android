@@ -11,6 +11,7 @@ import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
 import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.newdesign201804.component.inflateView
+import com.winsun.fruitmix.newdesign201804.file.transmission.InjectTransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 import kotlinx.android.synthetic.main.activity_transmission_task.*
@@ -31,7 +32,8 @@ class TransmissionTaskActivity : BaseToolbarActivity() {
 
         }
 
-        transmissionTaskPresenter = TransmissionTaskPresenter(InjectTransmissionTaskDataSource.provideInstance(this))
+        transmissionTaskPresenter = TransmissionTaskPresenter(InjectTransmissionTaskDataSource.provideInstance(this),
+                InjectTransmissionDataSource.inject(this))
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 

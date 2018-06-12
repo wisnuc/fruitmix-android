@@ -12,8 +12,6 @@ import java.io.File
 
 class OfflineFileRepository(threadManager: ThreadManager): BaseDataRepository(threadManager),OfflineFileDataSource {
 
-
-
     override fun getFile(folderPath: String, filterPaths: List<String>, baseLoadDataCallback: BaseLoadDataCallback<AbstractLocalFile>) {
 
         mThreadManager.runOnCacheThread({

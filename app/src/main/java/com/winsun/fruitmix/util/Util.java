@@ -734,22 +734,6 @@ public class Util {
 
     }
 
-    public static boolean checkBonjourService(BonjourService bonjourService) {
-
-        if (bonjourService.isLost()) return false;
-
-        String hostName = bonjourService.getHostname();
-
-        Log.d(TAG, "checkBonjourService: " + hostName);
-
-        if (hostName == null || (!hostName.startsWith("wisnuc") && !hostName.startsWith("phi"))) return false;
-
-        Log.d(TAG, "call: hostName: " + hostName);
-
-        return bonjourService.getInet4Address() != null;
-
-    }
-
     public static void setStatusBarColor(Activity activity, int colorResID) {
 
         if (checkRunningOnLollipopOrHigher()) {

@@ -6,10 +6,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import com.winsun.fruitmix.R
-import com.winsun.fruitmix.callback.BaseLoadDataCallback
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl
-import com.winsun.fruitmix.callback.BaseOperateCallback
-import com.winsun.fruitmix.callback.BaseOperateDataCallback
+import com.winsun.fruitmix.callback.*
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
 import com.winsun.fruitmix.file.data.model.*
@@ -29,8 +26,11 @@ import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
 import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.user.datasource.InjectUser
 import com.winsun.fruitmix.util.SnackbarUtil
+import com.winsun.fruitmix.viewmodel.LoadingViewModel
+import com.winsun.fruitmix.viewmodel.NoContentViewModel
 
 class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolderView: SharedFolderView,
+                            val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel,
                             val sharedFolderDataSource: SharedFolderDataSource) {
 
     private val sharedFolderRootUUID = "sharedFolderRootUUID"
@@ -63,50 +63,94 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
         recyclerView.adapter = fileRecyclerViewAdapter
 
-        shareRootDataUseCase.getRoot(object : BaseLoadDataCallback<AbstractRemoteFile> {
+        showLoadingBg()
 
-            override fun onFail(operationResult: OperationResult?) {
+        shareRootDataUseCase.getRoot(object : LoadSharedFolderCallback() {
 
-            }
-
-            override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+            override fun handleLoadSucceed() {
                 val remoteFolder = RemoteFolder()
                 remoteFolder.name = ""
                 remoteFolder.uuid = sharedFolderRootUUID
 
                 retrieveFolders.add(remoteFolder)
-
-                if (data != null) {
-
-                    currentFolderItems.addAll(data)
-
-                    refreshData(data)
-                }
-
             }
 
+            override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+
+                currentFolderItems.addAll(data)
+
+                refreshData(data)
+            }
 
         })
 
     }
 
+    private abstract inner class LoadSharedFolderCallback : BaseLoadDataCallback<AbstractRemoteFile> {
+        override fun onFail(operationResult: OperationResult?) {
+            showNoContentBg()
+
+            SnackbarUtil.showSnackBar(sharedFolderView.getRootView(), Snackbar.LENGTH_SHORT, messageStr = operationResult!!.getResultMessage(context))
+        }
+
+        override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+
+            if (data == null)
+                showNoContentBg()
+            else {
+
+                handleLoadSucceed()
+
+                if (data.isEmpty())
+                    showNoContentBg()
+                else {
+
+                    showContentBg()
+
+                    showContent(data, operationResult)
+
+                }
+
+            }
+
+        }
+
+        abstract fun  handleLoadSucceed()
+
+        abstract fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?)
+
+    }
+
+    private fun showNoContentBg() {
+        loadingViewModel.showLoading.set(false)
+        noContentViewModel.showNoContent.set(true)
+    }
+
+    private fun showLoadingBg() {
+        loadingViewModel.showLoading.set(true)
+    }
+
+    private fun showContentBg() {
+        loadingViewModel.showLoading.set(false)
+        noContentViewModel.showNoContent.set(false)
+    }
 
     private fun gotoNextFolder(abstractRemoteFile: AbstractRemoteFile) {
 
         sharedFolderView.setAddFabVisibility(View.INVISIBLE)
 
-        fileDataSource.getFile(abstractRemoteFile.rootFolderUUID, abstractRemoteFile.uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
-            override fun onFail(operationResult: OperationResult?) {
+        showLoadingBg()
 
-            }
+        fileDataSource.getFile(abstractRemoteFile.rootFolderUUID, abstractRemoteFile.uuid, object : LoadSharedFolderCallback() {
 
-            override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
-
+            override fun handleLoadSucceed() {
                 retrieveFolders.add(abstractRemoteFile)
-
-                refreshData(data!!)
-
             }
+
+            override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+                refreshData(data)
+            }
+
         })
 
     }
@@ -129,35 +173,32 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
             sharedFolderView.setAddFabVisibility(View.VISIBLE)
 
-            shareRootDataUseCase.getRoot(object : BaseLoadDataCallback<AbstractRemoteFile> {
-                override fun onFail(operationResult: OperationResult?) {
+            shareRootDataUseCase.getRoot(object : LoadSharedFolderCallback() {
+
+                override fun handleLoadSucceed() {
 
                 }
 
-                override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
-                    if (data != null) {
-                        refreshData(data)
-                    }
+                override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+                    refreshData(data)
                 }
+
             })
 
         } else {
 
             sharedFolderView.setAddFabVisibility(View.INVISIBLE)
 
-            fileDataSource.getFile(preFolder.rootFolderUUID, preFolder.uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
-                override fun onFail(operationResult: OperationResult?) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            fileDataSource.getFile(preFolder.rootFolderUUID, preFolder.uuid, object : LoadSharedFolderCallback() {
 
-                }
-
-                override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
-
+                override fun handleLoadSucceed() {
                     retrieveFolders.remove(preFolder)
-
-                    refreshData(data!!)
-
                 }
+
+                override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+                    refreshData(data)
+                }
+
             })
 
         }

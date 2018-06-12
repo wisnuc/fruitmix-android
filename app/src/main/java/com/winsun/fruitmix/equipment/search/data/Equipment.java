@@ -3,6 +3,7 @@ package com.winsun.fruitmix.equipment.search.data;
 import android.util.Log;
 
 import com.github.druk.rxdnssd.BonjourService;
+import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +108,7 @@ public class Equipment {
 
         String hostName = bonjourService.getHostname();
 
-        Log.d(TAG, "call: hostName: " + hostName);
+        Log.d(TAG, "Equipment: hostName: " + hostName);
 
         String model = "";
         String serialNumber = "";
@@ -122,12 +123,12 @@ public class Equipment {
 
             serialNumber = hostNames2[0].toUpperCase();
 
-            Log.d(TAG, "discovery: model:" + model + " serialNumber:" + serialNumber);
+            Log.d(TAG, "Equipment discovery: model:" + model + " serialNumber:" + serialNumber);
         }
 
         Equipment equipment = new Equipment();
         String hostAddress = bonjourService.getInet4Address().getHostAddress();
-        Log.d(TAG, "host address:" + hostAddress);
+        Log.d(TAG, "Equipment host address:" + hostAddress);
 
         List<String> hosts = new ArrayList<>();
         hosts.add(hostAddress);
@@ -141,5 +142,21 @@ public class Equipment {
         return equipment;
     }
 
+
+    public static boolean checkBonjourService(BonjourService bonjourService) {
+
+        if (bonjourService.isLost()) return false;
+
+        String hostName = bonjourService.getHostname();
+
+        Log.d(Util.TAG, "Equipment:checkBonjourService: " + hostName);
+
+        if (hostName == null || (!hostName.startsWith("wisnuc") && !hostName.startsWith("phi"))) return false;
+
+        Log.d(Util.TAG, "Equipment: hostName: " + hostName);
+
+        return bonjourService.getInet4Address() != null;
+
+    }
 
 }

@@ -116,10 +116,23 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
             return
 
         customHandler.removeMessages(SEARCH_TIMEOUT)
-        customHandler.sendEmptyMessageDelayed(SEARCH_SUCCEED, 3 * 1000)
 
-        convert(it, typeArray[type], object : BaseOperateCallbackImpl() {})
-        type++
+        convert(it, typeArray[type], object : BaseOperateCallbackImpl() {
+
+            override fun onSucceed() {
+                super.onSucceed()
+
+                type++
+
+                if (type == 1)
+                    customHandler.sendEmptyMessageDelayed(SEARCH_SUCCEED, 3 * 1000)
+                else
+                    customHandler.sendEmptyMessage(SEARCH_SUCCEED)
+
+            }
+
+        })
+
     }
 
     private fun checkEquipmentIsFounded(equipment: Equipment): Boolean {

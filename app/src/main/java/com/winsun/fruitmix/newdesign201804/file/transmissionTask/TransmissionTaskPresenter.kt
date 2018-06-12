@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask
 
+import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.ViewGroup
@@ -8,9 +9,15 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
 import com.winsun.fruitmix.command.BaseAbstractCommand
+import com.winsun.fruitmix.file.data.model.RemoteFolder
 import com.winsun.fruitmix.model.operationResult.OperationResult
+import com.winsun.fruitmix.model.operationResult.OperationSuccess
 import com.winsun.fruitmix.newdesign201804.component.inflateView
+import com.winsun.fruitmix.newdesign201804.file.transmission.InjectTransmissionDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmission.TransmissionDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmission.model.Transmission
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskRepository
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
@@ -19,7 +26,8 @@ import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 
 import kotlinx.android.synthetic.main.transmission_task_item.view.*
 
-class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTaskDataSource) {
+class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTaskDataSource,
+                                val transmissionDataSource: TransmissionDataSource) {
 
     private val transmissionTaskAdapter = TransmissionTaskAdapter()
 
@@ -33,7 +41,7 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
             override fun onSucceed(data: MutableList<Task>?, operationResult: OperationResult?) {
 
-                handleGetTask(data)
+                getTransmissionData(data)
 
             }
 
@@ -43,6 +51,39 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
         })
 
+
+    }
+
+    private fun getTransmissionData(taskData: MutableList<Task>?) {
+        transmissionDataSource.getTransmission(object : BaseLoadDataCallback<Transmission> {
+
+            override fun onFail(operationResult: OperationResult?) {
+
+                handleGetTask(taskData)
+
+            }
+
+            override fun onSucceed(data: MutableList<Transmission>?, operationResult: OperationResult?) {
+
+                data?.forEach {
+
+                    val abstractFile = RemoteFolder()
+                    abstractFile.uuid = it.dirUUID
+
+                    val btTaskParam = BTTaskParam(it)
+
+                    val task = BTTask(abstractFile, ThreadManagerImpl.getInstance(), btTaskParam,
+                            transmissionDataSource)
+
+                    taskData?.add(task)
+
+                }
+
+                handleGetTask(taskData)
+
+            }
+
+        })
     }
 
     fun onDestroy() {

@@ -9,16 +9,14 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import com.winsun.fruitmix.BR
 import com.winsun.fruitmix.R
-import com.winsun.fruitmix.callback.BaseLoadDataCallback
-import com.winsun.fruitmix.callback.BaseOperateCallback
-import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
-import com.winsun.fruitmix.callback.BaseOperateDataCallback
+import com.winsun.fruitmix.callback.*
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.databinding.*
 import com.winsun.fruitmix.dialog.BottomMenuGridDialogFactory
@@ -46,6 +44,7 @@ import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.move.*
+import com.winsun.fruitmix.newdesign201804.file.transmission.TransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.parser.RemoteMkDirParser
@@ -72,7 +71,8 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
                            val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding,
                            val baseView: BaseView, val fileView: FileView,
                            val currentUserUUID: String, val threadManager: ThreadManager,
-                           val transmissionTaskDataSource: TransmissionTaskDataSource) {
+                           val transmissionTaskDataSource: TransmissionTaskDataSource,
+                           val transmissionDataSource: TransmissionDataSource) {
 
     private val contentLayout = filePageBinding.contentLayout
 
@@ -242,7 +242,15 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         bottomMenuItems.add(uploadBottomMenuItem)
 
-        val magnetBottomMenuItem = BottomMenuItem(R.drawable.magnet_link, context.getString(R.string.magnet_link), object : BaseAbstractCommand() {})
+        val magnetBottomMenuItem = BottomMenuItem(R.drawable.magnet_link, context.getString(R.string.magnet_link), object : BaseAbstractCommand() {
+
+            override fun execute() {
+                super.execute()
+
+                createMagnetTransmission()
+            }
+
+        })
 
         bottomMenuItems.add(magnetBottomMenuItem)
 
@@ -303,6 +311,59 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         })
 
+
+    }
+
+    private fun createMagnetTransmission() {
+
+        val editText = EditText(context)
+
+        editText.hint = "magnet:?xt=urn:btih:"
+
+        AlertDialog.Builder(context).setTitle(context.getString(R.string.magnet_link))
+                .setView(editText)
+                .setPositiveButton(R.string.new_create) { dialog, which ->
+
+                    val magnetUrl = editText.text.toString()
+
+                    Log.d("magnetTest", magnetUrl.length.toString())
+                    Log.d("magnetTest",(!magnetUrl.startsWith("magnet:?xt=urn:btih:")).toString())
+
+                    if (magnetUrl.length < 60 || !magnetUrl.startsWith("magnet:?xt=urn:btih:")) {
+
+                        SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.magnet_illegal)
+
+                        return@setPositiveButton
+                    }
+
+                    doCreateMagnetTransmission(magnetUrl)
+
+                }
+                .setNegativeButton(R.string.cancel) { dialog, which -> }
+                .create().show()
+
+    }
+
+    private fun doCreateMagnetTransmission(magnetUrl: String) {
+
+        baseView.showProgressDialog(baseView.getString(R.string.operating_title, baseView.getString(R.string.create)))
+
+        transmissionDataSource.postMagnetTransmission(currentFolderUUID, magnetUrl, object : BaseOperateCallback {
+            override fun onFail(operationResult: OperationResult?) {
+
+                baseView.dismissDialog()
+
+                SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, messageStr = operationResult!!.getResultMessage(context))
+            }
+
+            override fun onSucceed() {
+
+                baseView.dismissDialog()
+
+                SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, messageStr =
+                baseView.getString(R.string.success, baseView.getString(R.string.create)))
+            }
+        })
 
     }
 
@@ -993,9 +1054,10 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
         val bottomMenuItems = mutableListOf<BottomMenuItem>()
 
-        val bottomMenuItem = BottomMenuItem(R.drawable.sort, context.getString(R.string.sort_by_name), object : BaseAbstractCommand() {
+        val bottomMenuItem = BottomMenuItem(R.drawable.black_up_arrow, context.getString(R.string.sort_by_name), object : BaseAbstractCommand() {
 
         })
+
         bottomMenuItem.rightResID = R.drawable.green_done
 
         bottomMenuItems.add(bottomMenuItem)
@@ -1015,7 +1077,6 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
         BottomMenuListDialogFactory(bottomMenuItems).createDialog(context).show()
 
     }
-
 
     override fun getItemViewType(position: Int): Int {
 
