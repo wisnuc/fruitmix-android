@@ -22,6 +22,16 @@ abstract class Task(val abstractFile: AbstractFile, val threadManager: ThreadMan
 
     private val taskStateObservers = mutableListOf<TaskStateObserver>()
 
+    private var mTotalSize:String = ""
+
+    fun setTotalSize(totalSize:String){
+        mTotalSize = totalSize
+    }
+
+    fun getTotalSize():String{
+        return mTotalSize
+    }
+
     //after construct task,call init(),
     fun init() {
 
@@ -134,7 +144,7 @@ class UploadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource,
 
 private const val DOWNLOAD_TASK_TAG = "download_task"
 
-class DownloadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
+open class DownloadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
                    val currentUserUUID: String, threadManager: ThreadManager) : Task(abstractFile, threadManager) {
 
     private lateinit var future: Future<Boolean>

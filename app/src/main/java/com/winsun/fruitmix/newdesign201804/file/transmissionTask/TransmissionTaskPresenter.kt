@@ -180,6 +180,8 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
             view?.taskFileNameTv?.text = task.abstractFile.name
             view?.taskTypeIv?.setImageResource(task.getTypeResID())
 
+
+
             view?.taskStateIcon?.refresh(task.getCurrentState())
 
             //TODO: check pause download

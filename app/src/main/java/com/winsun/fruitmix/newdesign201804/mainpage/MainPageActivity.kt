@@ -116,7 +116,9 @@ class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListene
         fileSelectModeTitle = FileSelectModeTitle(file_select_mode_title,
                 { filePage.quitSelectMode() },
                 { enterMovePage() },
-                {},
+                {
+                    filePage.downloadBtnOnClick()
+                },
                 {})
 
         drawerRecyclerView.layoutManager = LinearLayoutManager(this)

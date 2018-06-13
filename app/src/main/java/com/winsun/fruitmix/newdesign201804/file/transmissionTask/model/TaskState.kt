@@ -5,6 +5,7 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 import com.winsun.fruitmix.util.FileUtil
+import kotlin.math.max
 
 enum class StateType {
     INITIAL, START, STARTING, PAUSE, FINISH, ERROR
@@ -98,11 +99,15 @@ private const val UPDATE_SPEED = 0x1001
 
 private const val DELAY_TIME = 1000L
 
-class StartingTaskState(var progress: Int, var speed: String, task: Task) : TaskState(task) {
+private const val STARTING_TASK_STATE_TAG = "StartingTaskState"
+
+class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String, task: Task) : TaskState(task) {
 
     var currentHandledSize = 0L
 
     var lastDownloadSize = 0L
+
+    var speedSize: Long = 0L
 
     private lateinit var speedHandler: SpeedHandler
 
@@ -112,6 +117,8 @@ class StartingTaskState(var progress: Int, var speed: String, task: Task) : Task
         speedHandler = SpeedHandler(Looper.getMainLooper(), this)
 
         speedHandler.sendEmptyMessageDelayed(UPDATE_SPEED, DELAY_TIME)
+
+        task.setTotalSize(FileUtil.formatFileSize(maxSize))
 
     }
 
@@ -128,13 +135,14 @@ class StartingTaskState(var progress: Int, var speed: String, task: Task) : Task
 
     override fun pause() {
 
-        task.setCurrentState(PauseTaskState(progress, speed, task))
+        task.setCurrentState(PauseTaskState(progress, maxSize, speed, task))
 
         onFinishState()
 
     }
 
     override fun resume() {
+
     }
 
     override fun cancel() {
@@ -149,17 +157,31 @@ class StartingTaskState(var progress: Int, var speed: String, task: Task) : Task
 
     }
 
-    fun setCurrentHandleFileSize(currentHandledSize: Long) {
+    fun addCurrentHandleFileSize(size: Long) {
 
-        this.currentHandledSize = currentHandledSize
+        currentHandledSize += size
 
-        if (currentHandledSize == 0L && task.abstractFile.size == 0L)
+        calcProgress(currentHandledSize)
+
+        Log.d(STARTING_TASK_STATE_TAG, " progress: $progress currentHandledSize: $currentHandledSize maxSize: $maxSize")
+
+    }
+
+    fun setCurrentHandleFileSize(size: Long) {
+
+        currentHandledSize = size
+
+        if (currentHandledSize == 0L && maxSize == 0L)
             progress = task.max
 
-        val currentProgress = (currentHandledSize * task.max / task.abstractFile.size).toFloat()
+        calcProgress(size)
+
+    }
+
+    private fun calcProgress(currentHandledSize: Long) {
+        val currentProgress = (currentHandledSize * task.max / maxSize).toFloat()
 
         progress = currentProgress.toInt()
-
     }
 
     override fun getType(): StateType {
@@ -179,6 +201,8 @@ class SpeedHandler(looper: Looper, val taskState: StartingTaskState) : Handler(l
 
                 val speedSize = taskState.currentHandledSize - taskState.lastDownloadSize
 
+                taskState.speedSize = speedSize
+
                 taskState.speed = FileUtil.formatFileSize(speedSize) + "/s"
 
                 taskState.lastDownloadSize = taskState.currentHandledSize
@@ -195,11 +219,11 @@ class SpeedHandler(looper: Looper, val taskState: StartingTaskState) : Handler(l
 
 }
 
-class PauseTaskState(var progress: Int, var speed: String, task: Task) : TaskState(task) {
+class PauseTaskState(var progress: Int, val maxSize: Long, var speed: String, task: Task) : TaskState(task) {
 
     override fun start() {
 
-        task.setCurrentState(StartingTaskState(progress, speed, task))
+        task.setCurrentState(StartingTaskState(progress, maxSize, speed, task))
 
     }
 
@@ -210,7 +234,7 @@ class PauseTaskState(var progress: Int, var speed: String, task: Task) : TaskSta
 
     override fun resume() {
 
-        task.setCurrentState(StartingTaskState(progress, speed, task))
+        task.setCurrentState(StartingTaskState(progress, maxSize, speed, task))
 
     }
 

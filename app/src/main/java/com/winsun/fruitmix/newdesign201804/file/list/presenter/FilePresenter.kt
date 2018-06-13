@@ -21,9 +21,9 @@ import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.databinding.*
 import com.winsun.fruitmix.dialog.BottomMenuGridDialogFactory
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
-import com.winsun.fruitmix.newdesign201804.file.list.data.FileMenuBottomDialogFactory
 import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloadParam
 import com.winsun.fruitmix.file.data.model.*
+import com.winsun.fruitmix.file.data.station.StationFileRepository
 import com.winsun.fruitmix.http.HttpResponse
 import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.BottomMenuItem
@@ -37,9 +37,7 @@ import com.winsun.fruitmix.newdesign201804.file.list.FilePageActionListener
 import com.winsun.fruitmix.newdesign201804.file.list.FilePageSelectActionListener
 import com.winsun.fruitmix.newdesign201804.file.list.FileView
 import com.winsun.fruitmix.newdesign201804.file.list.MainPageDividerItemDecoration
-import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
-import com.winsun.fruitmix.newdesign201804.file.list.data.FileUploadParam
-import com.winsun.fruitmix.newdesign201804.file.list.data.FileWithSwitchBottomItem
+import com.winsun.fruitmix.newdesign201804.file.list.data.*
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
@@ -72,7 +70,8 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
                            val baseView: BaseView, val fileView: FileView,
                            val currentUserUUID: String, val threadManager: ThreadManager,
                            val transmissionTaskDataSource: TransmissionTaskDataSource,
-                           val transmissionDataSource: TransmissionDataSource) {
+                           val transmissionDataSource: TransmissionDataSource,
+                           val stationFileRepository: StationFileRepository) {
 
     private val contentLayout = filePageBinding.contentLayout
 
@@ -327,7 +326,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
                     val magnetUrl = editText.text.toString()
 
                     Log.d("magnetTest", magnetUrl.length.toString())
-                    Log.d("magnetTest",(!magnetUrl.startsWith("magnet:?xt=urn:btih:")).toString())
+                    Log.d("magnetTest", (!magnetUrl.startsWith("magnet:?xt=urn:btih:")).toString())
 
                     if (magnetUrl.length < 60 || !magnetUrl.startsWith("magnet:?xt=urn:btih:")) {
 
@@ -774,7 +773,6 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
                 it.dismissDialog()
 
-
             })
 
             bottomMenuItems.add(bottomMenuItem)
@@ -899,6 +897,35 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
             SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.no_select_file)
         else {
             MoveFileActivity.start(context, mSelectFiles, FILE_OPERATE_MOVE)
+        }
+
+    }
+
+    fun handleDownloadBtnOnClickWhenSelectFiles() {
+
+        if (mSelectFiles.isEmpty())
+            SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.no_select_file)
+        else {
+
+            mSelectFiles.forEach {
+
+                val abstractRemoteFile = it as AbstractRemoteFile
+
+                val task =
+
+                        if (it.isFolder)
+                            DownloadFolderTask(stationFileRepository, abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
+                                    currentUserUUID, threadManager)
+                        else
+                            DownloadTask(abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
+                                    currentUserUUID, threadManager)
+
+                transmissionTaskDataSource.addTransmissionTask(task, object : BaseOperateCallbackImpl() {})
+
+                SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
+
+            }
+
         }
 
     }

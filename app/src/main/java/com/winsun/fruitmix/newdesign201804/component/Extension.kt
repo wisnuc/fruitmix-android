@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam
 import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloadParam
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
+import com.winsun.fruitmix.file.data.model.RemoteFolder
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
 import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.user.datasource.InjectUser
@@ -32,3 +33,4 @@ fun AbstractRemoteFile.createFileDownloadParam(): FileDownloadParam {
     return FileFromStationFolderDownloadParam(this.uuid,
             this.parentFolderUUID, this.rootFolderUUID, this.name)
 }
+

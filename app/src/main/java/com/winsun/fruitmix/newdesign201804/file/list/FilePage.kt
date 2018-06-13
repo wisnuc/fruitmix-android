@@ -8,6 +8,7 @@ import android.view.View
 import com.winsun.fruitmix.BaseActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.FilePageBinding
+import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.FilePresenter
@@ -54,7 +55,8 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
                 noContentViewModel, loadingViewModel, filePageBinding, activity,
                 this, activity.getCurrentUserUUID(), ThreadManagerImpl.getInstance(),
                 InjectTransmissionTaskDataSource.provideInstance(activity),
-                InjectTransmissionDataSource.inject(activity))
+                InjectTransmissionDataSource.inject(activity),
+                InjectStationFileRepository.provideStationFileRepository(activity))
 
         val task = DrawerItem(R.drawable.transfer_menu_icon, activity.getString(R.string.transmission_task), {
 
@@ -191,5 +193,10 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
         filePresenter.enterMovePageWhenSelectMode()
 
     }
+
+    fun downloadBtnOnClick(){
+        filePresenter.handleDownloadBtnOnClickWhenSelectFiles()
+    }
+
 
 }

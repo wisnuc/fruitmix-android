@@ -15,7 +15,7 @@ class ProgressUploadRequestBody(val requestBody: RequestBody,val task: Task):Req
 
     private var bufferedSink: BufferedSink? = null
 
-    private val startingTaskState:StartingTaskState = StartingTaskState(0,"0KB/s",task)
+    private val startingTaskState:StartingTaskState = StartingTaskState(0,task.abstractFile.size,"0KB/s",task)
 
     init {
 

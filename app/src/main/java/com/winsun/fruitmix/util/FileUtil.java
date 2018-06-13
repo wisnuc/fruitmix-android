@@ -23,6 +23,8 @@ import com.winsun.fruitmix.file.data.download.FileDownloadFinishedState;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadState;
 import com.winsun.fruitmix.file.data.download.FileDownloadingState;
+import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.ErrorTaskState;
@@ -172,6 +174,11 @@ public class FileUtil {
 
     }
 
+    public static boolean createFolderInDownloadFolder(String path) {
+
+        return createFolder(getDownloadFileStoreFolderPath() + path);
+
+    }
 
     private static boolean createFolder(String path) {
         if (!checkExternalStorageState()) {
@@ -667,6 +674,27 @@ public class FileUtil {
 
     public static boolean writeResponseBodyToFolder(ResponseBody responseBody, Task task) {
 
+        StartingTaskState startingTaskState = new StartingTaskState(0, task.getAbstractFile().getSize(),"0KB/s", task);
+
+        task.setCurrentState(startingTaskState);
+
+        AbstractRemoteFile abstractRemoteFile = (AbstractRemoteFile) task.getAbstractFile();
+
+        boolean result = writeResponseBodyToFolder(responseBody, task, abstractRemoteFile.getParentFolderPath(),
+                startingTaskState);
+
+        if (result)
+            task.setCurrentState(new FinishTaskState(task));
+        else
+            task.setCurrentState(new ErrorTaskState(task));
+
+        return result;
+
+    }
+
+    private static boolean writeResponseBodyToFolder(ResponseBody responseBody, Task task, String fileParentFolderName,
+                                                     StartingTaskState startingTaskState) {
+
         checkIfNoExistThenCreateDownloadFileStoreFolder();
 
         File downloadFolder = new File(getDownloadFileStoreFolderPath());
@@ -674,11 +702,7 @@ public class FileUtil {
         if (!downloadFolder.exists())
             createDownloadFileStoreFolder();
 
-        File downloadFile = new File(getDownloadFileStoreFolderPath(), task.getAbstractFile().getName());
-
-        StartingTaskState startingTaskState = new StartingTaskState(0,"0KB/s",task);
-
-        task.setCurrentState(startingTaskState);
+        File downloadFile = new File(getDownloadFileStoreFolderPath() + fileParentFolderName, task.getAbstractFile().getName());
 
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -711,27 +735,23 @@ public class FileUtil {
                     fileDownloadedSize += read;
 
                     Log.d(TAG, "writeResponseBodyToFolder: fileDownloadedSize: " + fileDownloadedSize +
-                    " totalSize:" + task.getAbstractFile().getSize());
+                            " totalSize:" + task.getAbstractFile().getSize());
 
                     startingTaskState.setCurrentHandleFileSize(fileDownloadedSize);
 
                     Log.d(TAG, "writeResponseBodyToFolder: setCurrentHandleFileSize");
-                    
+
                     task.setCurrentState(startingTaskState);
 
                     Log.d(TAG, "writeResponseBodyToFolder: setCurrentState");
-                    
+
                 }
 
                 outputStream.flush();
 
-                task.setCurrentState(new FinishTaskState(task));
-
                 return true;
 
             } else {
-
-                task.setCurrentState(new ErrorTaskState(task));
 
                 return false;
 
@@ -740,13 +760,9 @@ public class FileUtil {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
 
-            task.setCurrentState(new ErrorTaskState(task));
-
             return false;
         } catch (IOException e) {
             e.printStackTrace();
-
-            task.setCurrentState(new ErrorTaskState(task));
 
             if (downloadFile.exists()) {
 
@@ -779,6 +795,7 @@ public class FileUtil {
         }
 
     }
+
 
     public static boolean writeResponseBodyToFolder(ResponseBody responseBody, FileDownloadState fileDownloadState) {
 
@@ -1047,16 +1064,16 @@ public class FileUtil {
 
     }
 
-    public static boolean checkAppInstalledByPackageName(String packageName,Context context){
+    public static boolean checkAppInstalledByPackageName(String packageName, Context context) {
 
         List<PackageInfo> packageInfos = context.getPackageManager().getInstalledPackages(0);
 
-        if(packageInfos == null)
+        if (packageInfos == null)
             return false;
 
-        for (PackageInfo packageInfo:packageInfos){
+        for (PackageInfo packageInfo : packageInfos) {
 
-            if(packageInfo.packageName.equalsIgnoreCase(packageName)){
+            if (packageInfo.packageName.equalsIgnoreCase(packageName)) {
                 return true;
             }
 
