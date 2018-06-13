@@ -517,7 +517,7 @@ public class UploadFileUseCase {
 
                     if (file.getName().equals(newFileName)) {
 
-                        newFileName = renameFileName(++renameCode, fileOriginalName);
+                        newFileName = FileUtil.renameFileName(++renameCode, fileOriginalName);
 
                         break;
                     }
@@ -539,22 +539,7 @@ public class UploadFileUseCase {
 
     }
 
-    @NonNull
-    public String renameFileName(int renameCode, String fileName) {
-        int dotIndex = fileName.indexOf(".");
 
-        if (dotIndex == -1)
-            dotIndex = fileName.length();
-
-        String fileNameWithEnd = fileName.substring(0, dotIndex);
-
-        String end = fileName.substring(dotIndex, fileName.length());
-
-        fileName = fileNameWithEnd + "(" + renameCode + ")" + end;
-
-        return fileName;
-
-    }
 
     private int startUploadFileAfterCheck(FileUploadState fileUploadState) {
 

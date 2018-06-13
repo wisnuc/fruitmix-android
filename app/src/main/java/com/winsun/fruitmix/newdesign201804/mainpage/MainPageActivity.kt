@@ -115,9 +115,13 @@ class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListene
 
         fileSelectModeTitle = FileSelectModeTitle(file_select_mode_title,
                 { filePage.quitSelectMode() },
-                { enterMovePage() },
+                {
+                    enterMovePage()
+                    filePage.quitSelectMode()
+                },
                 {
                     filePage.downloadBtnOnClick()
+                    filePage.quitSelectMode()
                 },
                 {})
 

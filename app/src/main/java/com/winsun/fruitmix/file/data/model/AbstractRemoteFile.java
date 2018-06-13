@@ -22,7 +22,7 @@ public abstract class AbstractRemoteFile extends AbstractFile{
     private String parentFolderUUID;
     private String rootFolderUUID;
 
-    private String parentFolderPath;
+    private String parentFolderPath = "";
 
     AbstractRemoteFile() {
         owners = new ArrayList<>();

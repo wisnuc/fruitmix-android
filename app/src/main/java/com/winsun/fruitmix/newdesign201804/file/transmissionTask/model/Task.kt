@@ -22,20 +22,21 @@ abstract class Task(val abstractFile: AbstractFile, val threadManager: ThreadMan
 
     private val taskStateObservers = mutableListOf<TaskStateObserver>()
 
-    private var mTotalSize:String = ""
+    private var mTotalSize: String = ""
 
-    fun setTotalSize(totalSize:String){
+    fun setTotalSize(totalSize: String) {
         mTotalSize = totalSize
     }
 
-    fun getTotalSize():String{
+    fun getTotalSize(): String {
         return mTotalSize
     }
 
     //after construct task,call init(),
     fun init() {
 
-        currentTaskState = InitialTaskState(this)
+        if (!::currentTaskState.isInitialized)
+            currentTaskState = InitialTaskState(this)
 
     }
 
@@ -145,9 +146,9 @@ class UploadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource,
 private const val DOWNLOAD_TASK_TAG = "download_task"
 
 open class DownloadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
-                   val currentUserUUID: String, threadManager: ThreadManager) : Task(abstractFile, threadManager) {
+                        val currentUserUUID: String, threadManager: ThreadManager) : Task(abstractFile, threadManager) {
 
-    private lateinit var future: Future<Boolean>
+    private var future: Future<Boolean>? = null
 
     override fun getTypeResID(): Int {
 
@@ -171,7 +172,8 @@ open class DownloadTask(abstractFile: AbstractFile, val fileDataSource: FileData
 
         super.cancelTask()
 
-        future.cancel(true)
+        if (future != null)
+            future?.cancel(true)
 
         val downloadFile = File(FileUtil.getDownloadFileStoreFolderPath(), abstractFile.name)
 
@@ -204,7 +206,7 @@ class BTTask(abstractFile: AbstractFile, threadManager: ThreadManager, val btTas
 
         val transmission = btTaskParam.transmission
 
-        transmissionDataSource.destroyTransmission(transmission.id,transmission.uuid,object :BaseOperateCallbackImpl(){})
+        transmissionDataSource.destroyTransmission(transmission.id, transmission.uuid, object : BaseOperateCallbackImpl() {})
     }
 
 }

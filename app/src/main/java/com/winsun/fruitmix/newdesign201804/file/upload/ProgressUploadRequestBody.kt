@@ -73,7 +73,7 @@ class ProgressUploadRequestBody(val requestBody: RequestBody,val task: Task):Req
 
                     startingTaskState.setCurrentHandleFileSize(bytesWritten)
 
-                    task.setCurrentState(FinishTaskState(task))
+                    task.setCurrentState(FinishTaskState(task.abstractFile.size,task))
 
                 } else {
 

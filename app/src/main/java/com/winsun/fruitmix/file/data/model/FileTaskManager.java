@@ -24,6 +24,7 @@ import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl;
 import com.winsun.fruitmix.util.FileTool;
+import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.File;
@@ -174,7 +175,7 @@ public class FileTaskManager {
 
             if (getFileTaskItemByName(fileName) != null) {
 
-                fileName = uploadFileUseCase.renameFileName(++renameCode, fileOriginalName);
+                fileName = FileUtil.renameFileName(++renameCode, fileOriginalName);
 
             } else
                 break;

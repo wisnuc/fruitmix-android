@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.os.StatFs;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.winsun.fruitmix.R;
@@ -345,6 +346,31 @@ public class FileUtil {
 
         if (!root.exists())
             createDownloadFileStoreFolder();
+    }
+
+    public static boolean checkIsExistInDownloadFolder(String path){
+
+        File file = new File(getDownloadFileStoreFolderPath() + path);
+
+        return file.exists();
+
+    }
+
+    @NonNull
+    public static String renameFileName(int renameCode, String fileName) {
+        int dotIndex = fileName.indexOf(".");
+
+        if (dotIndex == -1)
+            dotIndex = fileName.length();
+
+        String fileNameWithEnd = fileName.substring(0, dotIndex);
+
+        String end = fileName.substring(dotIndex, fileName.length());
+
+        fileName = fileNameWithEnd + "(" + renameCode + ")" + end;
+
+        return fileName;
+
     }
 
     public static boolean writeBitmapToFolder(Bitmap bitmap, File file) {
@@ -684,7 +710,7 @@ public class FileUtil {
                 startingTaskState);
 
         if (result)
-            task.setCurrentState(new FinishTaskState(task));
+            task.setCurrentState(new FinishTaskState(abstractRemoteFile.getSize(),task));
         else
             task.setCurrentState(new ErrorTaskState(task));
 
@@ -741,9 +767,9 @@ public class FileUtil {
 
                     Log.d(TAG, "writeResponseBodyToFolder: setCurrentHandleFileSize");
 
-                    task.setCurrentState(startingTaskState);
+  /*                  task.setCurrentState(startingTaskState);
 
-                    Log.d(TAG, "writeResponseBodyToFolder: setCurrentState");
+                    Log.d(TAG, "writeResponseBodyToFolder: setCurrentState");*/
 
                 }
 

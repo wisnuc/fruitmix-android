@@ -163,7 +163,7 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
 
         calcProgress(currentHandledSize)
 
-        Log.d(STARTING_TASK_STATE_TAG, " progress: $progress currentHandledSize: $currentHandledSize maxSize: $maxSize")
+        Log.d(STARTING_TASK_STATE_TAG, "addCurrentHandleFileSize size: $size progress: $progress currentHandledSize: $currentHandledSize maxSize: $maxSize")
 
     }
 
@@ -175,6 +175,8 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
             progress = task.max
 
         calcProgress(size)
+
+        Log.d(STARTING_TASK_STATE_TAG, "setCurrentHandleFileSize size: $size progress: $progress currentHandledSize: $currentHandledSize maxSize: $maxSize")
 
     }
 
@@ -254,7 +256,7 @@ class PauseTaskState(var progress: Int, val maxSize: Long, var speed: String, ta
 
 private const val FINISH_TASK_TAG = "finish_task_tag"
 
-class FinishTaskState(task: Task) : TaskState(task) {
+class FinishTaskState(maxSize: Long, task: Task) : TaskState(task) {
 
     override fun onStartState() {
         super.onStartState()

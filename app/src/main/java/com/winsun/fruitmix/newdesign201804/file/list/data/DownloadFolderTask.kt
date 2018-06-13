@@ -43,7 +43,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
         if (totalSize == 0L) {
 
-            setCurrentState(FinishTaskState(this))
+            setCurrentState(FinishTaskState(0L,this))
 
         } else
             listFolder(rootFolder, { abstractRemoteFile, parentFolder -> doDownloadFolder(abstractRemoteFile, parentFolder) })
@@ -109,7 +109,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
         Log.d(TAG, "createFolderInDownloadFolder: path: $path result: $result")
 
-    }
+}
 
     private var downloadFinishFileSize = 0L
 
@@ -138,8 +138,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
                         downloadFinishFileSize += abstractRemoteFile.size
 
                         if (downloadFinishFileSize == totalSize)
-                            setCurrentState(FinishTaskState(this@DownloadFolderTask))
-
+                            setCurrentState(FinishTaskState(totalSize,this@DownloadFolderTask))
 
                     } else if (currentState is ErrorTaskState)
                         setCurrentState(ErrorTaskState(this@DownloadFolderTask))

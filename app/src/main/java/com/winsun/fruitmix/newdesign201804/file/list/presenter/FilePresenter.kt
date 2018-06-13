@@ -922,9 +922,9 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
                 transmissionTaskDataSource.addTransmissionTask(task, object : BaseOperateCallbackImpl() {})
 
-                SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
-
             }
+
+            SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
 
         }
 

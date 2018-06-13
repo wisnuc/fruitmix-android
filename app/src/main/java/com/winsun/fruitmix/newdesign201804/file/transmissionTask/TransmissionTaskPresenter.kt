@@ -134,7 +134,7 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
         data?.forEach {
 
             if (it is SMBTask)
-                it.setCurrentState(FinishTaskState(it))
+                it.setCurrentState(FinishTaskState(it.abstractFile.size,it))
             else if (it is CopyTask)
                 it.setCurrentState(ErrorTaskState(it))
             else
@@ -179,8 +179,6 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
             view?.taskFileTypeIv?.setImageResource(task.abstractFile.fileTypeResID)
             view?.taskFileNameTv?.text = task.abstractFile.name
             view?.taskTypeIv?.setImageResource(task.getTypeResID())
-
-
 
             view?.taskStateIcon?.refresh(task.getCurrentState())
 
