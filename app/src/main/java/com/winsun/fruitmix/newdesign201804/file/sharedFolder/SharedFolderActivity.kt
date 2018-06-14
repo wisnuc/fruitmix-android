@@ -17,11 +17,13 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl
 import com.winsun.fruitmix.databinding.ActivitySharedFolderBinding
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
 import com.winsun.fruitmix.model.operationResult.OperationResult
+import com.winsun.fruitmix.newdesign201804.component.getCurrentUserHome
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.InjectSharedFolderDataSource
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.SharedFolderDataSource
 import com.winsun.fruitmix.newdesign201804.search.SearchActivity
+import com.winsun.fruitmix.newdesign201804.search.startSearchActivity
 import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.user.datasource.InjectUser
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
@@ -54,8 +56,7 @@ class SharedFolderActivity : BaseToolbarActivity(), SharedFolderView {
 
         toolbarViewModel.setToolbarMenuBtnOnClickListener {
 
-            val intent = Intent(this, SearchActivity::class.java)
-            startActivity(intent)
+            startSearchActivity(getCurrentUserHome(), this)
 
         }
 
@@ -63,7 +64,7 @@ class SharedFolderActivity : BaseToolbarActivity(), SharedFolderView {
 
         sharedFolderPresenter = SharedFolderPresenter(
                 InjectFileDataSource.inject(this), this,
-                loadingViewModel,noContentViewModel,
+                loadingViewModel, noContentViewModel,
                 sharedFolderDataSource)
 
         recyclerView.layoutManager = LinearLayoutManager(this)

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpRequest;
@@ -12,7 +13,7 @@ import com.winsun.fruitmix.util.Util;
 /**
  * Created by Administrator on 2016/7/28.
  */
-public class Media extends AbstractFile {
+public class Media extends AbstractRemoteFile {
 
     private static final String TAG = Media.class.getSimpleName();
 
@@ -22,7 +23,6 @@ public class Media extends AbstractFile {
     public static final String ALT_DATA = "?alt=data";
     public static final String BOX_UUID = "&boxUUID=";
 
-    private String uuid;
     private String thumb;
     private String formattedTime;
     private String width;
@@ -42,10 +42,9 @@ public class Media extends AbstractFile {
 
     private Address address;
 
-    private long size;
-
     public Media() {
-        uuid = "";
+
+        setUuid("");
         orientationNumber = 1;
         belongingMediaShareUUID = "";
         width = "";
@@ -62,22 +61,6 @@ public class Media extends AbstractFile {
 
         setFileTypeResID(R.drawable.file_icon);
 
-    }
-
-    public String getUuid() {
-        return uuid == null ? "" : uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    public long getSize() {
-        return size;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
     }
 
     public String getFormattedTime() {

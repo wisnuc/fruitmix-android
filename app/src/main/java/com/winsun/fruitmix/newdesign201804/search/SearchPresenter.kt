@@ -20,6 +20,8 @@ import com.winsun.fruitmix.newdesign201804.file.list.presenter.ItemFolder
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.ORIENTATION_LIST_TYPE
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
+import com.winsun.fruitmix.newdesign201804.search.data.SearchDataSource
+import com.winsun.fruitmix.newdesign201804.search.data.SearchOrder
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
@@ -32,7 +34,7 @@ import kotlinx.android.synthetic.main.search_type_card.view.*
 
 class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, val toolbarViewModel: ToolbarViewModel,
                       val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel,
-                      val fileDataSource: FileDataSource) {
+                      val searchDataSource: SearchDataSource, val searchPlace: String) {
 
     private val editText = activitySearchBinding.toolbar?.title!!
 
@@ -66,7 +68,7 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
 
         }
 
-        editText.addTextChangedListener(object : TextWatcher {
+/*        editText.addTextChangedListener(object : TextWatcher {
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
@@ -84,7 +86,17 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
 
             }
 
-        })
+        })*/
+
+        val searchBtn = activitySearchBinding.toolbar?.searchBtn!!
+
+        searchBtn.setOnClickListener {
+
+            currentInputText = editText.text.toString()
+
+            handleSelectedSearchTypeItemCountOrInputTextChanged()
+
+        }
 
         initSearchTypeItem()
 
@@ -143,8 +155,7 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
         searchedFileRecyclerView.layoutManager = LinearLayoutManager(context)
 
         fileRecyclerViewAdapter = FileRecyclerViewAdapter({ abstractFile, position ->
-        }, {}, {
-            abstractFile, position ->
+        }, {}, { abstractFile, position ->
         })
 
         fileRecyclerViewAdapter.currentOrientation = ORIENTATION_LIST_TYPE
@@ -206,22 +217,38 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
 
         val searchKeys = mutableListOf<String>()
 
-        if (currentInputText.isNotEmpty())
-            searchKeys.add(currentInputText)
+//        if (currentInputText.isNotEmpty())
+//            searchKeys.add(currentInputText)
+
+        val classesBuilder = StringBuilder()
+        val typesBuilder = StringBuilder()
 
         selectedSearchTypeItems.forEach {
 
             when (it.imageResID) {
-                R.drawable.photo_image -> searchKeys.add(".jpg")
-                R.drawable.word -> searchKeys.add(".docx")
-                R.drawable.pdf -> searchKeys.add(".pdf")
-                R.drawable.power_point -> searchKeys.add(".ppt")
-                R.drawable.excel -> searchKeys.add(".xlsx")
+                R.drawable.photo_image -> classesBuilder.append("image,")
+                R.drawable.word -> typesBuilder.append("DOC.")
+                R.drawable.pdf -> typesBuilder.append("PDF.")
+                R.drawable.power_point -> typesBuilder.append("PPT.")
+                R.drawable.excel -> typesBuilder.append("XLSX.")
+                R.drawable.video -> classesBuilder.append("video,")
+                R.drawable.audio -> classesBuilder.append("audio,")
             }
 
         }
 
-        fileDataSource.searchFile(searchKeys, object : BaseLoadDataCallback<AbstractRemoteFile> {
+        val classes = classesBuilder.toString()
+        val types = typesBuilder.toString()
+
+        var searchOrder = SearchOrder.NUll
+
+        if(currentInputText.isNotEmpty())
+            searchOrder= SearchOrder.FIND
+
+        searchDataSource.searchFile(name = if (currentInputText.isNotEmpty()) currentInputText else "", places = searchPlace,
+                types = if (types.isNotEmpty()) types else "", searchClasses = if (classes.isNotEmpty()) classes else "",
+                searchOrder = searchOrder,
+                baseLoadDataCallback = object : BaseLoadDataCallback<AbstractRemoteFile> {
 
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 

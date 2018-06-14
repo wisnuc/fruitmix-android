@@ -592,7 +592,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
         if (notRootFolder()) {
 
             filePageActionListeners.forEach {
-                it.notifyFolderLevelChanged(false, currentFolderName)
+                it.notifyFolderLevelChanged(false, currentFolderName,currentFolderUUID)
             }
 
         } else {

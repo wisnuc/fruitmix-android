@@ -15,22 +15,14 @@ public abstract class AbstractRemoteFile extends AbstractFile{
     public static final String ALL_CAN_VIEW = "*";
 
     private String uuid;
-    private List<String> owners;
-    private List<String> writeList;
-    private List<String> readList;
+    private List<String> owners = new ArrayList<>();
+    private List<String> writeList= new ArrayList<>();
+    private List<String> readList= new ArrayList<>();
 
     private String parentFolderUUID;
     private String rootFolderUUID;
 
     private String parentFolderPath = "";
-
-    AbstractRemoteFile() {
-        owners = new ArrayList<>();
-        writeList = new ArrayList<>();
-        readList = new ArrayList<>();
-
-        setFileTypeResID(R.drawable.file_icon);
-    }
 
     public String getUuid() {
         return uuid;

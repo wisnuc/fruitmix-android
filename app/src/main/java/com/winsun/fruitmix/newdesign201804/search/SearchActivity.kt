@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.newdesign201804.search
 
+import android.app.Activity
+import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -11,12 +13,24 @@ import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.ActivitySearchBinding
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
+import com.winsun.fruitmix.newdesign201804.search.data.InjectSearchDataSource
 import com.winsun.fruitmix.util.Util
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.searchpage_toolbar_layout.view.*
+
+const val SEARCH_PLACE = "seach_place"
+
+fun startSearchActivity(searchFolderUUID: String, activity: Activity) {
+
+    val intent = Intent(activity, SearchActivity::class.java)
+    intent.putExtra(SEARCH_PLACE, searchFolderUUID)
+
+    activity.startActivity(intent)
+
+}
 
 class SearchActivity : BaseActivity() {
 
@@ -46,10 +60,12 @@ class SearchActivity : BaseActivity() {
 
         activitySearchBinding.noContentViewModel = noContentViewModel
 
+        val searchPlace = intent.getStringExtra(SEARCH_PLACE)
+
         val searchPresenter = SearchPresenter(
                 activitySearchBinding, toolbarViewModel, loadingViewModel, noContentViewModel,
-                InjectFileDataSource.inject(this)
-        )
+                InjectSearchDataSource.inject(this), searchPlace)
+
 
         searchPresenter.initView()
 
