@@ -21,14 +21,14 @@ object FakeTransmissionTaskRepository : TransmissionTaskDataSource {
         word.uuid = Util.createLocalUUid()
         word.size = 1320743L
 
-        tasks.add(MoveTask(word, ThreadManagerImpl.getInstance(), MoveTaskParam("")))
+        tasks.add(MoveTask(Util.createLocalUUid(),word, ThreadManagerImpl.getInstance(), MoveTaskParam("")))
 
         val xlsx = RemoteFile()
         xlsx.uuid = Util.createLocalUUid()
         xlsx.name = "哈哈.xlsx"
         xlsx.size = 1070243L
 
-        tasks.add(CopyTask(xlsx, ThreadManagerImpl.getInstance(), CopyTaskParam("")))
+        tasks.add(CopyTask(Util.createLocalUUid(),xlsx, ThreadManagerImpl.getInstance(), CopyTaskParam("")))
 
         val smb = RemoteFile()
         smb.uuid = Util.createLocalUUid()

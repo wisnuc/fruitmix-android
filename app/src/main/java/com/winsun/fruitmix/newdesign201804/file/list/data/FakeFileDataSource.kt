@@ -184,4 +184,9 @@ object FakeFileDataSource : FileDataSource {
     override fun uploadFile(fileUploadParam: FileUploadParam, task: Task) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+
+    override fun deleteFile(fileName: String, driveUUID: String, dirUUID: String, callback: BaseOperateCallback) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }

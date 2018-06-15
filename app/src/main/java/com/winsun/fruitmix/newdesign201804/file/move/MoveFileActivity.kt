@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.move
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -20,20 +21,30 @@ const val FILE_OPERATE_KEY = "file_operate_key"
 
 const val FILE_OPERATE_MOVE = 0x1001
 const val FILE_OPERATE_COPY = 0x1002
+const val FILE_OPERATE_SHARE_TO_SHARED_FOLDER = 0x1003
 
-
+const val FILE_MOVE_REQUEST_CODE = 0x1002
+const val FILE_COPY_REQUEST_CODE = 0x1003
+const val FILE_SHARE_TO_SHARED_FOLDER_REQUEST_CODE = 0x1004
 
 class MoveFileActivity : BaseToolbarActivity(),MoveFileView {
 
     companion object {
 
-        fun start(context:Context,selectedFiles:MutableList<AbstractFile>,fileOperateKey:Int){
+        fun start(activity: Activity,selectedFiles:MutableList<AbstractFile>,fileOperateKey:Int){
 
             SelectMoveFileDataSource.saveSelectFiles(selectedFiles)
 
-            val intent = Intent(context, MoveFileActivity::class.java)
+            val intent = Intent(activity, MoveFileActivity::class.java)
             intent.putExtra(FILE_OPERATE_KEY, fileOperateKey)
-            context.startActivity(intent)
+
+            when(fileOperateKey){
+                FILE_OPERATE_SHARE_TO_SHARED_FOLDER ->activity.startActivityForResult(intent, FILE_SHARE_TO_SHARED_FOLDER_REQUEST_CODE)
+                FILE_OPERATE_COPY -> activity.startActivityForResult(intent, FILE_COPY_REQUEST_CODE)
+                FILE_OPERATE_MOVE -> activity.startActivityForResult(intent, FILE_MOVE_REQUEST_CODE)
+            }
+
+            selectedFiles.clear()
 
         }
 
@@ -86,10 +97,11 @@ class MoveFileActivity : BaseToolbarActivity(),MoveFileView {
 
     override fun getToolbarTitle(): String {
 
-        return if (fileOperation == FILE_OPERATE_MOVE)
-            getString(R.string.move_to)
-        else
-            getString(R.string.copy_to)
+        return when (fileOperation) {
+            FILE_OPERATE_MOVE -> getString(R.string.move_to)
+            FILE_OPERATE_COPY -> getString(R.string.copy_to)
+            else -> getString(R.string.share_to_shared_folder)
+        }
     }
 
     override fun getRootTitleText():String {

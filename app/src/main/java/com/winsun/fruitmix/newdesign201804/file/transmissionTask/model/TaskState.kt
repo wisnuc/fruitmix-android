@@ -114,9 +114,11 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
     override fun onStartState() {
         super.onStartState()
 
-        speedHandler = SpeedHandler(Looper.getMainLooper(), this)
+        if (task.startSpeedHandler) {
+            speedHandler = SpeedHandler(Looper.getMainLooper(), this)
 
-        speedHandler.sendEmptyMessageDelayed(UPDATE_SPEED, DELAY_TIME)
+            speedHandler.sendEmptyMessageDelayed(UPDATE_SPEED, DELAY_TIME)
+        }
 
         task.setTotalSize(FileUtil.formatFileSize(maxSize))
 
@@ -125,7 +127,8 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
     override fun onFinishState() {
         super.onFinishState()
 
-        speedHandler.removeMessages(UPDATE_SPEED)
+        if (task.startSpeedHandler)
+            speedHandler.removeMessages(UPDATE_SPEED)
 
     }
 

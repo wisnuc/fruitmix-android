@@ -2,6 +2,7 @@ package com.winsun.fruitmix.newdesign201804.file.list
 
 import android.app.Activity
 import android.content.Intent
+import android.support.design.widget.Snackbar
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,9 @@ import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.FilePresenter
+import com.winsun.fruitmix.newdesign201804.file.move.FILE_COPY_REQUEST_CODE
+import com.winsun.fruitmix.newdesign201804.file.move.FILE_MOVE_REQUEST_CODE
+import com.winsun.fruitmix.newdesign201804.file.move.FILE_SHARE_TO_SHARED_FOLDER_REQUEST_CODE
 import com.winsun.fruitmix.newdesign201804.file.offlineFile.OfflineFileActivity
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.SharedFolderActivity
 import com.winsun.fruitmix.newdesign201804.file.transmission.InjectTransmissionDataSource
@@ -22,6 +26,7 @@ import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileUtil
 import com.winsun.fruitmix.newdesign201804.mainpage.DrawerItem
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPage
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
+import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
@@ -57,6 +62,16 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
                 InjectTransmissionTaskDataSource.provideInstance(activity),
                 InjectTransmissionDataSource.inject(activity),
                 InjectStationFileRepository.provideStationFileRepository(activity))
+
+        val swipeRefreshLayout = filePageBinding.swipeRefreshLayout
+
+        swipeRefreshLayout.setOnRefreshListener {
+            filePresenter.refreshCurrentFolder()
+
+            if (swipeRefreshLayout.isRefreshing)
+                swipeRefreshLayout.isRefreshing = false
+
+        }
 
         val task = DrawerItem(R.drawable.transfer_menu_icon, activity.getString(R.string.transmission_task), {
 
@@ -99,6 +114,10 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
         return filePageBinding.root
     }
 
+    override fun getActivity(): Activity {
+        return activity
+    }
+
     override fun refreshView() {
 
         if (initPage) {
@@ -123,7 +142,7 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
 
     override fun enterFileBrowserActivity() {
 
-        val intent = Intent(activity,FileBrowserActivity::class.java)
+        val intent = Intent(activity, FileBrowserActivity::class.java)
 
         activity.startActivityForResult(intent, FILE_BROWSER_REQUEST_CODE)
 
@@ -133,6 +152,13 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
 
         if (requestCode == FILE_BROWSER_REQUEST_CODE && resultCode == Activity.RESULT_OK)
             filePresenter.onActivityResult(requestCode, resultCode, data)
+        else if (requestCode == FILE_MOVE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            SnackbarUtil.showSnackBar(filePageBinding.root, Snackbar.LENGTH_SHORT, messageStr = "创建移动任务成功，请到任务列表中查看")
+        } else if (requestCode == FILE_COPY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            SnackbarUtil.showSnackBar(filePageBinding.root, Snackbar.LENGTH_SHORT, messageStr = "创建拷贝任务成功，请到任务列表中查看")
+        } else if (requestCode == FILE_SHARE_TO_SHARED_FOLDER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            SnackbarUtil.showSnackBar(filePageBinding.root, Snackbar.LENGTH_SHORT, messageStr = "创建分享任务成功，请到任务列表中查看")
+        }
 
     }
 
@@ -194,7 +220,7 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
 
     }
 
-    fun downloadBtnOnClick(){
+    fun downloadBtnOnClick() {
         filePresenter.handleDownloadBtnOnClickWhenSelectFiles()
     }
 

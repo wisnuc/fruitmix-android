@@ -1,62 +1,69 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask.data
 
+import com.winsun.fruitmix.BaseDataRepository
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
+import com.winsun.fruitmix.file.data.model.FileTaskManager
+import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.DownloadTask
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
+import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.util.FileUtil
 
-object TransmissionTaskRepository : TransmissionTaskDataSource {
+class TransmissionTaskRepository(val taskManager: TaskManager, val transmissionTaskDataSource: TransmissionTaskDataSource,
+                                 threadManager: ThreadManager)
+    : BaseDataRepository(threadManager), TransmissionTaskDataSource {
 
-    private val tasks = mutableListOf<Task>()
 
     override fun getAllTransmissionTasks(baseLoadDataCallback: BaseLoadDataCallback<Task>) {
 
-        baseLoadDataCallback.onSucceed(tasks, OperationSuccess())
+        val tasks = taskManager.getAllTasks()
+
+        val runOnMainThreadCallback = createLoadCallbackRunOnMainThread(baseLoadDataCallback)
+
+        mThreadManager.runOnCacheThread({
+
+            transmissionTaskDataSource.getAllTransmissionTasks(object : BaseLoadDataCallback<Task> {
+                override fun onFail(operationResult: OperationResult?) {
+                    runOnMainThreadCallback.onSucceed(tasks, OperationSuccess())
+                }
+
+                override fun onSucceed(data: MutableList<Task>?, operationResult: OperationResult?) {
+
+                    data?.addAll(tasks)
+
+                    runOnMainThreadCallback.onSucceed(data, OperationSuccess())
+
+                }
+            })
+
+        })
+
 
     }
 
     override fun addTransmissionTask(task: Task, baseOperateCallback: BaseOperateCallback) {
 
-        renameFileNameIfNecessary(task)
-
-        tasks.add(task)
+        taskManager.addTask(task)
 
         baseOperateCallback.onSucceed()
-    }
-
-    private fun renameFileNameIfNecessary(task: Task) {
-        var code = 1
-
-        val originalName = task.abstractFile.name
-        var newName = originalName
-
-        while (true) {
-
-            val list = tasks.filter { it is DownloadTask }
-
-            val result = list.filter { it.abstractFile.name == task.abstractFile.name }
-
-            if (result.size > 1) {
-                newName = FileUtil.renameFileName(code++, newName)
-            }
-
-            if (FileUtil.checkFileExistInDownloadFolder(newName))
-                newName = FileUtil.renameFileName(code++, newName)
-            else
-                break
-
-        }
-
-        task.abstractFile.name = newName
 
     }
 
     override fun deleteTransmissionTask(task: Task, baseOperateCallback: BaseOperateCallback) {
-        tasks.remove(task)
+        val result = taskManager.deleteTask(task)
 
-        baseOperateCallback.onSucceed()
+        if (result)
+            baseOperateCallback.onSucceed()
+        else {
+
+            mThreadManager.runOnCacheThread({
+                transmissionTaskDataSource.deleteTransmissionTask(task, createOperateCallbackRunOnMainThread(baseOperateCallback))
+            })
+
+        }
+
     }
 
 }

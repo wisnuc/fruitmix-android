@@ -44,6 +44,7 @@ public class RetrieveFileFromOtherAppUseCase {
 
         }
 
+
         return null;
 
     }
@@ -60,6 +61,18 @@ public class RetrieveFileFromOtherAppUseCase {
             Log.d(TAG, "handleSendFile: file Uri: " + uri + " uri.path: " + path);
 
             return path;
+        } else {
+
+            uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+
+            if (uri != null) {
+
+                Log.d(TAG, "handleSendFile: file Uri: " + uri + " uri.path: " + uri.getPath());
+
+                return uri.getPath();
+
+            }
+
         }
 
         return null;

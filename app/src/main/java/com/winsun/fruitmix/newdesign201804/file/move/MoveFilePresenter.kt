@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.move
 
+import android.app.Activity
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
@@ -88,40 +89,56 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
             moveBtn.setOnClickListener {
                 doCopy()
             }
+
+        } else {
+
+            moveBtn.text = context.getText(R.string.copy_to)
+
+            moveBtn.setOnClickListener {
+                doCopy()
+            }
+
         }
 
     }
 
     private var getFileCount = 0
-    private val totalCount = 2
+    private var totalCount = 2
 
     private fun getRoot() {
 
         getFileCount = 0
 
+        totalCount = if (fileOperation == FILE_OPERATE_SHARE_TO_SHARED_FOLDER)
+            1
+        else
+            2
+
         showLoadingBg()
 
-        fileDataSource.getFile(currentUserHome, currentUserHome, object : BaseLoadDataCallback<AbstractRemoteFile> {
+        if (fileOperation != FILE_OPERATE_SHARE_TO_SHARED_FOLDER) {
+            fileDataSource.getFile(currentUserHome, currentUserHome, object : BaseLoadDataCallback<AbstractRemoteFile> {
 
-            override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+                override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
-                data?.forEach {
-                    it.rootFolderUUID = currentUserHome
+                    data?.forEach {
+                        it.rootFolderUUID = currentUserHome
+                    }
+
+                    currentFolderItems.addAll(data!!)
+
+                    handleGetFileFinish()
+
                 }
 
-                currentFolderItems.addAll(data!!)
+                override fun onFail(operationResult: OperationResult?) {
 
-                handleGetFileFinish()
+                    handleGetFileFinish()
 
-            }
+                }
 
-            override fun onFail(operationResult: OperationResult?) {
-
-                handleGetFileFinish()
-
-            }
-
-        })
+            })
+        }
 
         shareRootDataUseCase.getRoot(object : BaseLoadDataCallback<AbstractRemoteFile> {
 
@@ -174,6 +191,8 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
                 refreshData()
             }
+
+            refreshMoveState(selectFiles[0] as AbstractRemoteFile)
 
         }
 
@@ -230,8 +249,6 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
         fileRecyclerViewAdapter.setItemList(viewItems)
         fileRecyclerViewAdapter.notifyDataSetChanged()
 
-        refreshMoveState(selectFiles[0] as AbstractRemoteFile)
-
     }
 
     private fun gotoNextFolder(abstractRemoteFile: AbstractRemoteFile) {
@@ -244,9 +261,13 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
                 showNoContentBg()
 
+                refreshMoveState(selectFiles[0] as AbstractRemoteFile)
+
             }
 
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+
+                retrievedFolders.add(abstractRemoteFile)
 
                 handleGetFileSucceed(data, abstractRemoteFile)
 
@@ -258,7 +279,6 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
     private fun handleGetFileSucceed(data: MutableList<AbstractRemoteFile>?, abstractRemoteFile: AbstractRemoteFile) {
 
-        retrievedFolders.add(abstractRemoteFile)
 
         if (data!!.isEmpty())
             showNoContentBg()
@@ -272,6 +292,9 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
             refreshTitle()
         }
+
+        refreshMoveState(selectFiles[0] as AbstractRemoteFile)
+
     }
 
     fun notRoot(): Boolean {
@@ -292,7 +315,6 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
         if (remoteFile.uuid == rootUUID) {
             getRoot()
-
             refreshTitle()
 
         } else {
@@ -302,25 +324,13 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
             fileDataSource.getFile(remoteFile.rootFolderUUID, remoteFile.uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
                 override fun onFail(operationResult: OperationResult?) {
                     showNoContentBg()
+
+                    refreshMoveState(selectFiles[0] as AbstractRemoteFile)
                 }
 
                 override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
-                    if (data!!.isEmpty())
-                        showNoContentBg()
-                    else {
-
-                        showContentBg()
-
-                        currentFolderItems.clear()
-                        currentFolderItems.addAll(data)
-
-                        refreshData()
-
-                        refreshTitle()
-
-                    }
-
+                    handleGetFileSucceed(data, remoteFile)
 
                 }
             })
@@ -377,7 +387,9 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
                 moveFileView.dismissDialog()
 
-                SnackbarUtil.showSnackBar(moveBtn, Snackbar.LENGTH_SHORT, messageStr = "创建移动任务成功，请到任务列表中查看")
+                moveFileView.setResult(Activity.RESULT_OK)
+
+                moveFileView.finishView()
 
             }
         })
@@ -420,7 +432,9 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
                 moveFileView.dismissDialog()
 
-                SnackbarUtil.showSnackBar(moveBtn, Snackbar.LENGTH_SHORT, messageStr = "创建拷贝任务成功，请到任务列表中查看")
+                moveFileView.setResult(Activity.RESULT_OK)
+
+                moveFileView.finishView()
 
             }
         })

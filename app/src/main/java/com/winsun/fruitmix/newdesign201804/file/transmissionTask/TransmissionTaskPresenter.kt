@@ -23,6 +23,7 @@ import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
+import com.winsun.fruitmix.util.Util
 
 import kotlinx.android.synthetic.main.transmission_task_item.view.*
 
@@ -133,12 +134,12 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
         data?.forEach {
 
-            if (it is SMBTask)
-                it.setCurrentState(FinishTaskState(it.abstractFile.size,it))
-            else if (it is CopyTask)
-                it.setCurrentState(ErrorTaskState(it))
-            else
-                it.startTask()
+            when (it) {
+                is SMBTask -> it.setCurrentState(FinishTaskState(it.abstractFile.size, it))
+                is CopyTask -> it.setCurrentState(it.getCurrentState())
+                is MoveTask -> it.setCurrentState(it.getCurrentState())
+                else -> it.startTask()
+            }
 
         }
 

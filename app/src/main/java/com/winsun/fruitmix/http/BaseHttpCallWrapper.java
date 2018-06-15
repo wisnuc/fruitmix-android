@@ -67,6 +67,41 @@ public class BaseHttpCallWrapper {
         operateCall(httpRequest, callback, parser, 0);
     }
 
+    public void operateCall(HttpRequest httpRequest, List<TextFormData> textFormDatas, List<FileFormData> fileFormDatas, BaseOperateCallback callback) {
+
+        if (!checkPreCondition(httpRequest, callback)) return;
+
+        try {
+
+            HttpResponse httpResponse = iHttpUtil.remoteCallRequest(iHttpUtil.createPostRequest(httpRequest,
+                    iHttpUtil.createFormDataRequestBody(textFormDatas, fileFormDatas)));
+
+            if (httpResponse != null && httpResponse.getResponseCode() == 200) {
+
+                callback.onSucceed();
+
+            } else {
+
+                callback.onFail(new OperationNetworkException(httpResponse));
+
+            }
+
+        } catch (MalformedURLException e) {
+
+            callback.onFail(new OperationMalformedUrlException());
+
+        } catch (SocketTimeoutException ex) {
+
+            callback.onFail(new OperationSocketTimeoutException());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            callback.onFail(new OperationIOException());
+        }
+
+    }
+
     public <T> void operateCall(HttpRequest httpRequest, List<TextFormData> textFormDatas, List<FileFormData> fileFormDatas, BaseOperateDataCallback<T> callback, RemoteDataParser<T> parser) {
 
         if (!checkPreCondition(httpRequest, callback)) return;

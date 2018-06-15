@@ -142,6 +142,12 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
 
             refresh_layout.visibility = View.VISIBLE
 
+            refresh_layout.setOnClickListener {
+
+                addEquipmentPresenter.startSearchState()
+
+            }
+
             operate_btn.visibility = View.INVISIBLE
 
         }
@@ -150,8 +156,10 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
 
     override fun searchSucceedState() {
 
-        if (new_equipment_viewPager.currentItem == 0)
-            addEquipmentPresenter.onPageSelect(0)
+//        if (new_equipment_viewPager.currentItem == 0)
+//            addEquipmentPresenter.onPageSelect(0)
+
+        addEquipmentPresenter.onPageSelect(new_equipment_viewPager.currentItem)
 
         searchTimeoutState(true)
 

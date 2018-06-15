@@ -26,9 +26,11 @@ import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import org.json.JSONException
 import org.json.JSONObject
+import org.w3c.dom.Text
 import java.io.*
 import java.net.MalformedURLException
 import java.net.SocketTimeoutException
+import java.util.*
 
 private const val OP = "op"
 private const val RENAME = "rename"
@@ -40,7 +42,7 @@ private const val TAG = "FileNewOperate"
 
 private const val TASKS = "/tasks"
 
-class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil: IHttpUtil,val uploadFileInterface: UploadFileInterface)
+class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil: IHttpUtil, val uploadFileInterface: UploadFileInterface)
     : BaseRemoteDataSourceImpl(iHttpUtil, httpRequestFactory) {
 
     fun renameFile(oldName: String, newName: String, driveUUID: String, dirUUID: String, callback: BaseOperateCallback) {
@@ -53,32 +55,16 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
             return
         }
 
+
         Log.d(TAG, "start rename")
 
-        val httpResponse: HttpResponse?
-        try {
+        val value = JsonObject()
 
-            httpResponse = renameFileWithStationAPI(httpRequest, oldName, newName)
+        value.addProperty(OP, RENAME)
 
-            if (httpResponse != null && httpResponse.responseCode == 200)
-                callback.onSucceed()
-            else
-                callback.onFail(OperationNetworkException(httpResponse))
+        val textFormData = TextFormData("$oldName|$newName", value.toString())
 
-        } catch (e: MalformedURLException) {
-
-            callback.onFail(OperationMalformedUrlException())
-
-        } catch (e: SocketTimeoutException) {
-
-            callback.onFail(OperationSocketTimeoutException())
-
-        } catch (e: IOException) {
-
-            e.printStackTrace()
-
-            callback.onFail(OperationIOException())
-        }
+        wrapper.operateCall(httpRequest,Collections.singletonList(textFormData),Collections.emptyList(),callback)
 
     }
 
@@ -138,7 +124,7 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
         val entriesJsonArray = JsonArray()
 
         entries.forEach {
-            entriesJsonArray.add(it.uuid)
+            entriesJsonArray.add(it.name)
         }
 
         value.add("entries", entriesJsonArray)
@@ -194,12 +180,12 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
 
     }
 
-    fun uploadFile(fileUploadParam: FileUploadParam,task: Task){
+    fun uploadFile(fileUploadParam: FileUploadParam, task: Task) {
 
-        uploadFileWithProgress(fileUploadParam,task)
+        uploadFileWithProgress(fileUploadParam, task)
     }
 
-    private fun uploadFileWithProgress(fileUploadParam: FileUploadParam,task: Task): OperationResult {
+    private fun uploadFileWithProgress(fileUploadParam: FileUploadParam, task: Task): OperationResult {
 
         val httpRequest = createUploadFileHttpRequest(fileUploadParam.driveUUID, fileUploadParam.dirUUID)
 
@@ -297,6 +283,29 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
 
         }
         return requestBody
+    }
+
+
+    fun deleteFile(fileName: String, driveUUID: String, dirUUID: String, callback: BaseOperateCallback) {
+
+        val path = "$ROOT_DRIVE_PARAMETER/$driveUUID$DIRS$dirUUID/entries"
+
+        val httpRequest = httpRequestFactory.createHttpPostRequest(path, "")
+
+        if (!wrapper.checkPreCondition(httpRequest, callback)) {
+            return
+        }
+
+        Log.d(TAG, "start delete")
+
+        val value = JsonObject()
+
+        value.addProperty(OP, "remove")
+
+        val textFormData = TextFormData(fileName, value.toString())
+
+        wrapper.operateCall(httpRequest,Collections.singletonList(textFormData),Collections.emptyList(),callback)
+
     }
 
 

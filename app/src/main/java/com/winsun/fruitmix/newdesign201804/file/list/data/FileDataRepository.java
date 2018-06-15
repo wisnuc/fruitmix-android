@@ -115,6 +115,18 @@ public class FileDataRepository extends BaseDataRepository implements FileDataSo
 
     @Override
     public void uploadFile(@NotNull FileUploadParam fileUploadParam, @NotNull Task task) {
-        mFileNewOperateDataSource.uploadFile(fileUploadParam,task);
+        mFileNewOperateDataSource.uploadFile(fileUploadParam, task);
+    }
+
+    @Override
+    public void deleteFile(@NotNull final String fileName, @NotNull final String driveUUID, @NotNull final String dirUUID, @NotNull final BaseOperateCallback callback) {
+
+        mThreadManager.runOnCacheThread(new Runnable() {
+            @Override
+            public void run() {
+                mFileNewOperateDataSource.deleteFile(fileName, driveUUID, dirUUID, createOperateCallbackRunOnMainThread(callback));
+            }
+        });
+
     }
 }

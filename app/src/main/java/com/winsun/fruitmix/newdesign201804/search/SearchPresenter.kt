@@ -66,6 +66,10 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
 
             editText.text.clear()
 
+            currentInputText = ""
+
+            handleSelectedSearchTypeItemCountOrInputTextChanged()
+
         }
 
 /*        editText.addTextChangedListener(object : TextWatcher {
@@ -215,11 +219,6 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
 
         loadingViewModel.showLoading.set(true)
 
-        val searchKeys = mutableListOf<String>()
-
-//        if (currentInputText.isNotEmpty())
-//            searchKeys.add(currentInputText)
-
         val classesBuilder = StringBuilder()
         val typesBuilder = StringBuilder()
 
@@ -237,43 +236,53 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
 
         }
 
-        val classes = classesBuilder.toString()
-        val types = typesBuilder.toString()
+        var classes = classesBuilder.toString()
+        var types = typesBuilder.toString()
+
+        if (classes.isNotEmpty()) {
+            val classesLength = classes.length
+            classes = classes.substring(0, classesLength - 1)
+        }
+
+        if (types.isNotEmpty()) {
+            val typesLength = types.length
+            types = types.substring(0, typesLength - 1)
+        }
 
         var searchOrder = SearchOrder.NUll
 
-        if(currentInputText.isNotEmpty())
-            searchOrder= SearchOrder.FIND
+        if (currentInputText.isNotEmpty())
+            searchOrder = SearchOrder.FIND
 
         searchDataSource.searchFile(name = if (currentInputText.isNotEmpty()) currentInputText else "", places = searchPlace,
                 types = if (types.isNotEmpty()) types else "", searchClasses = if (classes.isNotEmpty()) classes else "",
                 searchOrder = searchOrder,
                 baseLoadDataCallback = object : BaseLoadDataCallback<AbstractRemoteFile> {
 
-            override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+                    override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
-                if (data!!.isEmpty()) {
+                        if (data!!.isEmpty()) {
 
-                    loadingViewModel.showLoading.set(false)
-                    noContentViewModel.showNoContent.set(true)
+                            loadingViewModel.showLoading.set(false)
+                            noContentViewModel.showNoContent.set(true)
 
-                } else {
+                        } else {
 
-                    loadingViewModel.showLoading.set(false)
-                    noContentViewModel.showNoContent.set(false)
+                            loadingViewModel.showLoading.set(false)
+                            noContentViewModel.showNoContent.set(false)
 
-                    handleSearchSucceed(data)
+                            handleSearchSucceed(data)
 
-                }
+                        }
 
-            }
+                    }
 
-            override fun onFail(operationResult: OperationResult?) {
-                loadingViewModel.showLoading.set(false)
-                noContentViewModel.showNoContent.set(true)
-            }
+                    override fun onFail(operationResult: OperationResult?) {
+                        loadingViewModel.showLoading.set(false)
+                        noContentViewModel.showNoContent.set(true)
+                    }
 
-        })
+                })
 
     }
 

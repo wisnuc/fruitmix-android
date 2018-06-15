@@ -95,6 +95,11 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
 
     override fun startSearchState() {
 
+        resetData()
+
+//        equipmentViewPagerAdapter.resetForceRefresh()
+        equipmentViewPagerAdapter.resetFindFirstEquipment()
+
         searchEquipmentUIState.startSearchState()
 
         equipmentSearchManager.startDiscovery {
@@ -106,6 +111,16 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
         customHandler.sendEmptyMessageDelayed(SEARCH_TIMEOUT, SEARCH_TIMEOUT_SECOND)
 
     }
+
+    private fun resetData(){
+
+        baseNewEquipmentStates.clear()
+
+        mEquipmentIps.clear()
+        mEquipmentSerialNumbers.clear()
+
+    }
+
 
     fun handleIpByManual(equipment: Equipment) {
         handleEquipmentFounded(equipment)
@@ -243,7 +258,6 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
         equipmentViewPagerAdapter.setEquipmentStates(baseNewEquipmentStates)
         equipmentViewPagerAdapter.notifyDataSetChanged()
 
-
     }
 
     fun onPageSelect(position: Int) {
@@ -293,10 +307,19 @@ private class EquipmentViewPagerAdapter(val addEquipmentPresenter: AddEquipmentP
     private val mEquipmentStates: MutableList<EquipmentState> = mutableListOf()
 
     private var findFirstEquipment = true
+    private var forceRefresh = false
 
     fun setEquipmentStates(equipmentStates: List<EquipmentState>) {
         mEquipmentStates.clear()
         mEquipmentStates.addAll(equipmentStates)
+    }
+
+    fun resetFindFirstEquipment() {
+        findFirstEquipment = true
+    }
+
+    fun resetForceRefresh() {
+        forceRefresh = true
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
@@ -341,6 +364,19 @@ private class EquipmentViewPagerAdapter(val addEquipmentPresenter: AddEquipmentP
 
     override fun getCount(): Int {
         return mEquipmentStates.size
+    }
+
+    override fun getItemPosition(`object`: Any): Int {
+
+        if (forceRefresh) {
+
+            forceRefresh = false
+
+            return POSITION_NONE
+
+        }
+
+        return super.getItemPosition(`object`)
     }
 
 }

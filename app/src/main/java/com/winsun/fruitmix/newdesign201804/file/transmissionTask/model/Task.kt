@@ -14,7 +14,8 @@ import com.winsun.fruitmix.util.FileUtil
 import java.io.File
 import java.util.concurrent.Future
 
-abstract class Task(val abstractFile: AbstractFile, val threadManager: ThreadManager, val max: Int = 100) {
+abstract class Task(val abstractFile: AbstractFile, val threadManager: ThreadManager, val max: Int = 100,
+                    val startSpeedHandler: Boolean = true) {
 
     abstract fun getTypeResID(): Int
 
@@ -114,7 +115,7 @@ interface TaskStateObserver {
 
 class UploadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource,
                  val fileUploadParam: FileUploadParam,
-                 threadManager: ThreadManager) : Task(abstractFile, threadManager) {
+                 threadManager: ThreadManager) : Task( abstractFile, threadManager) {
 
     private lateinit var future: Future<Boolean>
 
@@ -145,8 +146,8 @@ class UploadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource,
 
 private const val DOWNLOAD_TASK_TAG = "download_task"
 
-open class DownloadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
-                        val currentUserUUID: String, threadManager: ThreadManager) : Task(abstractFile, threadManager) {
+open class DownloadTask( abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
+                        val currentUserUUID: String, threadManager: ThreadManager) : Task( abstractFile, threadManager) {
 
     private var future: Future<Boolean>? = null
 
@@ -191,8 +192,8 @@ open class DownloadTask(abstractFile: AbstractFile, val fileDataSource: FileData
 
 data class BTTaskParam(val transmission: Transmission)
 
-class BTTask(abstractFile: AbstractFile, threadManager: ThreadManager, val btTaskParam: BTTaskParam,
-             val transmissionDataSource: TransmissionDataSource) : Task(abstractFile, threadManager) {
+class BTTask( abstractFile: AbstractFile, threadManager: ThreadManager, val btTaskParam: BTTaskParam,
+             val transmissionDataSource: TransmissionDataSource) : Task( abstractFile, threadManager) {
     override fun getTypeResID(): Int {
         return R.drawable.bt_task
     }
@@ -213,7 +214,8 @@ class BTTask(abstractFile: AbstractFile, threadManager: ThreadManager, val btTas
 
 data class SMBTaskParam(val smbUrl: String)
 
-class SMBTask(abstractFile: AbstractFile, threadManager: ThreadManager, val smbTaskParam: SMBTaskParam) : Task(abstractFile, threadManager) {
+class SMBTask(abstractFile: AbstractFile, threadManager: ThreadManager, val smbTaskParam: SMBTaskParam)
+    : Task( abstractFile, threadManager) {
     override fun getTypeResID(): Int {
 
         return R.drawable.smb_task
@@ -232,7 +234,8 @@ class SMBTask(abstractFile: AbstractFile, threadManager: ThreadManager, val smbT
 
 data class MoveTaskParam(val targetFolderUUID: String)
 
-class MoveTask(abstractFile: AbstractFile, threadManager: ThreadManager, val moveTaskParam: MoveTaskParam) : Task(abstractFile, threadManager) {
+class MoveTask(val uuid: String, abstractFile: AbstractFile, threadManager: ThreadManager, val moveTaskParam: MoveTaskParam,
+               startSpeedHandler: Boolean = false) : Task(abstractFile, threadManager, startSpeedHandler = startSpeedHandler) {
     override fun getTypeResID(): Int {
 
         return R.drawable.move_task
@@ -251,7 +254,8 @@ class MoveTask(abstractFile: AbstractFile, threadManager: ThreadManager, val mov
 
 data class CopyTaskParam(val targetFolderUUID: String)
 
-class CopyTask(abstractFile: AbstractFile, threadManager: ThreadManager, val copyTaskParam: CopyTaskParam) : Task(abstractFile, threadManager) {
+class CopyTask(val uuid: String, abstractFile: AbstractFile, threadManager: ThreadManager, val copyTaskParam: CopyTaskParam,
+               startSpeedHandler: Boolean = false) : Task(abstractFile, threadManager, startSpeedHandler = startSpeedHandler) {
     override fun getTypeResID(): Int {
 
         return R.drawable.copy_to

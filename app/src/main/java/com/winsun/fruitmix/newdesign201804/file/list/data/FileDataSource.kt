@@ -32,4 +32,6 @@ interface FileDataSource{
 
     fun uploadFile(fileUploadParam: FileUploadParam,task: Task)
 
+    fun deleteFile(fileName:String,driveUUID: String,dirUUID: String,callback: BaseOperateCallback)
+
 }
