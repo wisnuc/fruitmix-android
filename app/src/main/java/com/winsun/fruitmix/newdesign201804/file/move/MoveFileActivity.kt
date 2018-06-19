@@ -13,6 +13,7 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.ActivityMoveFileBinding
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 
@@ -27,19 +28,19 @@ const val FILE_MOVE_REQUEST_CODE = 0x1002
 const val FILE_COPY_REQUEST_CODE = 0x1003
 const val FILE_SHARE_TO_SHARED_FOLDER_REQUEST_CODE = 0x1004
 
-class MoveFileActivity : BaseToolbarActivity(),MoveFileView {
+class MoveFileActivity : BaseToolbarActivity(), MoveFileView {
 
     companion object {
 
-        fun start(activity: Activity,selectedFiles:MutableList<AbstractFile>,fileOperateKey:Int){
+        fun start(activity: Activity, selectedFiles: MutableList<AbstractFile>, fileOperateKey: Int) {
 
             SelectMoveFileDataSource.saveSelectFiles(selectedFiles)
 
             val intent = Intent(activity, MoveFileActivity::class.java)
             intent.putExtra(FILE_OPERATE_KEY, fileOperateKey)
 
-            when(fileOperateKey){
-                FILE_OPERATE_SHARE_TO_SHARED_FOLDER ->activity.startActivityForResult(intent, FILE_SHARE_TO_SHARED_FOLDER_REQUEST_CODE)
+            when (fileOperateKey) {
+                FILE_OPERATE_SHARE_TO_SHARED_FOLDER -> activity.startActivityForResult(intent, FILE_SHARE_TO_SHARED_FOLDER_REQUEST_CODE)
                 FILE_OPERATE_COPY -> activity.startActivityForResult(intent, FILE_COPY_REQUEST_CODE)
                 FILE_OPERATE_MOVE -> activity.startActivityForResult(intent, FILE_MOVE_REQUEST_CODE)
             }
@@ -80,8 +81,9 @@ class MoveFileActivity : BaseToolbarActivity(),MoveFileView {
             cancelMove()
         }
 
-        moveFilePresenter = MoveFilePresenter(InjectFileDataSource.inject(this), activityMoveFileBinding,
-                toolbarViewModel, this,loadingViewModel,noContentViewModel,fileOperation)
+        moveFilePresenter = MoveFilePresenter(InjectFileDataSource.inject(this),
+                InjectTransmissionTaskDataSource.provideInstance(this), activityMoveFileBinding,
+                toolbarViewModel, this, loadingViewModel, noContentViewModel, fileOperation)
 
         moveFilePresenter.initView()
 
@@ -104,7 +106,7 @@ class MoveFileActivity : BaseToolbarActivity(),MoveFileView {
         }
     }
 
-    override fun getRootTitleText():String {
+    override fun getRootTitleText(): String {
         return toolbarTitle
     }
 

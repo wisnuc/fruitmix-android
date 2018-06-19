@@ -3,6 +3,8 @@ package com.winsun.fruitmix.newdesign201804.file.list.data
 import android.content.Context
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
 import com.winsun.fruitmix.http.InjectHttp
+import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 
 class InjectFileDataSource {
@@ -15,10 +17,9 @@ class InjectFileDataSource {
 
         fun injectFileNewOperateDataSource(context: Context): FileNewOperateDataSource {
 
-
-
             return FileNewOperateDataSource(InjectHttp.provideHttpRequestFactory(context),
-                    InjectHttp.provideIHttpUtil(context),InjectHttp.provideUploadFileInterface())
+                    InjectHttp.provideIHttpUtil(context), InjectHttp.provideUploadFileInterface(),
+                    ThreadManagerImpl.getInstance(), context.getCurrentUserUUID())
 
         }
 

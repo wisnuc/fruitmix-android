@@ -146,6 +146,11 @@ public class InboxListPage implements Page, IShowHideFragmentListener, InboxView
     }
 
     @Override
+    public void setResult(int resultCode, Intent data) {
+
+    }
+
+    @Override
     public Dialog showProgressDialog(String message) {
         return mActivity.showProgressDialog(message);
     }

@@ -82,7 +82,8 @@ public class FileDataRepository extends BaseDataRepository implements FileDataSo
     }
 
     @Override
-    public void copyFile(@NotNull final AbstractRemoteFile srcFolder, @NotNull final AbstractRemoteFile targetFolder, @NotNull final List<? extends AbstractRemoteFile> entries, @NotNull final BaseOperateCallback callback) {
+    public void copyFile(@NotNull final AbstractRemoteFile srcFolder, @NotNull final AbstractRemoteFile targetFolder,
+                         @NotNull final List<? extends AbstractRemoteFile> entries, @NotNull final BaseOperateDataCallback<Task> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override
@@ -95,7 +96,8 @@ public class FileDataRepository extends BaseDataRepository implements FileDataSo
     }
 
     @Override
-    public void moveFile(@NotNull final AbstractRemoteFile srcFolder, @NotNull final AbstractRemoteFile targetFolder, @NotNull final List<? extends AbstractRemoteFile> entries, @NotNull final BaseOperateCallback callback) {
+    public void moveFile(@NotNull final AbstractRemoteFile srcFolder, @NotNull final AbstractRemoteFile targetFolder,
+                         @NotNull final List<? extends AbstractRemoteFile> entries, @NotNull final BaseOperateDataCallback<Task> callback) {
 
         mThreadManager.runOnCacheThread(new Runnable() {
             @Override

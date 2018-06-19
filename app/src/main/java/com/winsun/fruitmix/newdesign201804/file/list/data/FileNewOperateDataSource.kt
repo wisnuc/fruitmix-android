@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.winsun.fruitmix.callback.BaseOperateCallback
+import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.exception.NetworkException
 import com.winsun.fruitmix.file.data.download.FileDownloadErrorState
 import com.winsun.fruitmix.file.data.download.FileDownloadFinishedState
@@ -16,9 +17,12 @@ import com.winsun.fruitmix.file.data.model.LocalFolder
 import com.winsun.fruitmix.http.*
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory
 import com.winsun.fruitmix.model.operationResult.*
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.RemoteOneTransmissionTaskParser
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.ErrorTaskState
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
 import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileInterface
+import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.util.FileUtil
 import com.winsun.fruitmix.util.Util
 import okhttp3.Request
@@ -42,7 +46,9 @@ private const val TAG = "FileNewOperate"
 
 private const val TASKS = "/tasks"
 
-class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil: IHttpUtil, val uploadFileInterface: UploadFileInterface)
+class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil: IHttpUtil,
+                               val uploadFileInterface: UploadFileInterface,
+                               val threadManager: ThreadManager,val currentUserUUID:String )
     : BaseRemoteDataSourceImpl(iHttpUtil, httpRequestFactory) {
 
     fun renameFile(oldName: String, newName: String, driveUUID: String, dirUUID: String, callback: BaseOperateCallback) {
@@ -90,7 +96,7 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
     }
 
 
-    fun moveFile(srcFile: AbstractRemoteFile, targetFile: AbstractRemoteFile, entries: List<AbstractRemoteFile>, callback: BaseOperateCallback) {
+    fun moveFile(srcFile: AbstractRemoteFile, targetFile: AbstractRemoteFile, entries: List<AbstractRemoteFile>, callback: BaseOperateDataCallback<Task>) {
 
         val value = generateTaskAPIBody("move", srcFile, targetFile, entries)
 
@@ -100,7 +106,7 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
             return
         }
 
-        wrapper.operateCall(httpRequest, callback)
+        wrapper.operateCall(httpRequest, callback,RemoteOneTransmissionTaskParser(threadManager,currentUserUUID))
 
     }
 
@@ -134,7 +140,7 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
         return value
     }
 
-    fun copyFile(srcFile: AbstractRemoteFile, targetFile: AbstractRemoteFile, entries: List<AbstractRemoteFile>, callback: BaseOperateCallback) {
+    fun copyFile(srcFile: AbstractRemoteFile, targetFile: AbstractRemoteFile, entries: List<AbstractRemoteFile>, callback: BaseOperateDataCallback<Task>) {
 
         val value = generateTaskAPIBody("copy", srcFile, targetFile, entries)
 
@@ -144,7 +150,7 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
             return
         }
 
-        wrapper.operateCall(httpRequest, callback)
+        wrapper.operateCall(httpRequest, callback,RemoteOneTransmissionTaskParser(threadManager,currentUserUUID))
 
     }
 

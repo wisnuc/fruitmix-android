@@ -1,20 +1,30 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask.model
 
+import android.os.Handler
+import android.os.Message
 import android.util.Log
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
+import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam
 import com.winsun.fruitmix.file.data.model.AbstractFile
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
+import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileUploadParam
 import com.winsun.fruitmix.newdesign201804.file.transmission.TransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmission.model.Transmission
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.util.FileUtil
 import java.io.File
 import java.util.concurrent.Future
 
-abstract class Task(val abstractFile: AbstractFile, val threadManager: ThreadManager, val max: Int = 100,
+const val TASK_UUID_KEY = "task_uuid"
+
+const val TASK_TAG = "task"
+
+abstract class Task(val uuid: String, val createUserUUID: String, val abstractFile: AbstractFile, val threadManager: ThreadManager, val max: Int = 100,
                     val startSpeedHandler: Boolean = true) {
 
     abstract fun getTypeResID(): Int
@@ -113,9 +123,9 @@ interface TaskStateObserver {
 
 }
 
-class UploadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource,
+class UploadTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, val fileDataSource: FileDataSource,
                  val fileUploadParam: FileUploadParam,
-                 threadManager: ThreadManager) : Task( abstractFile, threadManager) {
+                 threadManager: ThreadManager) : Task(uuid, createUserUUID, abstractFile, threadManager) {
 
     private lateinit var future: Future<Boolean>
 
@@ -146,8 +156,8 @@ class UploadTask(abstractFile: AbstractFile, val fileDataSource: FileDataSource,
 
 private const val DOWNLOAD_TASK_TAG = "download_task"
 
-open class DownloadTask( abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
-                        val currentUserUUID: String, threadManager: ThreadManager) : Task( abstractFile, threadManager) {
+open class DownloadTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
+                        val currentUserUUID: String, threadManager: ThreadManager) : Task(uuid, createUserUUID, abstractFile, threadManager) {
 
     private var future: Future<Boolean>? = null
 
@@ -192,8 +202,8 @@ open class DownloadTask( abstractFile: AbstractFile, val fileDataSource: FileDat
 
 data class BTTaskParam(val transmission: Transmission)
 
-class BTTask( abstractFile: AbstractFile, threadManager: ThreadManager, val btTaskParam: BTTaskParam,
-             val transmissionDataSource: TransmissionDataSource) : Task( abstractFile, threadManager) {
+class BTTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, threadManager: ThreadManager, val btTaskParam: BTTaskParam,
+             val transmissionDataSource: TransmissionDataSource) : Task(uuid, createUserUUID, abstractFile, threadManager) {
     override fun getTypeResID(): Int {
         return R.drawable.bt_task
     }
@@ -214,8 +224,8 @@ class BTTask( abstractFile: AbstractFile, threadManager: ThreadManager, val btTa
 
 data class SMBTaskParam(val smbUrl: String)
 
-class SMBTask(abstractFile: AbstractFile, threadManager: ThreadManager, val smbTaskParam: SMBTaskParam)
-    : Task( abstractFile, threadManager) {
+class SMBTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, threadManager: ThreadManager, val smbTaskParam: SMBTaskParam)
+    : Task(uuid, createUserUUID, abstractFile, threadManager) {
     override fun getTypeResID(): Int {
 
         return R.drawable.smb_task
@@ -232,10 +242,36 @@ class SMBTask(abstractFile: AbstractFile, threadManager: ThreadManager, val smbT
 
 }
 
-data class MoveTaskParam(val targetFolderUUID: String)
 
-class MoveTask(val uuid: String, abstractFile: AbstractFile, threadManager: ThreadManager, val moveTaskParam: MoveTaskParam,
-               startSpeedHandler: Boolean = false) : Task(abstractFile, threadManager, startSpeedHandler = startSpeedHandler) {
+abstract class TransmissionTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
+                                threadManager: ThreadManager, val taskParam: TaskParam,
+                                startSpeedHandler: Boolean = false) : Task(uuid, createUserUUID, srcFolder, threadManager, startSpeedHandler = startSpeedHandler) {
+
+    private lateinit var refreshMoveCopyTaskHandler: RefreshMoveCopyTaskHandler
+
+
+    fun startRefresh(transmissionTaskDataSource: TransmissionTaskDataSource) {
+        refreshMoveCopyTaskHandler = RefreshMoveCopyTaskHandler(this, transmissionTaskDataSource)
+        refreshMoveCopyTaskHandler.sendEmptyMessageDelayed(REFRESH_TASK, REFRESH_DELAY_TIME)
+    }
+
+    fun stopRefresh() {
+
+        if (::refreshMoveCopyTaskHandler.isInitialized) {
+            refreshMoveCopyTaskHandler.removeMessages(REFRESH_TASK)
+        }
+
+    }
+
+}
+
+
+data class TaskParam(val targetFolder: AbstractRemoteFile, val entries: List<AbstractRemoteFile>)
+
+class MoveTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
+               threadManager: ThreadManager, taskParam: TaskParam,
+               startSpeedHandler: Boolean = false) : TransmissionTask(uuid, createUserUUID, srcFolder, threadManager, taskParam, startSpeedHandler = startSpeedHandler) {
+
     override fun getTypeResID(): Int {
 
         return R.drawable.move_task
@@ -252,10 +288,10 @@ class MoveTask(val uuid: String, abstractFile: AbstractFile, threadManager: Thre
 
 }
 
-data class CopyTaskParam(val targetFolderUUID: String)
+class CopyTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
+               threadManager: ThreadManager, taskParam: TaskParam,
+               startSpeedHandler: Boolean = false) : TransmissionTask(uuid, createUserUUID, srcFolder, threadManager, taskParam, startSpeedHandler = startSpeedHandler) {
 
-class CopyTask(val uuid: String, abstractFile: AbstractFile, threadManager: ThreadManager, val copyTaskParam: CopyTaskParam,
-               startSpeedHandler: Boolean = false) : Task(abstractFile, threadManager, startSpeedHandler = startSpeedHandler) {
     override fun getTypeResID(): Int {
 
         return R.drawable.copy_to
@@ -271,4 +307,65 @@ class CopyTask(val uuid: String, abstractFile: AbstractFile, threadManager: Thre
     }
 
 }
+
+private const val REFRESH_TASK = 0x1001
+private const val REFRESH_DELAY_TIME = 2 * 1000L
+
+private class RefreshMoveCopyTaskHandler(val task: Task, val transmissionTaskDataSource: TransmissionTaskDataSource) : Handler() {
+
+    override fun handleMessage(msg: Message?) {
+        super.handleMessage(msg)
+
+        when (msg?.what) {
+
+            REFRESH_TASK -> {
+
+                if (task is TransmissionTask) {
+
+                    Log.d(TASK_TAG, "start refresh transmission task")
+
+                    refreshTaskState(task)
+
+                }
+
+            }
+
+        }
+
+    }
+
+    private fun refreshTaskState(task: TransmissionTask) {
+        transmissionTaskDataSource.getTransmissionTask(task.uuid, object : BaseOperateDataCallback<Task> {
+            override fun onFail(operationResult: OperationResult?) {
+                sendEmptyMessageDelayed(REFRESH_TASK, REFRESH_DELAY_TIME)
+            }
+
+            override fun onSucceed(data: Task, operationResult: OperationResult?) {
+
+                if (data.getCurrentState().getType() == StateType.FINISH) {
+
+                    if (task is CopyTask)
+                        Log.d(TASK_TAG, "copy task finished,set current state and stop send message")
+                    else if (task is MoveTask)
+                        Log.d(TASK_TAG, "move task finished,set current state and stop send message")
+
+                    task.setCurrentState(data.getCurrentState())
+
+                } else {
+
+                    if (task is CopyTask)
+                        Log.d(TASK_TAG, "copy task not finished,send message ")
+                    else if (task is MoveTask)
+                        Log.d(TASK_TAG, "move task not finished,send message ")
+
+                    sendEmptyMessageDelayed(REFRESH_TASK, REFRESH_DELAY_TIME)
+
+                }
+
+            }
+        })
+    }
+
+}
+
 

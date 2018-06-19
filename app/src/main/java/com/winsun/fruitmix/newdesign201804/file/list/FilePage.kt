@@ -21,6 +21,7 @@ import com.winsun.fruitmix.newdesign201804.file.sharedFolder.SharedFolderActivit
 import com.winsun.fruitmix.newdesign201804.file.transmission.InjectTransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.TransmissionTaskActivity
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TASK_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.upload.FileBrowserActivity
 import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileUtil
 import com.winsun.fruitmix.newdesign201804.mainpage.DrawerItem
@@ -133,7 +134,7 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
     }
 
     override fun onDestroy() {
-
+        filePresenter.onDestroy()
     }
 
     override fun onActivityReenter(resultCode: Int, data: Intent?) {
@@ -154,10 +155,19 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
             filePresenter.onActivityResult(requestCode, resultCode, data)
         else if (requestCode == FILE_MOVE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             SnackbarUtil.showSnackBar(filePageBinding.root, Snackbar.LENGTH_SHORT, messageStr = "创建移动任务成功，请到任务列表中查看")
+
+            filePresenter.handleMoveCopyTaskCreateSucceed(data!!.getStringExtra(TASK_UUID_KEY))
+
         } else if (requestCode == FILE_COPY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             SnackbarUtil.showSnackBar(filePageBinding.root, Snackbar.LENGTH_SHORT, messageStr = "创建拷贝任务成功，请到任务列表中查看")
+
+            filePresenter.handleMoveCopyTaskCreateSucceed(data!!.getStringExtra(TASK_UUID_KEY))
+
         } else if (requestCode == FILE_SHARE_TO_SHARED_FOLDER_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             SnackbarUtil.showSnackBar(filePageBinding.root, Snackbar.LENGTH_SHORT, messageStr = "创建分享任务成功，请到任务列表中查看")
+
+            filePresenter.handleMoveCopyTaskCreateSucceed(data!!.getStringExtra(TASK_UUID_KEY))
+
         }
 
     }

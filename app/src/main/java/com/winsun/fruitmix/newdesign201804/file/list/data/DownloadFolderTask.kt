@@ -11,14 +11,16 @@ import com.winsun.fruitmix.newdesign201804.component.createFileDownloadParam
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.util.FileUtil
+import com.winsun.fruitmix.util.Util
 import java.io.File
 
 private const val TAG = "DownloadFolderTask"
 
 class DownloadFolderTask(val stationFileRepository: StationFileRepository,
+                         uuid:String,createUserUUID:String,
                          abstractFile: AbstractFile, fileDataSource: FileDataSource, fileDownloadParam: FileDownloadParam,
                          currentUserUUID: String, threadManager: ThreadManager)
-    : DownloadTask(abstractFile, fileDataSource, fileDownloadParam, currentUserUUID, threadManager) {
+    : DownloadTask(uuid,createUserUUID,abstractFile, fileDataSource, fileDownloadParam, currentUserUUID, threadManager) {
 
     private var totalSize = 0L
 
@@ -119,7 +121,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
             Log.d(TAG, "download file name: " + abstractRemoteFile.name)
 
-            val subTask = DownloadTask(abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
+            val subTask = DownloadTask(Util.createLocalUUid(),createUserUUID,abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
                     currentUserUUID, threadManager)
 
             subTasks.add(subTask)

@@ -2,6 +2,8 @@ package com.winsun.fruitmix.newdesign201804.file.transmissionTask.data
 
 import android.content.Context
 import com.winsun.fruitmix.http.InjectHttp
+import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
+import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 
 public class InjectTransmissionTaskDataSource {
@@ -12,7 +14,8 @@ public class InjectTransmissionTaskDataSource {
 
             val threadManager = ThreadManagerImpl.getInstance()
 
-            return TransmissionTaskRepository(TaskManager, TransmissionTaskRemoteDataSource(threadManager,InjectHttp.provideIHttpUtil(context),
+            return TransmissionTaskRepository(TaskManager, TransmissionTaskRemoteDataSource(
+                    threadManager,context.getCurrentUserUUID(),InjectHttp.provideIHttpUtil(context),
                     InjectHttp.provideHttpRequestFactory(context)), threadManager)
         }
 

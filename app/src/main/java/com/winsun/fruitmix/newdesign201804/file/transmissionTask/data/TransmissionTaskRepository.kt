@@ -3,13 +3,12 @@ package com.winsun.fruitmix.newdesign201804.file.transmissionTask.data
 import com.winsun.fruitmix.BaseDataRepository
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
-import com.winsun.fruitmix.file.data.model.FileTaskManager
+import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.DownloadTask
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TransmissionTask
 import com.winsun.fruitmix.thread.manage.ThreadManager
-import com.winsun.fruitmix.util.FileUtil
 
 class TransmissionTaskRepository(val taskManager: TaskManager, val transmissionTaskDataSource: TransmissionTaskDataSource,
                                  threadManager: ThreadManager)
@@ -31,7 +30,10 @@ class TransmissionTaskRepository(val taskManager: TaskManager, val transmissionT
 
                 override fun onSucceed(data: MutableList<Task>?, operationResult: OperationResult?) {
 
-                    data?.addAll(tasks)
+                    val newTasks = mutableListOf<Task>()
+
+                    newTasks.addAll(data!!.filter { !taskManager.checkTaskExist(it) })
+                    newTasks.addAll(tasks)
 
                     runOnMainThreadCallback.onSucceed(data, OperationSuccess())
 
@@ -40,14 +42,26 @@ class TransmissionTaskRepository(val taskManager: TaskManager, val transmissionT
 
         })
 
+    }
+
+    override fun getTransmissionTask(taskUUID: String, baseOperateDataCallback: BaseOperateDataCallback<Task>) {
+
+        mThreadManager.runOnCacheThread {
+            transmissionTaskDataSource.getTransmissionTask(taskUUID,createOperateCallbackRunOnMainThread(baseOperateDataCallback))
+        }
 
     }
 
-    override fun addTransmissionTask(task: Task, baseOperateCallback: BaseOperateCallback) {
+    override fun getTransmissionTaskInCache(taskUUID: String): Task? {
+        return taskManager.getTask(taskUUID)
+    }
 
-        taskManager.addTask(task)
+    override fun addTransmissionTask(task: Task): Boolean {
 
-        baseOperateCallback.onSucceed()
+        if (task is TransmissionTask)
+            task.startRefresh(this)
+
+        return taskManager.addTask(task)
 
     }
 

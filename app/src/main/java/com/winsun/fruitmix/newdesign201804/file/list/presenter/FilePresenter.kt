@@ -58,12 +58,17 @@ import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import kotlinx.android.synthetic.main.folder_item.view.*
 import java.io.File
+import java.util.*
 import java.util.concurrent.Callable
+import kotlin.Comparator
 
 private const val SPAN_COUNT = 2
 
 private val mSelectFiles = mutableListOf<AbstractFile>()
 private var mIsSelectMode = false
+
+private val sortPolicy = SortPolicy
+private val fileViewModePolicy = FileViewModePolicy
 
 public class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
                            val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding,
@@ -71,7 +76,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
                            val currentUserUUID: String, val threadManager: ThreadManager,
                            val transmissionTaskDataSource: TransmissionTaskDataSource,
                            val transmissionDataSource: TransmissionDataSource,
-                           val stationFileRepository: StationFileRepository) {
+                           val stationFileRepository: StationFileRepository) : TaskStateObserver {
 
     private val contentLayout = filePageBinding.contentLayout
 
@@ -102,6 +107,8 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
     private val retrievedFolderUUIDs = mutableListOf<String>()
     private val retrievedFolderNames = mutableListOf<String>()
 
+    private val handleTasks = mutableListOf<Task>()
+
     fun initView() {
 
         val currentUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(context)
@@ -117,7 +124,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
             doHandleOnLongClick(it)
         }, { remoteFile, position ->
             doShowFileMenuBottomDialog(context, remoteFile, position)
-        })
+        }, { showSortBottomDialog(context) })
 
         gridLayoutManager.spanSizeLookup.isSpanIndexCacheEnabled = true
 
@@ -169,10 +176,10 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     }
 
-    fun refreshCurrentFolder(){
+    fun refreshCurrentFolder() {
         loadingViewModel.showLoading.set(true)
 
-        fileDataSource.getFile(rootFolderUUID,currentFolderUUID,object :BaseLoadDataCallback<AbstractRemoteFile>{
+        fileDataSource.getFile(rootFolderUUID, currentFolderUUID, object : BaseLoadDataCallback<AbstractRemoteFile> {
 
             override fun onFail(operationResult: OperationResult?) {
                 loadingViewModel.showLoading.set(false)
@@ -202,6 +209,24 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         }
 
+        folderViewItems.sortWith(Comparator { o1, o2 ->
+            when (sortPolicy.getCurrentSortMode()) {
+                SortMode.NAME -> {
+
+                    
+
+                }
+                SortMode.SIZE -> {
+                }
+                SortMode.CREATE_TIME -> {
+                }
+                SortMode.MODIFY_TIME -> {
+                }
+            }
+
+            1
+        })
+
         viewItems.clear()
 
         val fileTitleViewModel = FolderFileTitleViewModel()
@@ -230,6 +255,70 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         fileRecyclerViewAdapter.setItemList(viewItems)
         fileRecyclerViewAdapter.notifyDataSetChanged()
+
+    }
+
+    private fun showSortBottomDialog(context: Context) {
+
+        val bottomMenuItems = mutableListOf<BottomMenuItem>()
+
+        val bottomMenuItem = BottomMenuItem(R.drawable.black_up_arrow, context.getString(R.string.sort_by_name), object : BaseAbstractCommand() {
+
+            override fun execute() {
+                super.execute()
+
+                sortPolicy.setCurrentSortMode(SortMode.NAME)
+
+                refreshData()
+
+            }
+
+        })
+
+        bottomMenuItem.rightResID = R.drawable.green_done
+
+        bottomMenuItems.add(bottomMenuItem)
+
+        bottomMenuItems.add(BottomMenuItem(0, context.getString(R.string.sort_by_modify_time), object : BaseAbstractCommand() {
+
+            override fun execute() {
+                super.execute()
+
+                sortPolicy.setCurrentSortMode(SortMode.MODIFY_TIME)
+
+                refreshData()
+
+            }
+
+        }))
+
+        bottomMenuItems.add(BottomMenuItem(0, context.getString(R.string.sort_by_create_time), object : BaseAbstractCommand() {
+
+            override fun execute() {
+                super.execute()
+
+                sortPolicy.setCurrentSortMode(SortMode.CREATE_TIME)
+
+                refreshData()
+
+            }
+
+        }))
+
+        bottomMenuItems.add(BottomMenuItem(0, context.getString(R.string.sort_by_capacity), object : BaseAbstractCommand() {
+
+            override fun execute() {
+                super.execute()
+
+                sortPolicy.setCurrentSortMode(SortMode.SIZE)
+
+                refreshData()
+
+            }
+
+        }))
+
+        BottomMenuListDialogFactory(bottomMenuItems).createDialog(context).show()
 
     }
 
@@ -401,11 +490,53 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         val fileUploadParam = FileUploadParam(rootFolderUUID, currentFolderUUID, localFile)
 
-        val uploadTask = UploadTask(localFile, fileDataSource, fileUploadParam, threadManager)
+        val uploadTask = UploadTask(Util.createLocalUUid(), currentUserUUID, localFile, fileDataSource, fileUploadParam, threadManager)
 
-        transmissionTaskDataSource.addTransmissionTask(uploadTask, object : BaseOperateCallbackImpl() {})
+        transmissionTaskDataSource.addTransmissionTask(uploadTask)
+
+        uploadTask.registerObserver(this)
+        handleTasks.add(uploadTask)
 
         SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
+
+    }
+
+    fun handleMoveCopyTaskCreateSucceed(taskUUID: String) {
+
+        val task = transmissionTaskDataSource.getTransmissionTaskInCache(taskUUID)
+
+        if (task != null && (task is TransmissionTask)) {
+
+            if (task.getCurrentState().getType() == StateType.FINISH)
+                refreshCurrentFolder()
+            else {
+
+                task.registerObserver(this)
+
+                handleTasks.add(task)
+            }
+
+        }
+
+    }
+
+    override fun notifyStateChanged(currentState: TaskState) {
+        if (currentState.getType() == StateType.FINISH)
+            refreshCurrentFolder()
+
+    }
+
+    fun onDestroy() {
+
+        handleTasks.forEach {
+
+            if (it is TransmissionTask)
+                it.stopRefresh()
+
+            it.unregisterObserver(this)
+        }
+
+        handleTasks.clear()
 
     }
 
@@ -544,7 +675,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
             val fileDownloadParam = FileFromStationFolderDownloadParam(abstractFile.uuid,
                     abstractFile.parentFolderUUID, abstractFile.rootFolderUUID, abstractFile.name)
 
-            val task = DownloadTask(abstractFile, fileDataSource, fileDownloadParam,
+            val task = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractFile, fileDataSource, fileDownloadParam,
                     currentUserUUID, threadManager)
 
             task.init()
@@ -791,10 +922,10 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
                 val fileDownloadParam = abstractRemoteFile.createFileDownloadParam()
 
-                val downloadTask = DownloadTask(abstractRemoteFile, fileDataSource, fileDownloadParam,
+                val downloadTask = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractRemoteFile, fileDataSource, fileDownloadParam,
                         currentUserUUID, threadManager)
 
-                transmissionTaskDataSource.addTransmissionTask(downloadTask, object : BaseOperateCallbackImpl() {})
+                transmissionTaskDataSource.addTransmissionTask(downloadTask)
 
                 SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
 
@@ -1022,13 +1153,15 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
                 val downloadTask =
 
                         if (it.isFolder)
-                            DownloadFolderTask(stationFileRepository, abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
+                            DownloadFolderTask(stationFileRepository, Util.createLocalUUid(), currentUserUUID,
+                                    abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
                                     currentUserUUID, threadManager)
                         else
-                            DownloadTask(abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
+                            DownloadTask(Util.createLocalUUid(), currentUserUUID,
+                                    abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
                                     currentUserUUID, threadManager)
 
-                transmissionTaskDataSource.addTransmissionTask(downloadTask, object : BaseOperateCallbackImpl() {})
+                transmissionTaskDataSource.addTransmissionTask(downloadTask)
 
             }
 
@@ -1044,7 +1177,8 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
 class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile, position: Int) -> Unit,
                               val handleItemOnLongClick: (abstractFile: AbstractFile) -> Unit,
-                              val doHandleMoreBtnOnClick: (abstractFile: AbstractFile, position: Int) -> Unit) : BaseRecyclerViewAdapter<BindingViewHolder, ViewItem>() {
+                              val doHandleMoreBtnOnClick: (abstractFile: AbstractFile, position: Int) -> Unit,
+                              val handleSortBtnOnClick: () -> Unit = {}) : BaseRecyclerViewAdapter<BindingViewHolder, ViewItem>() {
 
     var currentOrientation = ORIENTATION_GRID_TYPE
 
@@ -1096,7 +1230,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
                 val context = folderFileTitleBinding.nameTextView.context
 
                 folderFileTitleBinding.sortLayout.setOnClickListener {
-                    showSortBottomDialog(context)
+                    handleSortBtnOnClick()
                 }
 
             }
@@ -1137,7 +1271,6 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 itemFolder.folderFileTitleViewModel.doHandleMoreBtnOnClick = {
                     doHandleMoreBtnOnClick(itemFolder.getFile(), position)
-
                 }
 
                 val isSelected = selectFiles.contains(itemFolder.getFile())
@@ -1183,35 +1316,6 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
         }
 
         holder?.viewDataBinding?.executePendingBindings()
-
-    }
-
-
-    private fun showSortBottomDialog(context: Context) {
-
-        val bottomMenuItems = mutableListOf<BottomMenuItem>()
-
-        val bottomMenuItem = BottomMenuItem(R.drawable.black_up_arrow, context.getString(R.string.sort_by_name), object : BaseAbstractCommand() {
-
-        })
-
-        bottomMenuItem.rightResID = R.drawable.green_done
-
-        bottomMenuItems.add(bottomMenuItem)
-
-        bottomMenuItems.add(BottomMenuItem(0, context.getString(R.string.sort_by_modify_time), object : BaseAbstractCommand() {
-
-        }))
-
-        bottomMenuItems.add(BottomMenuItem(0, context.getString(R.string.sort_by_create_time), object : BaseAbstractCommand() {
-
-        }))
-
-        bottomMenuItems.add(BottomMenuItem(0, context.getString(R.string.sort_by_capacity), object : BaseAbstractCommand() {
-
-        }))
-
-        BottomMenuListDialogFactory(bottomMenuItems).createDialog(context).show()
 
     }
 

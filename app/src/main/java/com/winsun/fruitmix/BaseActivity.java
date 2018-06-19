@@ -197,7 +197,6 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
 
     }
 
-
     private void setStatusBarToolbarBgColor(Toolbar mToolbar, int colorResID) {
         mToolbar.setBackgroundColor(ContextCompat.getColor(this, colorResID));
 

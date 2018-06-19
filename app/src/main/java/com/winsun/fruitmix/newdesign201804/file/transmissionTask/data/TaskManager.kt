@@ -8,11 +8,18 @@ object TaskManager {
 
     private val tasks = mutableListOf<Task>()
 
-    fun addTask(task: Task){
+    private val taskMap = mutableMapOf<String,Task>()
+
+    fun addTask(task: Task):Boolean{
 
         renameFileNameIfNecessary(task)
 
-        tasks.add(task)
+        val result = tasks.add(task)
+
+        taskMap[task.uuid] = task
+
+        return result
+
     }
 
     fun deleteTask(task: Task):Boolean{
@@ -21,6 +28,16 @@ object TaskManager {
 
     fun getAllTasks():List<Task>{
         return tasks
+    }
+
+    fun checkTaskExist(task: Task):Boolean{
+
+        return taskMap.containsKey(task.uuid)
+
+    }
+
+    fun getTask(taskUUID:String):Task?{
+        return taskMap[taskUUID]
     }
 
     private fun renameFileNameIfNecessary(task: Task) {

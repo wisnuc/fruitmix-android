@@ -19,7 +19,7 @@ class ShareRootDataUseCase(private val fileDataSource: FileDataSource, val curre
 
         fileDataSource.getRootDrive(object : BaseLoadDataCallback<AbstractRemoteFile> {
             override fun onFail(operationResult: OperationResult?) {
-
+                baseLoadDataCallback.onFail(operationResult)
             }
 
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
@@ -61,6 +61,8 @@ class ShareRootDataUseCase(private val fileDataSource: FileDataSource, val curre
 
                 fileDataSource.getFile(publicRootUUID, publicRootUUID, object : BaseLoadDataCallback<AbstractRemoteFile> {
                     override fun onFail(operationResult: OperationResult?) {
+
+                        generateRootFolder(baseLoadDataCallback)
 
                     }
 

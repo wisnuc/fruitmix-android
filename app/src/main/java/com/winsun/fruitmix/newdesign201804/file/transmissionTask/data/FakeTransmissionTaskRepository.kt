@@ -2,6 +2,7 @@ package com.winsun.fruitmix.newdesign201804.file.transmissionTask.data
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
+import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloadParam
 import com.winsun.fruitmix.file.data.model.RemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFolder
@@ -16,7 +17,7 @@ object FakeTransmissionTaskRepository : TransmissionTaskDataSource {
 
     init {
 
-        val word = RemoteFile()
+/*        val word = RemoteFile()
         word.name = "呵呵.doc"
         word.uuid = Util.createLocalUUid()
         word.size = 1320743L
@@ -28,14 +29,14 @@ object FakeTransmissionTaskRepository : TransmissionTaskDataSource {
         xlsx.name = "哈哈.xlsx"
         xlsx.size = 1070243L
 
-        tasks.add(CopyTask(Util.createLocalUUid(),xlsx, ThreadManagerImpl.getInstance(), CopyTaskParam("")))
+        tasks.add(CopyTask(Util.createLocalUUid(),xlsx, ThreadManagerImpl.getInstance(), CopyTaskParam("")))*/
 
         val smb = RemoteFile()
         smb.uuid = Util.createLocalUUid()
         smb.name = "伊艾儿.txt"
         smb.size = 1320703L
 
-        tasks.add(SMBTask(smb, ThreadManagerImpl.getInstance(), SMBTaskParam("")))
+        tasks.add(SMBTask(Util.createLocalUUid(),"",smb, ThreadManagerImpl.getInstance(), SMBTaskParam("")))
 
     }
 
@@ -45,10 +46,17 @@ object FakeTransmissionTaskRepository : TransmissionTaskDataSource {
 
     }
 
-    override fun addTransmissionTask(task: Task, baseOperateCallback: BaseOperateCallback) {
-        TODO("not implemented")
+    override fun getTransmissionTask(taskUUID: String, baseOperateDataCallback: BaseOperateDataCallback<Task>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    override fun getTransmissionTaskInCache(taskUUID: String): Task? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun addTransmissionTask(task: Task): Boolean {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
     override fun deleteTransmissionTask(task: Task, baseOperateCallback: BaseOperateCallback) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }

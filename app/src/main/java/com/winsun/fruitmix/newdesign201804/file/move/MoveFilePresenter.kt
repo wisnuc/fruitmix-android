@@ -1,12 +1,14 @@
 package com.winsun.fruitmix.newdesign201804.file.move
 
 import android.app.Activity
+import android.content.Intent
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
+import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.databinding.ActivityMoveFileBinding
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
@@ -15,6 +17,7 @@ import com.winsun.fruitmix.file.data.model.RemoteFolder
 import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
+import com.winsun.fruitmix.newdesign201804.component.TaskStateIcon
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserHome
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
@@ -23,6 +26,9 @@ import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.ShareRootDataUseCase
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TASK_UUID_KEY
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
@@ -30,7 +36,8 @@ import com.winsun.fruitmix.viewmodel.ToolbarViewModel
 
 private const val rootUUID = "rootUUID"
 
-class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFileBinding: ActivityMoveFileBinding,
+class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTaskDataSource: TransmissionTaskDataSource,
+                        val activityMoveFileBinding: ActivityMoveFileBinding,
                         val toolbarViewModel: ToolbarViewModel, val moveFileView: MoveFileView,
                         val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel,
                         val fileOperation: Int) {
@@ -253,6 +260,8 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
     private fun gotoNextFolder(abstractRemoteFile: AbstractRemoteFile) {
 
+        currentFolderItems.clear()
+
         showLoadingBg()
 
         fileDataSource.getFile(abstractRemoteFile.rootFolderUUID, abstractRemoteFile.uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
@@ -285,7 +294,6 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
         else {
             showContentBg()
 
-            currentFolderItems.clear()
             currentFolderItems.addAll(data)
 
             refreshData()
@@ -313,10 +321,11 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
 
         val remoteFile = retrievedFolders.last()
 
+        currentFolderItems.clear()
+
         if (remoteFile.uuid == rootUUID) {
             getRoot()
             refreshTitle()
-
         } else {
 
             showLoadingBg()
@@ -375,7 +384,8 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
         moveFileView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.create_move_task)))
 
         fileDataSource.moveFile(srcFile as AbstractRemoteFile, targetFile,
-                entries, object : BaseOperateCallback {
+                entries, object : BaseOperateDataCallback<Task> {
+
             override fun onFail(operationResult: OperationResult?) {
 
                 moveFileView.dismissDialog()
@@ -383,11 +393,16 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
                 SnackbarUtil.showSnackBar(moveBtn, Snackbar.LENGTH_SHORT, messageStr = operationResult!!.getResultMessage(context))
             }
 
-            override fun onSucceed() {
+            override fun onSucceed(task: Task, operationResult: OperationResult) {
+
+                transmissionTaskDataSource.addTransmissionTask(task)
 
                 moveFileView.dismissDialog()
 
-                moveFileView.setResult(Activity.RESULT_OK)
+                val intent = Intent()
+                intent.putExtra(TASK_UUID_KEY,task.uuid)
+
+                moveFileView.setResult(Activity.RESULT_OK,intent)
 
                 moveFileView.finishView()
 
@@ -420,19 +435,25 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val activityMoveFile
         moveFileView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.create_copy_task)))
 
         fileDataSource.copyFile(srcFile as AbstractRemoteFile, targetFile,
-                entries, object : BaseOperateCallback {
+                entries, object : BaseOperateDataCallback<Task> {
             override fun onFail(operationResult: OperationResult?) {
 
                 moveFileView.dismissDialog()
 
                 SnackbarUtil.showSnackBar(moveBtn, Snackbar.LENGTH_SHORT, messageStr = operationResult!!.getResultMessage(context))
+
             }
 
-            override fun onSucceed() {
+            override fun onSucceed(task: Task, operationResult: OperationResult) {
+
+                transmissionTaskDataSource.addTransmissionTask(task)
 
                 moveFileView.dismissDialog()
 
-                moveFileView.setResult(Activity.RESULT_OK)
+                val intent = Intent()
+                intent.putExtra(TASK_UUID_KEY,task.uuid)
+
+                moveFileView.setResult(Activity.RESULT_OK,intent)
 
                 moveFileView.finishView()
 

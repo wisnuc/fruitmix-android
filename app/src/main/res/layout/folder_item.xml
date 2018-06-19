@@ -45,7 +45,7 @@
         </FrameLayout>
 
         <TextView
-            android:id="@+id/nameTextView"
+            android:id="@+id/sortModeTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"

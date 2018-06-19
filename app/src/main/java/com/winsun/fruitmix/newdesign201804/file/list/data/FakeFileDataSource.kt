@@ -169,11 +169,11 @@ object FakeFileDataSource : FileDataSource {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun copyFile(srcFolder: AbstractRemoteFile, targetFolder: AbstractRemoteFile, entries: List<AbstractRemoteFile>, callback: BaseOperateCallback) {
+    override fun moveFile(srcFolder: AbstractRemoteFile, targetFolder: AbstractRemoteFile, entries: List<AbstractRemoteFile>, callback: BaseOperateDataCallback<Task>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun moveFile(srcFolder: AbstractRemoteFile, targetFolder: AbstractRemoteFile, entries: List<AbstractRemoteFile>, callback: BaseOperateCallback) {
+    override fun copyFile(srcFolder: AbstractRemoteFile, targetFolder: AbstractRemoteFile, entries: List<AbstractRemoteFile>, callback: BaseOperateDataCallback<Task>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

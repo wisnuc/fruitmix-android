@@ -1,12 +1,14 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask
 
 import android.content.Context
+import android.support.design.widget.Snackbar
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.ViewGroup
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
+import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.file.data.model.RemoteFolder
@@ -23,12 +25,14 @@ import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
+import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
 
 import kotlinx.android.synthetic.main.transmission_task_item.view.*
 
 class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTaskDataSource,
-                                val transmissionDataSource: TransmissionDataSource) {
+                                val transmissionDataSource: TransmissionDataSource,
+                                val currentUserUUID:String) {
 
     private val transmissionTaskAdapter = TransmissionTaskAdapter()
 
@@ -73,7 +77,7 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
                     val btTaskParam = BTTaskParam(it)
 
-                    val task = BTTask(abstractFile, ThreadManagerImpl.getInstance(), btTaskParam,
+                    val task = BTTask(Util.createLocalUUid(), currentUserUUID,abstractFile, ThreadManagerImpl.getInstance(), btTaskParam,
                             transmissionDataSource)
 
                     taskData?.add(task)
@@ -136,8 +140,7 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
             when (it) {
                 is SMBTask -> it.setCurrentState(FinishTaskState(it.abstractFile.size, it))
-                is CopyTask -> it.setCurrentState(it.getCurrentState())
-                is MoveTask -> it.setCurrentState(it.getCurrentState())
+                is TransmissionTask -> it.setCurrentState(it.getCurrentState())
                 else -> it.startTask()
             }
 
@@ -173,6 +176,9 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
         override fun onBindViewHolder(holder: SimpleViewHolder?, position: Int) {
 
             val view = holder?.itemView
+
+            val context = view?.context
+
             val taskContainer = mItemList[position]
 
             val task = taskContainer.task
@@ -200,9 +206,8 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
                 task.cancelTask()
 
-                transmissionTaskDataSource.deleteTransmissionTask(task, object : BaseOperateCallbackImpl() {
+                transmissionTaskDataSource.deleteTransmissionTask(task, object : BaseOperateCallback {
                     override fun onSucceed() {
-                        super.onSucceed()
 
                         taskContainers.remove(taskContainer)
 
@@ -211,6 +216,11 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
                         transmissionTaskAdapter.notifyItemRemoved(holder.adapterPosition)
 
                     }
+
+                    override fun onFail(operationResult: OperationResult?) {
+                        SnackbarUtil.showSnackBar(view, Snackbar.LENGTH_SHORT, messageStr = operationResult!!.getResultMessage(context))
+                    }
+
                 })
 
             }

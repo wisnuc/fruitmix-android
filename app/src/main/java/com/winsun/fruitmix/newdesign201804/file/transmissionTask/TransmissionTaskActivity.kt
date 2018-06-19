@@ -10,6 +10,7 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
 import com.winsun.fruitmix.model.BottomMenuItem
+import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.component.inflateView
 import com.winsun.fruitmix.newdesign201804.file.transmission.InjectTransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
@@ -33,7 +34,7 @@ class TransmissionTaskActivity : BaseToolbarActivity() {
         }
 
         transmissionTaskPresenter = TransmissionTaskPresenter(InjectTransmissionTaskDataSource.provideInstance(this),
-                InjectTransmissionDataSource.inject(this))
+                InjectTransmissionDataSource.inject(this),getCurrentUserUUID())
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
