@@ -811,12 +811,16 @@
     <!-- file -->
     <string name="search_file">Search File</string>
     <string name="folder">Folder</string>
-    <string name="name">Name</string>
 
     <string name="sort_by_name">Positive and negative order by name</string>
     <string name="sort_by_modify_time">Positive and negative order by date of modification</string>
     <string name="sort_by_create_time">Positive and negative order by date of creation</string>
     <string name="sort_by_capacity">Positive and negative order by volume size</string>
+
+    <string name="name">Name</string>
+    <string name="modify_time">Modify Time</string>
+    <string name="create_time">Create Time</string>
+    <string name="capacity">Capacity</string>
 
     <string name="new_create">New</string>
 

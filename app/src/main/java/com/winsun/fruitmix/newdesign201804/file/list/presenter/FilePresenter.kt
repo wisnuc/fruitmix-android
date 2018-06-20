@@ -45,6 +45,7 @@ import com.winsun.fruitmix.newdesign201804.file.move.*
 import com.winsun.fruitmix.newdesign201804.file.transmission.TransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
+import com.winsun.fruitmix.newdesign201804.user.preference.*
 import com.winsun.fruitmix.parser.RemoteMkDirParser
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BindingViewHolder
@@ -58,7 +59,6 @@ import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import kotlinx.android.synthetic.main.folder_item.view.*
 import java.io.File
-import java.util.*
 import java.util.concurrent.Callable
 import kotlin.Comparator
 
@@ -67,22 +67,19 @@ private const val SPAN_COUNT = 2
 private val mSelectFiles = mutableListOf<AbstractFile>()
 private var mIsSelectMode = false
 
-private val sortPolicy = SortPolicy
-private val fileViewModePolicy = FileViewModePolicy
-
 public class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
                            val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding,
                            val baseView: BaseView, val fileView: FileView,
                            val currentUserUUID: String, val threadManager: ThreadManager,
                            val transmissionTaskDataSource: TransmissionTaskDataSource,
                            val transmissionDataSource: TransmissionDataSource,
-                           val stationFileRepository: StationFileRepository) : TaskStateObserver {
+                           val stationFileRepository: StationFileRepository,
+                           val userPreference: UserPreference,
+                           val userPreferenceDataSource: UserPreferenceDataSource) : TaskStateObserver {
 
     private val contentLayout = filePageBinding.contentLayout
 
     private lateinit var fileRecyclerViewAdapter: FileRecyclerViewAdapter
-
-    private var currentOrientation = ORIENTATION_GRID_TYPE
 
     private val currentFolderItems: MutableList<AbstractRemoteFile> = mutableListOf()
 
@@ -109,6 +106,11 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     private val handleTasks = mutableListOf<Task>()
 
+    private lateinit var sortComparator: Comparator<ItemContent>
+
+    private val sortPolicy = userPreference.fileSortPolicy
+    private val fileViewModePolicy = userPreference.fileViewModePolicy
+
     fun initView() {
 
         val currentUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(context)
@@ -124,7 +126,8 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
             doHandleOnLongClick(it)
         }, { remoteFile, position ->
             doShowFileMenuBottomDialog(context, remoteFile, position)
-        }, { showSortBottomDialog(context) })
+        }, { showSortBottomDialog(context) },
+                userPreference.fileSortPolicy)
 
         gridLayoutManager.spanSizeLookup.isSpanIndexCacheEnabled = true
 
@@ -136,8 +139,23 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         initRecyclerView()
 
+        initSortComparator()
+
         gotoNextFolder(rootFolderUUID, "")
 
+        updateToggleOrientation()
+
+    }
+
+    private fun updateToggleOrientation() {
+        filePageActionListeners.forEach {
+
+            if (fileViewModePolicy.getCurrentFileViewMode() == FileViewMode.LIST) {
+                it.updateToggleOrientationIcon(R.drawable.file_list_mode)
+            } else
+                it.updateToggleOrientationIcon(R.drawable.view_mode)
+
+        }
     }
 
     fun registerFilePageSelectActionListener(filePageSelectActionListener: FilePageSelectActionListener) {
@@ -158,7 +176,8 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     private fun initRecyclerView() {
 
-        fileRecyclerViewAdapter.currentOrientation = currentOrientation
+        fileRecyclerViewAdapter.fileViewMode =
+                userPreference.fileViewModePolicy.getCurrentFileViewMode()
 
         filePageBinding.fileRecyclerView.adapter = fileRecyclerViewAdapter
 
@@ -174,6 +193,44 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         setRecyclerViewLayoutManager()
 
+    }
+
+    private fun initSortComparator() {
+        sortComparator = Comparator { o1, o2 ->
+            when (sortPolicy.getCurrentSortMode()) {
+                SortMode.NAME -> {
+                    return@Comparator o1.getFileName().compareTo(o2.getFileName())
+                }
+                SortMode.SIZE -> {
+
+                    when {
+                        o1.getFileSize() > o2.getFileSize() -> return@Comparator 1
+                        o1.getFileSize() < o2.getFileSize() -> return@Comparator -1
+                        else -> return@Comparator 0
+                    }
+
+                }
+                SortMode.CREATE_TIME -> {
+
+                    when {
+                        o1.getFileModifyTime() > o2.getFileModifyTime() -> return@Comparator 1
+                        o1.getFileModifyTime() < o2.getFileModifyTime() -> return@Comparator -1
+                        else -> return@Comparator 0
+                    }
+
+                }
+                SortMode.MODIFY_TIME -> {
+
+                    when {
+                        o1.getFileModifyTime() > o2.getFileModifyTime() -> return@Comparator 1
+                        o1.getFileModifyTime() < o2.getFileModifyTime() -> return@Comparator -1
+                        else -> return@Comparator 0
+                    }
+
+                }
+            }
+
+        }
     }
 
     fun refreshCurrentFolder() {
@@ -196,8 +253,8 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
     }
 
     private fun refreshData() {
-        val folderViewItems = mutableListOf<ViewItem>()
-        val fileViewItems = mutableListOf<ViewItem>()
+        val folderViewItems = mutableListOf<ItemContent>()
+        val fileViewItems = mutableListOf<ItemContent>()
 
         currentFolderItems.forEach {
 
@@ -209,23 +266,13 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         }
 
-        folderViewItems.sortWith(Comparator { o1, o2 ->
-            when (sortPolicy.getCurrentSortMode()) {
-                SortMode.NAME -> {
+        folderViewItems.sortWith(sortComparator)
+        fileViewItems.sortWith(sortComparator)
 
-                    
-
-                }
-                SortMode.SIZE -> {
-                }
-                SortMode.CREATE_TIME -> {
-                }
-                SortMode.MODIFY_TIME -> {
-                }
-            }
-
-            1
-        })
+        if (sortPolicy.getCurrentSortDirection() == SortDirection.NEGATIVE) {
+            folderViewItems.reverse()
+            fileViewItems.reverse()
+        }
 
         viewItems.clear()
 
@@ -262,12 +309,15 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         val bottomMenuItems = mutableListOf<BottomMenuItem>()
 
-        val bottomMenuItem = BottomMenuItem(R.drawable.black_up_arrow, context.getString(R.string.sort_by_name), object : BaseAbstractCommand() {
+        val bottomMenuItem = BottomMenuItem(
+                getSortModeIconResID(SortMode.NAME),
+                context.getString(R.string.sort_by_name), object : BaseAbstractCommand() {
 
             override fun execute() {
                 super.execute()
 
                 sortPolicy.setCurrentSortMode(SortMode.NAME)
+                userPreferenceDataSource.updateUserPreference(currentUserUUID, userPreference)
 
                 refreshData()
 
@@ -275,51 +325,81 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         })
 
-        bottomMenuItem.rightResID = R.drawable.green_done
+        bottomMenuItem.rightResID = getBottomMenuRightResID(SortMode.NAME)
 
         bottomMenuItems.add(bottomMenuItem)
 
-        bottomMenuItems.add(BottomMenuItem(0, context.getString(R.string.sort_by_modify_time), object : BaseAbstractCommand() {
+        val sortByModifyTimeItem = BottomMenuItem(getSortModeIconResID(SortMode.MODIFY_TIME), context.getString(R.string.sort_by_modify_time), object : BaseAbstractCommand() {
 
             override fun execute() {
                 super.execute()
 
                 sortPolicy.setCurrentSortMode(SortMode.MODIFY_TIME)
+                userPreferenceDataSource.updateUserPreference(currentUserUUID, userPreference)
 
                 refreshData()
 
             }
 
-        }))
+        })
 
-        bottomMenuItems.add(BottomMenuItem(0, context.getString(R.string.sort_by_create_time), object : BaseAbstractCommand() {
+        sortByModifyTimeItem.rightResID = getBottomMenuRightResID(SortMode.MODIFY_TIME)
+        bottomMenuItems.add(sortByModifyTimeItem)
+
+        val sortByCreateTimeItem = BottomMenuItem(getSortModeIconResID(SortMode.CREATE_TIME), context.getString(R.string.sort_by_create_time), object : BaseAbstractCommand() {
 
             override fun execute() {
                 super.execute()
 
                 sortPolicy.setCurrentSortMode(SortMode.CREATE_TIME)
+                userPreferenceDataSource.updateUserPreference(currentUserUUID, userPreference)
 
                 refreshData()
 
             }
 
-        }))
+        })
 
-        bottomMenuItems.add(BottomMenuItem(0, context.getString(R.string.sort_by_capacity), object : BaseAbstractCommand() {
+        sortByCreateTimeItem.rightResID = getBottomMenuRightResID(SortMode.CREATE_TIME)
+        bottomMenuItems.add(sortByCreateTimeItem)
+
+        val sortByCapacityItem = BottomMenuItem(getSortModeIconResID(SortMode.SIZE), context.getString(R.string.sort_by_capacity), object : BaseAbstractCommand() {
 
             override fun execute() {
                 super.execute()
 
                 sortPolicy.setCurrentSortMode(SortMode.SIZE)
+                userPreferenceDataSource.updateUserPreference(currentUserUUID, userPreference)
 
                 refreshData()
 
             }
 
-        }))
+        })
+
+        sortByCapacityItem.rightResID = getBottomMenuRightResID(SortMode.SIZE)
+        bottomMenuItems.add(sortByCapacityItem)
 
         BottomMenuListDialogFactory(bottomMenuItems).createDialog(context).show()
 
+    }
+
+    private fun getSortModeIconResID(sortMode: SortMode): Int {
+        return if (sortPolicy.getCurrentSortMode() == sortMode) {
+
+            if (sortPolicy.getCurrentSortDirection() == SortDirection.POSITIVE)
+                R.drawable.black_up_arrow
+            else
+                R.drawable.black_down_arrow
+
+        } else 0
+    }
+
+    private fun getBottomMenuRightResID(sortMode: SortMode): Int {
+        return if (sortPolicy.getCurrentSortMode() == sortMode)
+            R.drawable.green_done
+        else
+            0
     }
 
     private fun showAddDialog() {
@@ -574,14 +654,17 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     fun toggleOrientation() {
 
-        currentOrientation = if (currentOrientation == ORIENTATION_GRID_TYPE)
-            ORIENTATION_LIST_TYPE
-        else
-            ORIENTATION_GRID_TYPE
+        fileViewModePolicy.setCurrentFileViewMode(
+                if (fileViewModePolicy.getCurrentFileViewMode() == FileViewMode.GRID) FileViewMode.LIST
+                else FileViewMode.GRID)
+
+        updateToggleOrientation()
+
+        userPreferenceDataSource.updateUserPreference(currentUserUUID, userPreference)
 
         setRecyclerViewLayoutManager()
 
-        fileRecyclerViewAdapter.currentOrientation = currentOrientation
+        fileRecyclerViewAdapter.fileViewMode = fileViewModePolicy.getCurrentFileViewMode()
 
         fileRecyclerViewAdapter.setItemList(viewItems)
         fileRecyclerViewAdapter.notifyDataSetChanged()
@@ -590,13 +673,15 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     private fun setRecyclerViewLayoutManager() {
 
-        if (currentOrientation == ORIENTATION_GRID_TYPE) {
+        val fileViewMode = fileViewModePolicy.getCurrentFileViewMode()
+
+        if (fileViewMode == FileViewMode.GRID) {
 
             filePageBinding.fileRecyclerView.layoutManager = gridLayoutManager
 
             filePageBinding.fileRecyclerView.addItemDecoration(mainPageDividerItemDecoration)
 
-        } else if (currentOrientation == ORIENTATION_LIST_TYPE) {
+        } else if (fileViewMode == FileViewMode.LIST) {
 
             filePageBinding.fileRecyclerView.layoutManager = linearLayoutManager
 
@@ -1178,9 +1263,10 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile, position: Int) -> Unit,
                               val handleItemOnLongClick: (abstractFile: AbstractFile) -> Unit,
                               val doHandleMoreBtnOnClick: (abstractFile: AbstractFile, position: Int) -> Unit,
-                              val handleSortBtnOnClick: () -> Unit = {}) : BaseRecyclerViewAdapter<BindingViewHolder, ViewItem>() {
+                              val handleSortBtnOnClick: () -> Unit = {},
+                              val sortPolicy: FileSortPolicy) : BaseRecyclerViewAdapter<BindingViewHolder, ViewItem>() {
 
-    var currentOrientation = ORIENTATION_GRID_TYPE
+    var fileViewMode = FileViewMode.GRID
 
     var selectFiles = mutableListOf<AbstractFile>()
     var isSelectMode = false
@@ -1191,9 +1277,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
             ITEM_FOLDER_HEAD, ITEM_FILE_HEAD -> FolderFileTitleBinding.inflate(LayoutInflater.from(parent?.context), parent, false)
             GRID_ITEM_FOLDER -> {
-
                 FolderItemBinding.inflate(LayoutInflater.from(parent?.context), parent, false)
-
             }
 
             LIST_ITEM_FOLDER ->
@@ -1203,9 +1287,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
                 FileItemBinding.inflate(LayoutInflater.from(parent?.context), parent, false)
 
             LIST_ITEM_FILE -> {
-
                 FileFolderListItemBinding.inflate(LayoutInflater.from(parent?.context), parent, false)
-
             }
             else -> throw IllegalArgumentException("file view type is illegal")
         }
@@ -1225,9 +1307,21 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 val folderFileTitleBinding = holder?.viewDataBinding as FolderFileTitleBinding
 
-                folderFileTitleBinding.folderFileTitleViewModel = itemFolderHead.folderFileTitleViewModel
+                val context = folderFileTitleBinding.root.context
 
-                val context = folderFileTitleBinding.nameTextView.context
+                itemFolderHead.folderFileTitleViewModel.sortModeText.set(when (sortPolicy.getCurrentSortMode()) {
+                    SortMode.NAME -> R.string.name
+                    SortMode.CREATE_TIME -> R.string.create_time
+                    SortMode.SIZE -> R.string.capacity
+                    SortMode.MODIFY_TIME -> R.string.modify_time
+                })
+
+                itemFolderHead.folderFileTitleViewModel.sortDirectionIconResID.set(when (sortPolicy.getCurrentSortDirection()) {
+                    SortDirection.POSITIVE -> R.drawable.green_up_arrow
+                    SortDirection.NEGATIVE -> R.drawable.green_down_arrow
+                })
+
+                folderFileTitleBinding.folderFileTitleViewModel = itemFolderHead.folderFileTitleViewModel
 
                 folderFileTitleBinding.sortLayout.setOnClickListener {
                     handleSortBtnOnClick()
@@ -1275,7 +1369,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 val isSelected = selectFiles.contains(itemFolder.getFile())
 
-                if (currentOrientation == ORIENTATION_LIST_TYPE) {
+                if (fileViewMode == FileViewMode.LIST) {
 
                     itemFolder.folderFileTitleViewModel.isSelectMode.set(isSelectMode)
                     itemFolder.folderFileTitleViewModel.isSelected.set(isSelected)
@@ -1324,12 +1418,12 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
         val type = mItemList[position].type
 
         return if (type == ITEM_FOLDER) {
-            if (currentOrientation == ORIENTATION_GRID_TYPE)
+            if (fileViewMode == FileViewMode.GRID)
                 GRID_ITEM_FOLDER
             else
                 LIST_ITEM_FOLDER
         } else if (type == ITEM_FILE) {
-            if (currentOrientation == ORIENTATION_GRID_TYPE)
+            if (fileViewMode == FileViewMode.GRID)
                 GRID_ITEM_FILE
             else
                 LIST_ITEM_FILE
@@ -1380,12 +1474,30 @@ open class ItemFolderHead(val folderFileTitleViewModel: FolderFileTitleViewModel
 
 }
 
-class ItemFolder(val folderFileTitleViewModel: FolderItemViewModel) : ViewItem {
+abstract class ItemContent : ViewItem {
+
+    abstract fun getFile(): AbstractFile
+
+    fun getFileName(): String {
+        return getFile().name
+    }
+
+    fun getFileSize(): Long {
+        return getFile().size
+    }
+
+    fun getFileModifyTime(): Long {
+        return getFile().time
+    }
+
+}
+
+class ItemFolder(val folderFileTitleViewModel: FolderItemViewModel) : ItemContent() {
     override fun getType(): Int {
         return ITEM_FOLDER
     }
 
-    fun getFile(): AbstractFile {
+    override fun getFile(): AbstractFile {
         return folderFileTitleViewModel.abstractFile
     }
 
@@ -1403,14 +1515,15 @@ class ItemFileHead(folderFileTitleViewModel: FolderFileTitleViewModel) : ItemFol
 
 }
 
-class ItemFile(val fileItemViewModel: FileItemViewModel) : ViewItem {
+class ItemFile(val fileItemViewModel: FileItemViewModel) : ItemContent() {
     override fun getType(): Int {
         return ITEM_FILE
     }
 
-    fun getFile(): AbstractFile {
+    override fun getFile(): AbstractFile {
         return fileItemViewModel.abstractFile
     }
+
 
 }
 

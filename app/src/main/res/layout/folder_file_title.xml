@@ -38,6 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"
+            android:visibility="@{folderFileTitleViewModel.showSortBtn?View.VISIBLE:View.INVISIBLE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -48,10 +49,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:layout_marginRight="16dp"
-                android:text="@string/name"
+                android:text="@{folderFileTitleViewModel.sortModeText,default=@string/name}"
                 android:textColor="@color/new_design_primary_color"
                 android:textSize="14dp"
-                android:visibility="@{folderFileTitleViewModel.showSortBtn?View.VISIBLE:View.INVISIBLE}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -62,15 +62,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginRight="8dp"
-                android:visibility="@{folderFileTitleViewModel.showSortBtn?View.VISIBLE:View.INVISIBLE}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/sortModeTextView"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/sort" />
-
+                android:src="@{folderFileTitleViewModel.sortDirectionIconResID,default=@drawable/green_up_arrow}" />
 
         </android.support.constraint.ConstraintLayout>
-
 
     </android.support.constraint.ConstraintLayout>
 

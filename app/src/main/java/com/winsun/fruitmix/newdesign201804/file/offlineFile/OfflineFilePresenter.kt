@@ -9,6 +9,8 @@ import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.offlineFile.data.OfflineFileDataSource
+import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
+import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
 import com.winsun.fruitmix.util.FileUtil
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
@@ -60,9 +62,9 @@ class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSou
 
         }, { file, position ->
 
-        })
+        }, sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
 
-        fileRecyclerViewAdapter.currentOrientation = ORIENTATION_LIST_TYPE
+        fileRecyclerViewAdapter.fileViewMode = FileViewMode.LIST
 
         recyclerView.adapter = fileRecyclerViewAdapter
 

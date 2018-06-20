@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.newdesign201804.file.list.presenter
+package com.winsun.fruitmix.newdesign201804.user.preference
 
 enum class SortDirection {
     POSITIVE, NEGATIVE
@@ -8,7 +8,7 @@ enum class SortMode {
     NAME, MODIFY_TIME, CREATE_TIME, SIZE
 }
 
-object SortPolicy {
+class FileSortPolicy {
 
     private var currentSortDirection = SortDirection.POSITIVE
     private var currentSortMode = SortMode.NAME
@@ -39,13 +39,17 @@ object SortPolicy {
         return currentSortDirection
     }
 
+    fun setCurrentSortDirection(sortDirection: SortDirection){
+        currentSortDirection = sortDirection
+    }
+
 }
 
 enum class FileViewMode{
     GRID,LIST
 }
 
-object FileViewModePolicy{
+class FileViewModePolicy{
 
     private var currentFileViewMode = FileViewMode.GRID
 
@@ -53,7 +57,7 @@ object FileViewModePolicy{
         currentFileViewMode = fileViewMode
     }
 
-    fun getCurrentFileViewMode():FileViewMode{
+    fun getCurrentFileViewMode(): FileViewMode {
         return currentFileViewMode
     }
 

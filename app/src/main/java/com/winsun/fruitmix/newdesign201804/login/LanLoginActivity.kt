@@ -1,6 +1,7 @@
 package com.winsun.fruitmix.newdesign201804.login
 
 import android.animation.ValueAnimator
+import android.app.Activity
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.view.LayoutInflater
@@ -18,6 +19,8 @@ import com.winsun.fruitmix.newdesign201804.equipment.list.data.InjectEquipmentIt
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
 import kotlinx.android.synthetic.main.activity_lan_login.view.*
+
+const val LAN_LOGIN_REQUEST_CODE = 0x1001
 
 class LanLoginActivity : BaseToolbarActivity() {
 
@@ -48,20 +51,22 @@ class LanLoginActivity : BaseToolbarActivity() {
 
             val password = mActivityLanLoginBinding.lanPasswordEditText.text.toString()
 
-            showProgressDialog(getString(R.string.operating_title,getString(R.string.login)))
+            showProgressDialog(getString(R.string.operating_title, getString(R.string.login)))
 
-            lanLoginPresenter.lanLogin(password,object :BaseOperateCallback{
+            lanLoginPresenter.lanLogin(password, object : BaseOperateCallback {
                 override fun onFail(operationResult: OperationResult?) {
 
                     dismissDialog()
 
                     SnackbarUtil.showSnackBar(mActivityLanLoginBinding.forgetPasswordTv, Snackbar.LENGTH_SHORT,
-                            messageStr = getString(R.string.fail,getString(R.string.login)))
+                            messageStr = getString(R.string.fail, getString(R.string.login)))
                 }
 
                 override fun onSucceed() {
 
                     dismissDialog()
+
+                    setResult(Activity.RESULT_OK)
 
                     finish()
 

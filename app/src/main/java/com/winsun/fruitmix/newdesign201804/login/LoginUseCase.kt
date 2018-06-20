@@ -8,6 +8,7 @@ import com.winsun.fruitmix.http.request.factory.HttpRequestFactory
 import com.winsun.fruitmix.model.operationResult.OperationFail
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
+import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceRepository
 import com.winsun.fruitmix.stations.StationsDataSource
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource
 import com.winsun.fruitmix.token.data.TokenDataSource
@@ -17,7 +18,7 @@ import com.winsun.fruitmix.user.datasource.UserDataRepository
 
 class LoginUseCase(val tokenDataSource: TokenDataSource, val systemSettingDataSource: SystemSettingDataSource,
                    val httpRequestFactory: HttpRequestFactory, val userDataRepository: UserDataRepository,
-                   val stationsDataSource: StationsDataSource) {
+                   val stationsDataSource: StationsDataSource,val userPreferenceRepository: UserPreferenceRepository) {
 
     fun loginWithNoParam(baseOperateCallback: BaseOperateCallback) {
 
@@ -97,6 +98,8 @@ class LoginUseCase(val tokenDataSource: TokenDataSource, val systemSettingDataSo
                                 user.home = data[0]
 
                                 userDataRepository.insertUsers(users)
+
+                                userPreferenceRepository.init(user.uuid)
 
                                 baseOperateCallback.onSucceed()
 

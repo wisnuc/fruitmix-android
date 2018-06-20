@@ -13,6 +13,7 @@ interface MainPage : Page {
     fun getDrawerItems(): List<DrawerItem>
 
     fun toggleOrientation()
+
     fun handleMoreIvClick()
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)

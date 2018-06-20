@@ -7,17 +7,14 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
-import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.databinding.ActivityMoveFileBinding
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFolder
-import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
-import com.winsun.fruitmix.newdesign201804.component.TaskStateIcon
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserHome
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
@@ -29,6 +26,8 @@ import com.winsun.fruitmix.newdesign201804.file.sharedFolder.ShareRootDataUseCas
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TASK_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
+import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
+import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
@@ -72,9 +71,9 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
         }, { abstractRemoteFile, position ->
 
-        })
+        },sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
 
-        fileRecyclerViewAdapter.currentOrientation = ORIENTATION_LIST_TYPE
+        fileRecyclerViewAdapter.fileViewMode = FileViewMode.LIST
 
         activityMoveFileBinding.fileRecyclerView.layoutManager = LinearLayoutManager(context)
         activityMoveFileBinding.fileRecyclerView.adapter = fileRecyclerViewAdapter

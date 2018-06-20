@@ -10,11 +10,9 @@ import com.winsun.fruitmix.callback.*
 import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
 import com.winsun.fruitmix.file.data.model.*
-import com.winsun.fruitmix.file.data.station.StationFileRepository
 import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
-import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
@@ -22,6 +20,8 @@ import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleVi
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.permissionManage.PermissionManageActivity
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.SharedFolderDataSource
+import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
+import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
 import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.user.datasource.InjectUser
@@ -57,9 +57,9 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
         }, { file, position ->
             showBottomDialogWhenClickMoreBtn(file, position)
-        })
+        }, sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
 
-        fileRecyclerViewAdapter.currentOrientation = ORIENTATION_LIST_TYPE
+        fileRecyclerViewAdapter.fileViewMode = FileViewMode.LIST
 
         recyclerView.adapter = fileRecyclerViewAdapter
 
@@ -115,7 +115,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
         }
 
-        abstract fun  handleLoadSucceed()
+        abstract fun handleLoadSucceed()
 
         abstract fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?)
 

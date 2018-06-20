@@ -105,6 +105,8 @@ class LoginEntranceActivity : AppCompatActivity() {
 
         startActivity(intent)
 
+        finish()
+
     }
 
 }

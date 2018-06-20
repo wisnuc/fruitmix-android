@@ -26,6 +26,8 @@ import com.winsun.fruitmix.newdesign201804.file.upload.FileBrowserActivity
 import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileUtil
 import com.winsun.fruitmix.newdesign201804.mainpage.DrawerItem
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPage
+import com.winsun.fruitmix.newdesign201804.user.preference.InjectUserPreference
+import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
@@ -62,7 +64,8 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
                 this, activity.getCurrentUserUUID(), ThreadManagerImpl.getInstance(),
                 InjectTransmissionTaskDataSource.provideInstance(activity),
                 InjectTransmissionDataSource.inject(activity),
-                InjectStationFileRepository.provideStationFileRepository(activity))
+                InjectStationFileRepository.provideStationFileRepository(activity),UserPreferenceContainer.userPreference,
+                InjectUserPreference.inject(activity))
 
         val swipeRefreshLayout = filePageBinding.swipeRefreshLayout
 

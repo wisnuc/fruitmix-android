@@ -2,8 +2,6 @@ package com.winsun.fruitmix.newdesign201804.search
 
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.OrientationHelper
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
@@ -13,15 +11,13 @@ import com.winsun.fruitmix.file.data.model.*
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.component.inflateView
-import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
-import com.winsun.fruitmix.newdesign201804.file.list.presenter.FileRecyclerViewAdapter
-import com.winsun.fruitmix.newdesign201804.file.list.presenter.ItemFile
-import com.winsun.fruitmix.newdesign201804.file.list.presenter.ItemFolder
-import com.winsun.fruitmix.newdesign201804.file.list.presenter.ORIENTATION_LIST_TYPE
+import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.search.data.SearchDataSource
 import com.winsun.fruitmix.newdesign201804.search.data.SearchOrder
+import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
+import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
@@ -160,14 +156,13 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
 
         fileRecyclerViewAdapter = FileRecyclerViewAdapter({ abstractFile, position ->
         }, {}, { abstractFile, position ->
-        })
+        },sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
 
-        fileRecyclerViewAdapter.currentOrientation = ORIENTATION_LIST_TYPE
+        fileRecyclerViewAdapter.fileViewMode = FileViewMode.LIST
 
         searchedFileRecyclerView.adapter = fileRecyclerViewAdapter
 
     }
-
 
     private fun handleSelectedSearchTypeItemCountOrInputTextChanged() {
 

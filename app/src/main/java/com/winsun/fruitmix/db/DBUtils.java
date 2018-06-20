@@ -21,6 +21,12 @@ import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.newdesign201804.user.preference.FileSortPolicy;
+import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode;
+import com.winsun.fruitmix.newdesign201804.user.preference.LocalUserPreferenceParser;
+import com.winsun.fruitmix.newdesign201804.user.preference.SortDirection;
+import com.winsun.fruitmix.newdesign201804.user.preference.SortMode;
+import com.winsun.fruitmix.newdesign201804.user.preference.UserPreference;
 import com.winsun.fruitmix.parser.FileFinishedTaskItemParser;
 import com.winsun.fruitmix.parser.LocalFakeGroupTweetParser;
 import com.winsun.fruitmix.parser.LocalGroupParser;
@@ -652,6 +658,122 @@ public class DBUtils {
         return contentValues;
     }
 
+    public long insertUserPreference(String userUUID, UserPreference userPreference) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues = getUserPreferenceContentValues(userUUID, userPreference);
+
+        returnValue = database.insert(DBHelper.USER_PREFERENCE_TABLE_NAME, null, contentValues);
+
+        close();
+
+        return returnValue;
+
+    }
+
+    @NonNull
+    private ContentValues getUserPreferenceContentValues(String userUUID, UserPreference userPreference) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.USER_PREFERENCE_USER_UUID, userUUID);
+
+        FileSortPolicy fileSortPolicy = userPreference.getFileSortPolicy();
+
+        SortMode sortMode = fileSortPolicy.getCurrentSortMode();
+
+        int sortModeValue;
+        switch (sortMode) {
+            case NAME:
+                sortModeValue = 0;
+                break;
+            case SIZE:
+                sortModeValue = 1;
+                break;
+            case CREATE_TIME:
+                sortModeValue = 2;
+                break;
+            case MODIFY_TIME:
+                sortModeValue = 3;
+                break;
+            default:
+                sortModeValue = 0;
+        }
+
+        contentValues.put(DBHelper.USER_PREFERENCE_FILE_SORT_MODE, sortModeValue);
+
+        SortDirection sortDirection = fileSortPolicy.getCurrentSortDirection();
+
+        int sortDirectionValue;
+
+        switch (sortDirection) {
+            case POSITIVE:
+                sortDirectionValue = 0;
+                break;
+            case NEGATIVE:
+                sortDirectionValue = 1;
+                break;
+            default:
+                sortDirectionValue = 0;
+        }
+
+        contentValues.put(DBHelper.USER_PREFERENCE_FILE_SORT_DIRECTION, sortDirectionValue);
+
+        FileViewMode fileViewMode = userPreference.getFileViewModePolicy().getCurrentFileViewMode();
+
+        int fileViewModeValue;
+
+        switch (fileViewMode) {
+            case GRID:
+                fileViewModeValue = 0;
+                break;
+            case LIST:
+                fileViewModeValue = 1;
+                break;
+            default:
+                fileViewModeValue = 0;
+        }
+
+        contentValues.put(DBHelper.USER_PREFERENCE_FILE_VIEW_MODE, fileViewModeValue);
+        return contentValues;
+    }
+
+    public long updateUserPreference(String userUUID, UserPreference userPreference) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        returnValue = database.update(DBHelper.USER_PREFERENCE_TABLE_NAME, getUserPreferenceContentValues(userUUID, userPreference),
+                DBHelper.USER_PREFERENCE_USER_UUID + " = ?", new String[]{userUUID});
+
+        close();
+
+        return returnValue;
+    }
+
+    public UserPreference getUserPreference(String userUUID){
+
+        openReadableDB();
+
+        Cursor cursor = database.query(DBHelper.USER_PREFERENCE_TABLE_NAME,null,DBHelper.USER_PREFERENCE_USER_UUID + " = ?",
+                new String[]{userUUID},null,null,null);
+
+        UserPreference userPreference;
+
+        if (!cursor.moveToFirst())
+            return null;
+
+        userPreference = new LocalUserPreferenceParser().parse(cursor);
+
+        cursor.close();
+
+        close();
+
+        return userPreference;
+
+    }
 
     private long deleteAllDataInTable(String tableName) {
         openWritableDB();
@@ -1382,7 +1504,7 @@ public class DBUtils {
 
     }
 
-    public long updateGroupUnreadCommentCount(String groupUUID, String currentUserGUID, long unreadCommentCount){
+    public long updateGroupUnreadCommentCount(String groupUUID, String currentUserGUID, long unreadCommentCount) {
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(DBHelper.GROUP_KEY_UNREAD_COMMENT_COUNT, unreadCommentCount);

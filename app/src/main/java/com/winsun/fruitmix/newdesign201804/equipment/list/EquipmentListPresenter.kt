@@ -20,6 +20,7 @@ import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemData
 import com.winsun.fruitmix.newdesign201804.equipment.model.*
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.EQUIPMENT_IP_KEY
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.EQUIPMENT_NAME_KEY
+import com.winsun.fruitmix.newdesign201804.login.LAN_LOGIN_REQUEST_CODE
 import com.winsun.fruitmix.newdesign201804.login.LanLoginActivity
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPageActivity
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
@@ -31,7 +32,8 @@ private const val ADD_EQUIPMENT_TYPE = 2
 
 private const val TAG = "EquipmentListPresenter"
 
-class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemDataSource, val wechatUserGUID: String, val activeView: ActiveView) {
+class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemDataSource, val wechatUserGUID: String,
+                             val activeView: ActiveView,val equipmentListBaseView: EquipmentListBaseView) {
 
     private var equipmentListAdapter: EquipmentListAdapter = EquipmentListAdapter()
 
@@ -122,7 +124,7 @@ class EquipmentListPresenter(private val equipmentItemDataSource: EquipmentItemD
                             val intent = Intent(context, LanLoginActivity::class.java)
 
                             intent.putExtra(EQUIPMENT_ITEM_UUID_KEY, equipmentItem.uuid)
-                            context.startActivity(intent)
+                            equipmentListBaseView.getActivity().startActivityForResult(intent, LAN_LOGIN_REQUEST_CODE)
                         }
                         is UnderReviewEquipmentItem -> showMessageDialog(context, R.string.under_review,
                                 context.getString(R.string.under_review_message, "Mark"))

@@ -6,7 +6,7 @@ import android.databinding.ObservableInt
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.util.FileUtil
 
-open class FileItemViewModel(val abstractFile: AbstractFile,var doHandleMoreBtnOnClick: () -> Unit = {}) {
+open class FileItemViewModel(val abstractFile: AbstractFile, var doHandleMoreBtnOnClick: () -> Unit = {}) {
 
     val isSelectMode = ObservableBoolean()
 
@@ -26,8 +26,13 @@ open class FileItemViewModel(val abstractFile: AbstractFile,var doHandleMoreBtnO
     init {
 
         fileTypeResID.set(abstractFile.fileTypeResID)
-        fileFormatSize.set(FileUtil.formatFileSize(abstractFile.size))
-        fileFormatTime.set(abstractFile.timeText)
+
+        if (abstractFile.isFolder)
+            fileFormatSize.set("")
+        else
+            fileFormatSize.set(FileUtil.formatFileSize(abstractFile.size))
+
+        fileFormatTime.set(abstractFile.dateText)
         folderName.set(abstractFile.name)
 
     }

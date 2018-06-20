@@ -38,6 +38,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final int ADD_GROUP_COMMENT_DRAFT_KEY_IS_FAIL_VERSION = 40;
 
+    public static final int ADD_USER_PREFERENCE_TABLE_VERSION = 41;
+
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
     public static final String USER_KEY_UUID = "user_uuid";
@@ -129,6 +131,11 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String GROUP_COMMENT_DRAFT_KEY_REAL_COMMENT_UUID = "group_comment_draft_key_real_comment_uuid";
     public static final String GROUP_COMMENT_DRAFT_KEY_IS_FAIL = "group_comment_draft_key_is_fail";
 
+    public static final String USER_PREFERENCE_USER_UUID = "user_preference_user_uuid";
+    public static final String USER_PREFERENCE_FILE_SORT_MODE = "user_preference_file_sort_mode";
+    public static final String USER_PREFERENCE_FILE_SORT_DIRECTION = "user_preference_file_sort_direction";
+    public static final String USER_PREFERENCE_FILE_VIEW_MODE = "user_preference_file_view_mode";
+
     private static final String DB_NAME = "fruitmix";
     static final String REMOTE_USER_TABLE_NAME = "remote_user";
     static final String REMOTE_MEDIA_TABLE_NAME = "remote_media";
@@ -149,6 +156,8 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String REMOTE_STATION_TABLE_NAME = "remote_station";
 
     static final String REMOTE_GROUP_TWEET_DRAFT_TABLE_NAME = "remote_group_tweet_draft";
+
+    static final String USER_PREFERENCE_TABLE_NAME = "user_preference";
 
     private static final String CREATE_TABLE = "create table if not exists ";
 
@@ -267,8 +276,12 @@ public class DBHelper extends SQLiteOpenHelper {
             + GROUP_COMMENT_DRAFT_KEY_IS_FAIL + INTEGER_NOT_NULL
             + GROUP_COMMENT_DRAFT_KEY_REAL_COMMENT_UUID + TEXT_WITHOUT_COMMA + END_SQL;
 
+    public static final String DATABASE_USER_PREFERENCE_CREATE = CREATE_TABLE + USER_PREFERENCE_TABLE_NAME + BEGIN_SQL
+            + ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT
+            + USER_PREFERENCE_USER_UUID + TEXT_NOT_NULL + USER_PREFERENCE_FILE_SORT_MODE + INTEGER_NOT_NULL
+            + USER_PREFERENCE_FILE_SORT_DIRECTION + INTEGER_NOT_NULL + USER_PREFERENCE_FILE_VIEW_MODE + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
-    private static final int DB_VERSION = ADD_GROUP_COMMENT_DRAFT_KEY_IS_FAIL_VERSION;
+    private static final int DB_VERSION = ADD_USER_PREFERENCE_TABLE_VERSION;
 
     DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -303,6 +316,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DATABASE_REMOTE_GROUP_LAST_COMMENT_CREATE);
 
         db.execSQL(DATABASE_REMOTE_GROUP_TWEET_DRAFT_CREATE);
+
+        db.execSQL(DATABASE_USER_PREFERENCE_CREATE);
     }
 
     @Override
@@ -363,15 +378,11 @@ public class DBHelper extends SQLiteOpenHelper {
         }
 
         if (oldVersion < MODIFY_STATION_TABLE_COLUMN) {
-
             db.execSQL(DROP_TABLE + REMOTE_STATION_TABLE_NAME);
-
         }
 
         if (oldVersion < ADD_GROUP_LAST_RETRIEVE_COMMENT_INDEX_VERSION) {
-
             db.execSQL(DROP_TABLE + REMOTE_GROUP_TABLE_NAME);
-
         }
 
         if (oldVersion < ADD_GROUP_COMMENT_DRAFT_TABLE_VERSION) {
@@ -381,6 +392,9 @@ public class DBHelper extends SQLiteOpenHelper {
         if (oldVersion < ADD_GROUP_COMMENT_DRAFT_KEY_IS_FAIL_VERSION) {
             db.execSQL(DROP_TABLE + REMOTE_GROUP_TWEET_DRAFT_TABLE_NAME);
         }
+
+        if (oldVersion < ADD_USER_PREFERENCE_TABLE_VERSION)
+            db.execSQL(DROP_TABLE + USER_PREFERENCE_TABLE_NAME);
 
         onCreate(db);
 

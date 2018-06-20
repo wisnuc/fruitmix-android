@@ -789,6 +789,10 @@
     <string name="sort_by_create_time">按创建日期的正序与倒序</string>
     <string name="sort_by_capacity">按容量大小的正序与倒序</string>
 
+    <string name="modify_time">修改日期</string>
+    <string name="create_time">创建日期</string>
+    <string name="capacity">容量大小</string>
+    
     <string name="new_create">新建</string>
     
     <string name="magnet_link">磁力链</string>

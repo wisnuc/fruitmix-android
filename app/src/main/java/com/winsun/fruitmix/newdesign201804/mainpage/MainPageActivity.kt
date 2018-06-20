@@ -22,6 +22,8 @@ import com.winsun.fruitmix.newdesign201804.media.MediaPage
 import com.winsun.fruitmix.newdesign201804.search.SearchActivity
 import com.winsun.fruitmix.newdesign201804.search.startSearchActivity
 import com.winsun.fruitmix.newdesign201804.share.SharePage
+import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
+import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.util.Util
@@ -110,8 +112,6 @@ class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListene
             return@setOnNavigationItemSelectedListener true
 
         }
-
-
 
         initToggleOrientationIv()
 
@@ -238,6 +238,10 @@ class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListene
 
     private fun openDrawer() {
         drawerLayout.openDrawer(Gravity.START)
+    }
+
+    override fun updateToggleOrientationIcon(resID: Int) {
+        toggleOrientationIv.setImageResource(resID)
     }
 
     private fun initToggleOrientationIv() {

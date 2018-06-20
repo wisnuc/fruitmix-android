@@ -67,7 +67,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/moreIv"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/view_mode" />
+            android:src="@drawable/view_mode" />
 
 
     </android.support.constraint.ConstraintLayout>
