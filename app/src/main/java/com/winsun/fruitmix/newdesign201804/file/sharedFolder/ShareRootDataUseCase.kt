@@ -57,7 +57,7 @@ class ShareRootDataUseCase(private val fileDataSource: FileDataSource, val curre
 
             if (it is RemotePublicDrive) {
 
-                val publicRootUUID = it.uuid
+/*                val publicRootUUID = it.uuid
 
                 fileDataSource.getFile(publicRootUUID, publicRootUUID, object : BaseLoadDataCallback<AbstractRemoteFile> {
                     override fun onFail(operationResult: OperationResult?) {
@@ -79,8 +79,13 @@ class ShareRootDataUseCase(private val fileDataSource: FileDataSource, val curre
                         generateRootFolder(baseLoadDataCallback)
 
                     }
-                })
+                })*/
 
+                it.rootFolderUUID = it.uuid
+
+                currentFolderItems.add(it)
+
+                generateRootFolder(baseLoadDataCallback)
 
             } else if (it is RemoteBuiltInDrive) {
 

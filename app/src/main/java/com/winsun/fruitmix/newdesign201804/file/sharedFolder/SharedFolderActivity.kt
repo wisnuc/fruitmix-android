@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.sharedFolder
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.databinding.DataBindingUtil
@@ -80,7 +81,7 @@ class SharedFolderActivity : BaseToolbarActivity(), SharedFolderView {
 
     override fun generateContent(root: ViewGroup?): View {
 
-        binding = DataBindingUtil.inflate(LayoutInflater.from(this), R.layout.activity_shared_folder, null, false)
+        binding = DataBindingUtil.inflate(LayoutInflater.from(this), R.layout.activity_shared_folder, root, false)
 
         return binding.root
 
@@ -90,8 +91,14 @@ class SharedFolderActivity : BaseToolbarActivity(), SharedFolderView {
         return getString(R.string.shared_folder)
     }
 
-    override fun getContext(): Context {
+    override fun getActivity(): Activity {
         return this
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        sharedFolderPresenter.onActivityResult(requestCode,resultCode,data)
     }
 
     override fun getRootView(): View {

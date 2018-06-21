@@ -24,7 +24,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
     private var totalSize = 0L
 
-    private val subTasks = mutableListOf<Task>()
+    private val subDownloadTasks = mutableListOf<Task>()
 
     private lateinit var startingTaskState: StartingTaskState
 
@@ -54,7 +54,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
     override fun cancelTask() {
 
-        subTasks.forEach {
+        subDownloadTasks.forEach {
 
             it.cancelTask()
 
@@ -124,7 +124,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
             val subTask = DownloadTask(Util.createLocalUUid(),createUserUUID,abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
                     currentUserUUID, threadManager)
 
-            subTasks.add(subTask)
+            subDownloadTasks.add(subTask)
 
             subTask.registerObserver(object : TaskStateObserver {
                 override fun notifyStateChanged(currentState: TaskState) {

@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.sharedFolder
 
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
@@ -18,6 +19,7 @@ import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
+import com.winsun.fruitmix.newdesign201804.file.permissionManage.PERMISSION_MANAGE_REQUEST_CODE
 import com.winsun.fruitmix.newdesign201804.file.permissionManage.PermissionManageActivity
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.SharedFolderDataSource
 import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
@@ -35,7 +37,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
     private val sharedFolderRootUUID = "sharedFolderRootUUID"
 
-    private val context = sharedFolderView.getContext()
+    private val context = sharedFolderView.getActivity()
 
     private val retrieveFolders = mutableListOf<AbstractRemoteFile>()
 
@@ -76,9 +78,6 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
             }
 
             override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
-
-                currentFolderItems.addAll(data)
-
                 refreshData(data)
             }
 
@@ -173,6 +172,8 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
             sharedFolderView.setAddFabVisibility(View.VISIBLE)
 
+            showLoadingBg()
+
             shareRootDataUseCase.getRoot(object : LoadSharedFolderCallback() {
 
                 override fun handleLoadSucceed() {
@@ -188,6 +189,8 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
         } else {
 
             sharedFolderView.setAddFabVisibility(View.INVISIBLE)
+
+            showLoadingBg()
 
             fileDataSource.getFile(preFolder.rootFolderUUID, preFolder.uuid, object : LoadSharedFolderCallback() {
 
@@ -205,8 +208,36 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
     }
 
+    private fun refreshRootFolder() {
+
+        shareRootDataUseCase.getRoot(object : LoadSharedFolderCallback() {
+
+            override fun handleLoadSucceed() {
+
+            }
+
+            override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+                refreshData(data)
+            }
+
+        })
+
+    }
+
+    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == PERMISSION_MANAGE_REQUEST_CODE && resultCode == RESULT_OK) {
+
+            if (!notRoot()) {
+                refreshRootFolder()
+            }
+
+        }
+    }
 
     private fun refreshData(data: MutableList<AbstractRemoteFile>) {
+
+        currentFolderItems.clear()
+        currentFolderItems.addAll(data)
 
         val folderViewItems = mutableListOf<ViewItem>()
         val fileViewItems = mutableListOf<ViewItem>()
@@ -216,6 +247,12 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
             if (it.isFolder) {
 
                 val folderItemViewModel = FolderItemViewModel(it as RemoteFolder)
+
+                if (it is RemoteBuiltInDrive)
+                    folderItemViewModel.showMoreBtn.set(false)
+                else
+                    folderItemViewModel.showMoreBtn.set(true)
+
                 folderViewItems.add(ItemFolder(folderItemViewModel))
             } else {
 
@@ -231,20 +268,20 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
         if (folderViewItems.size > 0) {
 
-            val folderFileTitleViewModel = FolderFileTitleViewModel()
-            folderFileTitleViewModel.showSortBtn.set(true)
+            /*     val folderFileTitleViewModel = FolderFileTitleViewModel()
+                 folderFileTitleViewModel.showSortBtn.set(false)
 
-            viewItems.add(ItemFolderHead(folderFileTitleViewModel))
+                 viewItems.add(ItemFolderHead(folderFileTitleViewModel))*/
             viewItems.addAll(folderViewItems)
 
-            fileTitleViewModel.showSortBtn.set(false)
-            viewItems.add(ItemFileHead(fileTitleViewModel))
+            /*   fileTitleViewModel.showSortBtn.set(false)
+               viewItems.add(ItemFileHead(fileTitleViewModel))*/
             viewItems.addAll(fileViewItems)
 
         } else {
 
-            fileTitleViewModel.showSortBtn.set(true)
-            viewItems.add(ItemFileHead(fileTitleViewModel))
+/*            fileTitleViewModel.showSortBtn.set(true)
+            viewItems.add(ItemFileHead(fileTitleViewModel))*/
             viewItems.addAll(fileViewItems)
 
         }
@@ -266,9 +303,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
             override fun execute() {
                 super.execute()
 
-                val intent = Intent(sharedFolderView.getContext(), PermissionManageActivity::class.java)
-
-                sharedFolderView.getContext().startActivity(intent)
+                PermissionManageActivity.start(sharedFolderView.getActivity(), abstractFile as RemotePublicDrive)
 
             }
 
@@ -285,7 +320,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
         }))
 
-        BottomMenuListDialogFactory(bottomMenuItems).createDialog(sharedFolderView.getContext()).show()
+        BottomMenuListDialogFactory(bottomMenuItems).createDialog(sharedFolderView.getActivity()).show()
 
     }
 

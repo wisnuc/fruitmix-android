@@ -8,7 +8,9 @@ import com.winsun.fruitmix.thread.manage.ThreadManager
 import org.json.JSONObject
 
 
-class RemoteTransmissionTaskJsonObjectParser(val threadManager: ThreadManager,val currentUserUUID:String) {
+class RemoteTransmissionTaskJsonObjectParser(val threadManager: ThreadManager, val currentUserUUID: String) {
+
+    private val remoteSubTaskParser = RemoteSubTaskParser()
 
     fun parse(jsonObject: JSONObject): Task? {
 
@@ -56,29 +58,50 @@ class RemoteTransmissionTaskJsonObjectParser(val threadManager: ThreadManager,va
 
         val taskParam = TaskParam(dstFile, entryFiles)
 
+        val nodesJsonArray = jsonObject.optJSONArray("nodes")
+
+        val subTasks = mutableListOf<SubTask>()
+
+        var isError = false
+
+        for (i in 0 until nodesJsonArray.length()) {
+
+            val nodeJsonObject = nodesJsonArray.optJSONObject(i)
+
+            val subTask = remoteSubTaskParser.parse(nodeJsonObject)
+
+            if (subTask.subTaskState == SubTaskState.CONFLICT)
+                isError = true
+
+            subTasks.add(subTask)
+
+        }
+
         if (type == "move") {
 
-            task = MoveTask(uuid, currentUserUUID,remoteFile, threadManager, taskParam)
+            task = MoveTask(uuid, currentUserUUID, remoteFile, threadManager, taskParam)
 
             task.init()
 
-            if (finished)
-                task.setCurrentState(FinishTaskState(0, task))
-            else
-                task.setCurrentState(StartingTaskState(0, 0, "", task))
+            when {
+                finished -> task.setCurrentState(FinishTaskState(0, task))
+                isError -> task.setCurrentState(ErrorTaskState(task))
+                else -> task.setCurrentState(StartingTaskState(0, 0, "", task))
+            }
 
             return task
 
         } else if (type == "copy") {
 
-            task = CopyTask(uuid, currentUserUUID,remoteFile, threadManager, taskParam)
+            task = CopyTask(uuid, currentUserUUID, remoteFile, threadManager, taskParam)
 
             task.init()
 
-            if (finished)
-                task.setCurrentState(FinishTaskState(0, task))
-            else
-                task.setCurrentState(StartingTaskState(0, 0, "", task))
+            when {
+                finished -> task.setCurrentState(FinishTaskState(0, task))
+                isError -> task.setCurrentState(ErrorTaskState(task))
+                else -> task.setCurrentState(StartingTaskState(0, 0, "", task))
+            }
 
             return task
 

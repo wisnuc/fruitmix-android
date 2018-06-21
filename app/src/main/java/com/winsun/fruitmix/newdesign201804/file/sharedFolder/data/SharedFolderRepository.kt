@@ -26,8 +26,18 @@ class SharedFolderRepository(threadManager: ThreadManager, private val sharedFol
             sharedFolderDataSource.deleteSharedDisk(sharedDiskUUID, createOperateCallbackRunOnMainThread(baseOperateCallback))
         })
 
-
     }
 
+    override fun updateSharedDiskName(sharedDiskUUID:String,newName: String, baseOperateCallback: BaseOperateCallback) {
+        mThreadManager.runOnCacheThread {
+            sharedFolderDataSource.updateSharedDiskName(sharedDiskUUID,newName,createOperateCallbackRunOnMainThread(baseOperateCallback))
+        }
+    }
+
+    override fun updateSharedDiskWriteList(sharedDiskUUID:String,userUUIDs:List<String>, baseOperateCallback: BaseOperateCallback) {
+        mThreadManager.runOnCacheThread {
+            sharedFolderDataSource.updateSharedDiskWriteList(sharedDiskUUID,userUUIDs,createOperateCallbackRunOnMainThread(baseOperateCallback))
+        }
+    }
 
 }

@@ -19,6 +19,7 @@ import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRemoteDataSource;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.NewMediaListDataLoader;
+import com.winsun.fruitmix.newdesign201804.init.InitNewDesignSystem;
 import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.stations.StationsRemoteDataSource;
 import com.winsun.fruitmix.stations.StationsRepository;
@@ -75,6 +76,8 @@ public class InitSystem {
         UploadMediaUseCase.destroyInstance();
 
         NewMediaListDataLoader.destroyInstance();
+
+        InitNewDesignSystem.Companion.init();
 
         ButlerService.startButlerService(context);
 

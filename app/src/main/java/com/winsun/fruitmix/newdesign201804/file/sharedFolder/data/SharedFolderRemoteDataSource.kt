@@ -4,7 +4,6 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
-import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl
 import com.winsun.fruitmix.http.IHttpUtil
@@ -44,6 +43,38 @@ class SharedFolderRemoteDataSource(iHttpUtil: IHttpUtil, httpRequestFactory: Htt
 
         wrapper.operateCall(httpRequest, baseOperateCallback)
 
+    }
+
+    override fun updateSharedDiskName(sharedDiskUUID:String,newName: String, baseOperateCallback: BaseOperateCallback) {
+
+        val httpPath = "$DRIVES/$sharedDiskUUID"
+
+        val body = JsonObject()
+
+        body.addProperty("label",newName)
+
+        val httpRequest = httpRequestFactory.createHttpPatchRequest(httpPath,body.toString())
+
+        wrapper.operateCall(httpRequest,baseOperateCallback)
+    }
+
+    override fun updateSharedDiskWriteList(sharedDiskUUID:String,userUUIDs:List<String>, baseOperateCallback: BaseOperateCallback) {
+
+        val httpPath = "$DRIVES/$sharedDiskUUID"
+
+        val body = JsonObject()
+
+        val writeLists = JsonArray()
+
+        userUUIDs.forEach {
+            writeLists.add(it)
+        }
+
+        body.add("writelist", writeLists)
+
+        val httpRequest = httpRequestFactory.createHttpPatchRequest(httpPath,body.toString())
+
+        wrapper.operateCall(httpRequest,baseOperateCallback)
     }
 
 }

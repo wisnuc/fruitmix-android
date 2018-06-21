@@ -6,7 +6,7 @@
     android:layout_height="56dp">
 
     <CheckBox
-        android:id="@+id/checkBox2"
+        android:id="@+id/userCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -23,7 +23,7 @@
         android:layout_height="40dp"
         android:layout_marginLeft="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toRightOf="@id/checkBox2"
+        app:layout_constraintLeft_toRightOf="@id/userCheckBox"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -36,7 +36,7 @@
         android:textColor="@color/eighty_seven_percent_black"
         android:textSize="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/checkBox2"
+        app:layout_constraintStart_toEndOf="@+id/userCheckBox"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Mark" />
 

@@ -38,6 +38,8 @@ import com.winsun.fruitmix.newdesign201804.file.list.FilePageSelectActionListene
 import com.winsun.fruitmix.newdesign201804.file.list.FileView
 import com.winsun.fruitmix.newdesign201804.file.list.MainPageDividerItemDecoration
 import com.winsun.fruitmix.newdesign201804.file.list.data.*
+import com.winsun.fruitmix.newdesign201804.file.list.operation.FileOperation
+import com.winsun.fruitmix.newdesign201804.file.list.operation.FileOperationView
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
@@ -120,11 +122,29 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         rootFolderUUID = currentUser.home
 
+        val fileOperation = FileOperation(currentUserUUID, threadManager, transmissionTaskDataSource,
+                contentLayout, fileDataSource, context, baseView, fileView,
+                { position ->
+
+                    fileRecyclerViewAdapter.notifyItemChanged(position)
+                },
+                { position ->
+                    viewItems.removeAt(position)
+
+                    fileRecyclerViewAdapter.setItemList(viewItems)
+
+                    fileRecyclerViewAdapter.notifyItemRemoved(position)
+
+                })
+
         fileRecyclerViewAdapter = FileRecyclerViewAdapter({ remoteFile, position ->
             doHandleItemOnClick(remoteFile, position)
         }, {
             doHandleOnLongClick(it)
         }, { remoteFile, position ->
+
+//            fileOperation.doShowFileMenuBottomDialog(context, remoteFile, position)
+
             doShowFileMenuBottomDialog(context, remoteFile, position)
         }, { showSortBottomDialog(context) },
                 userPreference.fileSortPolicy)
@@ -1341,6 +1361,8 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
                 itemFile.fileItemViewModel.isSelectMode.set(isSelectMode)
                 itemFile.fileItemViewModel.isSelected.set(selectFiles.contains(itemFile.getFile()))
 
+                itemFile.fileItemViewModel.init()
+
                 holder?.viewDataBinding?.setVariable(BR.fileItemViewModel, itemFile.fileItemViewModel)
 
                 rootView?.setOnClickListener {
@@ -1386,6 +1408,8 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
                             else R.drawable.round_circle)
 
                 }
+                
+                itemFolder.folderFileTitleViewModel.init()
 
                 holder?.viewDataBinding?.setVariable(BR.fileItemViewModel, itemFolder.folderFileTitleViewModel)
 

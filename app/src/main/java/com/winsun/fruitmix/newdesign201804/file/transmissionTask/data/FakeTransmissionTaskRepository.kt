@@ -61,4 +61,8 @@ object FakeTransmissionTaskRepository : TransmissionTaskDataSource {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    override fun updateConflictSubTask(taskUUID: String, nodeUUID: String, sameSourceConflictSubTaskPolicy: ConflictSubTaskPolicy, diffSourceConflictSubTaskPolicy: ConflictSubTaskPolicy, applyToAll: Boolean, baseOperateCallback: BaseOperateCallback) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }

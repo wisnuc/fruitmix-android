@@ -12,6 +12,7 @@ import com.winsun.fruitmix.databinding.FilePageBinding
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
+import com.winsun.fruitmix.newdesign201804.file.list.operation.FileOperationView
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.FilePresenter
 import com.winsun.fruitmix.newdesign201804.file.move.FILE_COPY_REQUEST_CODE
 import com.winsun.fruitmix.newdesign201804.file.move.FILE_MOVE_REQUEST_CODE

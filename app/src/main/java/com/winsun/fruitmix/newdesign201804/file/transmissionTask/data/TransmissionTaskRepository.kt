@@ -6,6 +6,7 @@ import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.ConflictSubTaskPolicy
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TransmissionTask
 import com.winsun.fruitmix.thread.manage.ThreadManager
@@ -79,5 +80,18 @@ class TransmissionTaskRepository(val taskManager: TaskManager, val transmissionT
         }
 
     }
+
+    override fun updateConflictSubTask(taskUUID: String, nodeUUID: String, sameSourceConflictSubTaskPolicy: ConflictSubTaskPolicy,
+                                       diffSourceConflictSubTaskPolicy: ConflictSubTaskPolicy,
+                                       applyToAll: Boolean, baseOperateCallback: BaseOperateCallback) {
+
+        mThreadManager.runOnCacheThread {
+            transmissionTaskDataSource.updateConflictSubTask(taskUUID,nodeUUID,sameSourceConflictSubTaskPolicy,
+                    diffSourceConflictSubTaskPolicy,applyToAll,
+                    createOperateCallbackRunOnMainThread(baseOperateCallback))
+        }
+
+    }
+
 
 }

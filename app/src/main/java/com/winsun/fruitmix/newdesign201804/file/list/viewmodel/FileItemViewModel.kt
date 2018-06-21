@@ -23,8 +23,7 @@ open class FileItemViewModel(val abstractFile: AbstractFile, var doHandleMoreBtn
 
     val isDisable = ObservableBoolean(false)
 
-    init {
-
+    fun init(){
         fileTypeResID.set(abstractFile.fileTypeResID)
 
         if (abstractFile.isFolder)
@@ -34,8 +33,8 @@ open class FileItemViewModel(val abstractFile: AbstractFile, var doHandleMoreBtn
 
         fileFormatTime.set(abstractFile.dateText)
         folderName.set(abstractFile.name)
-
     }
+
 
     fun handleMoreBtnOnClick() {
         doHandleMoreBtnOnClick()

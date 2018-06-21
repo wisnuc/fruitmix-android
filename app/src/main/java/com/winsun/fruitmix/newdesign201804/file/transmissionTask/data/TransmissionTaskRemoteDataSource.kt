@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask.data
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
@@ -7,15 +9,12 @@ import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl
 import com.winsun.fruitmix.http.IHttpUtil
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.CopyTask
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.MoveTask
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TransmissionTask
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.thread.manage.ThreadManager
 
-private const val TASK = "/tasks"
+private const val TASK = "/tasks/"
 
-class TransmissionTaskRemoteDataSource(val threadManager: ThreadManager,val currentUserUUID:String,
+class TransmissionTaskRemoteDataSource(val threadManager: ThreadManager, val currentUserUUID: String,
                                        iHttpUtil: IHttpUtil, httpRequestFactory: HttpRequestFactory)
     : BaseRemoteDataSourceImpl(iHttpUtil, httpRequestFactory), TransmissionTaskDataSource {
 
@@ -23,7 +22,7 @@ class TransmissionTaskRemoteDataSource(val threadManager: ThreadManager,val curr
 
         val httpRequest = httpRequestFactory.createHttpGetRequest(TASK)
 
-        wrapper.loadCall(httpRequest, baseLoadDataCallback, RemoteTransmissionTasksParser(threadManager,currentUserUUID))
+        wrapper.loadCall(httpRequest, baseLoadDataCallback, RemoteTransmissionTasksParser(threadManager, currentUserUUID))
 
     }
 
@@ -31,7 +30,7 @@ class TransmissionTaskRemoteDataSource(val threadManager: ThreadManager,val curr
 
         val httpRequest = httpRequestFactory.createHttpGetRequest("$TASK/$taskUUID")
 
-        wrapper.operateCall(httpRequest,baseOperateDataCallback,RemoteOneTransmissionTaskParser(threadManager,currentUserUUID))
+        wrapper.operateCall(httpRequest, baseOperateDataCallback, RemoteOneTransmissionTaskParser(threadManager, currentUserUUID))
 
     }
 
@@ -48,7 +47,7 @@ class TransmissionTaskRemoteDataSource(val threadManager: ThreadManager,val curr
         var path = ""
 
         if (task is TransmissionTask) {
-            path = TASK + "/" + task.uuid
+            path = TASK + task.uuid
         }
 
         if (path.isNotEmpty()) {
@@ -56,6 +55,27 @@ class TransmissionTaskRemoteDataSource(val threadManager: ThreadManager,val curr
 
             wrapper.operateCall(httpRequest, baseOperateCallback)
         }
+
+    }
+
+    override fun updateConflictSubTask(taskUUID: String, nodeUUID: String, sameSourceConflictSubTaskPolicy: ConflictSubTaskPolicy,
+                                       diffSourceConflictSubTaskPolicy: ConflictSubTaskPolicy,
+                                       applyToAll: Boolean, baseOperateCallback: BaseOperateCallback) {
+
+        val path = "$TASK$taskUUID/nodes/$nodeUUID"
+
+        val body = JsonObject()
+
+        val policyJsonArray = JsonArray()
+        policyJsonArray.add(sameSourceConflictSubTaskPolicy.value)
+        policyJsonArray.add(diffSourceConflictSubTaskPolicy.value)
+
+        body.add("policy", policyJsonArray)
+        body.addProperty("applyToAll", applyToAll)
+
+        val httpRequest = httpRequestFactory.createHttpPatchRequest(path, body.toString())
+
+        wrapper.operateCall(httpRequest, baseOperateCallback)
 
     }
 

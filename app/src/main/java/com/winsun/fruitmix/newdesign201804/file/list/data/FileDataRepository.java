@@ -42,6 +42,10 @@ public class FileDataRepository extends BaseDataRepository implements FileDataSo
         return instance;
     }
 
+    public static void destroyInstance() {
+        instance = null;
+    }
+
     @Override
     public void getFile(@NotNull String rootUUID, @NotNull String folderUUID, @NotNull BaseLoadDataCallback<AbstractRemoteFile> baseLoadDataCallback) {
         mStationFileRepository.getFile(rootUUID, folderUUID, baseLoadDataCallback);

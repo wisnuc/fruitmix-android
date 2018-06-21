@@ -25,7 +25,7 @@ const val TASK_UUID_KEY = "task_uuid"
 const val TASK_TAG = "task"
 
 abstract class Task(val uuid: String, val createUserUUID: String, val abstractFile: AbstractFile, val threadManager: ThreadManager, val max: Int = 100,
-                    val startSpeedHandler: Boolean = true) {
+                    val startSpeedHandler: Boolean = true, val subTasks: MutableList<SubTask> = mutableListOf()) {
 
     abstract fun getTypeResID(): Int
 
@@ -342,7 +342,9 @@ private class RefreshMoveCopyTaskHandler(val task: Task, val transmissionTaskDat
 
             override fun onSucceed(data: Task, operationResult: OperationResult?) {
 
-                if (data.getCurrentState().getType() == StateType.FINISH) {
+                val type = data.getCurrentState().getType()
+
+                if (type == StateType.FINISH) {
 
                     if (task is CopyTask)
                         Log.d(TASK_TAG, "copy task finished,set current state and stop send message")
@@ -351,12 +353,19 @@ private class RefreshMoveCopyTaskHandler(val task: Task, val transmissionTaskDat
 
                     task.setCurrentState(data.getCurrentState())
 
+                } else if (type == StateType.ERROR) {
+
+                    if (task is CopyTask)
+                        Log.d(TASK_TAG, "copy task error,stop send message")
+                    else if (task is MoveTask)
+                        Log.d(TASK_TAG, "move task error,stop send message")
+
                 } else {
 
                     if (task is CopyTask)
-                        Log.d(TASK_TAG, "copy task not finished,send message ")
+                        Log.d(TASK_TAG, "copy task not finished,send message")
                     else if (task is MoveTask)
-                        Log.d(TASK_TAG, "move task not finished,send message ")
+                        Log.d(TASK_TAG, "move task not finished,send message")
 
                     sendEmptyMessageDelayed(REFRESH_TASK, REFRESH_DELAY_TIME)
 

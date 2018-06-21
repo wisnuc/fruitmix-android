@@ -12,4 +12,8 @@ interface SharedFolderDataSource {
 
     fun deleteSharedDisk(sharedDiskUUID:String,baseOperateCallback: BaseOperateCallback)
 
+    fun updateSharedDiskName(sharedDiskUUID:String,newName:String,baseOperateCallback: BaseOperateCallback)
+
+    fun updateSharedDiskWriteList(sharedDiskUUID:String,userUUIDs:List<String>,baseOperateCallback: BaseOperateCallback)
+
 }
