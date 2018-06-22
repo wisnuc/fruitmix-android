@@ -67,7 +67,8 @@ public class ToolbarViewModel {
     }
 
     public void toolbarSelectBtnOnClick() {
-        toolbarSelectBtnOnClickListener.onClick();
+        if (toolbarSelectBtnOnClickListener != null)
+            toolbarSelectBtnOnClickListener.onClick();
     }
 
 
@@ -82,7 +83,8 @@ public class ToolbarViewModel {
     }
 
     public void toolbarMenuBtnOnClick() {
-        toolbarMenuBtnOnClickListener.onClick();
+        if (toolbarMenuBtnOnClickListener != null)
+            toolbarMenuBtnOnClickListener.onClick();
     }
 
 }

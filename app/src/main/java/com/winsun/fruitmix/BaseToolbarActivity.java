@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.winsun.fruitmix.databinding.ActivityBaseToolbarBinding;
@@ -45,7 +46,7 @@ public abstract class BaseToolbarActivity extends BaseActivity {
         toolbarViewModel = new ToolbarViewModel();
 
         toolbarViewModel.titleText.set(getToolbarTitle());
-        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this,R.color.eighty_seven_percent_black));
+        toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this, R.color.eighty_seven_percent_black));
 
         toolbarViewModel.setBaseView(this);
 
@@ -53,7 +54,7 @@ public abstract class BaseToolbarActivity extends BaseActivity {
 
     }
 
-    protected void setToolbarWhiteStyle(ToolbarViewModel toolbarViewModel){
+    protected void setToolbarWhiteStyle(ToolbarViewModel toolbarViewModel) {
 
         toolbarViewModel.titleTextColorResID.set(ContextCompat.getColor(this, R.color.eighty_seven_percent_white));
 
@@ -72,5 +73,6 @@ public abstract class BaseToolbarActivity extends BaseActivity {
     }
 
     protected abstract String getToolbarTitle();
+
 
 }

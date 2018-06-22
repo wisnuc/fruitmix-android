@@ -23,8 +23,10 @@ import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.InjectSharedFolderDataSource
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.SharedFolderDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.search.SearchActivity
 import com.winsun.fruitmix.newdesign201804.search.startSearchActivity
+import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.user.datasource.InjectUser
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
@@ -66,7 +68,7 @@ class SharedFolderActivity : BaseToolbarActivity(), SharedFolderView {
         sharedFolderPresenter = SharedFolderPresenter(
                 InjectFileDataSource.inject(this), this,
                 loadingViewModel, noContentViewModel,
-                sharedFolderDataSource)
+                sharedFolderDataSource,ThreadManagerImpl.getInstance(),InjectTransmissionTaskDataSource.provideInstance(this))
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -101,8 +103,8 @@ class SharedFolderActivity : BaseToolbarActivity(), SharedFolderView {
         sharedFolderPresenter.onActivityResult(requestCode,resultCode,data)
     }
 
-    override fun getRootView(): View {
-        return rootLayout
+    override fun getViewForSnackBar(): View {
+        return addFab
     }
 
     override fun setAddFabVisibility(visibility: Int) {

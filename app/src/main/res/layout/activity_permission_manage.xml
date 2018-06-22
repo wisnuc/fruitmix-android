@@ -6,14 +6,20 @@
     android:layout_height="match_parent"
     tools:context=".newdesign201804.file.permissionManage.PermissionManageActivity">
 
+    <include
+        android:id="@+id/permission_manage_title"
+        layout="@layout/permission_manage_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/permission_manage_title" />
 
 </android.support.constraint.ConstraintLayout>

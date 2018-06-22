@@ -15,6 +15,7 @@ import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
+import com.winsun.fruitmix.newdesign201804.file.operation.FileOperation
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
@@ -22,9 +23,11 @@ import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewMod
 import com.winsun.fruitmix.newdesign201804.file.permissionManage.PERMISSION_MANAGE_REQUEST_CODE
 import com.winsun.fruitmix.newdesign201804.file.permissionManage.PermissionManageActivity
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.SharedFolderDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
 import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
+import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.user.datasource.InjectUser
 import com.winsun.fruitmix.util.SnackbarUtil
@@ -33,7 +36,8 @@ import com.winsun.fruitmix.viewmodel.NoContentViewModel
 
 class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolderView: SharedFolderView,
                             val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel,
-                            val sharedFolderDataSource: SharedFolderDataSource) {
+                            val sharedFolderDataSource: SharedFolderDataSource, val threadManager: ThreadManager,
+                            val transmissionTaskDataSource: TransmissionTaskDataSource) {
 
     private val sharedFolderRootUUID = "sharedFolderRootUUID"
 
@@ -51,14 +55,43 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
     fun initView(recyclerView: RecyclerView) {
 
+        val fileOperation = FileOperation(currentUserUUID, threadManager, transmissionTaskDataSource,
+                recyclerView, fileDataSource, sharedFolderView, sharedFolderView,
+                { position ->
+
+                    fileRecyclerViewAdapter.notifyItemChanged(position)
+
+                },
+                { position ->
+
+                    currentFolderItems.removeAt(position)
+
+                    if (currentFolderItems.isEmpty())
+                        showNoContentBg()
+                    else {
+                        refreshData(currentFolderItems)
+
+                        fileRecyclerViewAdapter.notifyItemRemoved(position)
+                    }
+
+                }
+        )
+
         fileRecyclerViewAdapter = FileRecyclerViewAdapter({ file, position ->
 
             gotoNextFolder(file as AbstractRemoteFile)
 
         }, {
 
+            abstractFile ->
+
         }, { file, position ->
-            showBottomDialogWhenClickMoreBtn(file, position)
+
+            if (file is RemotePublicDrive)
+                showBottomDialogWhenClickMoreBtn(file, position)
+            else
+                fileOperation.doShowFileMenuBottomDialog(context, file, position)
+
         }, sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
 
         fileRecyclerViewAdapter.fileViewMode = FileViewMode.LIST
@@ -78,6 +111,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
             }
 
             override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+                super.showContent(data, operationResult)
                 refreshData(data)
             }
 
@@ -89,7 +123,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
         override fun onFail(operationResult: OperationResult?) {
             showNoContentBg()
 
-            SnackbarUtil.showSnackBar(sharedFolderView.getRootView(), Snackbar.LENGTH_SHORT, messageStr = operationResult!!.getResultMessage(context))
+            SnackbarUtil.showSnackBar(sharedFolderView.getViewForSnackBar(), Snackbar.LENGTH_SHORT, messageStr = operationResult!!.getResultMessage(context))
         }
 
         override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
@@ -116,7 +150,10 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
         abstract fun handleLoadSucceed()
 
-        abstract fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?)
+        open fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+            currentFolderItems.clear()
+            currentFolderItems.addAll(data)
+        }
 
     }
 
@@ -147,6 +184,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
             }
 
             override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+                super.showContent(data, operationResult)
                 refreshData(data)
             }
 
@@ -159,7 +197,11 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
     }
 
     fun notRoot(): Boolean {
-        return retrieveFolders.last().uuid != sharedFolderRootUUID
+
+        return if (retrieveFolders.isEmpty())
+            false
+        else
+            retrieveFolders.last().uuid != sharedFolderRootUUID
     }
 
     private fun gotoPreFolder() {
@@ -181,6 +223,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
                 }
 
                 override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+                    super.showContent(data, operationResult)
                     refreshData(data)
                 }
 
@@ -199,6 +242,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
                 }
 
                 override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+                    super.showContent(data, operationResult)
                     refreshData(data)
                 }
 
@@ -217,6 +261,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
             }
 
             override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+                super.showContent(data, operationResult)
                 refreshData(data)
             }
 
@@ -227,6 +272,9 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == PERMISSION_MANAGE_REQUEST_CODE && resultCode == RESULT_OK) {
 
+            SnackbarUtil.showSnackBar(sharedFolderView.getViewForSnackBar(), Snackbar.LENGTH_SHORT,
+                    messageStr = context.getString(R.string.success, context.getString(R.string.permission_operation)))
+
             if (!notRoot()) {
                 refreshRootFolder()
             }
@@ -235,9 +283,6 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
     }
 
     private fun refreshData(data: MutableList<AbstractRemoteFile>) {
-
-        currentFolderItems.clear()
-        currentFolderItems.addAll(data)
 
         val folderViewItems = mutableListOf<ViewItem>()
         val fileViewItems = mutableListOf<ViewItem>()
@@ -330,9 +375,8 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
                 .setTitle(context.getString(R.string.delete_or_not))
                 .setNegativeButton(R.string.cancel, null)
                 .setPositiveButton(R.string.delete_text, { dialog, which ->
-
                     doDeleteSharedDisk(abstractFile)
-                })
+                }).create().show()
 
     }
 
@@ -347,17 +391,22 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
         sharedFolderDataSource.deleteSharedDisk(abstractRemoteFile.uuid, object : BaseOperateCallback {
 
             override fun onFail(operationResult: OperationResult?) {
-                SnackbarUtil.showSnackBar(sharedFolderView.getRootView(), Snackbar.LENGTH_SHORT,
+
+                sharedFolderView.dismissDialog()
+
+                SnackbarUtil.showSnackBar(sharedFolderView.getViewForSnackBar(), Snackbar.LENGTH_SHORT,
                         messageStr = operationResult!!.getResultMessage(context))
             }
 
             override fun onSucceed() {
 
+                sharedFolderView.dismissDialog()
+
                 currentFolderItems.remove(abstractFile)
 
                 refreshData(currentFolderItems)
 
-                SnackbarUtil.showSnackBar(sharedFolderView.getRootView(), Snackbar.LENGTH_SHORT,
+                SnackbarUtil.showSnackBar(sharedFolderView.getViewForSnackBar(), Snackbar.LENGTH_SHORT,
                         messageStr = context.getString(R.string.success, context.getString(R.string.delete_text)))
 
             }
@@ -392,7 +441,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
                 sharedFolderView.dismissDialog()
 
-                SnackbarUtil.showSnackBar(sharedFolderView.getRootView(), Snackbar.LENGTH_SHORT,
+                SnackbarUtil.showSnackBar(sharedFolderView.getViewForSnackBar(), Snackbar.LENGTH_SHORT,
                         messageStr = operationResult!!.getResultMessage(context))
             }
 
@@ -406,7 +455,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
                 refreshData(currentFolderItems)
 
-                SnackbarUtil.showSnackBar(sharedFolderView.getRootView(), Snackbar.LENGTH_SHORT,
+                SnackbarUtil.showSnackBar(sharedFolderView.getViewForSnackBar(), Snackbar.LENGTH_SHORT,
                         messageStr = result!!.getResultMessage(context))
 
             }

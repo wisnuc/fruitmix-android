@@ -6,10 +6,12 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.Toolbar
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.android.volley.toolbox.ImageLoader
+import com.winsun.fruitmix.BaseActivity
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
@@ -25,8 +27,12 @@ import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.user.datasource.InjectUser
 import com.winsun.fruitmix.util.SnackbarUtil
+import com.winsun.fruitmix.util.Util
 import kotlinx.android.synthetic.main.activity_permission_manage.*
+import kotlinx.android.synthetic.main.main_page_layout.*
 import kotlinx.android.synthetic.main.permission_manage_item.view.*
+import kotlinx.android.synthetic.main.permission_manage_title.*
+import kotlinx.android.synthetic.main.permission_manage_title.view.*
 
 object ManageSharedFolder {
 
@@ -44,7 +50,7 @@ object ManageSharedFolder {
 
 const val PERMISSION_MANAGE_REQUEST_CODE = 0x1001
 
-class PermissionManageActivity : BaseToolbarActivity() {
+class PermissionManageActivity : BaseActivity() {
 
     companion object {
 
@@ -72,20 +78,26 @@ class PermissionManageActivity : BaseToolbarActivity() {
 
         super.onCreate(savedInstanceState)
 
-        setToolbarWhiteStyle(toolbarViewModel)
-        setStatusBarToolbarBgColor(R.color.new_design_primary_color)
+        setContentView(R.layout.activity_permission_manage)
 
-        toolbarViewModel.navigationIconResId.set(R.drawable.white_clear)
+        Util.setStatusBarColor(this, R.color.new_design_primary_color)
 
-        toolbarViewModel.showSelect.set(true)
+        val mToolbar = permission_manage_title.permissionManageTitleToolbar
 
-        toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(this, R.color.eighty_seven_percent_white))
+        setSupportActionBar(mToolbar)
 
-        toolbarViewModel.selectTextEnable.set(true)
+        val actionBar = supportActionBar
 
-        toolbarViewModel.selectTextResID.set(R.string.confirm)
+        actionBar?.setDisplayShowTitleEnabled(false)
 
-        toolbarViewModel.setToolbarSelectBtnOnClickListener {
+        mToolbar.setNavigationOnClickListener {
+            finish()
+        }
+
+        editTextTitle.setText(sharedFolder.name)
+        editTextTitle.setSelection(editTextTitle.text.length)
+
+        confirmTv.setOnClickListener {
             handleToolbarSelectBtnOnClick()
         }
 
@@ -112,30 +124,32 @@ class PermissionManageActivity : BaseToolbarActivity() {
 
             override fun onFail(operationResult: OperationResult?) {
 
-                SnackbarUtil.showSnackBar(recyclerView, Snackbar.LENGTH_SHORT, messageStr = "获取用户失败")
+                SnackbarUtil.showSnackBar(recyclerView, Snackbar.LENGTH_SHORT, messageStr = getString(R.string.fail, getString(R.string.get_user)))
 
             }
         })
 
-    }
+        editTextTitle.clearFocus()
 
-    override fun generateContent(root: ViewGroup?): View {
-        return LayoutInflater.from(root?.context).inflate(R.layout.activity_permission_manage, root, false)
-    }
-
-    override fun getToolbarTitle(): String {
-        return sharedFolder.name
     }
 
     private fun handleToolbarSelectBtnOnClick() {
 
         val writeList = sharedFolder.writeList
 
-        val isChanged = writeList.filter {
+        val isWriteListChanged = writeList.filter {
             selectedUserUUIDs.contains(it)
         }.size != writeList.size
 
-        if (isChanged) {
+        val isSelectedUserUUIDsChanged = selectedUserUUIDs.filter {
+            writeList.contains(it)
+        }.size != selectedUserUUIDs.size
+
+        val editTextTitleValue = editTextTitle.text.toString()
+
+        val isNameChanged = editTextTitleValue != sharedFolder.name
+
+        if (isWriteListChanged || isSelectedUserUUIDsChanged) {
 
             sharedFolderDataSource.updateSharedDiskWriteList(sharedFolder.uuid, selectedUserUUIDs, object : BaseOperateCallback {
                 override fun onFail(operationResult: OperationResult?) {
@@ -147,6 +161,22 @@ class PermissionManageActivity : BaseToolbarActivity() {
 
                     finish()
                 }
+            })
+
+        } else if (isNameChanged) {
+
+            sharedFolderDataSource.updateSharedDiskName(sharedFolder.uuid, editTextTitleValue, object : BaseOperateCallback {
+
+                override fun onFail(operationResult: OperationResult?) {
+                    SnackbarUtil.showSnackBar(recyclerView, Snackbar.LENGTH_SHORT, messageStr = operationResult!!.getResultMessage(context))
+                }
+
+                override fun onSucceed() {
+                    setResult(Activity.RESULT_OK)
+
+                    finish()
+                }
+
             })
 
         } else {
@@ -176,6 +206,15 @@ class PermissionManageActivity : BaseToolbarActivity() {
             view?.userName?.text = user.userName
 
             view?.userCheckBox?.isChecked = selectedUserUUIDs.contains(user.uuid)
+
+            view?.userCheckBox?.setOnCheckedChangeListener { buttonView, isChecked ->
+
+                if (isChecked)
+                    selectedUserUUIDs.add(user.uuid)
+                else
+                    selectedUserUUIDs.remove(user.uuid)
+
+            }
 
         }
 

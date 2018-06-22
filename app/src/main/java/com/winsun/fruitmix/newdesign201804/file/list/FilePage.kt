@@ -3,7 +3,6 @@ package com.winsun.fruitmix.newdesign201804.file.list
 import android.app.Activity
 import android.content.Intent
 import android.support.design.widget.Snackbar
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import com.winsun.fruitmix.BaseActivity
@@ -12,7 +11,6 @@ import com.winsun.fruitmix.databinding.FilePageBinding
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
-import com.winsun.fruitmix.newdesign201804.file.list.operation.FileOperationView
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.FilePresenter
 import com.winsun.fruitmix.newdesign201804.file.move.FILE_COPY_REQUEST_CODE
 import com.winsun.fruitmix.newdesign201804.file.move.FILE_MOVE_REQUEST_CODE
@@ -24,7 +22,6 @@ import com.winsun.fruitmix.newdesign201804.file.transmissionTask.TransmissionTas
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TASK_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.upload.FileBrowserActivity
-import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileUtil
 import com.winsun.fruitmix.newdesign201804.mainpage.DrawerItem
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPage
 import com.winsun.fruitmix.newdesign201804.user.preference.InjectUserPreference

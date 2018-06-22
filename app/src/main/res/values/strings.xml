@@ -865,6 +865,12 @@
 
     <string name="delete_or_not">Whether or not to delete</string>
 
+    <!-- permission manage -->
+    <string name="permission_operation">Permission Operation</string>
+
+    <!-- user -->
+    <string name="get_user">Get User</string>
+
     <!-- drawer -->
     <string name="tag">Tag</string>
     <string name="offline_file">Offline File</string>

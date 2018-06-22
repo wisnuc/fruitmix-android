@@ -77,6 +77,12 @@ class MoveFileActivity : BaseToolbarActivity(), MoveFileView {
         toolbarViewModel.showMenu.set(true)
         toolbarViewModel.menuResID.set(R.drawable.new_folder)
 
+        toolbarViewModel.setToolbarMenuBtnOnClickListener {
+
+            moveFilePresenter.handleCreateFolderBtnOnClick()
+
+        }
+
         activityMoveFileBinding.cancelBtn.setOnClickListener {
             cancelMove()
         }

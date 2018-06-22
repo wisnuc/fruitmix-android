@@ -85,6 +85,11 @@
         <item name="android:indeterminateDrawable">@drawable/new_design_progressbar</item>
     </style>
 
+    <style name="PermissionManageTitleEditTextStyle" parent="Widget.AppCompat.EditText">
+        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlActivated">@color/white</item>
+    </style>
+
     <style name="InputIpEditTextStyle">
         <item name="android:hint">""</item>
         <item name="android:inputType">number</item>

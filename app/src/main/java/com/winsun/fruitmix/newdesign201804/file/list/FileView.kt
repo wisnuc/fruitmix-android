@@ -1,8 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.list
 
-import android.app.Activity
-import com.winsun.fruitmix.newdesign201804.file.list.operation.FileOperationView
-import com.winsun.fruitmix.newdesign201804.mainpage.MainPage
+import com.winsun.fruitmix.newdesign201804.file.operation.FileOperationView
 
 interface FileView :FileOperationView {
 

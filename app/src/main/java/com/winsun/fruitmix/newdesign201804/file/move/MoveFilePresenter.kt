@@ -22,6 +22,7 @@ import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
+import com.winsun.fruitmix.newdesign201804.file.operation.CreateFolderUseCase
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.ShareRootDataUseCase
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TASK_UUID_KEY
@@ -32,6 +33,7 @@ import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel
+import java.util.*
 
 private const val rootUUID = "rootUUID"
 
@@ -71,7 +73,7 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
         }, { abstractRemoteFile, position ->
 
-        },sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
+        }, sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
 
         fileRecyclerViewAdapter.fileViewMode = FileViewMode.LIST
 
@@ -105,6 +107,23 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
             }
 
         }
+
+    }
+
+    fun handleCreateFolderBtnOnClick() {
+
+        val createFolderUseCase = CreateFolderUseCase(fileDataSource, moveFileView, moveBtn,
+                {
+
+                    newFolder ->
+
+                    currentFolderItems.add(newFolder)
+
+                    refreshView()
+
+                })
+
+        createFolderUseCase.createFolder(context, retrievedFolders.last())
 
     }
 
@@ -190,15 +209,7 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
             retrievedFolders.add(remoteFolder)
 
-            if (currentFolderItems.isEmpty()) {
-                showNoContentBg()
-            } else {
-                showContentBg()
-
-                refreshData()
-            }
-
-            refreshMoveState(selectFiles[0] as AbstractRemoteFile)
+            refreshView()
 
         }
 
@@ -259,7 +270,6 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
     private fun gotoNextFolder(abstractRemoteFile: AbstractRemoteFile) {
 
-        currentFolderItems.clear()
 
         showLoadingBg()
 
@@ -277,7 +287,7 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
                 retrievedFolders.add(abstractRemoteFile)
 
-                handleGetFileSucceed(data, abstractRemoteFile)
+                handleGetFileSucceed(data)
 
             }
 
@@ -285,15 +295,22 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
     }
 
-    private fun handleGetFileSucceed(data: MutableList<AbstractRemoteFile>?, abstractRemoteFile: AbstractRemoteFile) {
+    private fun handleGetFileSucceed(data: MutableList<AbstractRemoteFile>?) {
 
+        currentFolderItems.clear()
 
-        if (data!!.isEmpty())
+        currentFolderItems.addAll(data!!)
+
+        refreshView()
+
+    }
+
+    private fun refreshView() {
+
+        if (currentFolderItems.isEmpty())
             showNoContentBg()
         else {
             showContentBg()
-
-            currentFolderItems.addAll(data)
 
             refreshData()
 
@@ -301,7 +318,6 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
         }
 
         refreshMoveState(selectFiles[0] as AbstractRemoteFile)
-
     }
 
     fun notRoot(): Boolean {
@@ -320,8 +336,6 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
         val remoteFile = retrievedFolders.last()
 
-        currentFolderItems.clear()
-
         if (remoteFile.uuid == rootUUID) {
             getRoot()
             refreshTitle()
@@ -338,7 +352,7 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
                 override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
-                    handleGetFileSucceed(data, remoteFile)
+                    handleGetFileSucceed(data)
 
                 }
             })
@@ -399,9 +413,9 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
                 moveFileView.dismissDialog()
 
                 val intent = Intent()
-                intent.putExtra(TASK_UUID_KEY,task.uuid)
+                intent.putExtra(TASK_UUID_KEY, task.uuid)
 
-                moveFileView.setResult(Activity.RESULT_OK,intent)
+                moveFileView.setResult(Activity.RESULT_OK, intent)
 
                 moveFileView.finishView()
 
@@ -450,9 +464,9 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
                 moveFileView.dismissDialog()
 
                 val intent = Intent()
-                intent.putExtra(TASK_UUID_KEY,task.uuid)
+                intent.putExtra(TASK_UUID_KEY, task.uuid)
 
-                moveFileView.setResult(Activity.RESULT_OK,intent)
+                moveFileView.setResult(Activity.RESULT_OK, intent)
 
                 moveFileView.finishView()
 

@@ -38,12 +38,12 @@ import com.winsun.fruitmix.newdesign201804.file.list.FilePageSelectActionListene
 import com.winsun.fruitmix.newdesign201804.file.list.FileView
 import com.winsun.fruitmix.newdesign201804.file.list.MainPageDividerItemDecoration
 import com.winsun.fruitmix.newdesign201804.file.list.data.*
-import com.winsun.fruitmix.newdesign201804.file.list.operation.FileOperation
-import com.winsun.fruitmix.newdesign201804.file.list.operation.FileOperationView
+import com.winsun.fruitmix.newdesign201804.file.operation.FileOperation
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.move.*
+import com.winsun.fruitmix.newdesign201804.file.operation.CreateFolderUseCase
 import com.winsun.fruitmix.newdesign201804.file.transmission.TransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
@@ -69,15 +69,15 @@ private const val SPAN_COUNT = 2
 private val mSelectFiles = mutableListOf<AbstractFile>()
 private var mIsSelectMode = false
 
-public class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
-                           val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding,
-                           val baseView: BaseView, val fileView: FileView,
-                           val currentUserUUID: String, val threadManager: ThreadManager,
-                           val transmissionTaskDataSource: TransmissionTaskDataSource,
-                           val transmissionDataSource: TransmissionDataSource,
-                           val stationFileRepository: StationFileRepository,
-                           val userPreference: UserPreference,
-                           val userPreferenceDataSource: UserPreferenceDataSource) : TaskStateObserver {
+class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
+                    val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding,
+                    val baseView: BaseView, val fileView: FileView,
+                    val currentUserUUID: String, val threadManager: ThreadManager,
+                    val transmissionTaskDataSource: TransmissionTaskDataSource,
+                    val transmissionDataSource: TransmissionDataSource,
+                    val stationFileRepository: StationFileRepository,
+                    val userPreference: UserPreference,
+                    val userPreferenceDataSource: UserPreferenceDataSource) : TaskStateObserver {
 
     private val contentLayout = filePageBinding.contentLayout
 
@@ -123,17 +123,28 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
         rootFolderUUID = currentUser.home
 
         val fileOperation = FileOperation(currentUserUUID, threadManager, transmissionTaskDataSource,
-                contentLayout, fileDataSource, context, baseView, fileView,
+                contentLayout, fileDataSource, baseView, fileView,
                 { position ->
 
                     fileRecyclerViewAdapter.notifyItemChanged(position)
                 },
                 { position ->
+
                     viewItems.removeAt(position)
 
-                    fileRecyclerViewAdapter.setItemList(viewItems)
+                    val itemSize = viewItems.filter {
+                        it is ItemFolder || it is ItemFile
+                    }.size
 
-                    fileRecyclerViewAdapter.notifyItemRemoved(position)
+                    if (itemSize == 0)
+                        noContentViewModel.showNoContent.set(true)
+                    else {
+
+                        fileRecyclerViewAdapter.setItemList(viewItems)
+
+                        fileRecyclerViewAdapter.notifyItemRemoved(position)
+
+                    }
 
                 })
 
@@ -143,9 +154,9 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
             doHandleOnLongClick(it)
         }, { remoteFile, position ->
 
-//            fileOperation.doShowFileMenuBottomDialog(context, remoteFile, position)
+            fileOperation.doShowFileMenuBottomDialog(context, remoteFile, position)
 
-            doShowFileMenuBottomDialog(context, remoteFile, position)
+//            doShowFileMenuBottomDialog(context, remoteFile, position)
         }, { showSortBottomDialog(context) },
                 userPreference.fileSortPolicy)
 
@@ -465,7 +476,22 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
     private fun createFolder() {
 
-        val editText = EditText(context)
+        val createFolderUseCase = CreateFolderUseCase(fileDataSource, baseView, filePageBinding.root,
+                { newFolder ->
+
+                    currentFolderItems.add(newFolder)
+
+                    refreshView()
+
+                })
+
+        val parentFolder = RemoteFolder()
+        parentFolder.rootFolderUUID = rootFolderUUID
+        parentFolder.uuid = currentFolderUUID
+
+        createFolderUseCase.createFolder(context, parentFolder)
+
+/*        val editText = EditText(context)
 
         editText.hint = context.getString(R.string.no_title_folder)
 
@@ -482,7 +508,7 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
                 }
                 .setNegativeButton(R.string.cancel) { dialog, which -> }
-                .create().show()
+                .create().show()*/
 
     }
 
@@ -834,20 +860,25 @@ public class FilePresenter(val fileDataSource: FileDataSource, val noContentView
 
         loadingViewModel.showLoading.set(false)
 
-        if (data?.size == 0)
+        currentFolderItems.clear()
+        currentFolderItems.addAll(data!!)
+
+        refreshView()
+
+    }
+
+    private fun refreshView() {
+        if (currentFolderItems.size == 0)
             noContentViewModel.showNoContent.set(true)
         else {
 
             noContentViewModel.showNoContent.set(false)
 
-            currentFolderItems.clear()
-            currentFolderItems.addAll(data!!)
-
             refreshData()
 
         }
-
     }
+
 
     private fun notifyFolderLevelChanged() {
         if (notRootFolder()) {
@@ -1408,7 +1439,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
                             else R.drawable.round_circle)
 
                 }
-                
+
                 itemFolder.folderFileTitleViewModel.init()
 
                 holder?.viewDataBinding?.setVariable(BR.fileItemViewModel, itemFolder.folderFileTitleViewModel)

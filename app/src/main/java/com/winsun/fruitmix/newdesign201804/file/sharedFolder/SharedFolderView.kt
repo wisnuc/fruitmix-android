@@ -1,16 +1,12 @@
 package com.winsun.fruitmix.newdesign201804.file.sharedFolder
 
-import android.app.Activity
-import android.content.Context
-import android.opengl.Visibility
 import android.view.View
 import com.winsun.fruitmix.interfaces.BaseView
+import com.winsun.fruitmix.newdesign201804.file.operation.FileOperationView
 
-interface SharedFolderView:BaseView {
+interface SharedFolderView:BaseView,FileOperationView {
 
-    fun getActivity():Activity
-
-    fun getRootView(): View
+    fun getViewForSnackBar(): View
 
     fun setAddFabVisibility(visibility: Int)
 

@@ -248,7 +248,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".newdesign201804.file.permissionManage.PermissionManageActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan" />
         <activity
             android:name=".newdesign201804.file.offlineFile.OfflineFileActivity"
             android:screenOrientation="portrait" />
