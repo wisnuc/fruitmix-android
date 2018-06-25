@@ -56,11 +56,7 @@ class ProductIntroductionActivity : AppCompatActivity() {
 
                 setShowProductIntroduction()
 
-                val intent = Intent(it.context, LoginEntranceActivity::class.java)
-
-                it.context.startActivity(intent)
-
-                finish()
+                LoginEntranceActivity.start(this@ProductIntroductionActivity)
 
             }
 

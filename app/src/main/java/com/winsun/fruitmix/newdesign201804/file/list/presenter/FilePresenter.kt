@@ -601,27 +601,45 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-        val localFile = SelectMoveFileDataSource.getSelectFiles()[0] as LocalFile
+        val abstractFiles = SelectMoveFileDataSource.getSelectFiles()
 
-        val filePath = localFile.path
+        abstractFiles.forEach {
 
-        val future = threadManager.runOnCacheThread(Callable<String> {
-            Util.calcSHA256OfFile(filePath)
-        })
+            if(it is LocalFile){
+                val filePath = it.path
 
-        val fileHash = future.get()
+                val future = threadManager.runOnCacheThread(Callable<String> {
+                    Util.calcSHA256OfFile(filePath)
+                })
 
-        localFile.fileHash = fileHash
-        localFile.size = File(filePath).length()
+                val fileHash = future.get()
 
-        val fileUploadParam = FileUploadParam(rootFolderUUID, currentFolderUUID, localFile)
+                it.fileHash = fileHash
+                it.size = File(filePath).length()
 
-        val uploadTask = UploadTask(Util.createLocalUUid(), currentUserUUID, localFile, fileDataSource, fileUploadParam, threadManager)
+                val fileUploadParam = FileUploadParam(rootFolderUUID, currentFolderUUID, it)
 
-        transmissionTaskDataSource.addTransmissionTask(uploadTask)
+                val uploadTask = UploadTask(Util.createLocalUUid(), currentUserUUID, it, fileDataSource, fileUploadParam, threadManager)
 
-        uploadTask.registerObserver(this)
-        handleTasks.add(uploadTask)
+                transmissionTaskDataSource.addTransmissionTask(uploadTask)
+
+                uploadTask.registerObserver(this)
+                handleTasks.add(uploadTask)
+            }else if(it is LocalFolder){
+
+                val fileUploadParam = FileUploadParam(rootFolderUUID, currentFolderUUID, it)
+
+                val uploadFolderTask = UploadFolderTask(stationFileRepository,
+                        Util.createLocalUUid(),currentUserUUID,it,fileDataSource,fileUploadParam,threadManager)
+
+                transmissionTaskDataSource.addTransmissionTask(uploadFolderTask)
+
+                uploadFolderTask.registerObserver(this)
+                handleTasks.add(uploadFolderTask)
+
+            }
+
+        }
 
         SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
 

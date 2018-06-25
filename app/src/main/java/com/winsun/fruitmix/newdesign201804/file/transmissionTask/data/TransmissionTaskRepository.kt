@@ -36,7 +36,7 @@ class TransmissionTaskRepository(val taskManager: TaskManager, val transmissionT
                     newTasks.addAll(data!!.filter { !taskManager.checkTaskExist(it) })
                     newTasks.addAll(tasks)
 
-                    runOnMainThreadCallback.onSucceed(data, OperationSuccess())
+                    runOnMainThreadCallback.onSucceed(newTasks, OperationSuccess())
 
                 }
             })

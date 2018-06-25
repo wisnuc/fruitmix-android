@@ -42,7 +42,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="@drawable/round_circle"
-                    android:visibility="@{fileItemViewModel.selectMode?View.GONE:View.GONE,default=gone}" />
+                    android:visibility="@{fileItemViewModel.selectMode?View.GONE:View.GONE}" />
 
                 <ImageView
                     android:id="@+id/folder_icon"

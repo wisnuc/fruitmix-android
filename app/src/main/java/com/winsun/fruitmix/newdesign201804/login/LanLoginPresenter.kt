@@ -6,10 +6,10 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.equipment.search.data.Equipment
 import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource
-import com.winsun.fruitmix.equipment.search.data.InjectEquipment
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.model.CloudUnConnectedEquipmentItem
+import com.winsun.fruitmix.newdesign201804.login.usecase.InjectLoginCase
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPageActivity
 import com.winsun.fruitmix.token.param.StationTokenParam
 import com.winsun.fruitmix.user.User

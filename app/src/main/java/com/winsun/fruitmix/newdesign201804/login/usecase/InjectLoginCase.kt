@@ -1,4 +1,4 @@
-package com.winsun.fruitmix.newdesign201804.login
+package com.winsun.fruitmix.newdesign201804.login.usecase
 
 import android.content.Context
 import com.winsun.fruitmix.http.InjectHttp
@@ -12,9 +12,9 @@ class InjectLoginCase {
 
     companion object {
 
-        fun provideInstance(context: Context): LoginUseCase {
+        fun provideInstance(context: Context): NewDesignLoginUseCase {
 
-            return LoginUseCase(InjectTokenRemoteDataSource.provideTokenDataSource(context),
+            return NewDesignLoginUseCase(InjectTokenRemoteDataSource.provideTokenDataSource(context),
                     InjectSystemSettingDataSource.provideSystemSettingDataSource(context), InjectHttp.provideHttpRequestFactory(context),
                     InjectUser.provideRepository(context), InjectStation.provideStationDataSource(context),
                     InjectUserPreference.inject(context))

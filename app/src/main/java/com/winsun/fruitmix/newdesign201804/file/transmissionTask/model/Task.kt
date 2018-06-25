@@ -8,6 +8,7 @@ import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam
 import com.winsun.fruitmix.file.data.model.AbstractFile
+import com.winsun.fruitmix.file.data.model.AbstractLocalFile
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
@@ -123,11 +124,11 @@ interface TaskStateObserver {
 
 }
 
-class UploadTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, val fileDataSource: FileDataSource,
-                 val fileUploadParam: FileUploadParam,
-                 threadManager: ThreadManager) : Task(uuid, createUserUUID, abstractFile, threadManager) {
+open class UploadTask(uuid: String, createUserUUID: String, abstractFile: AbstractLocalFile, val fileDataSource: FileDataSource,
+                      val fileUploadParam: FileUploadParam,
+                      threadManager: ThreadManager) : Task(uuid, createUserUUID, abstractFile, threadManager) {
 
-    private lateinit var future: Future<Boolean>
+    protected lateinit var future: Future<Boolean>
 
     override fun getTypeResID(): Int {
         return R.drawable.upload
@@ -149,7 +150,6 @@ class UploadTask(uuid: String, createUserUUID: String, abstractFile: AbstractFil
 
         future.cancel(true)
 
-
     }
 
 }
@@ -159,7 +159,7 @@ private const val DOWNLOAD_TASK_TAG = "download_task"
 open class DownloadTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
                         val currentUserUUID: String, threadManager: ThreadManager) : Task(uuid, createUserUUID, abstractFile, threadManager) {
 
-    private var future: Future<Boolean>? = null
+    protected lateinit var future: Future<Boolean>
 
     override fun getTypeResID(): Int {
 
@@ -183,8 +183,7 @@ open class DownloadTask(uuid: String, createUserUUID: String, abstractFile: Abst
 
         super.cancelTask()
 
-        if (future != null)
-            future?.cancel(true)
+        future.cancel(true)
 
         val downloadFile = File(FileUtil.getDownloadFileStoreFolderPath(), abstractFile.name)
 

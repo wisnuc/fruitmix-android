@@ -15,8 +15,9 @@ import com.winsun.fruitmix.init.system.InitSystem;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.newdesign201804.introduction.ProductIntroductionActivity;
-import com.winsun.fruitmix.newdesign201804.login.InjectLoginCase;
+import com.winsun.fruitmix.newdesign201804.login.usecase.InjectLoginCase;
 import com.winsun.fruitmix.newdesign201804.login.LoginEntranceActivity;
+import com.winsun.fruitmix.newdesign201804.login.usecase.NewDesignLoginUseCase;
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPageActivity;
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
@@ -27,9 +28,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-
-import static com.winsun.fruitmix.newdesign201804.equipment.reinitialization.ReinitializationActivityKt.EQUIPMENT_IP_KEY;
-import static com.winsun.fruitmix.newdesign201804.equipment.reinitialization.ReinitializationActivityKt.EQUIPMENT_NAME_KEY;
 
 /**
  * Created by Administrator on 2016/5/9.
@@ -184,9 +182,9 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         } else {
 
-            com.winsun.fruitmix.newdesign201804.login.LoginUseCase loginUseCase = InjectLoginCase.Companion.provideInstance(this);
+            NewDesignLoginUseCase newDesignLoginUseCase = InjectLoginCase.Companion.provideInstance(this);
 
-            loginUseCase.loginWithNoParam(new BaseOperateCallback() {
+            newDesignLoginUseCase.loginWithNoParam(new BaseOperateCallback() {
                 @Override
                 public void onSucceed() {
 
@@ -198,11 +196,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                 @Override
                 public void onFail(OperationResult operationResult) {
 
-                    intent.setClass(SplashScreenActivity.this, LoginEntranceActivity.class);
-
-                    startActivity(intent);
-
-                    finish();
+                    LoginEntranceActivity.Companion.start(SplashScreenActivity.this);
 
                 }
             });

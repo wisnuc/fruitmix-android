@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
@@ -215,6 +216,9 @@ public class LocalFileFragment {
 
         private RemoteFolderItemLayoutBinding binding;
 
+        private ImageView folderIconBg;
+        private ImageView folderIcon;
+
         FolderViewHolder(ViewDataBinding viewDataBinding) {
             super(viewDataBinding);
 
@@ -223,6 +227,10 @@ public class LocalFileFragment {
             contentLayout = binding.contentLayout;
 
             folderItemLayout = binding.remoteFolderItemLayout;
+
+            folderIconBg = binding.folderIconBg;
+            folderIcon = binding.folderIcon;
+
         }
 
         @Override
@@ -230,18 +238,36 @@ public class LocalFileFragment {
 
             if (position == 0) {
 
-                Util.setMargin(contentLayout,0,Util.dip2px(mContext,8),Util.dip2px(mContext,16),0);
+                Util.setMargin(contentLayout, 0, Util.dip2px(mContext, 8), Util.dip2px(mContext, 16), 0);
 
             }
 
             final AbstractLocalFile abstractLocalFile = abstractLocalFiles.get(position);
 
-            FileItemViewModel fileItemViewModel = binding.getFileItemViewModel();
+/*            FileItemViewModel fileItemViewModel = binding.getFileItemViewModel();
 
             if (fileItemViewModel == null)
                 fileItemViewModel = new FileItemViewModel();
 
-            fileItemViewModel.selectMode.set(selectMode);
+            fileItemViewModel.selectMode.set(selectMode);*/
+
+            if (selectMode) {
+
+                folderIconBg.setVisibility(View.VISIBLE);
+
+                toggleFolderIconBg(abstractLocalFile);
+
+                folderIconBg.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        toggleFileInSelectedFile(abstractLocalFile);
+                        toggleFolderIconBg(abstractLocalFile);
+                    }
+                });
+
+            } else {
+                folderIconBg.setVisibility(View.GONE);
+            }
 
             folderItemLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -253,8 +279,18 @@ public class LocalFileFragment {
                 }
             });
 
-            binding.setFileItemViewModel(fileItemViewModel);
+//            binding.setFileItemViewModel(fileItemViewModel);
 
+        }
+
+        private void toggleFolderIconBg(AbstractLocalFile abstractLocalFile) {
+            if (selectedFiles.contains(abstractLocalFile)) {
+                folderIconBg.setImageResource(R.drawable.check_circle_selected);
+                folderIcon.setVisibility(View.INVISIBLE);
+            } else {
+                folderIconBg.setImageResource(R.drawable.round_circle);
+                folderIcon.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -284,7 +320,7 @@ public class LocalFileFragment {
 
             if (position == 0) {
 
-                Util.setMargin(contentLayout,0,Util.dip2px(mContext,8),0,0);
+                Util.setMargin(contentLayout, 0, Util.dip2px(mContext, 8), 0, 0);
 
             }
 
@@ -332,14 +368,14 @@ public class LocalFileFragment {
             }
         }
 
-        private void toggleFileInSelectedFile(AbstractFile abstractFile) {
-            if (selectedFiles.contains(abstractFile)) {
-                selectedFiles.remove(abstractFile);
-            } else {
-                selectedFiles.add(abstractFile);
-            }
-        }
+    }
 
+    private void toggleFileInSelectedFile(AbstractFile abstractFile) {
+        if (selectedFiles.contains(abstractFile)) {
+            selectedFiles.remove(abstractFile);
+        } else {
+            selectedFiles.add(abstractFile);
+        }
     }
 
 

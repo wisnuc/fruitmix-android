@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.login
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Paint
 import android.support.v7.app.AppCompatActivity
@@ -21,6 +22,21 @@ import kotlinx.android.synthetic.main.activity_login_entrance.*
 import kotlinx.android.synthetic.main.user_protocal_message.view.*
 
 class LoginEntranceActivity : AppCompatActivity() {
+
+    companion object {
+
+        fun start(activity: Activity){
+
+            val intent = Intent(activity, LoginEntranceActivity::class.java)
+
+            activity.startActivity(intent)
+
+            activity.finish()
+
+        }
+
+
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

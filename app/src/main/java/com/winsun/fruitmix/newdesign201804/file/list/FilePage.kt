@@ -22,6 +22,8 @@ import com.winsun.fruitmix.newdesign201804.file.transmissionTask.TransmissionTas
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TASK_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.upload.FileBrowserActivity
+import com.winsun.fruitmix.newdesign201804.login.LoginEntranceActivity
+import com.winsun.fruitmix.newdesign201804.logout.InjectLogoutUseCase
 import com.winsun.fruitmix.newdesign201804.mainpage.DrawerItem
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPage
 import com.winsun.fruitmix.newdesign201804.user.preference.InjectUserPreference
@@ -95,8 +97,16 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
 
         val tag = DrawerItem(R.drawable.tag, activity.getString(R.string.tag), {})
 
+        val logout =DrawerItem(R.drawable.ic_logout_black_24dp,activity.getString(R.string.logout),{
+
+            InjectLogoutUseCase.inject(activity).logout()
+
+            LoginEntranceActivity.start(activity)
+
+        })
+
         drawerItems = mutableListOf(
-                task, shareToSharedFolder, localFolder, tag
+                task, shareToSharedFolder, localFolder, tag,logout
         )
     }
 
