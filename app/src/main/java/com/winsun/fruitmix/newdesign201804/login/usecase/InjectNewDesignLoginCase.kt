@@ -8,7 +8,7 @@ import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
 import com.winsun.fruitmix.token.data.InjectTokenRemoteDataSource
 import com.winsun.fruitmix.user.datasource.InjectUser
 
-class InjectLoginCase {
+class InjectNewDesignLoginCase {
 
     companion object {
 

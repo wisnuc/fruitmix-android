@@ -15,7 +15,7 @@ import com.winsun.fruitmix.init.system.InitSystem;
 import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.newdesign201804.introduction.ProductIntroductionActivity;
-import com.winsun.fruitmix.newdesign201804.login.usecase.InjectLoginCase;
+import com.winsun.fruitmix.newdesign201804.login.usecase.InjectNewDesignLoginCase;
 import com.winsun.fruitmix.newdesign201804.login.LoginEntranceActivity;
 import com.winsun.fruitmix.newdesign201804.login.usecase.NewDesignLoginUseCase;
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPageActivity;
@@ -182,7 +182,7 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         } else {
 
-            NewDesignLoginUseCase newDesignLoginUseCase = InjectLoginCase.Companion.provideInstance(this);
+            NewDesignLoginUseCase newDesignLoginUseCase = InjectNewDesignLoginCase.Companion.provideInstance(this);
 
             newDesignLoginUseCase.loginWithNoParam(new BaseOperateCallback() {
                 @Override

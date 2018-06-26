@@ -14,6 +14,8 @@ import com.winsun.fruitmix.databinding.ActivityMoveFileBinding
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
+import com.winsun.fruitmix.newdesign201804.user.preference.InjectUserPreference
+import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 
@@ -89,7 +91,8 @@ class MoveFileActivity : BaseToolbarActivity(), MoveFileView {
 
         moveFilePresenter = MoveFilePresenter(InjectFileDataSource.inject(this),
                 InjectTransmissionTaskDataSource.provideInstance(this), activityMoveFileBinding,
-                toolbarViewModel, this, loadingViewModel, noContentViewModel, fileOperation)
+                toolbarViewModel, this, loadingViewModel, noContentViewModel, fileOperation,
+                UserPreferenceContainer.userPreference,InjectUserPreference.inject(this))
 
         moveFilePresenter.initView()
 

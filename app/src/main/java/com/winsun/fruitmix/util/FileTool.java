@@ -64,12 +64,14 @@ public class FileTool {
         }
     }
 
-    public void deleteFile(String filePath) {
+    public boolean deleteFile(String filePath) {
 
         File file = new File(filePath);
         boolean result = file.delete();
 
         Log.d(TAG, "delete file path:" + filePath + " result: " + result);
+
+        return result;
 
     }
 

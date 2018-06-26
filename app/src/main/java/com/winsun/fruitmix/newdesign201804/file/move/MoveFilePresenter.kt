@@ -9,10 +9,7 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.databinding.ActivityMoveFileBinding
-import com.winsun.fruitmix.file.data.model.AbstractFile
-import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
-import com.winsun.fruitmix.file.data.model.RemoteFile
-import com.winsun.fruitmix.file.data.model.RemoteFolder
+import com.winsun.fruitmix.file.data.model.*
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserHome
@@ -23,25 +20,29 @@ import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderFileTitleViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.operation.CreateFolderUseCase
+import com.winsun.fruitmix.newdesign201804.file.operation.SortFileUseCase
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.ShareRootDataUseCase
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TASK_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
-import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
-import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
+import com.winsun.fruitmix.newdesign201804.user.preference.*
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel
 import java.util.*
+import kotlin.Comparator
 
 private const val rootUUID = "rootUUID"
+
+private const val sharedFolderRootUUID = "sharedFolderRootUUID"
 
 class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTaskDataSource: TransmissionTaskDataSource,
                         val activityMoveFileBinding: ActivityMoveFileBinding,
                         val toolbarViewModel: ToolbarViewModel, val moveFileView: MoveFileView,
                         val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel,
-                        val fileOperation: Int) {
+                        val fileOperation: Int, val userPreference: UserPreference,
+                        val userPreferenceDataSource: UserPreferenceDataSource) {
 
     private val context = activityMoveFileBinding.cancelBtn.context
 
@@ -63,24 +64,36 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
     private val selectFiles = SelectMoveFileDataSource.getSelectFiles()
 
+    private var currentRootUUID = ""
+
+    private lateinit var sortComparator:Comparator<ItemContent>
+
     fun initView() {
+
+        val sortFileUseCase = SortFileUseCase(userPreference, currentUserUUID, userPreferenceDataSource,
+                {
+                    refreshData()
+                })
 
         fileRecyclerViewAdapter = FileRecyclerViewAdapter({ abstractRemoteFile, position ->
 
             gotoNextFolder(abstractRemoteFile as AbstractRemoteFile)
 
         }, {
-
         }, { abstractRemoteFile, position ->
 
-        }, sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
+        }, handleSortBtnOnClick = {
+
+            sortFileUseCase.showSortBottomDialog(context, false)
+
+        }, sortPolicy = userPreference.fileSortPolicy)
+
+        sortComparator = sortFileUseCase.getSortComparator()
 
         fileRecyclerViewAdapter.fileViewMode = FileViewMode.LIST
 
         activityMoveFileBinding.fileRecyclerView.layoutManager = LinearLayoutManager(context)
         activityMoveFileBinding.fileRecyclerView.adapter = fileRecyclerViewAdapter
-
-        getRoot()
 
         if (fileOperation == FILE_OPERATE_MOVE) {
 
@@ -90,6 +103,8 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
                 doMove()
             }
 
+            currentRootUUID = rootUUID
+
         } else if (fileOperation == FILE_OPERATE_COPY) {
 
             moveBtn.text = context.getText(R.string.copy_to)
@@ -98,7 +113,9 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
                 doCopy()
             }
 
-        } else {
+            currentRootUUID = rootUUID
+
+        } else if (fileOperation == FILE_OPERATE_SHARE_TO_SHARED_FOLDER) {
 
             moveBtn.text = context.getText(R.string.copy_to)
 
@@ -106,7 +123,11 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
                 doCopy()
             }
 
+            currentRootUUID = sharedFolderRootUUID
+
         }
+
+        getRoot()
 
     }
 
@@ -128,59 +149,20 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
     }
 
     private var getFileCount = 0
-    private var totalCount = 2
+    private var totalCount = 0
 
     private fun getRoot() {
 
-        getFileCount = 0
+        val abstractFile: AbstractRemoteFile
 
-        totalCount = if (fileOperation == FILE_OPERATE_SHARE_TO_SHARED_FOLDER)
-            1
-        else
-            2
-
-        showLoadingBg()
-
-        if (fileOperation != FILE_OPERATE_SHARE_TO_SHARED_FOLDER) {
-            fileDataSource.getFile(currentUserHome, currentUserHome, object : BaseLoadDataCallback<AbstractRemoteFile> {
-
-                override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
-
-                    data?.forEach {
-                        it.rootFolderUUID = currentUserHome
-                    }
-
-                    currentFolderItems.addAll(data!!)
-
-                    handleGetFileFinish()
-
-                }
-
-                override fun onFail(operationResult: OperationResult?) {
-
-                    handleGetFileFinish()
-
-                }
-
-            })
+        if (currentRootUUID == sharedFolderRootUUID)
+            abstractFile = getSharedRootFolder()
+        else {
+            abstractFile = RemoteFolder()
+            abstractFile.uuid = currentRootUUID
         }
 
-        shareRootDataUseCase.getRoot(object : BaseLoadDataCallback<AbstractRemoteFile> {
-
-            override fun onFail(operationResult: OperationResult?) {
-
-                handleGetFileFinish()
-
-            }
-
-            override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
-
-                currentFolderItems.addAll(data!!)
-
-                handleGetFileFinish()
-
-            }
-        })
+        gotoNextFolder(abstractFile)
 
     }
 
@@ -198,27 +180,171 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
         noContentViewModel.showNoContent.set(false)
     }
 
-    private fun handleGetFileFinish() {
+    private fun gotoNextFolder(abstractRemoteFile: AbstractRemoteFile) {
 
-        getFileCount++
+        showLoadingBg()
 
-        if (getFileCount == totalCount) {
+        if (abstractRemoteFile.uuid == rootUUID) {
+            gotoRootFolder(abstractRemoteFile, true)
 
-            val remoteFolder = RemoteFolder()
-            remoteFolder.uuid = rootUUID
+        } else if (abstractRemoteFile.uuid == sharedFolderRootUUID) {
 
-            retrievedFolders.add(remoteFolder)
+            gotoSharedRootFolder(abstractRemoteFile, true)
 
-            refreshView()
+        } else {
+
+            fileDataSource.getFile(abstractRemoteFile.rootFolderUUID, abstractRemoteFile.uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+
+                override fun onFail(operationResult: OperationResult?) {
+
+                    showNoContentBg()
+
+                    handleGetFileSucceed(Collections.emptyList())
+
+                }
+
+                override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+
+                    retrievedFolders.add(abstractRemoteFile)
+
+                    handleGetFileSucceed(data)
+
+                }
+
+            })
 
         }
 
     }
 
+    private fun gotoPreFolder() {
+
+        retrievedFolders.removeAt(retrievedFolders.lastIndex)
+
+        val remoteFile = retrievedFolders.last()
+
+        showLoadingBg()
+
+        if (remoteFile.uuid == rootUUID) {
+
+            gotoRootFolder(remoteFile, false)
+
+        } else if (remoteFile.uuid == sharedFolderRootUUID) {
+
+            gotoSharedRootFolder(remoteFile, false)
+
+        } else {
+
+            fileDataSource.getFile(remoteFile.rootFolderUUID, remoteFile.uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+                override fun onFail(operationResult: OperationResult?) {
+                    showNoContentBg()
+
+                    handleGetFileSucceed(Collections.emptyList())
+                }
+
+                override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+
+                    handleGetFileSucceed(data)
+
+                }
+            })
+
+        }
+
+    }
+
+    private fun gotoRootFolder(abstractRemoteFile: AbstractRemoteFile, addIntoRetrievedFolders: Boolean) {
+
+        val privateDrive = RemotePrivateDrive()
+
+        privateDrive.rootFolderUUID = currentUserHome
+        privateDrive.uuid = currentUserHome
+
+        privateDrive.name = moveFileView.getString(R.string.my_private_drive)
+
+        val sharedFolderRootDrive = getSharedRootFolder()
+
+        val folderItems = mutableListOf<AbstractRemoteFile>(
+                privateDrive, sharedFolderRootDrive
+        )
+
+        handleGetFileFinish(abstractRemoteFile, folderItems, addIntoRetrievedFolders)
+
+    }
+
+    private fun getSharedRootFolder(): RemoteFolder {
+        val sharedFolderRootDrive = RemoteFolder()
+        sharedFolderRootDrive.rootFolderUUID = sharedFolderRootUUID
+        sharedFolderRootDrive.uuid = sharedFolderRootUUID
+
+        sharedFolderRootDrive.name = moveFileView.getString(R.string.shared_folder)
+        return sharedFolderRootDrive
+    }
+
+    private fun gotoSharedRootFolder(abstractRemoteFile: AbstractRemoteFile, addIntoRetrievedFolders: Boolean) {
+
+        shareRootDataUseCase.getRoot(object : BaseLoadDataCallback<AbstractRemoteFile> {
+
+            override fun onFail(operationResult: OperationResult?) {
+
+                showNoContentBg()
+
+            }
+
+            override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+
+                currentFolderItems.addAll(data!!)
+
+                handleGetFileFinish(abstractRemoteFile, data, addIntoRetrievedFolders)
+
+            }
+        })
+
+    }
+
+    private fun handleGetFileFinish(abstractRemoteFile: AbstractRemoteFile, data: MutableList<AbstractRemoteFile>?,
+                                    addIntoRetrievedFolders: Boolean) {
+
+        if (addIntoRetrievedFolders) {
+
+            retrievedFolders.add(abstractRemoteFile)
+        }
+
+        handleGetFileSucceed(data)
+
+    }
+
+    private fun handleGetFileSucceed(data: MutableList<AbstractRemoteFile>?) {
+
+        currentFolderItems.clear()
+
+        currentFolderItems.addAll(data!!)
+
+        refreshView()
+
+    }
+
+    private fun refreshView() {
+
+        if (currentFolderItems.isEmpty())
+            showNoContentBg()
+        else {
+            showContentBg()
+
+            refreshData()
+
+        }
+
+        refreshTitle()
+
+        refreshMoveState(selectFiles[0] as AbstractRemoteFile)
+    }
+
+
     private fun refreshData() {
 
-        val folderViewItems = mutableListOf<ViewItem>()
-        val fileViewItems = mutableListOf<ViewItem>()
+        val folderViewItems = mutableListOf<ItemContent>()
+        val fileViewItems = mutableListOf<ItemContent>()
 
         currentFolderItems.forEach {
 
@@ -237,6 +363,14 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
                 fileViewItems.add(ItemFile(fileItemViewModel))
             }
 
+        }
+
+        folderViewItems.sortWith(sortComparator)
+        fileViewItems.sortWith(sortComparator)
+
+        if (userPreference.fileSortPolicy.getCurrentSortDirection() == SortDirection.NEGATIVE) {
+            folderViewItems.reverse()
+            fileViewItems.reverse()
         }
 
         val fileTitleViewModel = FolderFileTitleViewModel()
@@ -268,61 +402,10 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
     }
 
-    private fun gotoNextFolder(abstractRemoteFile: AbstractRemoteFile) {
-
-
-        showLoadingBg()
-
-        fileDataSource.getFile(abstractRemoteFile.rootFolderUUID, abstractRemoteFile.uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
-
-            override fun onFail(operationResult: OperationResult?) {
-
-                showNoContentBg()
-
-                refreshMoveState(selectFiles[0] as AbstractRemoteFile)
-
-            }
-
-            override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
-
-                retrievedFolders.add(abstractRemoteFile)
-
-                handleGetFileSucceed(data)
-
-            }
-
-        })
-
-    }
-
-    private fun handleGetFileSucceed(data: MutableList<AbstractRemoteFile>?) {
-
-        currentFolderItems.clear()
-
-        currentFolderItems.addAll(data!!)
-
-        refreshView()
-
-    }
-
-    private fun refreshView() {
-
-        if (currentFolderItems.isEmpty())
-            showNoContentBg()
-        else {
-            showContentBg()
-
-            refreshData()
-
-            refreshTitle()
-        }
-
-        refreshMoveState(selectFiles[0] as AbstractRemoteFile)
-    }
 
     fun notRoot(): Boolean {
 
-        return retrievedFolders.last().uuid != rootUUID
+        return retrievedFolders.last().uuid != currentRootUUID
 
     }
 
@@ -330,45 +413,35 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
         gotoPreFolder()
     }
 
-    private fun gotoPreFolder() {
-
-        retrievedFolders.removeAt(retrievedFolders.lastIndex)
-
-        val remoteFile = retrievedFolders.last()
-
-        if (remoteFile.uuid == rootUUID) {
-            getRoot()
-            refreshTitle()
-        } else {
-
-            showLoadingBg()
-
-            fileDataSource.getFile(remoteFile.rootFolderUUID, remoteFile.uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
-                override fun onFail(operationResult: OperationResult?) {
-                    showNoContentBg()
-
-                    refreshMoveState(selectFiles[0] as AbstractRemoteFile)
-                }
-
-                override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
-
-                    handleGetFileSucceed(data)
-
-                }
-            })
-
-        }
-
-    }
 
     private fun refreshTitle() {
 
         val remoteFile = retrievedFolders.last()
 
-        if (remoteFile.uuid == rootUUID)
-            toolbarViewModel.titleText.set(moveFileView.getRootTitleText())
-        else
-            toolbarViewModel.titleText.set(remoteFile.name)
+        when {
+            remoteFile.uuid == rootUUID -> {
+
+                toolbarViewModel.navigationIconResId.set(R.drawable.close)
+
+                toolbarViewModel.titleText.set(moveFileView.getString(R.string.select_target_location))
+
+                toolbarViewModel.showMenu.set(false)
+
+            }
+            else -> {
+
+                toolbarViewModel.navigationIconResId.set(R.drawable.back_black)
+
+                toolbarViewModel.titleText.set(remoteFile.name)
+
+                if (remoteFile.uuid == sharedFolderRootUUID) {
+                    toolbarViewModel.showMenu.set(false)
+                } else {
+                    toolbarViewModel.showMenu.set(true)
+                }
+
+            }
+        }
 
     }
 
@@ -376,7 +449,8 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
         val currentRetrievedFolder = retrievedFolders.last()
 
-        if (currentRetrievedFolder.uuid != rootUUID && abstractRemoteFile.parentFolderUUID != currentRetrievedFolder.uuid) {
+        if (currentRetrievedFolder.uuid != rootUUID && currentRetrievedFolder.uuid != sharedFolderRootUUID
+                && abstractRemoteFile.parentFolderUUID != currentRetrievedFolder.uuid) {
 
             moveBtn.isEnabled = true
 

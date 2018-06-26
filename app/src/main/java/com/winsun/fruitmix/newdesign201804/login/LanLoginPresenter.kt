@@ -9,7 +9,7 @@ import com.winsun.fruitmix.equipment.search.data.EquipmentDataSource
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.equipment.list.data.EquipmentItemDataSource
 import com.winsun.fruitmix.newdesign201804.equipment.model.CloudUnConnectedEquipmentItem
-import com.winsun.fruitmix.newdesign201804.login.usecase.InjectLoginCase
+import com.winsun.fruitmix.newdesign201804.login.usecase.InjectNewDesignLoginCase
 import com.winsun.fruitmix.newdesign201804.mainpage.MainPageActivity
 import com.winsun.fruitmix.token.param.StationTokenParam
 import com.winsun.fruitmix.user.User
@@ -62,7 +62,7 @@ class LanLoginPresenter(private val itemUUID: String, private val equipmentItemD
     fun lanLogin(password: String,
                  baseOperateCallback: BaseOperateCallback) {
 
-        val loginUseCase = InjectLoginCase.provideInstance(context)
+        val loginUseCase = InjectNewDesignLoginCase.provideInstance(context)
 
         val stationTokenParam = StationTokenParam(cloudUnConnectedEquipmentItem.ip, currentUser.uuid, password,
                 cloudUnConnectedEquipmentItem.name)

@@ -843,9 +843,6 @@
 
     <string name="no_title_folder">No title folder</string>
 
-    <!-- file operation -->
-    <string name="new_name_empty_hint">Please enter a new name</string>
-
     <!-- file detail -->
     <string name="key_type">Type</string>
     <string name="key_size">Size</string>
@@ -856,8 +853,15 @@
     <string name="key_modify">Modify</string>
 
     <!-- file operation -->
+    <string name="new_name_empty_hint">Please enter a new name</string>
     <string name="create_copy_task">Create copy task</string>
     <string name="create_move_task">Create move task</string>
+
+    <string name="my_private_drive">My private drive</string>
+    <string name="select_target_location">Select target location</string>
+
+    <!-- offline file -->
+    <string name="offline_unavailable">Offline Unavailable</string>
 
     <!-- shared folder -->
     <string name="shared_user">Shared User</string>

@@ -50,6 +50,7 @@
                 android:inputType="text"
                 android:text="@string/shared_folder"
                 android:textColor="@color/eighty_seven_percent_white"
+                android:textColorHint="@color/eighty_seven_percent_white"
                 android:textSize="18dp"
                 android:theme="@style/PermissionManageTitleEditTextStyle"
                 app:layout_constraintBottom_toBottomOf="parent"

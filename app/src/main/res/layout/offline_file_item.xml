@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="64dp">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/deleteLayout"
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="right">
+
+        <TextView
+            android:id="@+id/deleteTv"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:background="#f44336"
+            android:gravity="center"
+            android:text="@string/offline_unavailable"
+            android:textColor="@color/eighty_seven_percent_white"
+            android:textSize="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@color/white">
+
+        <ImageView
+            android:id="@+id/fileTypeImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/ic_folder"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <TextView
+            android:id="@+id/folderNameTv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="56dp"
+            android:layout_marginLeft="32dp"
+            android:layout_marginRight="56dp"
+            android:layout_marginStart="32dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/eighty_seven_percent_black"
+            android:textSize="14dp"
+            app:layout_constraintBottom_toTopOf="@id/fileFormatTimeTv"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/fileTypeImageView"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="新建文件夹" />
+
+        <ImageView
+            android:id="@+id/offlineAvailableIv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="8dp"
+            android:src="@drawable/offline_available_12dp"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/folderNameTv"
+            app:layout_constraintTop_toBottomOf="@+id/folderNameTv" />
+
+        <TextView
+            android:id="@+id/fileFormatTimeTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/fifty_four_percent_black"
+            android:textSize="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/offlineAvailableIv"
+            app:layout_constraintTop_toBottomOf="@+id/folderNameTv"
+            tools:text="2016.02.02" />
+
+        <TextView
+            android:id="@+id/fileFormatSizeTv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:textColor="@color/fifty_four_percent_black"
+            android:textSize="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/fileFormatTimeTv"
+            app:layout_constraintTop_toBottomOf="@+id/folderNameTv"
+            tools:text="40MB" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1px"
+            android:background="@color/divide_bg"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="@+id/folderNameTv" />
+
+
+    </android.support.constraint.ConstraintLayout>
+
+
+</com.daimajia.swipe.SwipeLayout>

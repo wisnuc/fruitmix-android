@@ -244,12 +244,15 @@ public class LocalFileFragment {
 
             final AbstractLocalFile abstractLocalFile = abstractLocalFiles.get(position);
 
-/*            FileItemViewModel fileItemViewModel = binding.getFileItemViewModel();
+/*
+
+            FileItemViewModel fileItemViewModel = binding.getFileItemViewModel();
 
             if (fileItemViewModel == null)
                 fileItemViewModel = new FileItemViewModel();
 
-            fileItemViewModel.selectMode.set(selectMode);*/
+            fileItemViewModel.selectMode.set(selectMode);
+*/
 
             if (selectMode) {
 
@@ -261,7 +264,9 @@ public class LocalFileFragment {
                     @Override
                     public void onClick(View v) {
                         toggleFileInSelectedFile(abstractLocalFile);
+
                         toggleFolderIconBg(abstractLocalFile);
+
                     }
                 });
 
@@ -353,21 +358,21 @@ public class LocalFileFragment {
 
         }
 
-        private void toggleFileIconBgResource(FileItemViewModel fileItemViewModel, AbstractFile abstractFile) {
-            if (selectedFiles.contains(abstractFile)) {
+    }
 
-                fileItemViewModel.fileIconBg.set(R.drawable.check_circle_selected);
-                fileItemViewModel.showFileIcon.set(false);
+    private void toggleFileIconBgResource(FileItemViewModel fileItemViewModel, AbstractFile abstractFile) {
+        if (selectedFiles.contains(abstractFile)) {
+
+            fileItemViewModel.fileIconBg.set(R.drawable.check_circle_selected);
+            fileItemViewModel.showFileIcon.set(false);
 
 
-            } else {
+        } else {
 
-                fileItemViewModel.fileIconBg.set(R.drawable.round_circle);
-                fileItemViewModel.showFileIcon.set(true);
+            fileItemViewModel.fileIconBg.set(R.drawable.round_circle);
+            fileItemViewModel.showFileIcon.set(true);
 
-            }
         }
-
     }
 
     private void toggleFileInSelectedFile(AbstractFile abstractFile) {

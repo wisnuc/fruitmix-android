@@ -814,9 +814,6 @@
 
     <string name="no_title_folder">无标题文件夹</string>
 
-    <!-- file operation -->
-    <string name="new_name_empty_hint">请输入新名称</string>
-
     <!-- file detail -->
     <string name="key_type">类型</string>
     <string name="key_size">大小</string>
@@ -827,8 +824,15 @@
     <string name="key_modify">修改于</string>
 
     <!-- file operation -->
+    <string name="new_name_empty_hint">请输入新名称</string>
     <string name="create_copy_task">创建拷贝任务</string>
     <string name="create_move_task">创建移动任务</string>
+
+    <string name="my_private_drive">我的私有盘</string>
+    <string name="select_target_location">选择目标位置</string>
+
+    <!-- offline file -->
+    <string name="offline_unavailable">离线不可用</string>
 
     <!-- shared folder -->
     <string name="shared_user">共享用户</string>

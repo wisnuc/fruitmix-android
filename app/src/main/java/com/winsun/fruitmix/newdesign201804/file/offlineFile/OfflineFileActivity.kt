@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.newdesign201804.file.offlineFile
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
@@ -14,26 +13,28 @@ import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import kotlinx.android.synthetic.main.activity_offline_file.*
 
-class OfflineFileActivity : BaseToolbarActivity() {
+class OfflineFileActivity : BaseToolbarActivity(), OfflineFileView {
 
-    private lateinit var activitiyOfflineFileBinding: ActivityOfflineFileBinding
+    private lateinit var activityOfflineFileBinding: ActivityOfflineFileBinding
 
     private val loadingViewModel = LoadingViewModel(this)
 
     private val noContentViewModel = NoContentViewModel()
 
+    private lateinit var offlineFilePresenter: OfflineFilePresenter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        activitiyOfflineFileBinding.loadingViewModel = loadingViewModel
+        activityOfflineFileBinding.loadingViewModel = loadingViewModel
 
         noContentViewModel.noContentImgResId = R.drawable.no_file
         noContentViewModel.setNoContentText(getString(R.string.no_files))
 
-        activitiyOfflineFileBinding.noContentViewModel = noContentViewModel
+        activityOfflineFileBinding.noContentViewModel = noContentViewModel
 
-        val offlineFilePresenter = OfflineFilePresenter(InjectOfflineFileDataSource.inject(this),
-                loadingViewModel,noContentViewModel)
+        offlineFilePresenter = OfflineFilePresenter(InjectOfflineFileDataSource.inject(this),
+                loadingViewModel, noContentViewModel, this)
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -43,14 +44,31 @@ class OfflineFileActivity : BaseToolbarActivity() {
 
     override fun generateContent(root: ViewGroup?): View {
 
-        activitiyOfflineFileBinding = ActivityOfflineFileBinding.inflate(LayoutInflater.from(this),
+        activityOfflineFileBinding = ActivityOfflineFileBinding.inflate(LayoutInflater.from(this),
                 root, false)
 
-        return activitiyOfflineFileBinding.root
+        return activityOfflineFileBinding.root
     }
 
     override fun getToolbarTitle(): String {
         return getString(R.string.offline_file)
+    }
+
+    override fun setTitle(title: String) {
+        toolbarViewModel.titleText.set(title)
+    }
+
+    override fun getRootView(): View {
+        return activityOfflineFileBinding.root
+    }
+
+    override fun onBackPressed() {
+
+        if (offlineFilePresenter.isRoot())
+            super.onBackPressed()
+        else
+            offlineFilePresenter.gotoUpperLevel()
+
     }
 
 }

@@ -1,33 +1,110 @@
 package com.winsun.fruitmix.newdesign201804.file.offlineFile
 
+import android.support.design.widget.Snackbar
 import android.support.v7.widget.RecyclerView
+import android.view.ViewGroup
+import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.file.data.model.*
-import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
-import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
-import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
-import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
+import com.winsun.fruitmix.newdesign201804.component.inflateView
 import com.winsun.fruitmix.newdesign201804.file.offlineFile.data.OfflineFileDataSource
-import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
-import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
+import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
+import com.winsun.fruitmix.recyclerview.SimpleViewHolder
+import com.winsun.fruitmix.util.FileTool
 import com.winsun.fruitmix.util.FileUtil
+import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 
+import kotlinx.android.synthetic.main.offline_file_item.view.*
+import java.io.File
+import java.util.*
+
 class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSource,
-                           val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel) {
+                           val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel,
+                           val offlineFileView: OfflineFileView) {
+
+    private val offlineFileAdapter = OfflineFileAdapter()
+
+    private val currentFileItems = mutableListOf<AbstractLocalFile>()
 
     private val rootFolderPath = FileUtil.getDownloadFileStoreFolderPath()
 
+    private val rootFilterFolderPath = listOf<String>(FileUtil.getAudioRecordFolderPath(), FileUtil.getLocalPhotoMiniThumbnailFolderPath(),
+            FileUtil.getLocalPhotoThumbnailFolderPath(), FileUtil.getOriginalPhotoFolderPath())
+
+    private val retrieveFolderPath = mutableListOf<String>()
+
     fun initView(recyclerView: RecyclerView) {
+
+        recyclerView.adapter = offlineFileAdapter
+
+        enterFolder(rootFolderPath, rootFilterFolderPath)
+
+    }
+
+    private fun enterFolder(folderPath: String, filterFolderPath: List<String>) {
 
         loadingViewModel.showLoading.set(true)
 
-        val filterPaths = listOf<String>(FileUtil.getAudioRecordFolderPath(), FileUtil.getLocalPhotoMiniThumbnailFolderPath(),
-                FileUtil.getLocalPhotoThumbnailFolderPath(), FileUtil.getOriginalPhotoFolderPath())
+        offlineFileDataSource.getFile(folderPath, filterFolderPath, object : BaseLoadDataCallback<AbstractLocalFile> {
 
-        offlineFileDataSource.getFile(rootFolderPath, filterPaths, object : BaseLoadDataCallback<AbstractLocalFile> {
+            override fun onSucceed(data: MutableList<AbstractLocalFile>?, operationResult: OperationResult?) {
+
+                retrieveFolderPath.add(folderPath)
+
+                loadingViewModel.showLoading.set(false)
+
+                if (data!!.isEmpty())
+                    noContentViewModel.showNoContent.set(true)
+                else {
+                    noContentViewModel.showNoContent.set(false)
+
+                    refreshData(data)
+                }
+
+                refreshTitle(folderPath)
+
+            }
+
+            override fun onFail(operationResult: OperationResult?) {
+
+                retrieveFolderPath.add(folderPath)
+
+                loadingViewModel.showLoading.set(false)
+                noContentViewModel.showNoContent.set(true)
+
+                refreshTitle(folderPath)
+            }
+
+        })
+
+    }
+
+    fun isRoot(): Boolean {
+        return retrieveFolderPath.last() == rootFolderPath
+    }
+
+    fun gotoUpperLevel() {
+
+        retrieveFolderPath.removeAt(retrieveFolderPath.lastIndex)
+
+        val folderPath = retrieveFolderPath.last()
+
+        val filterFolderPath = if (isRoot()) rootFilterFolderPath else Collections.emptyList()
+
+        loadingViewModel.showLoading.set(true)
+
+        offlineFileDataSource.getFile(folderPath, filterFolderPath, object : BaseLoadDataCallback<AbstractLocalFile> {
+
+            override fun onFail(operationResult: OperationResult?) {
+                loadingViewModel.showLoading.set(false)
+                noContentViewModel.showNoContent.set(true)
+
+                refreshTitle(folderPath)
+
+            }
 
             override fun onSucceed(data: MutableList<AbstractLocalFile>?, operationResult: OperationResult?) {
 
@@ -38,37 +115,63 @@ class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSou
                 else {
                     noContentViewModel.showNoContent.set(false)
 
-                    initRecyclerViewAdapter(recyclerView, data)
+                    refreshData(data)
                 }
 
-            }
-
-            override fun onFail(operationResult: OperationResult?) {
-
-                loadingViewModel.showLoading.set(false)
-                noContentViewModel.showNoContent.set(true)
+                refreshTitle(folderPath)
 
             }
 
         })
 
+    }
+
+    private fun refreshTitle(folderPath: String) {
+
+        if (folderPath == rootFolderPath)
+            offlineFileView.setTitle(offlineFileView.getString(R.string.offline_file))
+        else {
+
+            val file = File(folderPath)
+            offlineFileView.setTitle(file.name)
+
+        }
 
     }
 
-    private fun initRecyclerViewAdapter(recyclerView: RecyclerView, data: MutableList<AbstractLocalFile>) {
 
-        val fileRecyclerViewAdapter = FileRecyclerViewAdapter({ file, position ->
-        }, {
+    private fun refreshData(data: MutableList<AbstractLocalFile>) {
 
-        }, { file, position ->
+        /*       val fileRecyclerViewAdapter = FileRecyclerViewAdapter({ file, position ->
+               }, {
 
-        }, sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
+               }, { file, position ->
 
-        fileRecyclerViewAdapter.fileViewMode = FileViewMode.LIST
+               }, sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
 
-        recyclerView.adapter = fileRecyclerViewAdapter
+               fileRecyclerViewAdapter.fileViewMode = FileViewMode.LIST*/
 
-        val folderViewItems = mutableListOf<ViewItem>()
+        val folders = mutableListOf<AbstractLocalFile>()
+        val files = mutableListOf<AbstractLocalFile>()
+
+        data.forEach {
+
+            if (it.isFolder)
+                folders.add(it)
+            else
+                files.add(it)
+
+        }
+
+        currentFileItems.clear()
+
+        currentFileItems.addAll(folders)
+        currentFileItems.addAll(files)
+
+        offlineFileAdapter.setItemList(currentFileItems)
+        offlineFileAdapter.notifyDataSetChanged()
+
+/*        val folderViewItems = mutableListOf<ViewItem>()
         val fileViewItems = mutableListOf<ViewItem>()
 
         data.forEach {
@@ -97,7 +200,68 @@ class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSou
         viewItems.addAll(fileViewItems)
 
         fileRecyclerViewAdapter.setItemList(viewItems)
-        fileRecyclerViewAdapter.notifyDataSetChanged()
+        fileRecyclerViewAdapter.notifyDataSetChanged()*/
+
+    }
+
+    private inner class OfflineFileAdapter : BaseRecyclerViewAdapter<SimpleViewHolder, AbstractLocalFile>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): SimpleViewHolder {
+
+            val view = parent?.inflateView(R.layout.offline_file_item)
+
+            return SimpleViewHolder(view)
+
+        }
+
+        override fun onBindViewHolder(holder: SimpleViewHolder?, position: Int) {
+
+            val itemView = holder?.itemView
+
+            val abstractLocalFile = mItemList[position]
+
+            itemView?.fileTypeImageView?.setImageResource(abstractLocalFile.fileTypeResID)
+            itemView?.fileFormatSizeTv?.text = FileUtil.formatFileSize(abstractLocalFile.size)
+            itemView?.fileFormatTimeTv?.text = abstractLocalFile.dateText
+
+            itemView?.folderNameTv?.text = abstractLocalFile.name
+
+            itemView?.setOnClickListener {
+
+                if (abstractLocalFile.isFolder) {
+
+                    enterFolder(abstractLocalFile.path, Collections.emptyList())
+
+                } else
+                    FileUtil.openAbstractRemoteFile(itemView.context, abstractLocalFile.name)
+
+            }
+
+            itemView?.deleteLayout?.setOnClickListener {
+
+                val result = if (abstractLocalFile.isFolder)
+                    FileTool.getInstance().deleteDir(abstractLocalFile.path)
+                else
+                    FileTool.getInstance().deleteFile(abstractLocalFile.path)
+
+                if (result) {
+
+                    SnackbarUtil.showSnackBar(offlineFileView.getRootView(), Snackbar.LENGTH_SHORT,
+                            messageStr = offlineFileView.getString(R.string.success, offlineFileView.getString(R.string.delete_file)))
+
+                    currentFileItems.removeAt(position)
+                    offlineFileAdapter.setItemList(currentFileItems)
+
+                    offlineFileAdapter.notifyItemRemoved(holder.adapterPosition)
+
+                } else {
+                    SnackbarUtil.showSnackBar(offlineFileView.getRootView(), Snackbar.LENGTH_SHORT,
+                            messageStr = offlineFileView.getString(R.string.fail, offlineFileView.getString(R.string.delete_file)))
+                }
+
+            }
+
+        }
 
     }
 
