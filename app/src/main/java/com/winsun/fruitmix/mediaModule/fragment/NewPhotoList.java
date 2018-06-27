@@ -720,10 +720,7 @@ public class NewPhotoList implements Page, IShowHideFragmentListener, ActiveView
 
             url = httpRequest.getUrl();
 
-            ArrayMap<String, String> header = new ArrayMap<>();
-            header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
-
-            mImageLoader.setHeaders(header);
+            mImageLoader.setHeaders(httpRequest.getHeaders());
 
             mImageLoader.preLoadMediaSmallThumb(url, mItemWidth, mItemWidth);
 

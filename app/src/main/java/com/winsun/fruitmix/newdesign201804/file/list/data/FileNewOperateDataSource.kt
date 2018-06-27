@@ -20,6 +20,7 @@ import com.winsun.fruitmix.model.operationResult.*
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.RemoteOneTransmissionTaskParser
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.ErrorTaskState
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.StartingTaskState
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
 import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileInterface
 import com.winsun.fruitmix.thread.manage.ThreadManager
@@ -48,7 +49,7 @@ private const val TASKS = "/tasks"
 
 class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil: IHttpUtil,
                                val uploadFileInterface: UploadFileInterface,
-                               val threadManager: ThreadManager,val currentUserUUID:String )
+                               val threadManager: ThreadManager, val currentUserUUID: String)
     : BaseRemoteDataSourceImpl(iHttpUtil, httpRequestFactory) {
 
     fun renameFile(oldName: String, newName: String, driveUUID: String, dirUUID: String, callback: BaseOperateCallback) {
@@ -70,31 +71,9 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
 
         val textFormData = TextFormData("$oldName|$newName", value.toString())
 
-        wrapper.operateCall(httpRequest,Collections.singletonList(textFormData),Collections.emptyList(),callback)
+        wrapper.operateCall(httpRequest, Collections.singletonList(textFormData), Collections.emptyList(), callback)
 
     }
-
-    private fun renameFileWithStationAPI(httpRequest: HttpRequest, oldName: String, newName: String): HttpResponse? {
-
-        val value: JSONObject
-        try {
-            value = JSONObject()
-
-            value.put(OP, RENAME)
-
-            val textFormData = TextFormData("$oldName|$newName", value.toString())
-
-            return iHttpUtil.remoteCallRequest(iHttpUtil.createPostRequest(httpRequest,
-                    iHttpUtil.createFormDataRequestBody(listOf(textFormData), emptyList())))
-
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
-
-        return null
-
-    }
-
 
     fun moveFile(srcFile: AbstractRemoteFile, targetFile: AbstractRemoteFile, entries: List<AbstractRemoteFile>, callback: BaseOperateDataCallback<Task>) {
 
@@ -106,7 +85,7 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
             return
         }
 
-        wrapper.operateCall(httpRequest, callback,RemoteOneTransmissionTaskParser(threadManager,currentUserUUID))
+        wrapper.operateCall(httpRequest, callback, RemoteOneTransmissionTaskParser(threadManager, currentUserUUID))
 
     }
 
@@ -150,7 +129,7 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
             return
         }
 
-        wrapper.operateCall(httpRequest, callback,RemoteOneTransmissionTaskParser(threadManager,currentUserUUID))
+        wrapper.operateCall(httpRequest, callback, RemoteOneTransmissionTaskParser(threadManager, currentUserUUID))
 
     }
 
@@ -162,6 +141,17 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
             return
 
         val responseBody: ResponseBody
+
+
+        val currentState = task.getCurrentState()
+
+        val alreadyDownloadedFileSize = if (currentState is StartingTaskState)
+            currentState.currentHandledSize
+        else
+            0
+
+        if(alreadyDownloadedFileSize != 0L)
+            httpRequest.addHeader("RANGE", "bytes=$alreadyDownloadedFileSize-")
 
         try {
             responseBody = iHttpUtil.getResponseBody(httpRequest)
@@ -310,7 +300,7 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
 
         val textFormData = TextFormData(fileName, value.toString())
 
-        wrapper.operateCall(httpRequest,Collections.singletonList(textFormData),Collections.emptyList(),callback)
+        wrapper.operateCall(httpRequest, Collections.singletonList(textFormData), Collections.emptyList(), callback)
 
     }
 

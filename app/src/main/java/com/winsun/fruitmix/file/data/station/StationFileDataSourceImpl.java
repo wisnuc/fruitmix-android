@@ -100,7 +100,7 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
      * WISNUC API:GET DRIVE
      */
     @Override
-    public void getFile(String rootUUID, final String folderUUID, BaseLoadDataCallback<AbstractRemoteFile> callback) {
+    public void getFile(String rootUUID, final String folderUUID,BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(ROOT_DRIVE_PARAMETER + "/" + rootUUID + DIRS + folderUUID);
 

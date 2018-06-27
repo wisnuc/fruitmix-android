@@ -1025,17 +1025,14 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         mainPic.setTag(remoteUrl);
 
-        ArrayMap<String, String> header = new ArrayMap<>();
-        header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
-
         if (isGif) {
 
-            mGifLoader.setHeaders(header);
+            mGifLoader.setHeaders(httpRequest.getHeaders());
 
             mainPic.setGifUrl(remoteUrl, mGifLoader);
         } else {
 
-            mImageLoader.setHeaders(header);
+            mImageLoader.setHeaders(httpRequest.getHeaders());
 
             mainPic.setImageUrl(remoteUrl, mImageLoader);
         }
@@ -1437,9 +1434,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private void handleGetSCloudTokenWhenInitItem(int position, GifTouchNetworkImageView mainPic, Media media) {
         HttpRequest httpRequest = getMediaThumbHttpRequest(media, mSCloudToken);
 
-        ArrayMap<String, String> header = new ArrayMap<>();
-        header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
-
         if (transitionMediaNeedShowThumb && !media.isLocal()) {
 
             if (position == initialPhotoPosition)
@@ -1447,7 +1441,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             String thumbImageUrl = httpRequest.getUrl();
 
-            mImageLoader.setHeaders(header);
+            mImageLoader.setHeaders(httpRequest.getHeaders());
 
             mainPic.setTag(thumbImageUrl);
 
@@ -1466,12 +1460,12 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             if (imageThumbUrl.endsWith(".gif")) {
 
-                mGifLoader.setHeaders(header);
+                mGifLoader.setHeaders(httpRequest.getHeaders());
 
                 mainPic.setGifUrl(imageThumbUrl, mGifLoader);
             } else {
 
-                mImageLoader.setHeaders(header);
+                mImageLoader.setHeaders(httpRequest.getHeaders());
 
                 mainPic.setImageUrl(imageThumbUrl, mImageLoader);
             }

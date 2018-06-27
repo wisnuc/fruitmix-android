@@ -12,9 +12,7 @@ import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TaskState
 
 interface FileDataSource {
 
-    fun getFile(rootUUID: String, folderUUID: String, baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>)
-
-    fun getFileByUUID(uuid: String): AbstractFile?
+    fun getFile(rootUUID: String, folderUUID:String,folderName: String, baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>)
 
     fun searchFile(keys: List<String>, baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>)
 

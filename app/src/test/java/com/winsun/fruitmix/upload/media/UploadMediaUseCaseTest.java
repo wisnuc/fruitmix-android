@@ -183,7 +183,7 @@ public class UploadMediaUseCaseTest {
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
-        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUserHome)))
+        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUserHome),eq("")))
                 .thenReturn(new OperationSuccessWithFile(Collections.<AbstractRemoteFile>emptyList()));
 
         uploadMediaUseCase.startUploadMedia();
@@ -242,10 +242,10 @@ public class UploadMediaUseCaseTest {
         List<AbstractRemoteFile> files = new ArrayList<>();
         files.add(file);
 
-        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUserHome)))
+        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUserHome),eq("")))
                 .thenReturn(new OperationSuccessWithFile(files));
 
-        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadParentFolderUUID)))
+        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadParentFolderUUID),eq("")))
                 .thenReturn(new OperationSuccessWithFile(Collections.<AbstractRemoteFile>emptyList()));
 
         uploadMediaUseCase.startUploadMedia();
@@ -305,7 +305,7 @@ public class UploadMediaUseCaseTest {
         List<AbstractRemoteFile> files = new ArrayList<>();
         files.add(file);
 
-        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUserHome)))
+        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUserHome),eq("")))
                 .thenReturn(new OperationSuccessWithFile(files));
 
         AbstractRemoteFile uploadFolderFile = new RemoteFile();
@@ -315,13 +315,13 @@ public class UploadMediaUseCaseTest {
         List<AbstractRemoteFile> uploadParentFolders = new ArrayList<>();
         uploadParentFolders.add(uploadFolderFile);
 
-        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadParentFolderUUID)))
+        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadParentFolderUUID),eq("")))
                 .thenReturn(new OperationSuccessWithFile(uploadParentFolders));
 
         AbstractRemoteFile uploadFile = new RemoteFile();
         ((RemoteFile) uploadFile).setFileHash(testMediaUUID);
 
-        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadFolderUUID)))
+        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadFolderUUID),eq("")))
                 .thenReturn(new OperationSuccessWithFile(Collections.singletonList(uploadFile)));
 
         uploadMediaUseCase.startUploadMedia();
@@ -435,7 +435,7 @@ public class UploadMediaUseCaseTest {
 
         getLocalMediaCaptor.getValue().onSucceed(Collections.<Media>emptyList(), new OperationSuccess());
 
-        verify(stationFileRepository, never()).getFileWithoutCreateNewThread(anyString(), anyString());
+        verify(stationFileRepository, never()).getFileWithoutCreateNewThread(anyString(), anyString(),anyString());
 
         verify(stationFileRepository, never()).createFolderWithoutCreateNewThread(anyString(), anyString(), anyString(), any(BaseOperateDataCallback.class));
 
@@ -479,7 +479,7 @@ public class UploadMediaUseCaseTest {
         List<AbstractRemoteFile> files = new ArrayList<>();
         files.add(file);
 
-        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUserHome)))
+        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUserHome),eq("")))
                 .thenReturn(new OperationSuccessWithFile(files));
 
         AbstractRemoteFile uploadFolderFile = new RemoteFile();
@@ -489,13 +489,13 @@ public class UploadMediaUseCaseTest {
         List<AbstractRemoteFile> uploadParentFolders = new ArrayList<>();
         uploadParentFolders.add(uploadFolderFile);
 
-        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadParentFolderUUID)))
+        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadParentFolderUUID),eq("")))
                 .thenReturn(new OperationSuccessWithFile(uploadParentFolders));
 
         AbstractRemoteFile uploadFile = new RemoteFile();
         ((RemoteFile) uploadFile).setFileHash(testMediaUUID);
 
-        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadFolderUUID)))
+        when(stationFileRepository.getFileWithoutCreateNewThread(eq(testUserHome),eq(testUploadFolderUUID),eq("")))
                 .thenReturn(new OperationSuccessWithFile(Collections.singletonList(uploadFile)));
 
         uploadMediaUseCase.startUploadMedia();
@@ -506,11 +506,13 @@ public class UploadMediaUseCaseTest {
 
         getLocalMediaCaptor.getValue().onSucceed(medias, new OperationSuccess());
 
-        verify(stationFileRepository, times(2)).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome));
+        verify(stationFileRepository, times(2)).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUserHome),eq(""));
 
-        verify(stationFileRepository, times(2)).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUploadParentFolderUUID));
+        verify(stationFileRepository, times(2)).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUploadParentFolderUUID),
+                eq(""));
 
-        verify(stationFileRepository, times(2)).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUploadFolderUUID));
+        verify(stationFileRepository, times(2)).getFileWithoutCreateNewThread(eq(testUserHome), eq(testUploadFolderUUID),
+                eq(""));
 
         verify(checkMediaIsUploadStrategy, times(2)).setUploadedMediaHashs(ArgumentMatchers.<String>anyList());
 
@@ -527,7 +529,7 @@ public class UploadMediaUseCaseTest {
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
-        when(stationFileRepository.getFileWithoutCreateNewThread(anyString(),anyString())).thenReturn(new OperationIOException());
+        when(stationFileRepository.getFileWithoutCreateNewThread(anyString(),anyString(),anyString())).thenReturn(new OperationIOException());
 
         uploadMediaUseCase.startUploadMedia();
 
@@ -552,7 +554,7 @@ public class UploadMediaUseCaseTest {
 
         when(checkMediaIsUploadStrategy.isMediaUploaded(any(Media.class))).thenReturn(false);
 
-        when(stationFileRepository.getFileWithoutCreateNewThread(anyString(),anyString()))
+        when(stationFileRepository.getFileWithoutCreateNewThread(anyString(),anyString(),anyString()))
                 .thenReturn(new OperationSuccessWithFile(Collections.<AbstractRemoteFile>emptyList()));
 
         uploadMediaUseCase.startUploadMedia();

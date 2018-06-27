@@ -123,7 +123,7 @@ public class FileFragmentDataSource implements FileListDataSource {
 
         } else {
 
-            mStationFileRepository.getFile(driveRootUUID, currentFolderUUID, new BaseLoadDataCallback<AbstractRemoteFile>() {
+            mStationFileRepository.getFile(driveRootUUID, currentFolderUUID, currentFolderName,new BaseLoadDataCallback<AbstractRemoteFile>() {
                 @Override
                 public void onSucceed(final List<AbstractRemoteFile> data, OperationResult operationResult) {
 

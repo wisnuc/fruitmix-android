@@ -1,5 +1,7 @@
 package com.winsun.fruitmix.newdesign201804.file.list.data;
 
+import android.support.annotation.NonNull;
+
 import com.winsun.fruitmix.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
@@ -47,14 +49,8 @@ public class FileDataRepository extends BaseDataRepository implements FileDataSo
     }
 
     @Override
-    public void getFile(@NotNull String rootUUID, @NotNull String folderUUID, @NotNull BaseLoadDataCallback<AbstractRemoteFile> baseLoadDataCallback) {
-        mStationFileRepository.getFile(rootUUID, folderUUID, baseLoadDataCallback);
-    }
-
-    @Nullable
-    @Override
-    public AbstractFile getFileByUUID(@NotNull String uuid) {
-        return null;
+    public void getFile(@NotNull String rootUUID, @NonNull String folderUUID, @NonNull String folderName, @NotNull BaseLoadDataCallback<AbstractRemoteFile> baseLoadDataCallback) {
+        mStationFileRepository.getFile(rootUUID, folderUUID,folderName, baseLoadDataCallback);
     }
 
     @Override

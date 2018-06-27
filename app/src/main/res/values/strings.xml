@@ -852,6 +852,8 @@
     <string name="key_create">Create</string>
     <string name="key_modify">Modify</string>
 
+    <string name="unknown_file">Unknown file</string>
+
     <!-- file operation -->
     <string name="new_name_empty_hint">Please enter a new name</string>
     <string name="create_copy_task">Create copy task</string>

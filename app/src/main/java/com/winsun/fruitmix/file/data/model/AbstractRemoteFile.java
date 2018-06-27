@@ -20,6 +20,8 @@ public abstract class AbstractRemoteFile extends AbstractFile{
     private List<String> readList= new ArrayList<>();
 
     private String parentFolderUUID;
+    private String parentFolderName;
+
     private String rootFolderUUID;
 
     private String parentFolderPath = "";
@@ -60,13 +62,20 @@ public abstract class AbstractRemoteFile extends AbstractFile{
         return Collections.unmodifiableList(writeList);
     }
 
-
     public String getParentFolderUUID() {
         return parentFolderUUID;
     }
 
     public void setParentFolderUUID(String parentFolderUUID) {
         this.parentFolderUUID = parentFolderUUID;
+    }
+
+    public String getParentFolderName() {
+        return parentFolderName;
+    }
+
+    public void setParentFolderName(String parentFolderName) {
+        this.parentFolderName = parentFolderName;
     }
 
     public String getRootFolderUUID() {

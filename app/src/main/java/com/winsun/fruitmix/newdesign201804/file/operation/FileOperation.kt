@@ -144,14 +144,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
 
         val dialog = FileMenuBottomDialogFactory(abstractFile, bottomMenuItems, {
 
-            val intent = Intent(context, FileDetailActivity::class.java)
-
-            val abstractRemoteFile = it as AbstractRemoteFile
-            intent.putExtra(FILE_UUID_KEY, abstractRemoteFile.uuid)
-
-            //TODO: check pass uuid
-
-            context.startActivity(intent)
+            FileDetailActivity.start(abstractFile as AbstractRemoteFile,context)
 
         }).createDialog(context)
 

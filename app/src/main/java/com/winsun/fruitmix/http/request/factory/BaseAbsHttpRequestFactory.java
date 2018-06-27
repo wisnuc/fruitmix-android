@@ -91,7 +91,7 @@ public class BaseAbsHttpRequestFactory {
 
     void setHeader(HttpRequest httpRequest) {
         if (getHttpHeader() != null)
-            httpRequest.setHeader(getHttpHeader().getKey(), getHttpHeader().getValue());
+            httpRequest.addHeader(getHttpHeader().getKey(), getHttpHeader().getValue());
     }
 
     String createUrl(String httpPath) {

@@ -15,4 +15,18 @@
     <string name="android_photo_comment_url">%1$s?type=comments</string>
     <string name="android_update_mediashare_url">%1$s/%2$s/update</string>
 
+    <!-- file type -->
+    <string name="file_type_excel">Microsoft Excel</string>
+    <string name="file_type_word">Microsoft Word</string>
+    <string name="file_type_pdf">PDF</string>
+    <string name="file_type_ppt">Microsoft PowerPoint</string>
+    <string name="file_type_txt">TXT</string>
+    <string name="file_type_mp4">MP4</string>
+    <string name="file_type_mov">MOV</string>
+    <string name="file_type_video">VIDEO</string>
+    <string name="file_type_audio">AUDIO</string>
+    <string name="file_type_gif">GIF</string>
+    <string name="file_type_jpeg">JPEG</string>
+    <string name="file_type_png">PNG</string>
+
 </resources>

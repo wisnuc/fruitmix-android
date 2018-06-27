@@ -86,7 +86,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
 
     }
 
-    public void getFile(final String rootUUID, final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> callback) {
+    public void getFile(final String rootUUID, final String folderUUID,final String fileName, final BaseLoadDataCallback<AbstractRemoteFile> callback) {
 
 /*        if (currentFolderUUID != null && !currentFolderUUID.equals(folderUUID))
             cacheDirty = true;
@@ -102,7 +102,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
             @Override
             public void run() {
 
-                handleGeneralFolder(rootUUID, folderUUID, runOnMainThreadCallback);
+                handleGeneralFolder(rootUUID, folderUUID,fileName,runOnMainThreadCallback);
 
             }
 
@@ -111,25 +111,25 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
     }
 
     @Override
-    public OperationResult getFileWithoutCreateNewThread(String rootUUID, final String folderUUID) {
+    public OperationResult getFileWithoutCreateNewThread(String rootUUID, final String folderUUID,String folderName) {
 
         OperationResult result = stationFileDataSource.getFile(rootUUID, folderUUID);
 
         if (result instanceof OperationSuccessWithFile)
-            handleGetFileSucceed(((OperationSuccessWithFile) result).getList(), rootUUID, folderUUID);
+            handleGetFileSucceed(((OperationSuccessWithFile) result).getList(), rootUUID, folderUUID,folderName);
 
         return result;
 
     }
 
-    private void handleGeneralFolder(final String rootUUID, final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> runOnMainThreadCallback) {
+    private void handleGeneralFolder(final String rootUUID, final String folderUUID, final String folderName, final BaseLoadDataCallback<AbstractRemoteFile> runOnMainThreadCallback) {
         stationFileDataSource.getFile(rootUUID, folderUUID, new BaseLoadDataCallbackImpl<AbstractRemoteFile>() {
 
             @Override
             public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
                 super.onSucceed(data, operationResult);
 
-                handleGetFileSucceed(data, rootUUID, folderUUID);
+                handleGetFileSucceed(data, rootUUID, folderUUID,folderName);
 
                 runOnMainThreadCallback.onSucceed(data, operationResult);
 
@@ -139,7 +139,7 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
             public void onFail(OperationResult operationResult) {
                 super.onFail(operationResult);
 
-                handleGetFileFail(folderUUID);
+                handleGetFileFail();
 
                 runOnMainThreadCallback.onFail(operationResult);
 
@@ -147,15 +147,16 @@ public class StationFileRepositoryImpl extends BaseDataRepository implements Sta
         });
     }
 
-    private void handleGetFileFail(String folderUUID) {
+    private void handleGetFileFail() {
 
         cacheDirty = false;
     }
 
-    private void handleGetFileSucceed(List<AbstractRemoteFile> data, String rootUUID, String folderUUID) {
+    private void handleGetFileSucceed(List<AbstractRemoteFile> data, String rootUUID,String folderUUID,String folderName) {
 
         for (AbstractRemoteFile file : data) {
             file.setParentFolderUUID(folderUUID);
+            file.setParentFolderName(folderName);
             file.setRootFolderUUID(rootUUID);
         }
 

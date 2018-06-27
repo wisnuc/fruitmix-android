@@ -66,7 +66,7 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
     private var currentRootUUID = ""
 
-    private lateinit var sortComparator:Comparator<ItemContent>
+    private lateinit var sortComparator: Comparator<ItemContent>
 
     fun initView() {
 
@@ -160,6 +160,7 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
         else {
             abstractFile = RemoteFolder()
             abstractFile.uuid = currentRootUUID
+            abstractFile.name = ""
         }
 
         gotoNextFolder(abstractFile)
@@ -193,25 +194,26 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
         } else {
 
-            fileDataSource.getFile(abstractRemoteFile.rootFolderUUID, abstractRemoteFile.uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+            fileDataSource.getFile(abstractRemoteFile.rootFolderUUID, abstractRemoteFile.uuid, abstractRemoteFile.name,
+                    object : BaseLoadDataCallback<AbstractRemoteFile> {
 
-                override fun onFail(operationResult: OperationResult?) {
+                        override fun onFail(operationResult: OperationResult?) {
 
-                    showNoContentBg()
+                            showNoContentBg()
 
-                    handleGetFileSucceed(Collections.emptyList())
+                            handleGetFileSucceed(Collections.emptyList())
 
-                }
+                        }
 
-                override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
+                        override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
-                    retrievedFolders.add(abstractRemoteFile)
+                            retrievedFolders.add(abstractRemoteFile)
 
-                    handleGetFileSucceed(data)
+                            handleGetFileSucceed(data)
 
-                }
+                        }
 
-            })
+                    })
 
         }
 
@@ -235,7 +237,7 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
         } else {
 
-            fileDataSource.getFile(remoteFile.rootFolderUUID, remoteFile.uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+            fileDataSource.getFile(remoteFile.rootFolderUUID, remoteFile.uuid,remoteFile.name, object : BaseLoadDataCallback<AbstractRemoteFile> {
                 override fun onFail(operationResult: OperationResult?) {
                     showNoContentBg()
 

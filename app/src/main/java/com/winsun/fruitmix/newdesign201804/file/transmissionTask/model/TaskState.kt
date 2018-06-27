@@ -228,10 +228,9 @@ class PauseTaskState(var progress: Int, val maxSize: Long, var speed: String, ta
 
     override fun start() {
 
-        task.setCurrentState(StartingTaskState(progress, maxSize, speed, task))
+        resume()
 
     }
-
 
     override fun pause() {
 
@@ -239,7 +238,11 @@ class PauseTaskState(var progress: Int, val maxSize: Long, var speed: String, ta
 
     override fun resume() {
 
-        task.setCurrentState(StartingTaskState(progress, maxSize, speed, task))
+        val startTaskState = StartTaskState(task)
+
+        task.setCurrentState(startTaskState)
+
+        startTaskState.start()
 
     }
 

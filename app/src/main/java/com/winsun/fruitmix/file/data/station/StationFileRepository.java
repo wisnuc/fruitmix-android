@@ -26,9 +26,9 @@ public interface StationFileRepository {
 
     void getRootDrive(BaseLoadDataCallback<AbstractRemoteFile> callback);
 
-    void getFile(String rootUUID, final String folderUUID, final BaseLoadDataCallback<AbstractRemoteFile> callback);
+    void getFile(String rootUUID, final String folderUUID,String folderName, final BaseLoadDataCallback<AbstractRemoteFile> callback);
 
-    OperationResult getFileWithoutCreateNewThread(String rootUUID, final String folderUUID);
+    OperationResult getFileWithoutCreateNewThread(String rootUUID, final String folderUUID,String folderName);
 
     void downloadFile(String currentUserUUID, FileDownloadState fileDownloadState, BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException;
 

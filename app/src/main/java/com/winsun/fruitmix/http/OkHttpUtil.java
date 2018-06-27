@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -234,10 +235,14 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil,UploadFileInterface 
 
         Request.Builder builder = new Request.Builder().url(httpRequest.getUrl());
 
-        String headerKey = httpRequest.getHeaderKey();
-        if (headerKey != null) {
-            builder.addHeader(headerKey, httpRequest.getHeaderValue());
+        Map<String,String> headers = httpRequest.getHeaders();
+
+        for (Map.Entry<String,String> entry:headers.entrySet()){
+
+            builder.addHeader(entry.getKey(),entry.getValue());
+
         }
+
         return builder;
     }
 

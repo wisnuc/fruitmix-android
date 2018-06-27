@@ -39,6 +39,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -348,7 +353,7 @@ public class FileUtil {
             createDownloadFileStoreFolder();
     }
 
-    public static boolean checkIsExistInDownloadFolder(String path){
+    public static boolean checkIsExistInDownloadFolder(String path) {
 
         File file = new File(getDownloadFileStoreFolderPath() + path);
 
@@ -700,9 +705,7 @@ public class FileUtil {
 
     public static boolean writeResponseBodyToFolder(ResponseBody responseBody, Task task) {
 
-        StartingTaskState startingTaskState = new StartingTaskState(0, task.getAbstractFile().getSize(),"0KB/s", task);
-
-        task.setCurrentState(startingTaskState);
+        StartingTaskState startingTaskState = (StartingTaskState) task.getCurrentState();
 
         AbstractRemoteFile abstractRemoteFile = (AbstractRemoteFile) task.getAbstractFile();
 
@@ -710,7 +713,7 @@ public class FileUtil {
                 startingTaskState);
 
         if (result)
-            task.setCurrentState(new FinishTaskState(abstractRemoteFile.getSize(),task));
+            task.setCurrentState(new FinishTaskState(abstractRemoteFile.getSize(), task));
         else
             task.setCurrentState(new ErrorTaskState(task));
 
@@ -728,10 +731,14 @@ public class FileUtil {
         if (!downloadFolder.exists())
             createDownloadFileStoreFolder();
 
+        File temporaryDownloadFile = new File(getDownloadFileStoreFolderPath() + fileParentFolderName, task.getUuid());
+
         File downloadFile = new File(getDownloadFileStoreFolderPath() + fileParentFolderName, task.getAbstractFile().getName());
 
         InputStream inputStream = null;
         OutputStream outputStream = null;
+        FileChannel channel = null;
+        RandomAccessFile randomAccessFile = null;
 
         byte[] fileBuffer = new byte[4096];
 
@@ -743,11 +750,63 @@ public class FileUtil {
 
             long fileDownloadedSize = 0;
 
-            if (downloadFile.createNewFile() || downloadFile.isFile()) {
+            if (temporaryDownloadFile.exists()) {
+
+                Log.d(TAG, "writeResponseBodyToFolder: temporaryDownloadFile exist,continue download");
 
                 inputStream = responseBody.byteStream();
 
-                outputStream = new FileOutputStream(downloadFile);
+                fileDownloadedSize = temporaryDownloadFile.length();
+
+                long remainSize = task.getAbstractFile().getSize() - fileDownloadedSize;
+
+                randomAccessFile = new RandomAccessFile(temporaryDownloadFile, "rwd");
+
+                channel = randomAccessFile.getChannel();
+
+                MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, fileDownloadedSize, remainSize);
+
+                while (true) {
+                    int read = inputStream.read(fileBuffer);
+
+                    if (read == -1) {
+                        break;
+                    }
+
+                    mappedByteBuffer.put(fileBuffer, 0, read);
+
+                    fileDownloadedSize += read;
+
+                    Log.d(TAG, "writeResponseBodyToFolder: fileDownloadedSize: " + fileDownloadedSize +
+                            " totalSize:" + task.getAbstractFile().getSize());
+
+                    startingTaskState.setCurrentHandleFileSize(fileDownloadedSize);
+
+                    Log.d(TAG, "writeResponseBodyToFolder: setCurrentHandleFileSize");
+
+  /*                  task.setCurrentState(startingTaskState);
+
+                    Log.d(TAG, "writeResponseBodyToFolder: setCurrentState");*/
+
+                }
+
+                Log.d(TAG, "writeResponseBodyToFolder: finish download file,rename temporary file");
+
+                boolean renameResult = temporaryDownloadFile.renameTo(downloadFile);
+
+                Log.d(TAG, "writeResponseBodyToFolder: renameResult: " + renameResult);
+
+                return renameResult;
+
+
+            } else if (temporaryDownloadFile.createNewFile()) {
+
+                Log.d(TAG, "writeResponseBodyToFolder: temporaryDownloadFile create succeed,file name: " +
+                        temporaryDownloadFile.getAbsolutePath());
+
+                inputStream = responseBody.byteStream();
+
+                outputStream = new FileOutputStream(temporaryDownloadFile);
 
                 while (true) {
                     int read = inputStream.read(fileBuffer);
@@ -775,7 +834,13 @@ public class FileUtil {
 
                 outputStream.flush();
 
-                return true;
+                Log.d(TAG, "writeResponseBodyToFolder: finish download file,rename temporary file");
+
+                boolean renameResult = temporaryDownloadFile.renameTo(downloadFile);
+
+                Log.d(TAG, "writeResponseBodyToFolder: renameResult: " + renameResult);
+
+                return renameResult;
 
             } else {
 
@@ -789,6 +854,14 @@ public class FileUtil {
             return false;
         } catch (IOException e) {
             e.printStackTrace();
+
+            if (temporaryDownloadFile.exists()) {
+
+                boolean result = temporaryDownloadFile.delete();
+
+                Log.d(TAG, "writeResponseBodyToFolder: io exception occur,delete file: " + result);
+
+            }
 
             if (downloadFile.exists()) {
 
@@ -813,6 +886,12 @@ public class FileUtil {
                 if (outputStream != null) {
                     outputStream.close();
                 }
+
+                if (channel != null)
+                    channel.close();
+
+                if (randomAccessFile != null)
+                    randomAccessFile.close();
 
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -1407,6 +1486,61 @@ public class FileUtil {
             return R.drawable.file_icon;
 
     }
+
+    public static String getFileType(String fileName, Context context) {
+        return context.getString(getFileTypeStrResId(fileName));
+    }
+
+    private static int getFileTypeStrResId(String fileName) {
+
+        int dotIndex = fileName.lastIndexOf(".");
+
+        if (dotIndex < 0)
+            return R.string.unknown_file;
+
+        String end = fileName.substring(dotIndex, fileName.length()).toLowerCase();
+
+        if (end.isEmpty())
+            return R.string.unknown_file;
+
+        String type = "";
+        for (String[] aMIME_MapTable : MIME_MapTable) {
+            if (end.equals(aMIME_MapTable[0]))
+                type = aMIME_MapTable[1];
+        }
+
+        if (end.startsWith(".xls"))
+            return R.string.file_type_excel;
+        else if (end.startsWith(".doc"))
+            return R.string.file_type_word;
+        else if (end.equals(".pdf"))
+            return R.string.file_type_pdf;
+        else if (end.startsWith(".ppt"))
+            return R.string.file_type_ppt;
+        else if (end.equals(".txt")) {
+            return R.string.file_type_txt;
+        } else if (type.startsWith("video")) {
+
+            if (type.contains("mp4")) {
+                return R.string.file_type_mp4;
+            } else if (type.contains("quicktime")) {
+                return R.string.file_type_mov;
+            } else
+                return R.string.file_type_video;
+
+        } else if (type.startsWith("audio")) {
+            return R.string.file_type_audio;
+        } else if (type.contains("gif")) {
+            return R.string.file_type_gif;
+        } else if (type.contains("jpeg")) {
+            return R.string.file_type_jpeg;
+        } else if (type.contains("png")) {
+            return R.string.file_type_png;
+        } else
+            return R.string.unknown_file;
+
+    }
+
 
     public static boolean checkFileIsTorrent(String filePath) {
         return filePath.endsWith("torrent");

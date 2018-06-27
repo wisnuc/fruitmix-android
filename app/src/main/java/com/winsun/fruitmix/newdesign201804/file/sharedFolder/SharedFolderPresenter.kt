@@ -177,18 +177,19 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
         showLoadingBg()
 
-        fileDataSource.getFile(abstractRemoteFile.rootFolderUUID, abstractRemoteFile.uuid, object : LoadSharedFolderCallback() {
+        fileDataSource.getFile(abstractRemoteFile.rootFolderUUID, abstractRemoteFile.uuid, abstractRemoteFile.name,
+                object : LoadSharedFolderCallback() {
 
-            override fun handleLoadSucceed() {
-                retrieveFolders.add(abstractRemoteFile)
-            }
+                    override fun handleLoadSucceed() {
+                        retrieveFolders.add(abstractRemoteFile)
+                    }
 
-            override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
-                super.showContent(data, operationResult)
-                refreshData(data)
-            }
+                    override fun showContent(data: MutableList<AbstractRemoteFile>, operationResult: OperationResult?) {
+                        super.showContent(data, operationResult)
+                        refreshData(data)
+                    }
 
-        })
+                })
 
     }
 
@@ -235,7 +236,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
             showLoadingBg()
 
-            fileDataSource.getFile(preFolder.rootFolderUUID, preFolder.uuid, object : LoadSharedFolderCallback() {
+            fileDataSource.getFile(preFolder.rootFolderUUID, preFolder.uuid, preFolder.name, object : LoadSharedFolderCallback() {
 
                 override fun handleLoadSucceed() {
                     retrieveFolders.remove(preFolder)

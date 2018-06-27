@@ -169,6 +169,20 @@ open class DownloadTask(uuid: String, createUserUUID: String, abstractFile: Abst
 
     override fun executeTask() {
 
+        val abstractRemoteFile = abstractFile as AbstractRemoteFile
+
+        val temporaryDownloadFile = File(
+                FileUtil.getDownloadFileStoreFolderPath() + abstractRemoteFile.parentFolderPath, uuid)
+
+        val startingTaskState= StartingTaskState(0,abstractRemoteFile.size,"0KB/s",this)
+
+        if(temporaryDownloadFile.exists()){
+            startingTaskState.currentHandledSize = temporaryDownloadFile.length()
+        }else
+            startingTaskState.currentHandledSize = 0
+
+        setCurrentState(startingTaskState)
+
         val downloadFileCallable = OperateFileCallable(
                 {
                     fileDataSource.downloadFile(fileDownloadParam, this)

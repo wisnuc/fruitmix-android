@@ -95,7 +95,8 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
     private fun listFolder(parentFolder: RemoteFolder, handleFunc: (abstractRemoteFile: AbstractRemoteFile, parentFolder: RemoteFolder) -> Unit) {
 
-        val operationResult = stationFileRepository.getFileWithoutCreateNewThread(parentFolder.rootFolderUUID, parentFolder.uuid)
+        val operationResult = stationFileRepository.getFileWithoutCreateNewThread(parentFolder.rootFolderUUID, parentFolder.uuid,
+                parentFolder.name)
 
         if (operationResult is OperationSuccessWithFile) {
 

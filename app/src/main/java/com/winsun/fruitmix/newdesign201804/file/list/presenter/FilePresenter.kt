@@ -172,7 +172,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         initSortComparator()
 
-        gotoNextFolder(rootFolderUUID, "")
+        gotoNextFolder(rootFolderUUID, context.getString(R.string.my_private_drive))
 
         updateToggleOrientation()
 
@@ -267,7 +267,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
     fun refreshCurrentFolder() {
         loadingViewModel.showLoading.set(true)
 
-        fileDataSource.getFile(rootFolderUUID, currentFolderUUID, object : BaseLoadDataCallback<AbstractRemoteFile> {
+        fileDataSource.getFile(rootFolderUUID, currentFolderUUID, currentFolderName,object : BaseLoadDataCallback<AbstractRemoteFile> {
 
             override fun onFail(operationResult: OperationResult?) {
                 loadingViewModel.showLoading.set(false)
@@ -942,7 +942,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         loadingViewModel.showLoading.set(true)
 
-        fileDataSource.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+        fileDataSource.getFile(rootFolderUUID, uuid, name,object : BaseLoadDataCallback<AbstractRemoteFile> {
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
                 currentFolderUUID = uuid
@@ -983,7 +983,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         loadingViewModel.showLoading.set(true)
 
-        fileDataSource.getFile(rootFolderUUID, uuid, object : BaseLoadDataCallback<AbstractRemoteFile> {
+        fileDataSource.getFile(rootFolderUUID, uuid,name, object : BaseLoadDataCallback<AbstractRemoteFile> {
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
                 currentFolderUUID = uuid
@@ -1151,14 +1151,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         val dialog = FileMenuBottomDialogFactory(abstractFile, bottomMenuItems, {
 
-            val intent = Intent(context, FileDetailActivity::class.java)
-
-            val abstractRemoteFile = it as AbstractRemoteFile
-            intent.putExtra(FILE_UUID_KEY, abstractRemoteFile.uuid)
-
-            //TODO: check pass uuid
-
-            context.startActivity(intent)
+            FileDetailActivity.start(abstractFile as AbstractRemoteFile,context)
 
         }).createDialog(context)
 

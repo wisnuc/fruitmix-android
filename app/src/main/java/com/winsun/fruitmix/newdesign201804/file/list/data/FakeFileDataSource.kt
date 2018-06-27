@@ -96,7 +96,7 @@ object FakeFileDataSource : FileDataSource {
 
     }
 
-    override fun getFile(rootUUID: String, folderUUID: String, baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>) {
+    override fun getFile(rootUUID: String, folderUUID:String,folderName: String,baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>) {
 
         if (folderUUID == abstractRemoteFolder1UUID) {
 
@@ -122,12 +122,6 @@ object FakeFileDataSource : FileDataSource {
 
         } else
             baseLoadDataCallback.onSucceed(abstractRemoteFiles, OperationSuccess())
-
-    }
-
-    override fun getFileByUUID(uuid: String): AbstractFile? {
-
-        return abstractRemoteFileMap[uuid]
 
     }
 

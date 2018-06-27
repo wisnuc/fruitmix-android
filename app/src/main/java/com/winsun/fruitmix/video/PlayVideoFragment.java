@@ -245,11 +245,8 @@ public class PlayVideoFragment implements SCloudTokenContainer {
 
         Uri uri = Uri.parse(url);
 
-        Map<String, String> map = new HashMap<>();
-        map.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
-
         if (Util.checkRunningOnLollipopOrHigher()) {
-            videoView.setVideoURI(uri, map);
+            videoView.setVideoURI(uri, httpRequest.getHeaders());
         } else {
 
             videoView.setVideoURI(uri);
@@ -257,7 +254,7 @@ public class PlayVideoFragment implements SCloudTokenContainer {
             try {
                 Field field = VideoView.class.getDeclaredField("mHeaders");
                 field.setAccessible(true);
-                field.set(videoView, map);
+                field.set(videoView, httpRequest.getHeaders());
             } catch (Exception e) {
                 e.printStackTrace();
             }

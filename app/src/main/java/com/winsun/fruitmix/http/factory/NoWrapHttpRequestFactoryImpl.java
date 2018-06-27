@@ -21,7 +21,7 @@ public class NoWrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl imp
     public HttpRequest createHttpGetRequest(String httpPath, boolean isPipe) {
 
         HttpRequest httpRequest = new HttpRequest(createUrl(httpPath), Util.HTTP_GET_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, getToken());
+        httpRequest.addHeader(Util.KEY_AUTHORIZATION, getToken());
 
         return httpRequest;
 
@@ -36,7 +36,7 @@ public class NoWrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl imp
     private HttpRequest createHasBodyRequest(String url, String method, String body) {
 
         HttpRequest httpRequest = new HttpRequest(url, method);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, getToken());
+        httpRequest.addHeader(Util.KEY_AUTHORIZATION, getToken());
         httpRequest.setBody(body);
 
         return httpRequest;
@@ -50,7 +50,7 @@ public class NoWrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl imp
         String url = stationTokenParam.getGateway() + ":" + getPort() + Util.TOKEN_PARAMETER;
 
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((stationTokenParam.getUserUUID() + ":" + stationTokenParam.getUserPassword()).getBytes(), Base64.NO_WRAP));
+        httpRequest.addHeader(Util.KEY_AUTHORIZATION, Util.KEY_BASE_HEAD + Base64.encodeToString((stationTokenParam.getUserUUID() + ":" + stationTokenParam.getUserPassword()).getBytes(), Base64.NO_WRAP));
 
         return httpRequest;
 

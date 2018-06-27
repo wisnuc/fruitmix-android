@@ -66,7 +66,6 @@ class SearchActivity : BaseActivity() {
                 activitySearchBinding, toolbarViewModel, loadingViewModel, noContentViewModel,
                 InjectSearchDataSource.inject(this), searchPlace)
 
-
         searchPresenter.initView()
 
     }

@@ -239,7 +239,7 @@ public class UploadFileUseCase {
 
         Log.i(TAG, "start check folder exist");
 
-        OperationResult result = stationFileRepository.getFileWithoutCreateNewThread(rootUUID, dirUUID);
+        OperationResult result = stationFileRepository.getFileWithoutCreateNewThread(rootUUID, dirUUID,"");
 
         if (result instanceof OperationSuccessWithFile)
             callback.onSucceed(((OperationSuccessWithFile) result).getList(), new OperationSuccess());
@@ -491,7 +491,7 @@ public class UploadFileUseCase {
 
             final FileUploadItem fileUploadItem = fileUploadState.getFileUploadItem();
 
-            OperationResult result = stationFileRepository.getFileWithoutCreateNewThread(currentUserHome, uploadFolderUUID);
+            OperationResult result = stationFileRepository.getFileWithoutCreateNewThread(currentUserHome, uploadFolderUUID,"");
 
             if (!(result instanceof OperationSuccessWithFile)){
 

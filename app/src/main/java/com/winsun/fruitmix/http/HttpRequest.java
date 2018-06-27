@@ -1,5 +1,9 @@
 package com.winsun.fruitmix.http;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Administrator on 2017/1/19.
  */
@@ -10,13 +14,16 @@ public class HttpRequest {
 
     private String url;
     private String httpMethod;
-    private String headerKey;
-    private String headerValue;
+
+    private Map<String,String> headers;
+
     private String body;
 
     public HttpRequest(String url, String httpMethod) {
         this.url = url;
         this.httpMethod = httpMethod;
+
+        headers = new HashMap<>();
     }
 
     public String getUrl() {
@@ -35,17 +42,12 @@ public class HttpRequest {
         this.httpMethod = httpMethod;
     }
 
-    public void setHeader(String key, String value) {
-        headerKey = key;
-        headerValue = value;
+    public void addHeader(String headerKey,String headerValue){
+        headers.put(headerKey,headerValue);
     }
 
-    public String getHeaderKey() {
-        return headerKey;
-    }
-
-    public String getHeaderValue() {
-        return headerValue;
+    public Map<String,String> getHeaders(){
+        return Collections.unmodifiableMap(headers);
     }
 
     public String getBody() {

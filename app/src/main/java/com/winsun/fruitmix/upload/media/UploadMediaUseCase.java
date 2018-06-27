@@ -278,7 +278,7 @@ public class UploadMediaUseCase {
 
         Log.i(TAG, "start check folder exist");
 
-        OperationResult operationResult = stationFileRepository.getFileWithoutCreateNewThread(rootUUID, dirUUID);
+        OperationResult operationResult = stationFileRepository.getFileWithoutCreateNewThread(rootUUID, dirUUID,"");
 
         if (operationResult.getOperationResultType() == OperationResultType.SUCCEED) {
 
@@ -362,7 +362,7 @@ public class UploadMediaUseCase {
 
         Log.i(TAG, "start getUploadedMediaHashList");
 
-        OperationResult operationResult = stationFileRepository.getFileWithoutCreateNewThread(currentUserHome, uploadFolderUUID);
+        OperationResult operationResult = stationFileRepository.getFileWithoutCreateNewThread(currentUserHome, uploadFolderUUID,"");
 
         if (operationResult instanceof OperationSuccessWithFile) {
 

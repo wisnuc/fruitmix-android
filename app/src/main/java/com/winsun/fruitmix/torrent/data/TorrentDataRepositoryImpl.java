@@ -40,7 +40,7 @@ public class TorrentDataRepositoryImpl extends BaseDataRepository implements Tor
 
     private void createDownloadFolderIfNotExist(final BaseOperateDataCallback<String> callback) {
 
-        mStationFileRepository.getFile(currentUser.getHome(), currentUser.getHome(), new BaseLoadDataCallback<AbstractRemoteFile>() {
+        mStationFileRepository.getFile(currentUser.getHome(), currentUser.getHome(), "",new BaseLoadDataCallback<AbstractRemoteFile>() {
             @Override
             public void onSucceed(List<AbstractRemoteFile> data, OperationResult operationResult) {
 

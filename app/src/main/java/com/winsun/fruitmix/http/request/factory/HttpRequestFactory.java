@@ -613,7 +613,7 @@ public class HttpRequestFactory {
 
         HttpRequest httpRequest = new HttpRequest(url, Util.HTTP_GET_METHOD);
 
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, getTokenForHeaderValue());
+        httpRequest.addHeader(Util.KEY_AUTHORIZATION, getTokenForHeaderValue());
 
         return httpRequest;
 

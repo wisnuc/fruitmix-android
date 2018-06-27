@@ -41,11 +41,11 @@ class CreateFolderUseCase(val fileDataSource: FileDataSource, val baseView: Base
 
     }
 
-    private fun doCreateFolder(context: Context, folderName: String, panentFolder: AbstractRemoteFile) {
+    private fun doCreateFolder(context: Context, folderName: String, parentFolder: AbstractRemoteFile) {
 
         baseView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.create)))
 
-        fileDataSource.createFolder(folderName, panentFolder.rootFolderUUID, panentFolder.uuid, object : BaseOperateDataCallback<HttpResponse> {
+        fileDataSource.createFolder(folderName, parentFolder.rootFolderUUID, parentFolder.uuid, object : BaseOperateDataCallback<HttpResponse> {
 
             override fun onSucceed(data: HttpResponse?, result: OperationResult?) {
 
@@ -55,8 +55,8 @@ class CreateFolderUseCase(val fileDataSource: FileDataSource, val baseView: Base
 
                 val newFolder = parser.parse(data?.responseData)
 
-                newFolder.rootFolderUUID = panentFolder.rootFolderUUID
-                newFolder.parentFolderUUID = panentFolder.uuid
+                newFolder.rootFolderUUID = parentFolder.rootFolderUUID
+                newFolder.parentFolderUUID = parentFolder.uuid
 
                 handleCreateSucceed(newFolder)
 

@@ -41,10 +41,7 @@ public class MediaUtil {
 
         networkImageView.setTag(httpRequest.getUrl());
 
-        ArrayMap<String, String> header = new ArrayMap<>();
-        header.put(httpRequest.getHeaderKey(), httpRequest.getHeaderValue());
-
-        imageLoader.setHeaders(header);
+        imageLoader.setHeaders(httpRequest.getHeaders());
 
         networkImageView.setImageUrl(httpRequest.getUrl(), imageLoader);
     }

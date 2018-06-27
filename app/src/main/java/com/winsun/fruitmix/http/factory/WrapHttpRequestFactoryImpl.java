@@ -61,7 +61,7 @@ public class WrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl imple
     private HttpRequest createHttpGetRequestWithOutJWTHeader(String httpPath) {
 
         HttpRequest httpRequest = new HttpRequest(createUrl(httpPath), Util.HTTP_GET_METHOD);
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, getToken());
+        httpRequest.addHeader(Util.KEY_AUTHORIZATION, getToken());
 
         return httpRequest;
 
@@ -79,7 +79,7 @@ public class WrapHttpRequestFactoryImpl extends BaseHttpRequestFactoryImpl imple
 
         HttpRequest httpRequest = new HttpRequest(createUrl(CALL_STATION_THROUGH_CLOUD_PRE + getStationID() + (isPipe ? CALL_STATION_THROUGH_CLOUD_END_FOR_PIPE : CALL_STATION_THROUGH_CLOUD_END_FOR_JSON)), method);
 
-        httpRequest.setHeader(Util.KEY_AUTHORIZATION, getToken());
+        httpRequest.addHeader(Util.KEY_AUTHORIZATION, getToken());
 
         String httpPathEncodeByBase64 = Base64.encodeToString(httpPath.getBytes(), Base64.NO_WRAP);
 

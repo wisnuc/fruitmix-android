@@ -822,6 +822,8 @@
     <string name="key_media_quantity">媒体文件数量</string>
     <string name="key_create">创建于</string>
     <string name="key_modify">修改于</string>
+    
+    <string name="unknown_file">未知文件</string>
 
     <!-- file operation -->
     <string name="new_name_empty_hint">请输入新名称</string>
