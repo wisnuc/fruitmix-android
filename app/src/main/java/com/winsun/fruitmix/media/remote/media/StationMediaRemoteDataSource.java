@@ -8,9 +8,6 @@ import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.model.operationResult.OperationFail;
-import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
-import com.winsun.fruitmix.parser.RemoteMediaParser;
 import com.winsun.fruitmix.parser.RemoteMediaStreamParser;
 import com.winsun.fruitmix.util.FileUtil;
 
@@ -73,7 +70,7 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
             return false;
         }
 
-        ResponseBody responseBody = iHttpUtil.getResponseBody(httpRequest);
+        ResponseBody responseBody = iHttpUtil.getHttpResponseBody(httpRequest).getResponseBody();
 
         return FileUtil.downloadMediaToOriginalPhotoFolder(responseBody, media);
 

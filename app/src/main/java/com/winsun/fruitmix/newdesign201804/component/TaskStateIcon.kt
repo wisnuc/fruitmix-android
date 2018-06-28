@@ -53,6 +53,9 @@ class TaskStateIcon(context: Context?, val attrs: AttributeSet?) : FrameLayout(c
 
             roundProgressBar.visibility = View.VISIBLE
 
+            roundProgressBar.circleColor = ContextCompat.getColor(context, R.color.round_progress_color)
+            roundProgressBar.circleProgressColor = ContextCompat.getColor(context, R.color.new_design_primary_color)
+
             roundProgressBar.setProgress(taskState.progress, taskState.speed)
 
         } else if (taskState is PauseTaskState) {

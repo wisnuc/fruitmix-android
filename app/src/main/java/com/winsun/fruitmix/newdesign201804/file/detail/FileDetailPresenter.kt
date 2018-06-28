@@ -71,7 +71,6 @@ class FileDetailPresenter(val fileDataSource: FileDataSource, val userDataReposi
 
 }
 
-
 class FileDetailAdapter : BaseRecyclerViewAdapter<SimpleViewHolder, FileDetailItemViewModel>() {
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): SimpleViewHolder {

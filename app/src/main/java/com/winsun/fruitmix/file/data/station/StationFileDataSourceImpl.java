@@ -155,9 +155,9 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
 
         try {
-            responseBody = iHttpUtil.getResponseBody(httpRequest);
+            responseBody = iHttpUtil.getHttpResponseBody(httpRequest).getResponseBody();
 
-            Log.d(TAG, "call: getResponseBody");
+            Log.d(TAG, "call: getHttpResponseBody");
 
             boolean result = FileUtil.writeResponseBodyToFolder(responseBody, fileDownloadState);
 

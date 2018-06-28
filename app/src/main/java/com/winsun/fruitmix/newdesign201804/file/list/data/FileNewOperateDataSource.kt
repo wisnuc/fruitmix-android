@@ -6,19 +6,13 @@ import com.google.gson.JsonObject
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.exception.NetworkException
-import com.winsun.fruitmix.file.data.download.FileDownloadErrorState
-import com.winsun.fruitmix.file.data.download.FileDownloadFinishedState
-import com.winsun.fruitmix.file.data.download.FileDownloadState
-import com.winsun.fruitmix.file.data.download.FileDownloadingState
 import com.winsun.fruitmix.file.data.download.param.FileDownloadParam
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.file.data.model.LocalFile
-import com.winsun.fruitmix.file.data.model.LocalFolder
 import com.winsun.fruitmix.http.*
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory
 import com.winsun.fruitmix.model.operationResult.*
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.RemoteOneTransmissionTaskParser
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.ErrorTaskState
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.StartingTaskState
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
@@ -31,7 +25,6 @@ import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import org.json.JSONException
 import org.json.JSONObject
-import org.w3c.dom.Text
 import java.io.*
 import java.net.MalformedURLException
 import java.net.SocketTimeoutException
@@ -142,7 +135,6 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
 
         val responseBody: ResponseBody
 
-
         val currentState = task.getCurrentState()
 
         val alreadyDownloadedFileSize = if (currentState is StartingTaskState)
@@ -150,13 +142,26 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
         else
             0
 
-        if(alreadyDownloadedFileSize != 0L)
-            httpRequest.addHeader("RANGE", "bytes=$alreadyDownloadedFileSize-")
+        if(alreadyDownloadedFileSize != 0L){
+            val rangeValue = "bytes=$alreadyDownloadedFileSize-"
+
+            Log.d(TAG, "rangeValue: $rangeValue")
+
+            if (alreadyDownloadedFileSize != 0L)
+                httpRequest.addHeader("RANGE", rangeValue)
+        }
 
         try {
-            responseBody = iHttpUtil.getResponseBody(httpRequest)
+            val httpResponseBody = iHttpUtil.getHttpResponseBody(httpRequest)
 
-            val result = FileUtil.writeResponseBodyToFolder(responseBody, task)
+            var deleteTemporaryFile = false
+
+            if (httpResponseBody.code == 200)
+                deleteTemporaryFile = true
+
+            responseBody = httpResponseBody.responseBody
+
+            val result = FileUtil.writeResponseBodyToFolder(responseBody, task, deleteTemporaryFile)
 
             Log.d(TAG, " download result:$result")
 

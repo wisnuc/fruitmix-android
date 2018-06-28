@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask
 
-import android.content.Context
 import android.support.design.widget.Snackbar
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -9,21 +8,14 @@ import com.daimajia.swipe.adapters.RecyclerSwipeAdapter
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
-import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
-import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.file.data.model.RemoteFolder
 import com.winsun.fruitmix.model.operationResult.OperationResult
-import com.winsun.fruitmix.model.operationResult.OperationSuccess
 import com.winsun.fruitmix.newdesign201804.component.inflateView
-import com.winsun.fruitmix.newdesign201804.file.transmission.InjectTransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmission.TransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmission.model.Transmission
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskRepository
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
-import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
-import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
@@ -32,7 +24,7 @@ import kotlinx.android.synthetic.main.transmission_task_item.view.*
 
 class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTaskDataSource,
                                 val transmissionDataSource: TransmissionDataSource,
-                                val currentUserUUID:String) {
+                                val currentUserUUID: String) {
 
     private val transmissionTaskAdapter = TransmissionTaskAdapter()
 
@@ -77,7 +69,7 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
                     val btTaskParam = BTTaskParam(it)
 
-                    val task = BTTask(Util.createLocalUUid(), currentUserUUID,abstractFile, ThreadManagerImpl.getInstance(), btTaskParam,
+                    val task = BTTask(Util.createLocalUUid(), currentUserUUID, abstractFile, ThreadManagerImpl.getInstance(), btTaskParam,
                             transmissionDataSource)
 
                     taskData?.add(task)
@@ -115,10 +107,49 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
     }
 
+    private var currentDeletedFinishedTaskCount = 0
+    private var totalFinishedTaskCount = 0
+
     fun clearAllFinishedTask() {
 
+        val finishedTaskContainers = taskContainers.filter {
+            it.task.getCurrentState().getType() == StateType.FINISH
+        }
+
+        totalFinishedTaskCount = finishedTaskContainers.size
+
+        finishedTaskContainers.forEach {
+
+            it.task.deleteTask()
+
+            transmissionTaskDataSource.deleteTransmissionTask(it.task, object : BaseOperateCallback {
+                override fun onFail(operationResult: OperationResult?) {
+                    handleDeletedFinishedTaskFinish(finishedTaskContainers)
+                }
+
+                override fun onSucceed() {
+                    handleDeletedFinishedTaskFinish(finishedTaskContainers)
+                }
+            })
+        }
 
     }
+
+    private fun handleDeletedFinishedTaskFinish(finishedTaskContainers: List<TaskContainer>) {
+
+        currentDeletedFinishedTaskCount++
+
+        if (currentDeletedFinishedTaskCount == totalFinishedTaskCount) {
+
+            taskContainers.removeAll(finishedTaskContainers)
+
+            transmissionTaskAdapter.setItemList(taskContainers)
+            transmissionTaskAdapter.notifyDataSetChanged()
+
+        }
+
+    }
+
 
     private fun handleGetTask(data: MutableList<Task>?) {
 
@@ -189,22 +220,20 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
             view?.taskStateIcon?.refresh(task.getCurrentState())
 
-            //TODO: check pause download
+            view?.taskStateIcon?.setOnClickListener {
 
-/*            view?.setOnClickListener {
+                val taskStateType = task.getCurrentState().getType()
 
-                val taskState = task.getCurrentState()
+                if (taskStateType == StateType.PAUSE)
+                    task.resumeTask()
+                else if (taskStateType == StateType.STARTING)
+                    task.pauseTask()
 
-                if (taskState is StartingTaskState)
-                    task.setCurrentState(PauseTaskState(taskState.progress, taskState.speed, task))
-                else if (taskState is PauseTaskState)
-                    task.setCurrentState(StartingTaskState(taskState.progress, taskState.speed, task))
-
-            }*/
+            }
 
             view?.deleteTv?.setOnClickListener {
 
-                task.cancelTask()
+                task.deleteTask()
 
                 transmissionTaskDataSource.deleteTransmissionTask(task, object : BaseOperateCallback {
                     override fun onSucceed() {

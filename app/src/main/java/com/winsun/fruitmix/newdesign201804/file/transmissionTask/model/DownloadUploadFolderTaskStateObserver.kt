@@ -21,7 +21,7 @@ class DownloadUploadFolderTaskStateObserver(val abstractFile: AbstractFile,
 
         } else if (currentState is ErrorTaskState){
 
-            task.cancelTask()
+            task.deleteTask()
             task.setCurrentState(ErrorTaskState(task))
 
         }

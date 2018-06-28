@@ -39,7 +39,7 @@ public class MediaInTweetRemoteDataSource extends BaseRemoteDataSourceImpl imple
             return false;
         }
 
-        ResponseBody responseBody = iHttpUtil.getResponseBody(httpRequest);
+        ResponseBody responseBody = iHttpUtil.getHttpResponseBody(httpRequest).getResponseBody();
 
         return FileUtil.downloadMediaToOriginalPhotoFolder(responseBody, media);
 

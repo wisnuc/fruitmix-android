@@ -251,7 +251,7 @@ public class CheckIpHttpUtil implements IHttpUtil {
     }
 
     @Override
-    public ResponseBody getResponseBody(HttpRequest httpRequest) throws IOException, NetworkException {
+    public HttpResponseBody getHttpResponseBody(HttpRequest httpRequest) {
         return null;
     }
 }

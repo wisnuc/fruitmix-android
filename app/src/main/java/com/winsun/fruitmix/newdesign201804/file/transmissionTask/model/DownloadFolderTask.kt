@@ -23,6 +23,8 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
                          currentUserUUID: String, threadManager: ThreadManager)
     : DownloadTask(uuid, createUserUUID, abstractFile, fileDataSource, fileDownloadParam, currentUserUUID, threadManager) {
 
+    private var currentDownloadedSize = 0L
+
     private var totalSize = 0L
 
     private val subDownloadTasks = mutableListOf<Task>()
@@ -45,27 +47,83 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
     private fun downloadFolder(rootFolder: RemoteFolder) {
 
+        currentDownloadedSize = 0L
+        totalSize = 0L
+
         rootFolder.parentFolderPath = ""
         listFolder(rootFolder, { abstractRemoteFile, parentFolder -> analysisFolder(abstractRemoteFile, parentFolder) })
 
+        restoreCurrentDownloadedSize()
+
+        Log.d(TAG, "currentDownloadedSize:$currentDownloadedSize totalSize:$totalSize")
+
         startingTaskState = StartingTaskState(0, totalSize, "0KB/s", this)
+
+        startingTaskState.setCurrentHandleFileSize(currentDownloadedSize)
 
         setCurrentState(startingTaskState)
 
         if (totalSize == 0L) {
 
-            setCurrentState(FinishTaskState(0L, this))
+            Log.d(TAG, "totalSize is 0,set current state to finish state")
+
+            setCurrentState(FinishTaskState(totalSize, this))
+
+        } else if (currentDownloadedSize == totalSize) {
+
+            Log.d(TAG, "resume task,currentDownloadedSize == totalSize,set current state to finish state")
+
+            setCurrentState(FinishTaskState(totalSize, this))
 
         } else
             listFolder(rootFolder, { abstractRemoteFile, parentFolder -> doDownloadFolder(abstractRemoteFile, parentFolder) })
 
     }
 
-    override fun cancelTask() {
+    private fun restoreCurrentDownloadedSize() {
+
+        if (subDownloadTasks.isNotEmpty()) {
+
+            subDownloadTasks.forEach {
+
+                val downloadTask = it as DownloadTask
+
+                if (downloadTask.getCurrentState().getType() == StateType.PAUSE) {
+
+                    val temporaryFileSize = downloadTask.getTemporaryDownloadFile().length()
+
+                    Log.d(TAG, "task temporary file size: $temporaryFileSize")
+
+                    currentDownloadedSize += temporaryFileSize
+
+                }
+
+
+            }
+
+        }
+
+    }
+
+
+    override fun setCurrentState(taskState: TaskState) {
+        super.setCurrentState(taskState)
+
+        if (taskState is PauseTaskState) {
+
+            subDownloadTasks.forEach {
+                it.pauseTask()
+            }
+
+        }
+
+    }
+
+    override fun deleteTask() {
 
         subDownloadTasks.forEach {
 
-            it.cancelTask()
+            it.deleteTask()
 
         }
 
@@ -88,10 +146,32 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
             Log.d(TAG, "analysis file is not folder,size: " + abstractRemoteFile.size)
 
+            val downloadFile = abstractRemoteFile.downloadedFile
+
+            if (downloadFile.exists()) {
+
+                currentDownloadedSize += abstractRemoteFile.size
+
+                Log.d(TAG, "downloadFile exist,currentDownloadedSize: $currentDownloadedSize fileName:${abstractRemoteFile.name}")
+
+                for (i in 0 until subDownloadTasks.size) {
+
+                    val downloadTask = subDownloadTasks[i] as DownloadTask
+
+                    if (downloadTask.abstractRemoteFile.uuid == abstractRemoteFile.uuid) {
+                        downloadTask.setCurrentState(FinishTaskState(abstractRemoteFile.size, downloadTask))
+                    }
+
+                }
+
+            }
+
             totalSize += abstractRemoteFile.size
+
         }
 
     }
+
 
     private fun listFolder(parentFolder: RemoteFolder, handleFunc: (abstractRemoteFile: AbstractRemoteFile, parentFolder: RemoteFolder) -> Unit) {
 
@@ -135,7 +215,28 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
         if (!abstractRemoteFile.isFolder) {
 
-            Log.d(TAG, "download file name: " + abstractRemoteFile.name)
+            var isTaskExist = false
+
+            for (i in 0 until subDownloadTasks.size) {
+
+                val downloadTask = subDownloadTasks[i] as DownloadTask
+
+                if (downloadTask.abstractRemoteFile.uuid == abstractRemoteFile.uuid) {
+
+                    Log.d(TAG, "task exist,resume,file name: " + abstractRemoteFile.name)
+
+                    downloadTask.resumeTask()
+
+                    isTaskExist = true
+                    break
+                }
+
+            }
+
+            if (isTaskExist)
+                return
+
+            Log.d(TAG, "create new task,download file name: " + abstractRemoteFile.name)
 
             val subTask = DownloadTask(Util.createLocalUUid(), createUserUUID, abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
                     currentUserUUID, threadManager)

@@ -1,7 +1,9 @@
 package com.winsun.fruitmix.file.data.model;
 
 import com.winsun.fruitmix.R;
+import com.winsun.fruitmix.util.FileUtil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,14 +12,14 @@ import java.util.List;
  * Created by Administrator on 2016/10/25.
  */
 
-public abstract class AbstractRemoteFile extends AbstractFile{
+public abstract class AbstractRemoteFile extends AbstractFile {
 
     public static final String ALL_CAN_VIEW = "*";
 
     private String uuid;
     private List<String> owners = new ArrayList<>();
-    private List<String> writeList= new ArrayList<>();
-    private List<String> readList= new ArrayList<>();
+    private List<String> writeList = new ArrayList<>();
+    private List<String> readList = new ArrayList<>();
 
     private String parentFolderUUID;
     private String parentFolderName;
@@ -92,6 +94,10 @@ public abstract class AbstractRemoteFile extends AbstractFile{
 
     public void setParentFolderPath(String parentFolderPath) {
         this.parentFolderPath = parentFolderPath;
+    }
+
+    public File getDownloadedFile() {
+        return new File(FileUtil.getDownloadFileStoreFolderPath() + getParentFolderPath(), getName());
     }
 
     @Override

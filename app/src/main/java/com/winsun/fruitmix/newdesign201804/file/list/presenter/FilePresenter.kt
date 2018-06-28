@@ -31,7 +31,6 @@ import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.component.createFileDownloadParam
-import com.winsun.fruitmix.newdesign201804.file.detail.FILE_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.detail.FileDetailActivity
 import com.winsun.fruitmix.newdesign201804.file.list.FilePageActionListener
 import com.winsun.fruitmix.newdesign201804.file.list.FilePageSelectActionListener
@@ -836,7 +835,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
             taskProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.cancel), { dialog, which ->
 
-                task.cancelTask()
+                task.deleteTask()
 
                 dialog.dismiss()
 

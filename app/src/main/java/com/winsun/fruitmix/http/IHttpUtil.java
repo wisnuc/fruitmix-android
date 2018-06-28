@@ -28,6 +28,6 @@ public interface IHttpUtil {
 
     HttpResponse remoteCallRequest(Request request) throws MalformedURLException, IOException, SocketTimeoutException;
 
-    ResponseBody getResponseBody(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException,NetworkException;
+    HttpResponseBody getHttpResponseBody(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException,NetworkException;
 
 }

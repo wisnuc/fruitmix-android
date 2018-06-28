@@ -5,7 +5,6 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 import com.winsun.fruitmix.util.FileUtil
-import kotlin.math.max
 
 enum class StateType {
     INITIAL, START, STARTING, PAUSE, FINISH, ERROR
@@ -19,7 +18,7 @@ abstract class TaskState(val task: Task) {
 
     abstract fun resume()
 
-    abstract fun cancel()
+    abstract fun delete()
 
     abstract fun restart()
 
@@ -50,7 +49,7 @@ class InitialTaskState(task: Task) : TaskState(task) {
 
     }
 
-    override fun cancel() {
+    override fun delete() {
 
     }
 
@@ -82,7 +81,7 @@ class StartTaskState(task: Task) : TaskState(task) {
 
     }
 
-    override fun cancel() {
+    override fun delete() {
 
     }
 
@@ -138,6 +137,8 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
 
     override fun pause() {
 
+        task.cancelTask()
+
         task.setCurrentState(PauseTaskState(progress, maxSize, speed, task))
 
         onFinishState()
@@ -148,12 +149,8 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
 
     }
 
-    override fun cancel() {
-
-        task.cancelTask()
-
-        onFinishState()
-
+    override fun delete() {
+        task.deleteTask()
     }
 
     override fun restart() {
@@ -246,7 +243,7 @@ class PauseTaskState(var progress: Int, val maxSize: Long, var speed: String, ta
 
     }
 
-    override fun cancel() {
+    override fun delete() {
 
     }
 
@@ -280,7 +277,8 @@ class FinishTaskState(maxSize: Long, task: Task) : TaskState(task) {
     override fun resume() {
     }
 
-    override fun cancel() {
+    override fun delete() {
+
     }
 
     override fun restart() {
@@ -303,7 +301,8 @@ class ErrorTaskState(task: Task) : TaskState(task) {
     override fun resume() {
     }
 
-    override fun cancel() {
+    override fun delete() {
+
     }
 
     override fun restart() {

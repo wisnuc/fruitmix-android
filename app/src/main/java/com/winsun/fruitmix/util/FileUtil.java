@@ -28,9 +28,11 @@ import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.DownloadTask;
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.ErrorTaskState;
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.FinishTaskState;
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.StartingTaskState;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.StateType;
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task;
 
 import java.io.File;
@@ -38,6 +40,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
@@ -703,26 +706,29 @@ public class FileUtil {
 
     }
 
-    public static boolean writeResponseBodyToFolder(ResponseBody responseBody, Task task) {
+    public static boolean writeResponseBodyToFolder(ResponseBody responseBody, Task task, boolean deleteTemporaryFile) {
 
         StartingTaskState startingTaskState = (StartingTaskState) task.getCurrentState();
 
         AbstractRemoteFile abstractRemoteFile = (AbstractRemoteFile) task.getAbstractFile();
 
-        boolean result = writeResponseBodyToFolder(responseBody, task, abstractRemoteFile.getParentFolderPath(),
-                startingTaskState);
+        StateType result = writeResponseBodyToFolder(responseBody, task, abstractRemoteFile,
+                startingTaskState, deleteTemporaryFile);
 
-        if (result)
+        if (result == StateType.FINISH)
             task.setCurrentState(new FinishTaskState(abstractRemoteFile.getSize(), task));
-        else
+        else if (result == StateType.ERROR)
             task.setCurrentState(new ErrorTaskState(task));
 
-        return result;
+        if (result == StateType.ERROR)
+            return false;
+        else
+            return true;
 
     }
 
-    private static boolean writeResponseBodyToFolder(ResponseBody responseBody, Task task, String fileParentFolderName,
-                                                     StartingTaskState startingTaskState) {
+    private static StateType writeResponseBodyToFolder(ResponseBody responseBody, Task task, AbstractRemoteFile abstractRemoteFile,
+                                                       StartingTaskState startingTaskState, boolean deleteTemporaryFile) {
 
         checkIfNoExistThenCreateDownloadFileStoreFolder();
 
@@ -731,9 +737,16 @@ public class FileUtil {
         if (!downloadFolder.exists())
             createDownloadFileStoreFolder();
 
-        File temporaryDownloadFile = new File(getDownloadFileStoreFolderPath() + fileParentFolderName, task.getUuid());
+        DownloadTask downloadTask = (DownloadTask) task;
 
-        File downloadFile = new File(getDownloadFileStoreFolderPath() + fileParentFolderName, task.getAbstractFile().getName());
+        File temporaryDownloadFile = downloadTask.getTemporaryDownloadFile();
+
+        if (deleteTemporaryFile) {
+            boolean deleteResult = temporaryDownloadFile.delete();
+            Log.d(TAG, "writeResponseBodyToFolder: http server not support range,delete temporary file result：" + deleteResult);
+        }
+
+        File downloadFile = abstractRemoteFile.getDownloadedFile();
 
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -762,9 +775,11 @@ public class FileUtil {
 
                 randomAccessFile = new RandomAccessFile(temporaryDownloadFile, "rwd");
 
-                channel = randomAccessFile.getChannel();
+       /*         channel = randomAccessFile.getChannel();
 
-                MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, fileDownloadedSize, remainSize);
+                MappedByteBuffer mappedByteBuffer = channel.map(FileChannel.MapMode.READ_WRITE, fileDownloadedSize, remainSize);*/
+
+                randomAccessFile.seek(fileDownloadedSize);
 
                 while (true) {
                     int read = inputStream.read(fileBuffer);
@@ -773,7 +788,9 @@ public class FileUtil {
                         break;
                     }
 
-                    mappedByteBuffer.put(fileBuffer, 0, read);
+                    randomAccessFile.write(fileBuffer, 0, read);
+
+//                    mappedByteBuffer.put(fileBuffer, 0, read);
 
                     fileDownloadedSize += read;
 
@@ -796,7 +813,10 @@ public class FileUtil {
 
                 Log.d(TAG, "writeResponseBodyToFolder: renameResult: " + renameResult);
 
-                return renameResult;
+                if (renameResult)
+                    return StateType.FINISH;
+                else
+                    return StateType.ERROR;
 
 
             } else if (temporaryDownloadFile.createNewFile()) {
@@ -840,38 +860,33 @@ public class FileUtil {
 
                 Log.d(TAG, "writeResponseBodyToFolder: renameResult: " + renameResult);
 
-                return renameResult;
+                if (renameResult)
+                    return StateType.FINISH;
+                else
+                    return StateType.ERROR;
 
             } else {
 
-                return false;
+                return StateType.ERROR;
 
             }
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
 
-            return false;
-        } catch (IOException e) {
+            return StateType.ERROR;
+        } catch (InterruptedIOException e) {
+
             e.printStackTrace();
 
-            if (temporaryDownloadFile.exists()) {
+            return StateType.PAUSE;
 
-                boolean result = temporaryDownloadFile.delete();
+        } catch (IOException e) {
 
-                Log.d(TAG, "writeResponseBodyToFolder: io exception occur,delete file: " + result);
+            e.printStackTrace();
 
-            }
+            return StateType.ERROR;
 
-            if (downloadFile.exists()) {
-
-                boolean result = downloadFile.delete();
-
-                Log.d(TAG, "writeResponseBodyToFolder: io exception occur,delete file: " + result);
-
-            }
-
-            return false;
         } finally {
 
             try {

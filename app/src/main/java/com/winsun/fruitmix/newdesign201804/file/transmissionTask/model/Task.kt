@@ -68,15 +68,17 @@ abstract class Task(val uuid: String, val createUserUUID: String, val abstractFi
         currentTaskState.restart()
     }
 
-    fun deleteTask() {
-        currentTaskState.cancel()
-    }
-
     abstract fun executeTask()
 
     open fun cancelTask() {
 
+    }
+
+    open fun deleteTask() {
+
         taskStateObservers.clear()
+
+        currentTaskState.delete()
 
     }
 
@@ -89,7 +91,7 @@ abstract class Task(val uuid: String, val createUserUUID: String, val abstractFi
     }
 
     @Synchronized
-    fun setCurrentState(taskState: TaskState) {
+    open fun setCurrentState(taskState: TaskState) {
 
         if (taskState.getType() != currentTaskState.getType()) {
 
@@ -145,10 +147,15 @@ open class UploadTask(uuid: String, createUserUUID: String, abstractFile: Abstra
     }
 
     override fun cancelTask() {
-
         super.cancelTask()
 
         future.cancel(true)
+
+    }
+
+    override fun deleteTask() {
+
+        super.deleteTask()
 
     }
 
@@ -161,25 +168,29 @@ open class DownloadTask(uuid: String, createUserUUID: String, abstractFile: Abst
 
     protected lateinit var future: Future<Boolean>
 
+    val abstractRemoteFile = abstractFile as AbstractRemoteFile
+
     override fun getTypeResID(): Int {
 
         return R.drawable.download
 
     }
 
+    fun getTemporaryDownloadFile(): File {
+
+        return File(FileUtil.getDownloadFileStoreFolderPath() + abstractRemoteFile.parentFolderPath, uuid)
+    }
+
     override fun executeTask() {
 
-        val abstractRemoteFile = abstractFile as AbstractRemoteFile
+        val temporaryDownloadFile = getTemporaryDownloadFile()
 
-        val temporaryDownloadFile = File(
-                FileUtil.getDownloadFileStoreFolderPath() + abstractRemoteFile.parentFolderPath, uuid)
+        val startingTaskState = StartingTaskState(0, abstractRemoteFile.size, "0KB/s", this)
 
-        val startingTaskState= StartingTaskState(0,abstractRemoteFile.size,"0KB/s",this)
-
-        if(temporaryDownloadFile.exists()){
-            startingTaskState.currentHandledSize = temporaryDownloadFile.length()
-        }else
-            startingTaskState.currentHandledSize = 0
+        if (temporaryDownloadFile.exists()) {
+            startingTaskState.setCurrentHandleFileSize(temporaryDownloadFile.length())
+        } else
+            startingTaskState.setCurrentHandleFileSize(0)
 
         setCurrentState(startingTaskState)
 
@@ -194,18 +205,35 @@ open class DownloadTask(uuid: String, createUserUUID: String, abstractFile: Abst
     }
 
     override fun cancelTask() {
-
         super.cancelTask()
 
         future.cancel(true)
 
-        val downloadFile = File(FileUtil.getDownloadFileStoreFolderPath(), abstractFile.name)
+    }
+
+    override fun deleteTask() {
+
+        super.deleteTask()
+
+        val abstractRemoteFile = abstractFile as AbstractRemoteFile
+
+        val temporaryDownloadFile = File(FileUtil.getDownloadFileStoreFolderPath() + abstractRemoteFile.parentFolderPath, uuid)
+
+        val downloadFile = File(FileUtil.getDownloadFileStoreFolderPath() + abstractRemoteFile.parentFolderPath, abstractFile.getName())
+
+        if (temporaryDownloadFile.exists()) {
+
+            val result = temporaryDownloadFile.delete()
+
+            Log.d(DOWNLOAD_TASK_TAG, "delete task,so delete temporaryDownloadFile: $result")
+
+        }
 
         if (downloadFile.exists()) {
 
             val result = downloadFile.delete()
 
-            Log.d(DOWNLOAD_TASK_TAG, "cancel download,delete file result: $result")
+            Log.d(DOWNLOAD_TASK_TAG, "delete task,so delete downloadFile: $result")
 
         }
 
@@ -225,8 +253,8 @@ class BTTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, t
 
     }
 
-    override fun cancelTask() {
-        super.cancelTask()
+    override fun deleteTask() {
+        super.deleteTask()
 
         val transmission = btTaskParam.transmission
 
@@ -249,8 +277,8 @@ class SMBTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, 
 
     }
 
-    override fun cancelTask() {
-        super.cancelTask()
+    override fun deleteTask() {
+        super.deleteTask()
     }
 
 }
@@ -294,8 +322,8 @@ class MoveTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
 
     }
 
-    override fun cancelTask() {
-        super.cancelTask()
+    override fun deleteTask() {
+        super.deleteTask()
 
     }
 
@@ -314,8 +342,8 @@ class CopyTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
 
     }
 
-    override fun cancelTask() {
-        super.cancelTask()
+    override fun deleteTask() {
+        super.deleteTask()
 
     }
 

@@ -238,7 +238,7 @@ public class BaseHttpCallWrapper {
 
             Log.d(TAG, "loadCall: start get response body,url:" + httpRequest.getUrl() + "," + Util.getCurrentFormatTime());
 
-            ResponseBody responseBody = iHttpUtil.getResponseBody(httpRequest);
+            ResponseBody responseBody = iHttpUtil.getHttpResponseBody(httpRequest).getResponseBody();
 
             Log.d(TAG, "loadCall: get response body,request url:" + httpRequest.getUrl() + "," + Util.getCurrentFormatTime());
 

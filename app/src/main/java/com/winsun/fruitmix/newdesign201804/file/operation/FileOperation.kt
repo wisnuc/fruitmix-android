@@ -3,7 +3,6 @@ package com.winsun.fruitmix.newdesign201804.file.operation
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.view.View
@@ -19,7 +18,6 @@ import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.component.createFileDownloadParam
-import com.winsun.fruitmix.newdesign201804.file.detail.FILE_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.detail.FileDetailActivity
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileMenuBottomDialogFactory
@@ -172,7 +170,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
 
             taskProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, fileOperationView.getActivity().getString(R.string.cancel), { dialog, which ->
 
-                task.cancelTask()
+                task.deleteTask()
 
                 dialog.dismiss()
 

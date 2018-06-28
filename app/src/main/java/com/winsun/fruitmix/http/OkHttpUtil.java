@@ -37,7 +37,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
  * Created by Administrator on 2016/12/22.
  */
 
-public class OkHttpUtil implements IHttpUtil, IHttpFileUtil,UploadFileInterface {
+public class OkHttpUtil implements IHttpUtil, IHttpFileUtil, UploadFileInterface {
 
     public static final String TAG = OkHttpUtil.class.getSimpleName();
 
@@ -115,10 +115,6 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil,UploadFileInterface 
 
     }
 
-    private boolean checkResponseCode(int code) {
-        return code == 200;
-    }
-
     private Response executeRequest(Request request) throws MalformedURLException, IOException, SocketTimeoutException {
         Log.d(TAG, "remoteCallMethod: before execute" + Util.getCurrentFormatTime());
 
@@ -146,7 +142,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil,UploadFileInterface 
     }
 
     @Override
-    public ResponseBody getResponseBody(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException, NetworkException {
+    public HttpResponseBody getHttpResponseBody(HttpRequest httpRequest) throws MalformedURLException, IOException, SocketTimeoutException, NetworkException {
 
         Request.Builder builder = generateRequestBuilder(httpRequest);
 
@@ -157,11 +153,15 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil,UploadFileInterface 
         int code = response.code();
 
         if (checkResponseCode(code)) {
-            return response.body();
+            return new HttpResponseBody(code, response.body());
         } else {
             throw new NetworkException("download api return http error code", new HttpResponse(code, response.body().string()));
         }
 
+    }
+
+    private boolean checkResponseCode(int code) {
+        return code >= 200 && code < 300;
     }
 
     @Override
@@ -215,7 +215,7 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil,UploadFileInterface 
 
         builder = generateRequestBuilder(httpRequest);
 
-        return builder.post(new ProgressUploadRequestBody(requestBody,task)).build();
+        return builder.post(new ProgressUploadRequestBody(requestBody, task)).build();
 
     }
 
@@ -235,11 +235,11 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil,UploadFileInterface 
 
         Request.Builder builder = new Request.Builder().url(httpRequest.getUrl());
 
-        Map<String,String> headers = httpRequest.getHeaders();
+        Map<String, String> headers = httpRequest.getHeaders();
 
-        for (Map.Entry<String,String> entry:headers.entrySet()){
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
 
-            builder.addHeader(entry.getKey(),entry.getValue());
+            builder.addHeader(entry.getKey(), entry.getValue());
 
         }
 

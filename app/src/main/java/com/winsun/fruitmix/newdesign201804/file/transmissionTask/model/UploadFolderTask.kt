@@ -1,12 +1,10 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask.model
 
 import android.util.Log
-import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.file.data.model.AbstractLocalFile
 import com.winsun.fruitmix.file.data.model.LocalFile
 import com.winsun.fruitmix.file.data.model.LocalFolder
-import com.winsun.fruitmix.file.data.model.RemoteFolder
 import com.winsun.fruitmix.file.data.station.StationFileRepository
 import com.winsun.fruitmix.http.HttpResponse
 import com.winsun.fruitmix.model.operationResult.OperationResult
@@ -17,7 +15,6 @@ import com.winsun.fruitmix.parser.RemoteMkDirParser
 import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.util.Util
 import java.io.File
-import java.util.concurrent.Future
 
 private const val TAG = "UploadFolderTask"
 
@@ -61,12 +58,12 @@ class UploadFolderTask(
 
     }
 
-    override fun cancelTask() {
+    override fun deleteTask() {
 
         subUploadTasks.forEach { (taskStateObserver, task) ->
 
             task.unregisterObserver(taskStateObserver)
-            task.cancelTask()
+            task.deleteTask()
 
         }
 
@@ -120,7 +117,7 @@ class UploadFolderTask(
 
                         Log.d(TAG, "create folder " + localFolder.name + " failed")
 
-                        cancelTask()
+                        deleteTask()
                         setCurrentState(ErrorTaskState(this@UploadFolderTask))
                     }
 
@@ -168,7 +165,7 @@ class UploadFolderTask(
 
                         } else if (currentState is ErrorTaskState){
 
-                            cancelTask()
+                            deleteTask()
                             setCurrentState(ErrorTaskState(this@UploadFolderTask))
 
                         }
