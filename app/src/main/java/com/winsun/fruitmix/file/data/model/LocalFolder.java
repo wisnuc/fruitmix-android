@@ -37,4 +37,17 @@ public class LocalFolder extends AbstractLocalFile {
         return contents;
     }
 
+    @Override
+    public AbstractFile copySelf() {
+
+        LocalFolder localFolder = new LocalFolder();
+        localFolder.setName(getName());
+        localFolder.setFileTypeResID(getFileTypeResID());
+        localFolder.setSize(getSize());
+        localFolder.setTime(getTime());
+        localFolder.setPath(getPath());
+
+        return localFolder;
+
+    }
 }

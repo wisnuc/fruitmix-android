@@ -50,4 +50,23 @@ public class RemoteFile extends AbstractRemoteFile {
 
     }
 
+    @Override
+    public AbstractFile copySelf() {
+
+        RemoteFile file = new RemoteFile();
+
+        file.setName(getName());
+        file.setFileTypeResID(getFileTypeResID());
+        file.setSize(getSize());
+        file.setTime(getTime());
+        file.setFileHash(getFileHash());
+        file.setUuid(getUuid());
+        file.setParentFolderName(getParentFolderName());
+        file.setParentFolderPath(getParentFolderPath());
+        file.setParentFolderUUID(getParentFolderUUID());
+        file.setRootFolderUUID(getRootFolderUUID());
+
+        return file;
+
+    }
 }

@@ -18,6 +18,8 @@ abstract class TaskState(val task: Task) {
 
     abstract fun resume()
 
+    abstract fun cancel()
+
     abstract fun delete()
 
     abstract fun restart()
@@ -53,6 +55,10 @@ class InitialTaskState(task: Task) : TaskState(task) {
 
     }
 
+    override fun cancel() {
+
+    }
+
     override fun restart() {
 
     }
@@ -85,6 +91,10 @@ class StartTaskState(task: Task) : TaskState(task) {
 
     }
 
+    override fun cancel() {
+
+    }
+
     override fun restart() {
 
     }
@@ -114,8 +124,7 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
         super.onStartState()
 
         if (task.startSpeedHandler) {
-            speedHandler = SpeedHandler(Looper.getMainLooper(), this)
-
+            speedHandler = SpeedHandler(Looper.getMainLooper(), task)
             speedHandler.sendEmptyMessageDelayed(UPDATE_SPEED, DELAY_TIME)
         }
 
@@ -126,8 +135,10 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
     override fun onFinishState() {
         super.onFinishState()
 
-        if (task.startSpeedHandler)
+        if (task.startSpeedHandler) {
             speedHandler.removeMessages(UPDATE_SPEED)
+            speedHandler.stopUpdate()
+        }
 
     }
 
@@ -137,11 +148,11 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
 
     override fun pause() {
 
-        task.cancelTask()
+        task.doCancelTask()
+
+        Log.d(STARTING_TASK_STATE_TAG, "set state to pause")
 
         task.setCurrentState(PauseTaskState(progress, maxSize, speed, task))
-
-        onFinishState()
 
     }
 
@@ -149,8 +160,13 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
 
     }
 
+    override fun cancel() {
+        task.doCancelTask()
+    }
+
     override fun delete() {
-        task.deleteTask()
+        task.doDeleteTask()
+        task.doCancelTask()
     }
 
     override fun restart() {
@@ -192,7 +208,13 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
 
 }
 
-class SpeedHandler(looper: Looper, val taskState: StartingTaskState) : Handler(looper) {
+class SpeedHandler(looper: Looper, val task: Task) : Handler(looper) {
+
+    private var stopUpdate = false
+
+    fun stopUpdate() {
+        stopUpdate = true
+    }
 
     override fun handleMessage(msg: Message?) {
         super.handleMessage(msg)
@@ -201,17 +223,25 @@ class SpeedHandler(looper: Looper, val taskState: StartingTaskState) : Handler(l
 
             UPDATE_SPEED -> {
 
-                val speedSize = taskState.currentHandledSize - taskState.lastDownloadSize
+                val taskState = task.getCurrentState()
 
-                taskState.speedSize = speedSize
+                if (taskState is StartingTaskState && !stopUpdate) {
 
-                taskState.speed = FileUtil.formatFileSize(speedSize) + "/s"
+                    val speedSize = taskState.currentHandledSize - taskState.lastDownloadSize
 
-                taskState.lastDownloadSize = taskState.currentHandledSize
+                    taskState.speedSize = speedSize
 
-                taskState.task.setCurrentState(taskState)
+                    taskState.speed = FileUtil.formatFileSize(speedSize) + "/s"
 
-                sendEmptyMessageDelayed(UPDATE_SPEED, DELAY_TIME)
+                    taskState.lastDownloadSize = taskState.currentHandledSize
+
+                    Log.d("task", "SpeedHandler,set current state: " + taskState.getType())
+
+                    task.setCurrentState(taskState)
+
+                    sendEmptyMessageDelayed(UPDATE_SPEED, DELAY_TIME)
+
+                }
 
             }
 
@@ -244,6 +274,10 @@ class PauseTaskState(var progress: Int, val maxSize: Long, var speed: String, ta
     }
 
     override fun delete() {
+        task.doDeleteTask()
+    }
+
+    override fun cancel() {
 
     }
 
@@ -281,6 +315,10 @@ class FinishTaskState(maxSize: Long, task: Task) : TaskState(task) {
 
     }
 
+    override fun cancel() {
+
+    }
+
     override fun restart() {
     }
 
@@ -302,6 +340,10 @@ class ErrorTaskState(task: Task) : TaskState(task) {
     }
 
     override fun delete() {
+        task.doDeleteTask()
+    }
+
+    override fun cancel() {
 
     }
 

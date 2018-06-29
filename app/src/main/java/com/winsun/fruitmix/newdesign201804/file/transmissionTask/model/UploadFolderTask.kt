@@ -3,12 +3,14 @@ package com.winsun.fruitmix.newdesign201804.file.transmissionTask.model
 import android.util.Log
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.file.data.model.AbstractLocalFile
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.file.data.model.LocalFile
 import com.winsun.fruitmix.file.data.model.LocalFolder
 import com.winsun.fruitmix.file.data.station.StationFileRepository
 import com.winsun.fruitmix.http.HttpResponse
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
+import com.winsun.fruitmix.model.operationResult.OperationSuccessWithFile
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileUploadParam
 import com.winsun.fruitmix.parser.RemoteMkDirParser
@@ -35,6 +37,10 @@ class UploadFolderTask(
 
     override fun executeTask() {
 
+        totalSize = 0L
+        uploadFinishFileSize = 0L
+        subUploadTasks.clear()
+
         val uploadFolderCallable = OperateFileCallable {
 
             val folder = File(abstractLocalFile.path)
@@ -58,16 +64,31 @@ class UploadFolderTask(
 
     }
 
-    override fun deleteTask() {
+    override fun doCancelTask() {
 
         subUploadTasks.forEach { (taskStateObserver, task) ->
 
             task.unregisterObserver(taskStateObserver)
-            task.deleteTask()
+            task.cancelTask()
 
         }
 
-        future.cancel(true)
+        super.doCancelTask()
+
+    }
+
+    override fun setCurrentState(taskState: TaskState) {
+        super.setCurrentState(taskState)
+
+        if (taskState is PauseTaskState) {
+
+            subUploadTasks.forEach {
+
+                it.value.pauseTask()
+
+            }
+
+        }
 
     }
 
@@ -78,6 +99,7 @@ class UploadFolderTask(
                     analyseFolder(folder)
                 },
                 { file ->
+                    Log.d(TAG, "file name:${file.name} size:${file.length()}")
                     totalSize += file.length()
                 })
     }
@@ -101,9 +123,33 @@ class UploadFolderTask(
 
     private fun doUploadFolder(files: Array<File>, driveUUID: String, parentFolderUUID: String) {
 
+        val operationResult = stationFileRepository.getFileWithoutCreateNewThread(driveUUID, parentFolderUUID, "")
+
+        val alreadyExistFiles = mutableListOf<AbstractRemoteFile>()
+
+        if (operationResult is OperationSuccessWithFile)
+            alreadyExistFiles.addAll(operationResult.list)
+
         files.forEach {
 
             if (it.isDirectory) {
+
+                var directoryFolderUUID = ""
+
+                for (i in 0 until alreadyExistFiles.size) {
+
+                    val alreadyExistFile = alreadyExistFiles[i]
+                    if (alreadyExistFile.name == it.name) {
+                        directoryFolderUUID = alreadyExistFile.uuid
+                        break
+                    }
+
+                }
+
+                if (directoryFolderUUID.isNotEmpty()) {
+                    doUploadFolder(it.listFiles(), driveUUID, directoryFolderUUID)
+                    return
+                }
 
                 val localFolder = LocalFolder()
                 localFolder.name = it.name
@@ -131,6 +177,26 @@ class UploadFolderTask(
 
             } else {
 
+                var fileExist = false
+
+                for (i in 0 until alreadyExistFiles.size) {
+
+                    val alreadyExistFile = alreadyExistFiles[i]
+                    if (alreadyExistFile.name == it.name) {
+
+                        fileExist = true
+
+                        handleFileUploadSucceed(it.length())
+
+                        break
+                    }
+
+                }
+
+                if (fileExist) {
+                    return
+                }
+
                 val localFile = LocalFile()
                 localFile.name = it.name
 
@@ -146,24 +212,32 @@ class UploadFolderTask(
                 val uploadTask = UploadTask(Util.createLocalUUid(), createUserUUID,
                         localFile, fileDataSource, fileUploadParam, threadManager)
 
-                val downloadUploadFolderTaskStateObserver = object :TaskStateObserver{
+                val downloadUploadFolderTaskStateObserver = object : TaskStateObserver {
 
                     override fun notifyStateChanged(currentState: TaskState) {
 
                         if (currentState is StartingTaskState) {
 
+                            Log.d(TAG, "addCurrentHandleFileSize: " + currentState.speedSize + " fileName: " + localFile.name)
+
                             startingTaskState.addCurrentHandleFileSize(currentState.speedSize)
+
+                            Log.d(TAG, "currentHandleFileSize:${startingTaskState.currentHandledSize} totalSize:$totalSize")
 
                             setCurrentState(startingTaskState)
 
                         } else if (currentState is FinishTaskState) {
 
-                            uploadFinishFileSize += localFile.size
+                            handleFileUploadSucceed(localFile.size)
 
-                            if (uploadFinishFileSize == totalSize)
-                                setCurrentState(FinishTaskState(totalSize, this@UploadFolderTask))
+                            Log.d(TAG, "file: " + localFile.name + " finish download," +
+                                    "uploadFinishFileSize: " + uploadFinishFileSize + " totalSize: " + totalSize)
 
-                        } else if (currentState is ErrorTaskState){
+                            uploadTask.unregisterObserver(this)
+
+                        } else if (currentState is ErrorTaskState) {
+
+                            Log.d(TAG, "file: " + localFile.name + " error occur when download")
 
                             deleteTask()
                             setCurrentState(ErrorTaskState(this@UploadFolderTask))
@@ -188,6 +262,14 @@ class UploadFolderTask(
 
         }
 
+
+    }
+
+    private fun handleFileUploadSucceed(fileSize: Long) {
+        uploadFinishFileSize += fileSize
+
+        if (uploadFinishFileSize == totalSize)
+            setCurrentState(FinishTaskState(totalSize, this@UploadFolderTask))
 
     }
 

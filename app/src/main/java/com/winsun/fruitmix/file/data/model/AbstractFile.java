@@ -83,5 +83,6 @@ public abstract class AbstractFile {
 
     }
 
+    public abstract AbstractFile copySelf();
 
 }

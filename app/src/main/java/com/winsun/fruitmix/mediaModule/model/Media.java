@@ -413,4 +413,39 @@ public class Media extends AbstractRemoteFile {
     public boolean isFolder() {
         return false;
     }
+
+    @Override
+    public AbstractFile copySelf() {
+
+        Media media = new Media();
+
+        media.setUuid(getUuid());
+        media.setAddress(getAddress());
+        media.setBelongingMediaShareUUID(getBelongingMediaShareUUID());
+        media.setDateWithoutHourMinSec(getDateWithoutHourMinSec());
+        media.setFormattedTime(getFormattedTime());
+        media.setHeight(getHeight());
+        media.setWidth(getWidth());
+        media.setLatitude(getLatitude());
+        media.setLongitude(getLongitude());
+        media.setLocal(isLocal());
+        media.setMiniThumbPath(getMiniThumbPath());
+        media.setOriginalPhotoPath(getOriginalPhotoPath());
+        media.setOrientationNumber(getOrientationNumber());
+        media.setSharing(isSharing());
+        media.setThumb(getThumb());
+        media.setType(getType());
+        media.setUploadedUserUUIDs(getUploadedUserUUIDs());
+        media.setName(getName());
+        media.setFileTypeResID(getFileTypeResID());
+        media.setSize(getSize());
+        media.setTime(getTime());
+        media.setParentFolderName(getParentFolderName());
+        media.setParentFolderPath(getParentFolderPath());
+        media.setParentFolderUUID(getParentFolderUUID());
+        media.setRootFolderUUID(getRootFolderUUID());
+
+        return media;
+
+    }
 }

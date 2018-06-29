@@ -142,7 +142,7 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
         else
             0
 
-        if(alreadyDownloadedFileSize != 0L){
+        if (alreadyDownloadedFileSize != 0L) {
             val rangeValue = "bytes=$alreadyDownloadedFileSize-"
 
             Log.d(TAG, "rangeValue: $rangeValue")
@@ -206,11 +206,11 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
             return OperationJSONException()
         }
 
-        return handleUploadFileRequest(request)
+        return handleUploadFileRequest(request,task)
 
     }
 
-    private fun handleUploadFileRequest(request: Request): OperationResult {
+    private fun handleUploadFileRequest(request: Request, task: Task): OperationResult {
         val httpResponse: HttpResponse?
         try {
 
@@ -218,19 +218,36 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
 
             return if (httpResponse != null && httpResponse.responseCode == 200)
                 OperationSuccess()
-            else
+            else {
+
+                task.setCurrentState(ErrorTaskState(task))
+
                 OperationNetworkException(httpResponse)
 
+            }
+
         } catch (e: MalformedURLException) {
+
+            e.printStackTrace()
+
+            task.setCurrentState(ErrorTaskState(task))
 
             return OperationMalformedUrlException()
 
         } catch (ex: SocketTimeoutException) {
 
+            ex.printStackTrace()
+
+            task.setCurrentState(ErrorTaskState(task))
+
             return OperationSocketTimeoutException()
 
         } catch (e: IOException) {
+
             e.printStackTrace()
+
+            if (e !is InterruptedIOException)
+                task.setCurrentState(ErrorTaskState(task))
 
             return OperationIOException()
         }

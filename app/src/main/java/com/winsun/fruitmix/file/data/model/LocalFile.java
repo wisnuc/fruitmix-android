@@ -42,4 +42,17 @@ public class LocalFile extends AbstractLocalFile {
         return false;
     }
 
+    @Override
+    public AbstractFile copySelf() {
+
+        LocalFile file = new LocalFile();
+        file.setName(getName());
+        file.setFileTypeResID(getFileTypeResID());
+        file.setSize(getSize());
+        file.setTime(getTime());
+        file.setPath(getPath());
+        file.setFileHash(getFileHash());
+
+        return file;
+    }
 }

@@ -25,7 +25,7 @@ const val TASK_UUID_KEY = "task_uuid"
 
 const val TASK_TAG = "task"
 
-abstract class Task(val uuid: String, val createUserUUID: String, val abstractFile: AbstractFile, val threadManager: ThreadManager, val max: Int = 100,
+abstract class Task(val uuid: String, val createUserUUID: String, var abstractFile: AbstractFile, val threadManager: ThreadManager, val max: Int = 100,
                     val startSpeedHandler: Boolean = true, val subTasks: MutableList<SubTask> = mutableListOf()) {
 
     abstract fun getTypeResID(): Int
@@ -70,15 +70,23 @@ abstract class Task(val uuid: String, val createUserUUID: String, val abstractFi
 
     abstract fun executeTask()
 
-    open fun cancelTask() {
-
-    }
-
-    open fun deleteTask() {
+    fun deleteTask() {
 
         taskStateObservers.clear()
 
         currentTaskState.delete()
+
+    }
+
+    fun cancelTask() {
+        currentTaskState.cancel()
+    }
+
+    open fun doCancelTask() {
+
+    }
+
+    open fun doDeleteTask() {
 
     }
 
@@ -103,10 +111,19 @@ abstract class Task(val uuid: String, val createUserUUID: String, val abstractFi
 
         currentTaskState = taskState
 
+        if (currentTaskState.getType() == StateType.FINISH) {
+            Log.d(TASK_TAG, "finish taskUUID: $uuid,currentTaskState = taskState fileName: ${abstractFile.name} taskStateObservers size:${taskStateObservers.size}" )
+        }
+
         threadManager.runOnMainThread {
 
             taskStateObservers.forEach {
+
+                if (currentTaskState.getType() == StateType.FINISH)
+                    Log.d(TASK_TAG, "finish taskUUID:$uuid,notifyStateChanged fileName: ${abstractFile.name}")
+
                 it.notifyStateChanged(currentTaskState)
+
             }
 
         }
@@ -146,16 +163,16 @@ open class UploadTask(uuid: String, createUserUUID: String, abstractFile: Abstra
 
     }
 
-    override fun cancelTask() {
-        super.cancelTask()
+    override fun doCancelTask() {
+        super.doCancelTask()
 
         future.cancel(true)
 
     }
 
-    override fun deleteTask() {
+    override fun doDeleteTask() {
 
-        super.deleteTask()
+        super.doDeleteTask()
 
     }
 
@@ -168,8 +185,6 @@ open class DownloadTask(uuid: String, createUserUUID: String, abstractFile: Abst
 
     protected lateinit var future: Future<Boolean>
 
-    val abstractRemoteFile = abstractFile as AbstractRemoteFile
-
     override fun getTypeResID(): Int {
 
         return R.drawable.download
@@ -178,12 +193,16 @@ open class DownloadTask(uuid: String, createUserUUID: String, abstractFile: Abst
 
     fun getTemporaryDownloadFile(): File {
 
+        val abstractRemoteFile = abstractFile as AbstractRemoteFile
+
         return File(FileUtil.getDownloadFileStoreFolderPath() + abstractRemoteFile.parentFolderPath, uuid)
     }
 
     override fun executeTask() {
 
         val temporaryDownloadFile = getTemporaryDownloadFile()
+
+        val abstractRemoteFile = abstractFile as AbstractRemoteFile
 
         val startingTaskState = StartingTaskState(0, abstractRemoteFile.size, "0KB/s", this)
 
@@ -204,22 +223,21 @@ open class DownloadTask(uuid: String, createUserUUID: String, abstractFile: Abst
 
     }
 
-    override fun cancelTask() {
-        super.cancelTask()
+    override fun doCancelTask() {
+        super.doCancelTask()
 
         future.cancel(true)
 
     }
 
-    override fun deleteTask() {
-
-        super.deleteTask()
+    override fun doDeleteTask() {
+        super.doDeleteTask()
 
         val abstractRemoteFile = abstractFile as AbstractRemoteFile
 
         val temporaryDownloadFile = File(FileUtil.getDownloadFileStoreFolderPath() + abstractRemoteFile.parentFolderPath, uuid)
 
-        val downloadFile = File(FileUtil.getDownloadFileStoreFolderPath() + abstractRemoteFile.parentFolderPath, abstractFile.getName())
+        val downloadFile = File(FileUtil.getDownloadFileStoreFolderPath() + abstractRemoteFile.parentFolderPath, abstractFile.name)
 
         if (temporaryDownloadFile.exists()) {
 
@@ -253,8 +271,8 @@ class BTTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, t
 
     }
 
-    override fun deleteTask() {
-        super.deleteTask()
+    override fun doDeleteTask() {
+        super.doDeleteTask()
 
         val transmission = btTaskParam.transmission
 
@@ -277,9 +295,6 @@ class SMBTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, 
 
     }
 
-    override fun deleteTask() {
-        super.deleteTask()
-    }
 
 }
 
@@ -322,10 +337,6 @@ class MoveTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
 
     }
 
-    override fun deleteTask() {
-        super.deleteTask()
-
-    }
 
 }
 
@@ -342,10 +353,6 @@ class CopyTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
 
     }
 
-    override fun deleteTask() {
-        super.deleteTask()
-
-    }
 
 }
 

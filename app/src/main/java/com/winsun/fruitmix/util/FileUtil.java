@@ -715,9 +715,13 @@ public class FileUtil {
         StateType result = writeResponseBodyToFolder(responseBody, task, abstractRemoteFile,
                 startingTaskState, deleteTemporaryFile);
 
-        if (result == StateType.FINISH)
+        if (result == StateType.FINISH) {
+
+            Log.d("task", "writeResponseBodyToFolder,set current state to finish task state");
+
             task.setCurrentState(new FinishTaskState(abstractRemoteFile.getSize(), task));
-        else if (result == StateType.ERROR)
+
+        } else if (result == StateType.ERROR)
             task.setCurrentState(new ErrorTaskState(task));
 
         if (result == StateType.ERROR)
@@ -743,7 +747,7 @@ public class FileUtil {
 
         if (deleteTemporaryFile) {
             boolean deleteResult = temporaryDownloadFile.delete();
-            Log.d(TAG, "writeResponseBodyToFolder: http server not support range,delete temporary file result：" + deleteResult);
+            Log.d(TAG, "writeResponseBodyToFolder: delete temporary file result：" + deleteResult);
         }
 
         File downloadFile = abstractRemoteFile.getDownloadedFile();
@@ -818,7 +822,6 @@ public class FileUtil {
                 else
                     return StateType.ERROR;
 
-
             } else if (temporaryDownloadFile.createNewFile()) {
 
                 Log.d(TAG, "writeResponseBodyToFolder: temporaryDownloadFile create succeed,file name: " +
@@ -858,7 +861,7 @@ public class FileUtil {
 
                 boolean renameResult = temporaryDownloadFile.renameTo(downloadFile);
 
-                Log.d(TAG, "writeResponseBodyToFolder: renameResult: " + renameResult);
+                Log.d(TAG, "writeResponseBodyToFolder: renameResult: " + renameResult + " name: " + downloadFile.getName());
 
                 if (renameResult)
                     return StateType.FINISH;

@@ -11,11 +11,11 @@ import java.io.IOException
 
 const val TAG = "ProgressUploadRequest"
 
-class ProgressUploadRequestBody(val requestBody: RequestBody,val task: Task):RequestBody() {
+class ProgressUploadRequestBody(val requestBody: RequestBody, val task: Task) : RequestBody() {
 
     private var bufferedSink: BufferedSink? = null
 
-    private val startingTaskState:StartingTaskState = StartingTaskState(0,task.abstractFile.size,"0KB/s",task)
+    private val startingTaskState: StartingTaskState = StartingTaskState(0, task.abstractFile.size, "0KB/s", task)
 
     init {
 
@@ -69,19 +69,24 @@ class ProgressUploadRequestBody(val requestBody: RequestBody,val task: Task):Req
 
                 if (bytesWritten == contentLength) {
 
-                    Log.d(TAG, "currentUploadSize: $bytesWritten")
+                    Log.d(TAG, "FinishTaskState:currentUploadSize: $bytesWritten")
 
                     startingTaskState.setCurrentHandleFileSize(bytesWritten)
 
-                    task.setCurrentState(FinishTaskState(task.abstractFile.size,task))
+                    task.setCurrentState(FinishTaskState(task.abstractFile.size, task))
 
                 } else {
 
-                    if (bytesWritten - startingTaskState.currentHandledSize > 1024) {
+                    if (task.getCurrentState() is StartingTaskState) {
 
-                        startingTaskState.setCurrentHandleFileSize(bytesWritten)
+                        if (bytesWritten - startingTaskState.currentHandledSize > 1024) {
 
-                        task.setCurrentState(startingTaskState)
+                            startingTaskState.setCurrentHandleFileSize(bytesWritten)
+
+                            Log.d(TAG, "StartingTaskState:currentUploadSize: $bytesWritten " +
+                                    "file name: ${task.abstractFile.name} file size: ${task.abstractFile.size}")
+
+                        }
 
                     }
 

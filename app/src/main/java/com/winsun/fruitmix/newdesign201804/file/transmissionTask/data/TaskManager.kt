@@ -8,9 +8,9 @@ object TaskManager {
 
     private val tasks = mutableListOf<Task>()
 
-    private val taskMap = mutableMapOf<String,Task>()
+    private val taskMap = mutableMapOf<String, Task>()
 
-    fun addTask(task: Task):Boolean{
+    fun addTask(task: Task): Boolean {
 
         renameFileNameIfNecessary(task)
 
@@ -22,21 +22,21 @@ object TaskManager {
 
     }
 
-    fun deleteTask(task: Task):Boolean{
+    fun deleteTask(task: Task): Boolean {
         return tasks.remove(task)
     }
 
-    fun getAllTasks():List<Task>{
+    fun getAllTasks(): List<Task> {
         return tasks
     }
 
-    fun checkTaskExist(task: Task):Boolean{
+    fun checkTaskExist(task: Task): Boolean {
 
         return taskMap.containsKey(task.uuid)
 
     }
 
-    fun getTask(taskUUID:String):Task?{
+    fun getTask(taskUUID: String): Task? {
         return taskMap[taskUUID]
     }
 
@@ -63,7 +63,11 @@ object TaskManager {
 
         }
 
-        task.abstractFile.name = newName
+        val abstractFile = task.abstractFile.copySelf()
+
+        abstractFile.name = newName
+
+        task.abstractFile = abstractFile
 
     }
 

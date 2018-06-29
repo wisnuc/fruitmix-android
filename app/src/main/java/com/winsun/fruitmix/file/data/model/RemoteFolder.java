@@ -35,4 +35,23 @@ public class RemoteFolder extends AbstractRemoteFile {
             return super.getTimeText();
         }
     }
+
+    @Override
+    public AbstractFile copySelf() {
+
+        RemoteFolder folder = new RemoteFolder();
+
+        folder.setName(getName());
+        folder.setFileTypeResID(getFileTypeResID());
+        folder.setSize(getSize());
+        folder.setTime(getTime());
+        folder.setUuid(getUuid());
+        folder.setParentFolderName(getParentFolderName());
+        folder.setParentFolderPath(getParentFolderPath());
+        folder.setParentFolderUUID(getParentFolderUUID());
+        folder.setRootFolderUUID(getRootFolderUUID());
+
+        return folder;
+
+    }
 }
