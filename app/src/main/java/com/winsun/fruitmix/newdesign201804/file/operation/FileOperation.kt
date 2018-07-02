@@ -68,7 +68,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
                 val fileDownloadParam = abstractRemoteFile.createFileDownloadParam()
 
                 val downloadTask = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractRemoteFile, fileDataSource, fileDownloadParam,
-                        currentUserUUID, threadManager)
+                         threadManager)
 
                 transmissionTaskDataSource.addTransmissionTask(downloadTask)
 
@@ -159,7 +159,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
                     abstractFile.parentFolderUUID, abstractFile.rootFolderUUID, abstractFile.name)
 
             val task = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractFile, fileDataSource, fileDownloadParam,
-                    currentUserUUID, threadManager)
+                     threadManager)
 
             task.init()
 

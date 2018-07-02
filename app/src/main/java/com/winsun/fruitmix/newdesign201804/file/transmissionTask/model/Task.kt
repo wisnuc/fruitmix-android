@@ -112,7 +112,7 @@ abstract class Task(val uuid: String, val createUserUUID: String, var abstractFi
         currentTaskState = taskState
 
         if (currentTaskState.getType() == StateType.FINISH) {
-            Log.d(TASK_TAG, "finish taskUUID: $uuid,currentTaskState = taskState fileName: ${abstractFile.name} taskStateObservers size:${taskStateObservers.size}" )
+            Log.d(TASK_TAG, "finish taskUUID: $uuid,currentTaskState = taskState fileName: ${abstractFile.name} taskStateObservers size:${taskStateObservers.size}")
         }
 
         threadManager.runOnMainThread {
@@ -181,7 +181,7 @@ open class UploadTask(uuid: String, createUserUUID: String, abstractFile: Abstra
 private const val DOWNLOAD_TASK_TAG = "download_task"
 
 open class DownloadTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, val fileDataSource: FileDataSource, val fileDownloadParam: FileDownloadParam,
-                        val currentUserUUID: String, threadManager: ThreadManager) : Task(uuid, createUserUUID, abstractFile, threadManager) {
+                        threadManager: ThreadManager) : Task(uuid, createUserUUID, abstractFile, threadManager) {
 
     protected lateinit var future: Future<Boolean>
 
@@ -191,18 +191,11 @@ open class DownloadTask(uuid: String, createUserUUID: String, abstractFile: Abst
 
     }
 
-    fun getTemporaryDownloadFile(): File {
-
-        val abstractRemoteFile = abstractFile as AbstractRemoteFile
-
-        return File(FileUtil.getDownloadFileStoreFolderPath() + abstractRemoteFile.parentFolderPath, uuid)
-    }
-
     override fun executeTask() {
 
-        val temporaryDownloadFile = getTemporaryDownloadFile()
-
         val abstractRemoteFile = abstractFile as AbstractRemoteFile
+
+        val temporaryDownloadFile = abstractRemoteFile.getTemporaryDownloadFile(createUserUUID)
 
         val startingTaskState = StartingTaskState(0, abstractRemoteFile.size, "0KB/s", this)
 
@@ -294,7 +287,6 @@ class SMBTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, 
     override fun executeTask() {
 
     }
-
 
 }
 

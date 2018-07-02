@@ -23,13 +23,13 @@ import java.util.*
 
 class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSource,
                            val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel,
-                           val offlineFileView: OfflineFileView) {
+                           val offlineFileView: OfflineFileView,val currentUserUUID:String) {
 
     private val offlineFileAdapter = OfflineFileAdapter()
 
     private val currentFileItems = mutableListOf<AbstractLocalFile>()
 
-    private val rootFolderPath = FileUtil.getDownloadFileStoreFolderPath()
+    private val rootFolderPath = FileUtil.getDownloadFileFolderPath(currentUserUUID)
 
     private val rootFilterFolderPath = listOf<String>(FileUtil.getAudioRecordFolderPath(), FileUtil.getLocalPhotoMiniThumbnailFolderPath(),
             FileUtil.getLocalPhotoThumbnailFolderPath(), FileUtil.getOriginalPhotoFolderPath())

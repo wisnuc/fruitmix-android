@@ -8,8 +8,12 @@ import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.winsun.fruitmix.executor.UploadFileTask;
 import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
+import com.winsun.fruitmix.file.data.model.AbstractFile;
+import com.winsun.fruitmix.file.data.model.AbstractLocalFile;
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.upload.FileUploadErrorState;
 import com.winsun.fruitmix.file.data.upload.FileUploadFinishedState;
 import com.winsun.fruitmix.file.data.upload.FileUploadItem;
@@ -21,6 +25,13 @@ import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.logged.in.user.LoggedInUser;
 import com.winsun.fruitmix.mediaModule.model.Video;
+import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource;
+import com.winsun.fruitmix.newdesign201804.file.list.data.FileUploadParam;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.DownloadTask;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.StateType;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.UploadFolderTaskKt;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.UploadTask;
 import com.winsun.fruitmix.newdesign201804.user.preference.FileSortPolicy;
 import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode;
 import com.winsun.fruitmix.newdesign201804.user.preference.LocalUserPreferenceParser;
@@ -28,14 +39,17 @@ import com.winsun.fruitmix.newdesign201804.user.preference.SortDirection;
 import com.winsun.fruitmix.newdesign201804.user.preference.SortMode;
 import com.winsun.fruitmix.newdesign201804.user.preference.UserPreference;
 import com.winsun.fruitmix.parser.FileFinishedTaskItemParser;
+import com.winsun.fruitmix.parser.LocalDownloadTaskParser;
 import com.winsun.fruitmix.parser.LocalFakeGroupTweetParser;
 import com.winsun.fruitmix.parser.LocalGroupParser;
 import com.winsun.fruitmix.parser.LocalGroupTweetParser;
 import com.winsun.fruitmix.parser.LocalGroupUserParser;
 import com.winsun.fruitmix.parser.LocalStationParser;
+import com.winsun.fruitmix.parser.LocalUploadTaskParser;
 import com.winsun.fruitmix.parser.LocalVideoParser;
 import com.winsun.fruitmix.parser.LocalWeChatUserParser;
 import com.winsun.fruitmix.stations.Station;
+import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.parser.LocalDataParser;
 import com.winsun.fruitmix.parser.LocalMediaParser;
@@ -753,12 +767,12 @@ public class DBUtils {
         return returnValue;
     }
 
-    public UserPreference getUserPreference(String userUUID){
+    public UserPreference getUserPreference(String userUUID) {
 
         openReadableDB();
 
-        Cursor cursor = database.query(DBHelper.USER_PREFERENCE_TABLE_NAME,null,DBHelper.USER_PREFERENCE_USER_UUID + " = ?",
-                new String[]{userUUID},null,null,null);
+        Cursor cursor = database.query(DBHelper.USER_PREFERENCE_TABLE_NAME, null, DBHelper.USER_PREFERENCE_USER_UUID + " = ?",
+                new String[]{userUUID}, null, null, null);
 
         UserPreference userPreference;
 
@@ -773,6 +787,160 @@ public class DBUtils {
 
         return userPreference;
 
+    }
+
+    public long insertUploadTask(UploadTask uploadTask, FileUploadParam fileUploadParam) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        AbstractLocalFile file = (AbstractLocalFile) uploadTask.getAbstractFile();
+
+        ContentValues contentValues = generateTaskContentValue(uploadTask, file, fileUploadParam.getDriveUUID(), fileUploadParam.getDirUUID());
+
+        contentValues.put(DBHelper.UPLOAD_TASK_FILE_LOCAL_PATH, file.getPath());
+
+        returnValue = database.insert(DBHelper.UPLOAD_TASK_TABLE_NAME, null, contentValues);
+
+        close();
+
+        return returnValue;
+
+    }
+
+    public long insertDownloadTask(DownloadTask downloadTask) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        AbstractRemoteFile file = (AbstractRemoteFile) downloadTask.getAbstractFile();
+
+        ContentValues contentValues = generateTaskContentValue(downloadTask, file, file.getRootFolderUUID(), file.getParentFolderUUID());
+
+        contentValues.put(DBHelper.DOWNLOAD_TASK_FILE_REMOTE_UUID, file.getUuid());
+
+        returnValue = database.insert(DBHelper.DOWNLOAD_TASK_TABLE_NAME, null, contentValues);
+
+        close();
+
+        return returnValue;
+
+    }
+
+    private ContentValues generateTaskContentValue(Task task, AbstractFile file, String rootUUID, String parentUUID) {
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(DBHelper.TASK_STATE, task.getCurrentState().getType().getValue());
+        contentValues.put(DBHelper.TASK_UUID, task.getUuid());
+        contentValues.put(DBHelper.TASK_CREATE_USER_UUID, task.getCreateUserUUID());
+        contentValues.put(DBHelper.TASK_FILE_NAME, file.getName());
+        contentValues.put(DBHelper.TASK_FILE_SIZE, file.getSize());
+        contentValues.put(DBHelper.TASK_FILE_TIMESTAMP, file.getTime());
+        contentValues.put(DBHelper.TASK_FILE_IS_FOLDER, file.isFolder() ? 1 : 0);
+        contentValues.put(DBHelper.TASK_FILE_ROOT_UUID, rootUUID);
+        contentValues.put(DBHelper.TASK_FILE_PARENT_UUID, parentUUID);
+
+        return contentValues;
+    }
+
+    public List<UploadTask> getAllUploadTasks(String createUserUUID, FileDataSource fileDataSource, ThreadManager threadManager) {
+
+        openReadableDB();
+
+        Cursor cursor = database.query(DBHelper.UPLOAD_TASK_TABLE_NAME, null, DBHelper.TASK_CREATE_USER_UUID + " = ?",
+                new String[]{createUserUUID}, null, null, null);
+
+        List<UploadTask> uploadTasks = new ArrayList<>();
+
+        LocalUploadTaskParser localUploadTaskParser = new LocalUploadTaskParser(fileDataSource, threadManager);
+
+        while (cursor.moveToNext()) {
+
+            UploadTask uploadTask = localUploadTaskParser.parse(cursor);
+
+            uploadTasks.add(uploadTask);
+
+        }
+
+        cursor.close();
+
+        close();
+
+        return uploadTasks;
+
+    }
+
+    public List<DownloadTask> getAllDownloadTasks(String createUserUUID, FileDataSource fileDataSource, ThreadManager threadManager) {
+
+        openReadableDB();
+
+        Cursor cursor = database.query(DBHelper.DOWNLOAD_TASK_TABLE_NAME, null, DBHelper.TASK_CREATE_USER_UUID + " = ?",
+                new String[]{createUserUUID}, null, null, null);
+
+        List<DownloadTask> downloadTasks = new ArrayList<>();
+
+        LocalDownloadTaskParser localDownloadTaskParser = new LocalDownloadTaskParser(fileDataSource, threadManager);
+
+        while (cursor.moveToNext()) {
+
+            DownloadTask downloadTask = localDownloadTaskParser.parse(cursor);
+
+            downloadTasks.add(downloadTask);
+
+        }
+
+        cursor.close();
+
+        close();
+
+        return downloadTasks;
+
+    }
+
+    public long uploadUploadTaskState(String taskUUID, int taskState) {
+        return updateTaskState(DBHelper.UPLOAD_TASK_TABLE_NAME, taskUUID, taskState);
+    }
+
+    public long uploadDownloadTaskState(String taskUUID, int taskState) {
+        return updateTaskState(DBHelper.DOWNLOAD_TASK_TABLE_NAME, taskUUID, taskState);
+    }
+
+    private long updateTaskState(String dbName, String taskUUID, int taskState) {
+
+        openWritableDB();
+
+        long returnValue = 0;
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DBHelper.TASK_STATE, taskState);
+
+        returnValue = database.update(dbName, contentValues,
+                DBHelper.TASK_UUID + " = ?", new String[]{taskUUID});
+
+        close();
+
+        return returnValue;
+    }
+
+    public long deleteUploadTask(String taskUUID) {
+        return deleteTask(DBHelper.UPLOAD_TASK_TABLE_NAME, taskUUID);
+    }
+
+    public long deleteDownloadTask(String taskUUID) {
+        return deleteTask(DBHelper.DOWNLOAD_TASK_TABLE_NAME, taskUUID);
+    }
+
+    private long deleteTask(String dbName, String taskUUID) {
+
+        openWritableDB();
+
+        long returnValue = database.delete(dbName, DBHelper.TASK_UUID + " = ?", new String[]{taskUUID});
+
+        close();
+
+        return returnValue;
     }
 
     private long deleteAllDataInTable(String tableName) {

@@ -40,6 +40,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final int ADD_USER_PREFERENCE_TABLE_VERSION = 41;
 
+    public static final int ADD_DOWNLOAD_UPLOAD_TASK_TABLE_VERSION = 42;
+
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
     public static final String USER_KEY_UUID = "user_uuid";
@@ -136,6 +138,21 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String USER_PREFERENCE_FILE_SORT_DIRECTION = "user_preference_file_sort_direction";
     public static final String USER_PREFERENCE_FILE_VIEW_MODE = "user_preference_file_view_mode";
 
+    public static final String TASK_UUID = "task_uuid";
+    public static final String TASK_STATE = "task_state";
+    public static final String TASK_CREATE_USER_UUID = "create_task_user_uuid";
+
+    public static final String TASK_FILE_NAME = "download_task_file_name";
+    public static final String TASK_FILE_SIZE = "download_task_file_size";
+    public static final String TASK_FILE_TIMESTAMP = "download_task_file_timestamp";
+    public static final String TASK_FILE_ROOT_UUID = "download_task_file_root_uuid";
+    public static final String TASK_FILE_PARENT_UUID = "download_task_file_parent_uuid";
+    public static final String TASK_FILE_IS_FOLDER = "download_task_file_is_folder";
+
+    public static final String DOWNLOAD_TASK_FILE_REMOTE_UUID = "download_task_file_remote_uuid";
+
+    public static final String UPLOAD_TASK_FILE_LOCAL_PATH = "uplaod_task_file_local_path";
+
     private static final String DB_NAME = "fruitmix";
     static final String REMOTE_USER_TABLE_NAME = "remote_user";
     static final String REMOTE_MEDIA_TABLE_NAME = "remote_media";
@@ -151,13 +168,14 @@ public class DBHelper extends SQLiteOpenHelper {
     static final String REMOTE_GROUP_USER_TABLE_NAME = "remote_group_user";
 
     static final String REMOTE_GROUP_LAST_TWEET_TABLE_NAME = "remote_group_last_tweet";
-
     static final String REMOTE_GROUP_TWEET_TABLE_NAME = "remote_group_tweet";
     static final String REMOTE_STATION_TABLE_NAME = "remote_station";
-
     static final String REMOTE_GROUP_TWEET_DRAFT_TABLE_NAME = "remote_group_tweet_draft";
 
     static final String USER_PREFERENCE_TABLE_NAME = "user_preference";
+
+    static final String UPLOAD_TASK_TABLE_NAME = "upload_task";
+    static final String DOWNLOAD_TASK_TABLE_NAME = "download_task";
 
     private static final String CREATE_TABLE = "create table if not exists ";
 
@@ -281,6 +299,21 @@ public class DBHelper extends SQLiteOpenHelper {
             + USER_PREFERENCE_USER_UUID + TEXT_NOT_NULL + USER_PREFERENCE_FILE_SORT_MODE + INTEGER_NOT_NULL
             + USER_PREFERENCE_FILE_SORT_DIRECTION + INTEGER_NOT_NULL + USER_PREFERENCE_FILE_VIEW_MODE + INTEGER_NOT_NULL_WITHOUT_COMMA + END_SQL;
 
+    private static final String TASK_FIELD_CREATE = TASK_UUID + TEXT_NOT_NULL
+            + TASK_STATE + INTEGER_NOT_NULL + TASK_CREATE_USER_UUID + TEXT_NOT_NULL
+            + TASK_FILE_NAME + TEXT_NOT_NULL
+            + TASK_FILE_SIZE + INTEGER_NOT_NULL + TASK_FILE_TIMESTAMP + INTEGER_NOT_NULL
+            + TASK_FILE_ROOT_UUID + TEXT_NOT_NULL + TASK_FILE_PARENT_UUID + TEXT_NOT_NULL
+            + TASK_FILE_IS_FOLDER + INTEGER_NOT_NULL;
+
+    public static final String DATABASE_DOWNLOAD_TASK_CREATE = CREATE_TABLE + DOWNLOAD_TASK_TABLE_NAME + BEGIN_SQL
+            + ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT + TASK_FIELD_CREATE
+            + DOWNLOAD_TASK_FILE_REMOTE_UUID + TEXT_NOT_NULL_WITHOUT_COMMA + BEGIN_SQL;
+
+    public static final String DATABASE_UPLOAD_TASK_CREATE = CREATE_TABLE + UPLOAD_TASK_TABLE_NAME + BEGIN_SQL
+            + ID + INTEGER_PRIMARY_KEY_AUTOINCREMENT + TASK_FIELD_CREATE
+            + UPLOAD_TASK_FILE_LOCAL_PATH + TEXT_NOT_NULL_WITHOUT_COMMA + BEGIN_SQL;
+
     private static final int DB_VERSION = ADD_USER_PREFERENCE_TABLE_VERSION;
 
     DBHelper(Context context) {
@@ -318,6 +351,11 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DATABASE_REMOTE_GROUP_TWEET_DRAFT_CREATE);
 
         db.execSQL(DATABASE_USER_PREFERENCE_CREATE);
+
+        db.execSQL(DATABASE_DOWNLOAD_TASK_CREATE);
+
+        db.execSQL(DATABASE_UPLOAD_TASK_CREATE);
+
     }
 
     @Override
@@ -395,6 +433,11 @@ public class DBHelper extends SQLiteOpenHelper {
 
         if (oldVersion < ADD_USER_PREFERENCE_TABLE_VERSION)
             db.execSQL(DROP_TABLE + USER_PREFERENCE_TABLE_NAME);
+
+        if (oldVersion < ADD_DOWNLOAD_UPLOAD_TASK_TABLE_VERSION) {
+            db.execSQL(DROP_TABLE + DOWNLOAD_TASK_TABLE_NAME);
+            db.execSQL(DROP_TABLE + UPLOAD_TASK_TABLE_NAME);
+        }
 
         onCreate(db);
 

@@ -6,8 +6,8 @@ import android.os.Message
 import android.util.Log
 import com.winsun.fruitmix.util.FileUtil
 
-enum class StateType {
-    INITIAL, START, STARTING, PAUSE, FINISH, ERROR
+enum class StateType(val value:Int) {
+    INITIAL(0), START(1), STARTING(2), PAUSE(3), FINISH(4), ERROR(5)
 }
 
 abstract class TaskState(val task: Task) {

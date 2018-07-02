@@ -40,6 +40,7 @@ class OfflineFileRepository(threadManager: ThreadManager): BaseDataRepository(th
                 abstractLocalFile.name = file.name
                 abstractLocalFile.path = file.absolutePath
                 abstractLocalFile.time = file.lastModified()
+                abstractLocalFile.size = file.length()
 
                 abstractLocalFiles.add(abstractLocalFile)
 

@@ -247,6 +247,10 @@ public class FileUtil {
         return getExternalDirectoryPathForDownload() + File.separator + WISNUC_FOLDER_NAME + File.separator;
     }
 
+    public static String getDownloadFileFolderPath(String fileCreateUserUUID) {
+        return getDownloadFileStoreFolderPath() + fileCreateUserUUID + File.separator;
+    }
+
     public static String getLocalPhotoMiniThumbnailFolderPath() {
         return getDownloadFileStoreFolderPath() + LOCAL_PHOTO_MINI_THUMBNAIL_FOLDER_NAME;
     }
@@ -736,21 +740,21 @@ public class FileUtil {
 
         checkIfNoExistThenCreateDownloadFileStoreFolder();
 
-        File downloadFolder = new File(getDownloadFileStoreFolderPath());
+        File downloadFolder = new File(getDownloadFileFolderPath(task.getCreateUserUUID()));
 
-        if (!downloadFolder.exists())
-            createDownloadFileStoreFolder();
+        if (!downloadFolder.exists()) {
+            Log.d(TAG, "download file folder not exist,create it");
+            createFolder(getDownloadFileFolderPath(task.getCreateUserUUID()));
+        }
 
-        DownloadTask downloadTask = (DownloadTask) task;
-
-        File temporaryDownloadFile = downloadTask.getTemporaryDownloadFile();
+        File temporaryDownloadFile = abstractRemoteFile.getTemporaryDownloadFile(task.getCreateUserUUID());
 
         if (deleteTemporaryFile) {
             boolean deleteResult = temporaryDownloadFile.delete();
             Log.d(TAG, "writeResponseBodyToFolder: delete temporary file result：" + deleteResult);
         }
 
-        File downloadFile = abstractRemoteFile.getDownloadedFile();
+        File downloadFile = abstractRemoteFile.getDownloadedFile(task.getCreateUserUUID());
 
         InputStream inputStream = null;
         OutputStream outputStream = null;
@@ -919,15 +923,17 @@ public class FileUtil {
 
     }
 
-
+    /**
+     * download folder add user uuid to avoid rename file name when different user download same name item
+     *
+     * @param responseBody
+     * @param fileDownloadState
+     * @return
+     */
+    @Deprecated
     public static boolean writeResponseBodyToFolder(ResponseBody responseBody, FileDownloadState fileDownloadState) {
 
         checkIfNoExistThenCreateDownloadFileStoreFolder();
-
-        File downloadFolder = new File(getDownloadFileStoreFolderPath());
-
-        if (!downloadFolder.exists())
-            createDownloadFileStoreFolder();
 
         File downloadFile = new File(getDownloadFileStoreFolderPath(), fileDownloadState.getFileName());
 

@@ -21,8 +21,8 @@ private const val TAG = "DownloadFolderTask"
 class DownloadFolderTask(val stationFileRepository: StationFileRepository,
                          uuid: String, createUserUUID: String,
                          abstractFile: AbstractFile, fileDataSource: FileDataSource, fileDownloadParam: FileDownloadParam,
-                         currentUserUUID: String, threadManager: ThreadManager)
-    : DownloadTask(uuid, createUserUUID, abstractFile, fileDataSource, fileDownloadParam, currentUserUUID, threadManager) {
+                         threadManager: ThreadManager)
+    : DownloadTask(uuid, createUserUUID, abstractFile, fileDataSource, fileDownloadParam, threadManager) {
 
     private var currentDownloadedSize = 0L
 
@@ -94,14 +94,15 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
                 if (downloadTask.getCurrentState().getType() == StateType.PAUSE) {
 
-                    val temporaryFileSize = downloadTask.getTemporaryDownloadFile().length()
+                    val temporaryFile = downloadTask.abstractFile as AbstractRemoteFile
+
+                    val temporaryFileSize = temporaryFile.getDownloadedFile(createUserUUID).length()
 
                     d(TAG, "task temporary file size: $temporaryFileSize")
 
                     currentDownloadedSize += temporaryFileSize
 
                 }
-
 
             }
 
@@ -153,7 +154,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
             d(TAG, "analysis file is not folder,size: " + abstractRemoteFile.size + " name: " + abstractRemoteFile.name)
 
-            val downloadFile = abstractRemoteFile.downloadedFile
+            val downloadFile = abstractRemoteFile.getDownloadedFile(createUserUUID)
 
             if (downloadFile.exists()) {
 
@@ -256,8 +257,8 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
             d(TAG, "create new task,download file name: " + abstractRemoteFile.name)
 
-            val subTask = DownloadTask(Util.createLocalUUid(), createUserUUID, abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
-                    currentUserUUID, threadManager)
+            val subTask = DownloadTask(Util.createLocalUUid(), createUserUUID, abstractRemoteFile,
+                    fileDataSource, abstractRemoteFile.createFileDownloadParam(), threadManager)
 
             val taskStateObserver = object : TaskStateObserver {
                 override fun notifyStateChanged(currentState: TaskState) {

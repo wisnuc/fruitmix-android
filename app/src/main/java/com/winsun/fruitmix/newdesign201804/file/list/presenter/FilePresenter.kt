@@ -266,7 +266,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
     fun refreshCurrentFolder() {
         loadingViewModel.showLoading.set(true)
 
-        fileDataSource.getFile(rootFolderUUID, currentFolderUUID, currentFolderName,object : BaseLoadDataCallback<AbstractRemoteFile> {
+        fileDataSource.getFile(rootFolderUUID, currentFolderUUID, currentFolderName, object : BaseLoadDataCallback<AbstractRemoteFile> {
 
             override fun onFail(operationResult: OperationResult?) {
                 loadingViewModel.showLoading.set(false)
@@ -604,7 +604,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         abstractFiles.forEach {
 
-            if(it is LocalFile){
+            if (it is LocalFile) {
                 val filePath = it.path
 
                 val future = threadManager.runOnCacheThread(Callable<String> {
@@ -624,12 +624,12 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
                 uploadTask.registerObserver(this)
                 handleTasks.add(uploadTask)
-            }else if(it is LocalFolder){
+            } else if (it is LocalFolder) {
 
                 val fileUploadParam = FileUploadParam(rootFolderUUID, currentFolderUUID, it)
 
                 val uploadFolderTask = UploadFolderTask(stationFileRepository,
-                        Util.createLocalUUid(),currentUserUUID,it,fileDataSource,fileUploadParam,threadManager)
+                        Util.createLocalUUid(), currentUserUUID, it, fileDataSource, fileUploadParam, threadManager)
 
                 transmissionTaskDataSource.addTransmissionTask(uploadFolderTask)
 
@@ -823,8 +823,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
             val fileDownloadParam = FileFromStationFolderDownloadParam(abstractFile.uuid,
                     abstractFile.parentFolderUUID, abstractFile.rootFolderUUID, abstractFile.name)
 
-            val task = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractFile, fileDataSource, fileDownloadParam,
-                    currentUserUUID, threadManager)
+            val task = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractFile, fileDataSource, fileDownloadParam, threadManager)
 
             task.init()
 
@@ -941,7 +940,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         loadingViewModel.showLoading.set(true)
 
-        fileDataSource.getFile(rootFolderUUID, uuid, name,object : BaseLoadDataCallback<AbstractRemoteFile> {
+        fileDataSource.getFile(rootFolderUUID, uuid, name, object : BaseLoadDataCallback<AbstractRemoteFile> {
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
                 currentFolderUUID = uuid
@@ -982,7 +981,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         loadingViewModel.showLoading.set(true)
 
-        fileDataSource.getFile(rootFolderUUID, uuid,name, object : BaseLoadDataCallback<AbstractRemoteFile> {
+        fileDataSource.getFile(rootFolderUUID, uuid, name, object : BaseLoadDataCallback<AbstractRemoteFile> {
             override fun onSucceed(data: MutableList<AbstractRemoteFile>?, operationResult: OperationResult?) {
 
                 currentFolderUUID = uuid
@@ -1076,7 +1075,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
                 val fileDownloadParam = abstractRemoteFile.createFileDownloadParam()
 
                 val downloadTask = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractRemoteFile, fileDataSource, fileDownloadParam,
-                        currentUserUUID, threadManager)
+                        threadManager)
 
                 transmissionTaskDataSource.addTransmissionTask(downloadTask)
 
@@ -1150,7 +1149,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         val dialog = FileMenuBottomDialogFactory(abstractFile, bottomMenuItems, {
 
-            FileDetailActivity.start(abstractFile as AbstractRemoteFile,context)
+            FileDetailActivity.start(abstractFile as AbstractRemoteFile, context)
 
         }).createDialog(context)
 
@@ -1301,11 +1300,11 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
                         if (it.isFolder)
                             DownloadFolderTask(stationFileRepository, Util.createLocalUUid(), currentUserUUID,
                                     abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
-                                    currentUserUUID, threadManager)
+                                    threadManager)
                         else
                             DownloadTask(Util.createLocalUUid(), currentUserUUID,
                                     abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
-                                    currentUserUUID, threadManager)
+                                    threadManager)
 
                 transmissionTaskDataSource.addTransmissionTask(downloadTask)
 
