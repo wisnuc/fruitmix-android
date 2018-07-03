@@ -19,7 +19,7 @@ import com.winsun.fruitmix.newdesign201804.file.offlineFile.OfflineFileActivity
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.SharedFolderActivity
 import com.winsun.fruitmix.newdesign201804.file.transmission.InjectTransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.TransmissionTaskActivity
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskRepository
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TASK_UUID_KEY
 import com.winsun.fruitmix.newdesign201804.file.upload.FileBrowserActivity
 import com.winsun.fruitmix.newdesign201804.login.LoginEntranceActivity
@@ -62,7 +62,7 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
         filePresenter = FilePresenter(InjectFileDataSource.inject(activity),
                 noContentViewModel, loadingViewModel, filePageBinding, activity,
                 this, activity.getCurrentUserUUID(), ThreadManagerImpl.getInstance(),
-                InjectTransmissionTaskDataSource.provideInstance(activity),
+                InjectTransmissionTaskRepository.provideInstance(activity),
                 InjectTransmissionDataSource.inject(activity),
                 InjectStationFileRepository.provideStationFileRepository(activity),UserPreferenceContainer.userPreference,
                 InjectUserPreference.inject(activity))
@@ -108,6 +108,7 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
         drawerItems = mutableListOf(
                 task, shareToSharedFolder, localFolder, tag,logout
         )
+
     }
 
     fun generateView() {

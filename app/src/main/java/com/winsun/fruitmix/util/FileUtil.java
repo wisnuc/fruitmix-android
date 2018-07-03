@@ -1045,9 +1045,9 @@ public class FileUtil {
 
     }
 
-    public static boolean checkFileExistInDownloadFolder(String fileName) {
+    public static boolean checkFileExistInDownloadFolder(String createUserUUID,String fileName) {
 
-        File file = new File(FileUtil.getDownloadFileStoreFolderPath(), fileName);
+        File file = new File(FileUtil.getDownloadFileFolderPath(createUserUUID), fileName);
 
         return file.exists();
 

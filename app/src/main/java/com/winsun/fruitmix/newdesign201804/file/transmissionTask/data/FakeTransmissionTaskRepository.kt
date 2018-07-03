@@ -46,11 +46,7 @@ object FakeTransmissionTaskRepository : TransmissionTaskDataSource {
 
     }
 
-    override fun getTransmissionTask(taskUUID: String, baseOperateDataCallback: BaseOperateDataCallback<Task>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun getTransmissionTaskInCache(taskUUID: String): Task? {
+    override fun getBaseMoveCopyTask(taskUUID: String, baseOperateDataCallback: BaseOperateDataCallback<Task>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -62,6 +58,10 @@ object FakeTransmissionTaskRepository : TransmissionTaskDataSource {
     }
 
     override fun updateConflictSubTask(taskUUID: String, nodeUUID: String, sameSourceConflictSubTaskPolicy: ConflictSubTaskPolicy, diffSourceConflictSubTaskPolicy: ConflictSubTaskPolicy, applyToAll: Boolean, baseOperateCallback: BaseOperateCallback) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun updateUploadDownloadTaskState(task: Task, baseOperateCallback: BaseOperateCallback) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 

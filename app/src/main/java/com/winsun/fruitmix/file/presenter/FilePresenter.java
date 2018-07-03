@@ -885,7 +885,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
             AbstractRemoteFile file = iterator.next();
 
-            if (FileUtil.checkFileExistInDownloadFolder(file.getName())) {
+            if (FileUtil.checkFileExistInDownloadFolder(file.getName(),currentUserUUID)) {
 
                 alreadyDownloadedFilePathForShare.add(FileUtil.getDownloadFileStoreFolderPath() + file.getName());
 
@@ -1297,7 +1297,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                         }
 
-                        if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName()) && result) {
+                        if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName(),currentUserUUID) && result) {
 
                             bottomMenuItems.add(new BottomMenuItem(R.drawable.download, activity.getString(R.string.re_download_the_item), new ReDownloadCommand(abstractRemoteFile)));
 
@@ -1326,7 +1326,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
                     @Override
                     public void onClick(View v) {
 
-                        if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName())) {
+                        if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName(),currentUserUUID)) {
 
                             if (!abstractRemoteFile.openAbstractRemoteFile(activity)) {
                                 ToastUtil.showToast(activity, activity.getString(R.string.open_file_failed));

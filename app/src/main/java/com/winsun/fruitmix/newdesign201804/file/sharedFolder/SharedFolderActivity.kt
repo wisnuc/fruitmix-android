@@ -1,34 +1,23 @@
 package com.winsun.fruitmix.newdesign201804.file.sharedFolder
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.databinding.DataBindingUtil
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
-import com.winsun.fruitmix.callback.BaseLoadDataCallback
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl
 import com.winsun.fruitmix.databinding.ActivitySharedFolderBinding
-import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
-import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserHome
-import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.InjectSharedFolderDataSource
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.SharedFolderDataSource
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
-import com.winsun.fruitmix.newdesign201804.search.SearchActivity
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskRepository
 import com.winsun.fruitmix.newdesign201804.search.startSearchActivity
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
-import com.winsun.fruitmix.user.User
-import com.winsun.fruitmix.user.datasource.InjectUser
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import kotlinx.android.synthetic.main.activity_shared_folder.*
@@ -68,7 +57,7 @@ class SharedFolderActivity : BaseToolbarActivity(), SharedFolderView {
         sharedFolderPresenter = SharedFolderPresenter(
                 InjectFileDataSource.inject(this), this,
                 loadingViewModel, noContentViewModel,
-                sharedFolderDataSource,ThreadManagerImpl.getInstance(),InjectTransmissionTaskDataSource.provideInstance(this))
+                sharedFolderDataSource,ThreadManagerImpl.getInstance(),InjectTransmissionTaskRepository.provideInstance(this))
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 

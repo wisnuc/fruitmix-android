@@ -24,10 +24,12 @@ class AddEquipmentByIpActivity : BaseToolbarActivity() {
 
         toolbarViewModel.showSelect.set(true)
 
-        toolbarViewModel.selectTextEnable.set(false)
+        //TODO:add logic:ip format is wrong then selectTextEnable is false,otherwise is true
+
+        toolbarViewModel.selectTextEnable.set(true)
 
         toolbarViewModel.selectTextResID.set(R.string.confirm)
-        toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(this, R.color.twenty_six_percent_white))
+        toolbarViewModel.selectTextColorResID.set(ContextCompat.getColor(this, R.color.eighty_seven_percent_white))
 
         toolbarViewModel.setToolbarSelectBtnOnClickListener {
 

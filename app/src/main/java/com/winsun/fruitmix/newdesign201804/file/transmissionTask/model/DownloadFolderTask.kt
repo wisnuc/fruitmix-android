@@ -261,7 +261,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
                     fileDataSource, abstractRemoteFile.createFileDownloadParam(), threadManager)
 
             val taskStateObserver = object : TaskStateObserver {
-                override fun notifyStateChanged(currentState: TaskState) {
+                override fun notifyStateChanged(currentState: TaskState,preState:TaskState) {
 
                     if (currentState is StartingTaskState) {
 

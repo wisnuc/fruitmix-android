@@ -253,10 +253,10 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
 
     override fun searchSucceedState() {
 
-        searchEquipmentUIState.searchSucceedState()
-
         equipmentViewPagerAdapter.setEquipmentStates(baseNewEquipmentStates)
         equipmentViewPagerAdapter.notifyDataSetChanged()
+
+        searchEquipmentUIState.searchSucceedState()
 
     }
 

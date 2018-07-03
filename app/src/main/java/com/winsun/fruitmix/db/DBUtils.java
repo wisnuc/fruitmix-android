@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.winsun.fruitmix.executor.UploadFileTask;
 import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
 import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
@@ -28,9 +27,7 @@ import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource;
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileUploadParam;
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.DownloadTask;
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.StateType;
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task;
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.UploadFolderTaskKt;
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.UploadTask;
 import com.winsun.fruitmix.newdesign201804.user.preference.FileSortPolicy;
 import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode;
@@ -39,13 +36,13 @@ import com.winsun.fruitmix.newdesign201804.user.preference.SortDirection;
 import com.winsun.fruitmix.newdesign201804.user.preference.SortMode;
 import com.winsun.fruitmix.newdesign201804.user.preference.UserPreference;
 import com.winsun.fruitmix.parser.FileFinishedTaskItemParser;
-import com.winsun.fruitmix.parser.LocalDownloadTaskParser;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.LocalDownloadTaskParser;
 import com.winsun.fruitmix.parser.LocalFakeGroupTweetParser;
 import com.winsun.fruitmix.parser.LocalGroupParser;
 import com.winsun.fruitmix.parser.LocalGroupTweetParser;
 import com.winsun.fruitmix.parser.LocalGroupUserParser;
 import com.winsun.fruitmix.parser.LocalStationParser;
-import com.winsun.fruitmix.parser.LocalUploadTaskParser;
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.LocalUploadTaskParser;
 import com.winsun.fruitmix.parser.LocalVideoParser;
 import com.winsun.fruitmix.parser.LocalWeChatUserParser;
 import com.winsun.fruitmix.stations.Station;
@@ -789,13 +786,15 @@ public class DBUtils {
 
     }
 
-    public long insertUploadTask(UploadTask uploadTask, FileUploadParam fileUploadParam) {
+    public long insertUploadTask(UploadTask uploadTask) {
 
         openWritableDB();
 
         long returnValue = 0;
 
         AbstractLocalFile file = (AbstractLocalFile) uploadTask.getAbstractFile();
+
+        FileUploadParam fileUploadParam = uploadTask.getFileUploadParam();
 
         ContentValues contentValues = generateTaskContentValue(uploadTask, file, fileUploadParam.getDriveUUID(), fileUploadParam.getDirUUID());
 

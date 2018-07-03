@@ -19,11 +19,14 @@ import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
+import com.winsun.fruitmix.viewmodel.LoadingViewModel
+import com.winsun.fruitmix.viewmodel.NoContentViewModel
 
 import kotlinx.android.synthetic.main.transmission_task_item.view.*
 
 class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTaskDataSource,
                                 val transmissionDataSource: TransmissionDataSource,
+                                val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel,
                                 val currentUserUUID: String) {
 
     private val transmissionTaskAdapter = TransmissionTaskAdapter()
@@ -34,6 +37,8 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
         recyclerView.adapter = transmissionTaskAdapter
 
+        loadingViewModel.showLoading.set(true)
+
         transmissionTaskDataSource.getAllTransmissionTasks(object : BaseLoadDataCallback<Task> {
 
             override fun onSucceed(data: MutableList<Task>?, operationResult: OperationResult?) {
@@ -43,6 +48,9 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
             }
 
             override fun onFail(operationResult: OperationResult?) {
+
+                loadingViewModel.showLoading.set(false)
+                noContentViewModel.showNoContent.set(true)
 
             }
 
@@ -143,6 +151,12 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
             taskContainers.removeAll(finishedTaskContainers)
 
+            if (taskContainers.isEmpty()) {
+                noContentViewModel.showNoContent.set(true)
+                return
+            } else
+                noContentViewModel.showNoContent.set(false)
+
             transmissionTaskAdapter.setItemList(taskContainers)
             transmissionTaskAdapter.notifyDataSetChanged()
 
@@ -152,6 +166,8 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
 
     private fun handleGetTask(data: MutableList<Task>?) {
+
+        loadingViewModel.showLoading.set(false)
 
         data?.forEach {
 
@@ -163,6 +179,12 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
         }
 
+        if (taskContainers.isEmpty()) {
+            noContentViewModel.showNoContent.set(true)
+            return
+        } else
+            noContentViewModel.showNoContent.set(false)
+
         transmissionTaskAdapter.setItemList(taskContainers)
 
         transmissionTaskAdapter.notifyDataSetChanged()
@@ -171,7 +193,7 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
 
             when (it) {
                 is SMBTask -> it.setCurrentState(FinishTaskState(it.abstractFile.size, it))
-                is TransmissionTask -> it.setCurrentState(it.getCurrentState())
+                is BaseMoveCopyTask -> it.setCurrentState(it.getCurrentState())
                 else -> it.startTask()
             }
 
@@ -269,7 +291,7 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
             task.unregisterObserver(this)
         }
 
-        override fun notifyStateChanged(currentState: TaskState) {
+        override fun notifyStateChanged(currentState: TaskState, preState: TaskState) {
 
             val position = taskContainers.indexOf(this)
 

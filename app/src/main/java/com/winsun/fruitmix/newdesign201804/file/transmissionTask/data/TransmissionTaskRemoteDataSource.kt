@@ -8,7 +8,6 @@ import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl
 import com.winsun.fruitmix.http.IHttpUtil
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory
-import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.thread.manage.ThreadManager
 
@@ -26,16 +25,12 @@ class TransmissionTaskRemoteDataSource(val threadManager: ThreadManager, val cur
 
     }
 
-    override fun getTransmissionTask(taskUUID: String, baseOperateDataCallback: BaseOperateDataCallback<Task>) {
+    override fun getBaseMoveCopyTask(taskUUID: String, baseOperateDataCallback: BaseOperateDataCallback<Task>) {
 
         val httpRequest = httpRequestFactory.createHttpGetRequest("$TASK/$taskUUID")
 
         wrapper.operateCall(httpRequest, baseOperateDataCallback, RemoteOneTransmissionTaskParser(threadManager, currentUserUUID))
 
-    }
-
-    override fun getTransmissionTaskInCache(taskUUID: String): Task? {
-        return null
     }
 
     override fun addTransmissionTask(task: Task): Boolean {
@@ -46,7 +41,7 @@ class TransmissionTaskRemoteDataSource(val threadManager: ThreadManager, val cur
 
         var path = ""
 
-        if (task is TransmissionTask) {
+        if (task is BaseMoveCopyTask) {
             path = TASK + task.uuid
         }
 
@@ -57,6 +52,8 @@ class TransmissionTaskRemoteDataSource(val threadManager: ThreadManager, val cur
         }
 
     }
+
+    override fun updateUploadDownloadTaskState(task: Task, baseOperateCallback: BaseOperateCallback) {}
 
     override fun updateConflictSubTask(taskUUID: String, nodeUUID: String, sameSourceConflictSubTaskPolicy: ConflictSubTaskPolicy,
                                        diffSourceConflictSubTaskPolicy: ConflictSubTaskPolicy,

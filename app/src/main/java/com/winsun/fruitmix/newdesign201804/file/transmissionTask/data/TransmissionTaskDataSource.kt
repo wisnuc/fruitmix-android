@@ -10,13 +10,13 @@ interface TransmissionTaskDataSource {
 
     fun getAllTransmissionTasks(baseLoadDataCallback: BaseLoadDataCallback<Task>)
 
-    fun getTransmissionTask(taskUUID:String,baseOperateDataCallback: BaseOperateDataCallback<Task>)
-
-    fun getTransmissionTaskInCache(taskUUID: String):Task?
+    fun getBaseMoveCopyTask(taskUUID:String, baseOperateDataCallback: BaseOperateDataCallback<Task>)
 
     fun addTransmissionTask(task: Task):Boolean
 
     fun deleteTransmissionTask(task: Task,baseOperateCallback: BaseOperateCallback)
+
+    fun updateUploadDownloadTaskState(task: Task,baseOperateCallback: BaseOperateCallback)
 
     fun updateConflictSubTask(taskUUID: String, nodeUUID:String, sameSourceConflictSubTaskPolicy: ConflictSubTaskPolicy,
                               diffSourceConflictSubTaskPolicy: ConflictSubTaskPolicy,

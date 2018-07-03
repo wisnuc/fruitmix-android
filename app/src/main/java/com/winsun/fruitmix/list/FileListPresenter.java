@@ -243,7 +243,7 @@ public class FileListPresenter {
 
                     }
 
-                    if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName()) && result) {
+                    if (FileUtil.checkFileExistInDownloadFolder(currentUserUUID,abstractRemoteFile.getName()) && result) {
 
                         bottomMenuItems.add(new BottomMenuItem(R.drawable.download, context.getString(R.string.re_download_the_item), new ReDownloadCommand(abstractRemoteFile)));
 
@@ -271,7 +271,7 @@ public class FileListPresenter {
                 @Override
                 public void onClick(View v) {
 
-                    if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName())) {
+                    if (FileUtil.checkFileExistInDownloadFolder(currentUserUUID,abstractRemoteFile.getName())) {
 
                         if (!abstractRemoteFile.openAbstractRemoteFile(context)) {
                             ToastUtil.showToast(context, context.getString(R.string.open_file_failed));

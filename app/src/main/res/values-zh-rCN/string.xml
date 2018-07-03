@@ -863,8 +863,10 @@
     <string name="start_all_task">开始全部任务</string>
     <string name="pause_all_task">暂停全部任务</string>
     <string name="clear_completed_task">清除已完成任务</string>
+    <string name="no_task">没有任务</string>
 
     <string name="add_task_hint">任务创建成功,请到传输任务列表中确认</string>
+
 
     <!-- select mode -->
     <string name="no_select_file">请选择文件</string>

@@ -115,6 +115,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
         viewpager_indicator.visibility = View.INVISIBLE
 
         new_equipment_viewPager.visibility = View.INVISIBLE
+        new_equipment_viewPager.currentItem = 0
 
         operate_btn.visibility = View.INVISIBLE
 

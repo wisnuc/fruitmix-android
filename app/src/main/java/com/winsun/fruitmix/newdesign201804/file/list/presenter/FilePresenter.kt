@@ -44,7 +44,7 @@ import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewMod
 import com.winsun.fruitmix.newdesign201804.file.move.*
 import com.winsun.fruitmix.newdesign201804.file.operation.CreateFolderUseCase
 import com.winsun.fruitmix.newdesign201804.file.transmission.TransmissionDataSource
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskRepository
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.newdesign201804.user.preference.*
 import com.winsun.fruitmix.parser.RemoteMkDirParser
@@ -72,7 +72,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
                     val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding,
                     val baseView: BaseView, val fileView: FileView,
                     val currentUserUUID: String, val threadManager: ThreadManager,
-                    val transmissionTaskDataSource: TransmissionTaskDataSource,
+                    val transmissionTaskRepository: TransmissionTaskRepository,
                     val transmissionDataSource: TransmissionDataSource,
                     val stationFileRepository: StationFileRepository,
                     val userPreference: UserPreference,
@@ -121,7 +121,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         rootFolderUUID = currentUser.home
 
-        val fileOperation = FileOperation(currentUserUUID, threadManager, transmissionTaskDataSource,
+        val fileOperation = FileOperation(currentUserUUID, threadManager, transmissionTaskRepository,
                 contentLayout, fileDataSource, baseView, fileView,
                 { position ->
 
@@ -620,7 +620,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
                 val uploadTask = UploadTask(Util.createLocalUUid(), currentUserUUID, it, fileDataSource, fileUploadParam, threadManager)
 
-                transmissionTaskDataSource.addTransmissionTask(uploadTask)
+                transmissionTaskRepository.addTransmissionTask(uploadTask)
 
                 uploadTask.registerObserver(this)
                 handleTasks.add(uploadTask)
@@ -631,7 +631,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
                 val uploadFolderTask = UploadFolderTask(stationFileRepository,
                         Util.createLocalUUid(), currentUserUUID, it, fileDataSource, fileUploadParam, threadManager)
 
-                transmissionTaskDataSource.addTransmissionTask(uploadFolderTask)
+                transmissionTaskRepository.addTransmissionTask(uploadFolderTask)
 
                 uploadFolderTask.registerObserver(this)
                 handleTasks.add(uploadFolderTask)
@@ -646,9 +646,9 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     fun handleMoveCopyTaskCreateSucceed(taskUUID: String) {
 
-        val task = transmissionTaskDataSource.getTransmissionTaskInCache(taskUUID)
+        val task = transmissionTaskRepository.getTransmissionTaskInCache(taskUUID)
 
-        if (task != null && (task is TransmissionTask)) {
+        if (task != null && (task is BaseMoveCopyTask)) {
 
             if (task.getCurrentState().getType() == StateType.FINISH)
                 refreshCurrentFolder()
@@ -663,7 +663,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     }
 
-    override fun notifyStateChanged(currentState: TaskState) {
+    override fun notifyStateChanged(currentState: TaskState,preState:TaskState) {
         if (currentState.getType() == StateType.FINISH)
             refreshCurrentFolder()
 
@@ -673,7 +673,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         handleTasks.forEach {
 
-            if (it is TransmissionTask)
+            if (it is BaseMoveCopyTask)
                 it.stopRefresh()
 
             it.unregisterObserver(this)
@@ -816,7 +816,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
     }
 
     private fun openFileAfterOnClick(abstractFile: AbstractRemoteFile) {
-        if (FileUtil.checkFileExistInDownloadFolder(abstractFile.name))
+        if (FileUtil.checkFileExistInDownloadFolder(abstractFile.name,currentUserUUID))
             FileUtil.openAbstractRemoteFile(context, abstractFile.name)
         else {
 
@@ -844,7 +844,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
             taskProgressDialog.max = 100
 
             task.registerObserver(object : TaskStateObserver {
-                override fun notifyStateChanged(currentState: TaskState) {
+                override fun notifyStateChanged(currentState: TaskState,preState:TaskState) {
 
                     if (currentState is StartingTaskState) {
 
@@ -1077,7 +1077,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
                 val downloadTask = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractRemoteFile, fileDataSource, fileDownloadParam,
                         threadManager)
 
-                transmissionTaskDataSource.addTransmissionTask(downloadTask)
+                transmissionTaskRepository.addTransmissionTask(downloadTask)
 
                 SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
 
@@ -1306,7 +1306,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
                                     abstractRemoteFile, fileDataSource, abstractRemoteFile.createFileDownloadParam(),
                                     threadManager)
 
-                transmissionTaskDataSource.addTransmissionTask(downloadTask)
+                transmissionTaskRepository.addTransmissionTask(downloadTask)
 
             }
 

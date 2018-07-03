@@ -7,7 +7,7 @@ class DownloadUploadFolderTaskStateObserver(val abstractFile: AbstractFile,
                                             val task:Task,
                                             val handleTaskFinished:()->Unit):TaskStateObserver {
 
-    override fun notifyStateChanged(currentState: TaskState) {
+    override fun notifyStateChanged(currentState: TaskState,preState:TaskState) {
 
         if (currentState is StartingTaskState) {
 

@@ -892,6 +892,7 @@
     <string name="start_all_task">Start all task</string>
     <string name="pause_all_task">Pause all task</string>
     <string name="clear_completed_task">Clear completed task</string>
+    <string name="no_task">No task</string>
 
     <string name="add_task_hint">The task was successfully created, please confirm in the transfer task list</string>
 

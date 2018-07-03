@@ -4,7 +4,6 @@ import android.content.Context
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
 import com.winsun.fruitmix.http.InjectHttp
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 
 class InjectFileDataSource {

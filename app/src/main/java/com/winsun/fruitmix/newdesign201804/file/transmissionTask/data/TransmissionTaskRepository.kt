@@ -1,82 +1,153 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask.data
 
+import android.util.Log
 import com.winsun.fruitmix.BaseDataRepository
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.model.operationResult.OperationResult
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.ConflictSubTaskPolicy
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.TransmissionTask
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.thread.manage.ThreadManager
 
-class TransmissionTaskRepository(val taskManager: TaskManager, val transmissionTaskDataSource: TransmissionTaskDataSource,
+private const val TAG = "TransmissionTaskRepo"
+
+class TransmissionTaskRepository(private val taskManager: TaskManager, private val transmissionTaskRemoteDataSource: TransmissionTaskDataSource,
+                                 private val transmissionTaskDBDataSource: TransmissionTaskDBDataSource,
                                  threadManager: ThreadManager)
     : BaseDataRepository(threadManager), TransmissionTaskDataSource {
 
-
     override fun getAllTransmissionTasks(baseLoadDataCallback: BaseLoadDataCallback<Task>) {
-
-        val tasks = taskManager.getAllTasks()
 
         val runOnMainThreadCallback = createLoadCallbackRunOnMainThread(baseLoadDataCallback)
 
         mThreadManager.runOnCacheThread({
 
-            transmissionTaskDataSource.getAllTransmissionTasks(object : BaseLoadDataCallback<Task> {
-                override fun onFail(operationResult: OperationResult?) {
-                    runOnMainThreadCallback.onSucceed(tasks, OperationSuccess())
-                }
+            if (taskManager.isCacheDirty()) {
+                transmissionTaskDBDataSource.getAllTransmissionTasks(object : BaseLoadDataCallback<Task> {
+                    override fun onSucceed(data: MutableList<Task>?, operationResult: OperationResult?) {
 
-                override fun onSucceed(data: MutableList<Task>?, operationResult: OperationResult?) {
+                        data?.forEach {
+                            taskManager.addTask(it)
+                        }
 
-                    val newTasks = mutableListOf<Task>()
+                        handleTaskManagerInitial(runOnMainThreadCallback)
+                    }
 
-                    newTasks.addAll(data!!.filter { !taskManager.checkTaskExist(it) })
-                    newTasks.addAll(tasks)
+                    override fun onFail(operationResult: OperationResult?) {
 
-                    runOnMainThreadCallback.onSucceed(newTasks, OperationSuccess())
+                    }
+                })
+            } else {
 
-                }
-            })
+                handleTaskManagerInitial(runOnMainThreadCallback)
+
+            }
 
         })
 
     }
 
-    override fun getTransmissionTask(taskUUID: String, baseOperateDataCallback: BaseOperateDataCallback<Task>) {
+    private fun handleTaskManagerInitial(runOnMainThreadCallback: BaseLoadDataCallback<Task>) {
+        val tasks = taskManager.getAllTasks()
+
+        transmissionTaskRemoteDataSource.getAllTransmissionTasks(object : BaseLoadDataCallback<Task> {
+            override fun onFail(operationResult: OperationResult?) {
+                runOnMainThreadCallback.onSucceed(tasks, OperationSuccess())
+            }
+
+            override fun onSucceed(data: MutableList<Task>?, operationResult: OperationResult?) {
+
+                val newTasks = mutableListOf<Task>()
+
+                newTasks.addAll(data!!.filter { !taskManager.checkTaskExist(it) })
+                newTasks.addAll(tasks)
+
+                runOnMainThreadCallback.onSucceed(newTasks, OperationSuccess())
+
+            }
+        })
+    }
+
+    override fun getBaseMoveCopyTask(taskUUID: String, baseOperateDataCallback: BaseOperateDataCallback<Task>) {
 
         mThreadManager.runOnCacheThread {
-            transmissionTaskDataSource.getTransmissionTask(taskUUID,createOperateCallbackRunOnMainThread(baseOperateDataCallback))
+            transmissionTaskRemoteDataSource.getBaseMoveCopyTask(taskUUID, createOperateCallbackRunOnMainThread(baseOperateDataCallback))
         }
 
     }
 
-    override fun getTransmissionTaskInCache(taskUUID: String): Task? {
+    fun getTransmissionTaskInCache(taskUUID: String): Task? {
         return taskManager.getTask(taskUUID)
+    }
+
+    fun getAllDownloadUploadTransmissionTaskInCache(): List<Task> {
+
+        return taskManager.getAllTasks().filter {
+            it is UploadTask || it is DownloadTask
+        }
+
+    }
+
+    fun handleExitApp() {
+        taskManager.handleExitApp()
     }
 
     override fun addTransmissionTask(task: Task): Boolean {
 
-        if (task is TransmissionTask)
+        task.init()
+
+        if (task is BaseMoveCopyTask)
             task.startRefresh(this)
 
-        return taskManager.addTask(task)
+        val result = taskManager.addTask(task)
+
+        if (task is DownloadTask || task is UploadTask) {
+
+            mThreadManager.runOnCacheThread {
+                val addTaskInDBResult = transmissionTaskDBDataSource.addTransmissionTask(task)
+                Log.d(TAG, "addTaskInDBResult:$addTaskInDBResult")
+            }
+
+        }
+
+        return result
 
     }
 
     override fun deleteTransmissionTask(task: Task, baseOperateCallback: BaseOperateCallback) {
         val result = taskManager.deleteTask(task)
 
-        if (result)
-            baseOperateCallback.onSucceed()
-        else {
+        val runOnMainThreadCallback = createOperateCallbackRunOnMainThread(baseOperateCallback)
+
+        if (result) {
+
+            mThreadManager.runOnCacheThread {
+                transmissionTaskDBDataSource.deleteTransmissionTask(task, runOnMainThreadCallback)
+            }
+
+        } else {
 
             mThreadManager.runOnCacheThread({
-                transmissionTaskDataSource.deleteTransmissionTask(task, createOperateCallbackRunOnMainThread(baseOperateCallback))
+                transmissionTaskRemoteDataSource.deleteTransmissionTask(task, object : BaseOperateCallback {
+                    override fun onSucceed() {
+                        transmissionTaskDBDataSource.deleteTransmissionTask(task, runOnMainThreadCallback)
+                    }
+
+                    override fun onFail(operationResult: OperationResult?) {
+                        runOnMainThreadCallback.onFail(operationResult)
+                    }
+                })
             })
 
+        }
+
+    }
+
+    override fun updateUploadDownloadTaskState(task: Task, baseOperateCallback: BaseOperateCallback) {
+
+        mThreadManager.runOnCacheThread {
+            transmissionTaskDBDataSource.updateUploadDownloadTaskState(task, createOperateCallbackRunOnMainThread(baseOperateCallback))
         }
 
     }
@@ -86,12 +157,11 @@ class TransmissionTaskRepository(val taskManager: TaskManager, val transmissionT
                                        applyToAll: Boolean, baseOperateCallback: BaseOperateCallback) {
 
         mThreadManager.runOnCacheThread {
-            transmissionTaskDataSource.updateConflictSubTask(taskUUID,nodeUUID,sameSourceConflictSubTaskPolicy,
-                    diffSourceConflictSubTaskPolicy,applyToAll,
+            transmissionTaskRemoteDataSource.updateConflictSubTask(taskUUID, nodeUUID, sameSourceConflictSubTaskPolicy,
+                    diffSourceConflictSubTaskPolicy, applyToAll,
                     createOperateCallbackRunOnMainThread(baseOperateCallback))
         }
 
     }
-
 
 }

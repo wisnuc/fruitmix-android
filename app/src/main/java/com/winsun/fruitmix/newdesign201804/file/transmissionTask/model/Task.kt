@@ -101,6 +101,8 @@ abstract class Task(val uuid: String, val createUserUUID: String, var abstractFi
     @Synchronized
     open fun setCurrentState(taskState: TaskState) {
 
+        val preState = currentTaskState
+
         if (taskState.getType() != currentTaskState.getType()) {
 
             currentTaskState.onFinishState()
@@ -122,7 +124,7 @@ abstract class Task(val uuid: String, val createUserUUID: String, var abstractFi
                 if (currentTaskState.getType() == StateType.FINISH)
                     Log.d(TASK_TAG, "finish taskUUID:$uuid,notifyStateChanged fileName: ${abstractFile.name}")
 
-                it.notifyStateChanged(currentTaskState)
+                it.notifyStateChanged(currentTaskState,preState)
 
             }
 
@@ -139,7 +141,7 @@ abstract class Task(val uuid: String, val createUserUUID: String, var abstractFi
 
 interface TaskStateObserver {
 
-    fun notifyStateChanged(currentState: TaskState)
+    fun notifyStateChanged(currentState: TaskState,preState:TaskState)
 
 }
 
@@ -291,7 +293,7 @@ class SMBTask(uuid: String, createUserUUID: String, abstractFile: AbstractFile, 
 }
 
 
-abstract class TransmissionTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
+abstract class BaseMoveCopyTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
                                 threadManager: ThreadManager, val taskParam: TaskParam,
                                 startSpeedHandler: Boolean = false) : Task(uuid, createUserUUID, srcFolder, threadManager, startSpeedHandler = startSpeedHandler) {
 
@@ -318,7 +320,7 @@ data class TaskParam(val targetFolder: AbstractRemoteFile, val entries: List<Abs
 
 class MoveTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
                threadManager: ThreadManager, taskParam: TaskParam,
-               startSpeedHandler: Boolean = false) : TransmissionTask(uuid, createUserUUID, srcFolder, threadManager, taskParam, startSpeedHandler = startSpeedHandler) {
+               startSpeedHandler: Boolean = false) : BaseMoveCopyTask(uuid, createUserUUID, srcFolder, threadManager, taskParam, startSpeedHandler = startSpeedHandler) {
 
     override fun getTypeResID(): Int {
 
@@ -334,7 +336,7 @@ class MoveTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
 
 class CopyTask(uuid: String, createUserUUID: String, srcFolder: AbstractFile,
                threadManager: ThreadManager, taskParam: TaskParam,
-               startSpeedHandler: Boolean = false) : TransmissionTask(uuid, createUserUUID, srcFolder, threadManager, taskParam, startSpeedHandler = startSpeedHandler) {
+               startSpeedHandler: Boolean = false) : BaseMoveCopyTask(uuid, createUserUUID, srcFolder, threadManager, taskParam, startSpeedHandler = startSpeedHandler) {
 
     override fun getTypeResID(): Int {
 
@@ -360,7 +362,7 @@ private class RefreshMoveCopyTaskHandler(val task: Task, val transmissionTaskDat
 
             REFRESH_TASK -> {
 
-                if (task is TransmissionTask) {
+                if (task is BaseMoveCopyTask) {
 
                     Log.d(TASK_TAG, "start refresh transmission task")
 
@@ -374,8 +376,8 @@ private class RefreshMoveCopyTaskHandler(val task: Task, val transmissionTaskDat
 
     }
 
-    private fun refreshTaskState(task: TransmissionTask) {
-        transmissionTaskDataSource.getTransmissionTask(task.uuid, object : BaseOperateDataCallback<Task> {
+    private fun refreshTaskState(task: BaseMoveCopyTask) {
+        transmissionTaskDataSource.getBaseMoveCopyTask(task.uuid, object : BaseOperateDataCallback<Task> {
             override fun onFail(operationResult: OperationResult?) {
                 sendEmptyMessageDelayed(REFRESH_TASK, REFRESH_DELAY_TIME)
             }

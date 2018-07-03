@@ -151,7 +151,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
     }
 
     private fun openFileAfterOnClick(abstractFile: AbstractRemoteFile) {
-        if (FileUtil.checkFileExistInDownloadFolder(abstractFile.name))
+        if (FileUtil.checkFileExistInDownloadFolder(abstractFile.name,currentUserUUID))
             FileUtil.openAbstractRemoteFile(fileOperationView.getActivity(), abstractFile.name)
         else {
 
@@ -180,7 +180,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
             taskProgressDialog.max = 100
 
             task.registerObserver(object : TaskStateObserver {
-                override fun notifyStateChanged(currentState: TaskState) {
+                override fun notifyStateChanged(currentState: TaskState,preState:TaskState) {
 
                     if (currentState is StartingTaskState) {
 

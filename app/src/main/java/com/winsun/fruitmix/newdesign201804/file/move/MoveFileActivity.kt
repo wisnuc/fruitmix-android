@@ -1,9 +1,7 @@
 package com.winsun.fruitmix.newdesign201804.file.move
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +11,7 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.ActivityMoveFileBinding
 import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskDataSource
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskRepository
 import com.winsun.fruitmix.newdesign201804.user.preference.InjectUserPreference
 import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
@@ -90,7 +88,7 @@ class MoveFileActivity : BaseToolbarActivity(), MoveFileView {
         }
 
         moveFilePresenter = MoveFilePresenter(InjectFileDataSource.inject(this),
-                InjectTransmissionTaskDataSource.provideInstance(this), activityMoveFileBinding,
+                InjectTransmissionTaskRepository.provideInstance(this), activityMoveFileBinding,
                 toolbarViewModel, this, loadingViewModel, noContentViewModel, fileOperation,
                 UserPreferenceContainer.userPreference,InjectUserPreference.inject(this))
 
