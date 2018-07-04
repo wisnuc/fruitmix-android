@@ -28,7 +28,8 @@ class TransmissionTaskRepository(private val taskManager: TaskManager, private v
                     override fun onSucceed(data: MutableList<Task>?, operationResult: OperationResult?) {
 
                         data?.forEach {
-                            taskManager.addTask(it)
+                            if (!taskManager.checkTaskExist(it))
+                                taskManager.addTask(it)
                         }
 
                         handleTaskManagerInitial(runOnMainThreadCallback)

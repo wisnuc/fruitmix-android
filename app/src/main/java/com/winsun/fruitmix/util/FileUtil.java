@@ -171,7 +171,7 @@ public class FileUtil {
         return createFolder(getAudioRecordFolderPath());
     }
 
-    static boolean createFolderIfNotExist(String filePath) {
+    public static boolean createFolderIfNotExist(String filePath) {
 
         File file = new File(filePath);
 
@@ -179,13 +179,9 @@ public class FileUtil {
 
         createTemporaryUserFolderResult = file.exists() || createFolder(file.getPath());
 
+        Log.d(TAG, "createFolderIfNotExist: path: " + filePath);
+
         return createTemporaryUserFolderResult;
-
-    }
-
-    public static boolean createFolderInDownloadFolder(String path) {
-
-        return createFolder(getDownloadFileStoreFolderPath() + path);
 
     }
 
@@ -740,14 +736,12 @@ public class FileUtil {
 
         checkIfNoExistThenCreateDownloadFileStoreFolder();
 
-        File downloadFolder = new File(getDownloadFileFolderPath(task.getCreateUserUUID()));
-
-        if (!downloadFolder.exists()) {
-            Log.d(TAG, "download file folder not exist,create it");
-            createFolder(getDownloadFileFolderPath(task.getCreateUserUUID()));
-        }
+        createFolderIfNotExist(abstractRemoteFile.getDownloadFileFolderRootPath(task.getCreateUserUUID()));
+        createFolderIfNotExist(abstractRemoteFile.getDownloadFileFolderParentFolderPath(task.getCreateUserUUID()));
 
         File temporaryDownloadFile = abstractRemoteFile.getTemporaryDownloadFile(task.getCreateUserUUID());
+
+        Log.d(TAG, "temporary file path: " + temporaryDownloadFile.getAbsolutePath());
 
         if (deleteTemporaryFile) {
             boolean deleteResult = temporaryDownloadFile.delete();
@@ -1045,7 +1039,7 @@ public class FileUtil {
 
     }
 
-    public static boolean checkFileExistInDownloadFolder(String createUserUUID,String fileName) {
+    public static boolean checkFileExistInDownloadFolder(String createUserUUID, String fileName) {
 
         File file = new File(FileUtil.getDownloadFileFolderPath(createUserUUID), fileName);
 

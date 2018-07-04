@@ -96,7 +96,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
                     val temporaryFile = downloadTask.abstractFile as AbstractRemoteFile
 
-                    val temporaryFileSize = temporaryFile.getDownloadedFile(createUserUUID).length()
+                    val temporaryFileSize = temporaryFile.getTemporaryDownloadFile(createUserUUID).length()
 
                     d(TAG, "task temporary file size: $temporaryFileSize")
 
@@ -138,7 +138,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
         val rootFolder = abstractFile as RemoteFolder
 
         val result = FileTool.getInstance().deleteDir(
-                FileUtil.getDownloadFileStoreFolderPath() + rootFolder.parentFolderPath + rootFolder.name)
+                rootFolder.getDownloadedFile(createUserUUID).absolutePath)
 
         d(TAG, "cancel download,delete folder result: $result")
 
@@ -216,9 +216,12 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
     private fun doCreateFolder(abstractRemoteFile: AbstractRemoteFile) {
 
-        val path = abstractRemoteFile.parentFolderPath + abstractRemoteFile.name
+        FileUtil.createFolderIfNotExist(abstractRemoteFile.getDownloadFileFolderRootPath(createUserUUID))
+        FileUtil.createFolderIfNotExist(abstractRemoteFile.getDownloadFileFolderParentFolderPath(createUserUUID))
 
-        val result = FileUtil.createFolderInDownloadFolder(path)
+        val path = abstractRemoteFile.getDownloadedFile(createUserUUID).absolutePath
+
+        val result = FileUtil.createFolderIfNotExist(path)
 
         d(TAG, "createFolderInDownloadFolder: path: $path result: $result")
 

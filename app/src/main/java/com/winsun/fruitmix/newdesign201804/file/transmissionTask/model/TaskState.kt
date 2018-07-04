@@ -6,7 +6,7 @@ import android.os.Message
 import android.util.Log
 import com.winsun.fruitmix.util.FileUtil
 
-enum class StateType(val value:Int) {
+enum class StateType(val value: Int) {
     INITIAL(0), START(1), STARTING(2), PAUSE(3), FINISH(4), ERROR(5)
 }
 
@@ -189,8 +189,8 @@ class StartingTaskState(var progress: Int, val maxSize: Long, var speed: String,
 
         if (currentHandledSize == 0L && maxSize == 0L)
             progress = task.max
-
-        calcProgress(size)
+        else
+            calcProgress(size)
 
         Log.d(STARTING_TASK_STATE_TAG, "setCurrentHandleFileSize size: $size progress: $progress currentHandledSize: $currentHandledSize maxSize: $maxSize")
 

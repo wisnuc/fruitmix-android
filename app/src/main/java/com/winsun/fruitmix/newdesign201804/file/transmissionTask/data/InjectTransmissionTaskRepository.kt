@@ -2,6 +2,7 @@ package com.winsun.fruitmix.newdesign201804.file.transmissionTask.data
 
 import android.content.Context
 import com.winsun.fruitmix.db.DBUtils
+import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
 import com.winsun.fruitmix.http.InjectHttp
 import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
@@ -31,7 +32,10 @@ public class InjectTransmissionTaskRepository {
 
         private fun provideTransmissionTaskDBDataSource(context: Context, threadManager: ThreadManager,
                                                         currentUserUUID: String): TransmissionTaskDBDataSource {
-            return TransmissionTaskDBDataSource(DBUtils.getInstance(context), InjectFileDataSource.inject(context), threadManager, currentUserUUID)
+            return TransmissionTaskDBDataSource(DBUtils.getInstance(context),
+                    InjectFileDataSource.inject(context), threadManager,
+                    InjectStationFileRepository.provideStationFileRepository(context),
+                    currentUserUUID)
         }
 
         private fun provideTaskManager(transmissionTaskDBDataSource: TransmissionTaskDBDataSource): TaskManager {

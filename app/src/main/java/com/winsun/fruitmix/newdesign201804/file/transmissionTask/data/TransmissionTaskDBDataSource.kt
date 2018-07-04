@@ -4,6 +4,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateDataCallback
 import com.winsun.fruitmix.db.DBUtils
+import com.winsun.fruitmix.file.data.station.StationFileRepository
 import com.winsun.fruitmix.model.operationResult.OperationSQLException
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
@@ -14,14 +15,16 @@ import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.UploadTas
 import com.winsun.fruitmix.thread.manage.ThreadManager
 
 class TransmissionTaskDBDataSource(val dbUtils: DBUtils, val fileDataSource: FileDataSource,
-                                   val threadManager: ThreadManager, val currentUserUUID: String) : TransmissionTaskDataSource {
+                                   val threadManager: ThreadManager,
+                                   val stationFileRepository: StationFileRepository,
+                                   val currentUserUUID: String) : TransmissionTaskDataSource {
 
     override fun getAllTransmissionTasks(baseLoadDataCallback: BaseLoadDataCallback<Task>) {
 
         val tasks = mutableListOf<Task>()
 
-        tasks.addAll(dbUtils.getAllDownloadTasks(currentUserUUID, fileDataSource, threadManager))
-        tasks.addAll(dbUtils.getAllUploadTasks(currentUserUUID, fileDataSource, threadManager))
+        tasks.addAll(dbUtils.getAllDownloadTasks(currentUserUUID, fileDataSource, threadManager, stationFileRepository))
+        tasks.addAll(dbUtils.getAllUploadTasks(currentUserUUID, fileDataSource, threadManager, stationFileRepository))
 
         baseLoadDataCallback.onSucceed(tasks, OperationSuccess())
 

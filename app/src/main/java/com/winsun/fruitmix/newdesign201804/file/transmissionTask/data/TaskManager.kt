@@ -58,6 +58,7 @@ object TaskManager : TaskStateObserver {
         tasks.forEach {
             it.unregisterObserver(this)
         }
+        tasks.clear()
     }
 
     fun deleteTask(task: Task): Boolean {

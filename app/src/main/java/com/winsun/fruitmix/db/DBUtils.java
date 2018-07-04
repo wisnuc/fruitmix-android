@@ -13,6 +13,7 @@ import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractLocalFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
+import com.winsun.fruitmix.file.data.station.StationFileRepository;
 import com.winsun.fruitmix.file.data.upload.FileUploadErrorState;
 import com.winsun.fruitmix.file.data.upload.FileUploadFinishedState;
 import com.winsun.fruitmix.file.data.upload.FileUploadItem;
@@ -844,7 +845,8 @@ public class DBUtils {
         return contentValues;
     }
 
-    public List<UploadTask> getAllUploadTasks(String createUserUUID, FileDataSource fileDataSource, ThreadManager threadManager) {
+    public List<UploadTask> getAllUploadTasks(String createUserUUID, FileDataSource fileDataSource, ThreadManager threadManager,
+                                              StationFileRepository stationFileRepository) {
 
         openReadableDB();
 
@@ -853,11 +855,13 @@ public class DBUtils {
 
         List<UploadTask> uploadTasks = new ArrayList<>();
 
-        LocalUploadTaskParser localUploadTaskParser = new LocalUploadTaskParser(fileDataSource, threadManager);
+        LocalUploadTaskParser localUploadTaskParser = new LocalUploadTaskParser(fileDataSource, threadManager, stationFileRepository);
 
         while (cursor.moveToNext()) {
 
             UploadTask uploadTask = localUploadTaskParser.parse(cursor);
+
+            Log.d(TAG, "getAllUploadTasks: generate upload task from db,task file name: " + uploadTask.getAbstractFile().getName());
 
             uploadTasks.add(uploadTask);
 
@@ -871,7 +875,8 @@ public class DBUtils {
 
     }
 
-    public List<DownloadTask> getAllDownloadTasks(String createUserUUID, FileDataSource fileDataSource, ThreadManager threadManager) {
+    public List<DownloadTask> getAllDownloadTasks(String createUserUUID, FileDataSource fileDataSource, ThreadManager threadManager,
+                                                  StationFileRepository stationFileRepository) {
 
         openReadableDB();
 
@@ -880,11 +885,13 @@ public class DBUtils {
 
         List<DownloadTask> downloadTasks = new ArrayList<>();
 
-        LocalDownloadTaskParser localDownloadTaskParser = new LocalDownloadTaskParser(fileDataSource, threadManager);
+        LocalDownloadTaskParser localDownloadTaskParser = new LocalDownloadTaskParser(fileDataSource, threadManager, stationFileRepository);
 
         while (cursor.moveToNext()) {
 
             DownloadTask downloadTask = localDownloadTaskParser.parse(cursor);
+
+            Log.d(TAG, "getAllDownloadTasks: generate download task from db,task file name: " + downloadTask.getAbstractFile().getName());
 
             downloadTasks.add(downloadTask);
 
