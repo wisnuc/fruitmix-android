@@ -237,10 +237,20 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
             val task = taskContainer.task
 
             view?.taskFileTypeIv?.setImageResource(task.abstractFile.fileTypeResID)
-            view?.taskFileNameTv?.text = task.abstractFile.name
-            view?.taskTypeIv?.setImageResource(task.getTypeResID())
 
-            view?.taskStateIcon?.refresh(task.getCurrentState())
+            val taskFileName =
+                    if (task is BaseMoveCopyTask) {
+
+                        if (task.taskParam.entries.size > 1)
+                            context?.getString(R.string.file_and_so_on, task.abstractFile.name)
+                        else
+                            task.abstractFile.name
+                    } else
+                        task.abstractFile.name
+
+            view?.taskFileNameTv?.text = taskFileName
+
+            view?.taskTypeIv?.setImageResource(task.getTypeResID())
 
             view?.taskStateIcon?.setOnClickListener {
 
@@ -275,6 +285,8 @@ class TransmissionTaskPresenter(val transmissionTaskDataSource: TransmissionTask
                 })
 
             }
+
+            view?.taskStateIcon?.refresh(task.getCurrentState())
 
         }
 

@@ -1,8 +1,10 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask.data
 
 import com.winsun.fruitmix.callback.BaseOperateCallbackImpl
+import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.util.FileUtil
+import java.io.File
 
 object TaskManager : TaskStateObserver {
 
@@ -85,20 +87,28 @@ object TaskManager : TaskStateObserver {
         val originalName = task.abstractFile.name
         var newName = originalName
 
-        while (true) {
+        val list = tasks.filter { it is DownloadTask }
 
-            val list = tasks.filter { it is DownloadTask }
+        val result = list.filter { it.abstractFile.name == task.abstractFile.name }
 
-            val result = list.filter { it.abstractFile.name == task.abstractFile.name }
+        if (result.size > 1) {
+            newName = FileUtil.renameFileName(code++, newName)
+        }
 
-            if (result.size > 1) {
-                newName = FileUtil.renameFileName(code++, newName)
+        if (task is DownloadTask) {
+
+            val abstractRemoteFile = task.abstractFile as AbstractRemoteFile
+
+            while (true) {
+
+                val newFile = File(abstractRemoteFile.getDownloadFileFolderParentFolderPath(task.createUserUUID) + newName)
+
+                if (newFile.exists())
+                    newName = FileUtil.renameFileName(code++, newName)
+                else
+                    break
+
             }
-
-            if (task is DownloadTask && FileUtil.checkFileExistInDownloadFolder(newName, task.createUserUUID))
-                newName = FileUtil.renameFileName(code++, newName)
-            else
-                break
 
         }
 

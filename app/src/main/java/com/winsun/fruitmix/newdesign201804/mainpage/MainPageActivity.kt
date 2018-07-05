@@ -176,6 +176,10 @@ class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListene
         filePage.unregisterFilePageSelectActionListener(this)
         filePage.unregisterFilePageActionListener(this)
 
+        mainPages.forEach {
+            it.onDestroy()
+        }
+
     }
 
     private class MainPageAdapter(val mainPages: List<MainPage>) : PagerAdapter() {

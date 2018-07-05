@@ -72,7 +72,7 @@ public class FileUtil {
     private static final String ORIGINAL_PHOTO_FOLDER_NAME = "originalPhoto";
 
     private static final String AUDIO_RECORD_FOLDER_NAME = "audioRecord";
-
+    
     private static final String NO_MEDIA = ".nomedia";
 
     public static boolean checkExternalStorageState() {
@@ -356,14 +356,6 @@ public class FileUtil {
             createDownloadFileStoreFolder();
     }
 
-    public static boolean checkIsExistInDownloadFolder(String path) {
-
-        File file = new File(getDownloadFileStoreFolderPath() + path);
-
-        return file.exists();
-
-    }
-
     @NonNull
     public static String renameFileName(int renameCode, String fileName) {
         int dotIndex = fileName.indexOf(".");
@@ -432,7 +424,6 @@ public class FileUtil {
         }
 
         return false;
-
 
     }
 
@@ -736,7 +727,7 @@ public class FileUtil {
 
         checkIfNoExistThenCreateDownloadFileStoreFolder();
 
-        createFolderIfNotExist(abstractRemoteFile.getDownloadFileFolderRootPath(task.getCreateUserUUID()));
+        createFolderIfNotExist(getDownloadFileFolderPath(task.getCreateUserUUID()));
         createFolderIfNotExist(abstractRemoteFile.getDownloadFileFolderParentFolderPath(task.getCreateUserUUID()));
 
         File temporaryDownloadFile = abstractRemoteFile.getTemporaryDownloadFile(task.getCreateUserUUID());
@@ -1039,6 +1030,10 @@ public class FileUtil {
 
     }
 
+    /**
+     * download folder path is changed to /Download/wisnuc/($userUUID),maybe it has parent folder path because file is in download folder
+     */
+    @Deprecated
     public static boolean checkFileExistInDownloadFolder(String createUserUUID, String fileName) {
 
         File file = new File(FileUtil.getDownloadFileFolderPath(createUserUUID), fileName);
@@ -1047,9 +1042,25 @@ public class FileUtil {
 
     }
 
+    /**
+     * download folder path is changed to /Download/wisnuc/($userUUID),maybe it has parent folder path because file is in download folder
+     */
+    @Deprecated
     public static boolean openAbstractRemoteFile(Context context, String fileName) {
 
         File file = new File(FileUtil.getDownloadFileStoreFolderPath(), fileName);
+
+        try {
+            FileUtil.openFile(context, file);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    public static boolean openDownloadedFile(Context context,File file){
 
         try {
             FileUtil.openFile(context, file);

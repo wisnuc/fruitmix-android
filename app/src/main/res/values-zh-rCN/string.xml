@@ -867,6 +867,7 @@
 
     <string name="add_task_hint">任务创建成功,请到传输任务列表中确认</string>
 
+    <string name="file_and_so_on">%1$s等等文件</string>
 
     <!-- select mode -->
     <string name="no_select_file">请选择文件</string>

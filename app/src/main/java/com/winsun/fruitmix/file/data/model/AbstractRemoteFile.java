@@ -96,10 +96,6 @@ public abstract class AbstractRemoteFile extends AbstractFile {
         this.parentFolderPath = parentFolderPath;
     }
 
-    public String getDownloadFileFolderRootPath(String fileCreateUserUUID) {
-        return FileUtil.getDownloadFileFolderPath(fileCreateUserUUID);
-    }
-
     public String getDownloadFileFolderParentFolderPath(String fileCreateUserUUID) {
         return FileUtil.getDownloadFileFolderPath(fileCreateUserUUID) + getParentFolderPath();
     }

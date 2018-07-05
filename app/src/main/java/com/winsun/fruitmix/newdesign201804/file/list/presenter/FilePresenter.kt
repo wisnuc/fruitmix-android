@@ -68,6 +68,8 @@ private const val SPAN_COUNT = 2
 private val mSelectFiles = mutableListOf<AbstractFile>()
 private var mIsSelectMode = false
 
+private const val FILE_PRESENTERR_TAG = "FilePresenter"
+
 class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: NoContentViewModel,
                     val loadingViewModel: LoadingViewModel, val filePageBinding: FilePageBinding,
                     val baseView: BaseView, val fileView: FileView,
@@ -112,6 +114,8 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
     private val sortPolicy = userPreference.fileSortPolicy
     private val fileViewModePolicy = userPreference.fileViewModePolicy
 
+    private lateinit var fileOperation: FileOperation
+
     fun initView() {
 
         val currentUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(context)
@@ -121,7 +125,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         rootFolderUUID = currentUser.home
 
-        val fileOperation = FileOperation(currentUserUUID, threadManager, transmissionTaskRepository,
+        fileOperation = FileOperation(currentUserUUID, threadManager, transmissionTaskRepository,
                 contentLayout, fileDataSource, baseView, fileView,
                 { position ->
 
@@ -264,12 +268,10 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
     }
 
     fun refreshCurrentFolder() {
-        loadingViewModel.showLoading.set(true)
 
         fileDataSource.getFile(rootFolderUUID, currentFolderUUID, currentFolderName, object : BaseLoadDataCallback<AbstractRemoteFile> {
 
             override fun onFail(operationResult: OperationResult?) {
-                loadingViewModel.showLoading.set(false)
                 noContentViewModel.showNoContent.set(true)
             }
 
@@ -663,13 +665,21 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     }
 
-    override fun notifyStateChanged(currentState: TaskState,preState:TaskState) {
-        if (currentState.getType() == StateType.FINISH)
+    override fun notifyStateChanged(currentState: TaskState, preState: TaskState) {
+        if (currentState.getType() == StateType.FINISH) {
+
+            Log.d(FILE_PRESENTERR_TAG, " task file:" + currentState.task.abstractFile.name + " finished,refresh current folder")
+
             refreshCurrentFolder()
 
+            Log.d(FILE_PRESENTERR_TAG, "finish call refreshCurrentFolder()")
+
+        }
     }
 
     fun onDestroy() {
+
+        Log.d(FILE_PRESENTERR_TAG, "onDestroy,")
 
         handleTasks.forEach {
 
@@ -800,7 +810,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
                 } else {
 
-                    openFileAfterOnClick(abstractFile)
+                    fileOperation.openFileAfterOnClick(abstractFile)
 
                 }
 
@@ -815,62 +825,6 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     }
 
-    private fun openFileAfterOnClick(abstractFile: AbstractRemoteFile) {
-        if (FileUtil.checkFileExistInDownloadFolder(abstractFile.name,currentUserUUID))
-            FileUtil.openAbstractRemoteFile(context, abstractFile.name)
-        else {
-
-            val fileDownloadParam = FileFromStationFolderDownloadParam(abstractFile.uuid,
-                    abstractFile.parentFolderUUID, abstractFile.rootFolderUUID, abstractFile.name)
-
-            val task = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractFile, fileDataSource, fileDownloadParam, threadManager)
-
-            task.init()
-
-            val taskProgressDialog = ProgressDialog(context)
-            taskProgressDialog.setTitle(context.getString(R.string.downloading))
-            taskProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL)
-            taskProgressDialog.isIndeterminate = false
-
-            taskProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.cancel), { dialog, which ->
-
-                task.deleteTask()
-
-                dialog.dismiss()
-
-            })
-
-            taskProgressDialog.setCancelable(false)
-            taskProgressDialog.max = 100
-
-            task.registerObserver(object : TaskStateObserver {
-                override fun notifyStateChanged(currentState: TaskState,preState:TaskState) {
-
-                    if (currentState is StartingTaskState) {
-
-                        taskProgressDialog.progress = currentState.progress
-
-                        taskProgressDialog.setProgressNumberFormat(currentState.speed)
-
-                    } else if (currentState is FinishTaskState) {
-
-                        taskProgressDialog.dismiss()
-
-                        FileUtil.openAbstractRemoteFile(context, abstractFile.name)
-
-                        task.unregisterObserver(this)
-
-                    }
-
-                }
-            })
-
-            task.startTask()
-
-            taskProgressDialog.show()
-
-        }
-    }
 
     private fun handleGetFileSucceed(data: MutableList<AbstractRemoteFile>?) {
 
@@ -878,6 +832,8 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
         currentFolderItems.clear()
         currentFolderItems.addAll(data!!)
+
+        Log.d(FILE_PRESENTERR_TAG, "currentFolderItems size:${currentFolderItems.size}")
 
         refreshView()
 
@@ -1046,235 +1002,6 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     }
 
-    private fun doShowFileMenuBottomDialog(context: Context, abstractFile: AbstractFile, position: Int) {
-
-        val bottomMenuItems = mutableListOf<BottomMenuItem>()
-
-        bottomMenuItems.add(BottomMenuItem(R.drawable.modify_icon, context.getString(R.string.rename), object : BaseAbstractCommand() {
-            override fun execute() {
-                super.execute()
-
-                rename(abstractFile, position)
-            }
-        }))
-
-        bottomMenuItems.add(BottomMenuItem(R.drawable.black_move, context.getString(R.string.move_to), object : BaseAbstractCommand() {
-            override fun execute() {
-                super.execute()
-                enterMovePage(abstractFile)
-            }
-        }))
-
-        if (!abstractFile.isFolder) {
-
-            val bottomMenuItem = FileWithSwitchBottomItem(R.drawable.offline_available, context.getString(R.string.offline_available),
-                    object : BaseAbstractCommand() {}, {
-
-                val abstractRemoteFile = abstractFile as AbstractRemoteFile
-
-                val fileDownloadParam = abstractRemoteFile.createFileDownloadParam()
-
-                val downloadTask = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractRemoteFile, fileDataSource, fileDownloadParam,
-                        threadManager)
-
-                transmissionTaskRepository.addTransmissionTask(downloadTask)
-
-                SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
-
-                it.dismissDialog()
-
-            })
-
-            bottomMenuItems.add(bottomMenuItem)
-
-            bottomMenuItems.add(BottomMenuItem(R.drawable.open_with_other_app, context.getString(R.string.open_with_other_app), object : BaseAbstractCommand() {
-
-                override fun execute() {
-                    super.execute()
-
-                    openFileAfterOnClick(abstractFile as AbstractRemoteFile)
-
-                }
-
-            }))
-
-        }
-
-        bottomMenuItems.add(DivideBottomMenuItem())
-
-        if (!abstractFile.isFolder) {
-
-            bottomMenuItems.add(BottomMenuItem(R.drawable.make_a_copy, context.getString(R.string.make_a_copy), object : BaseAbstractCommand() {
-
-                override fun execute() {
-                    super.execute()
-
-                }
-
-            }))
-
-            bottomMenuItems.add(BottomMenuItem(R.drawable.edit_tag, context.getString(R.string.edit_tag), object : BaseAbstractCommand() {}))
-
-        }
-
-        bottomMenuItems.add(BottomMenuItem(R.drawable.share_to_shared_folder, context.getString(R.string.share_to_shared_folder), object : BaseAbstractCommand() {
-
-            override fun execute() {
-                super.execute()
-
-                enterShareToSharedFolderPage(abstractFile)
-            }
-
-        }))
-
-        bottomMenuItems.add(BottomMenuItem(R.drawable.copy_to, context.getString(R.string.copy_to), object : BaseAbstractCommand() {
-
-            override fun execute() {
-                super.execute()
-
-                enterCopyPage(abstractFile)
-            }
-
-        }))
-
-        bottomMenuItems.add(BottomMenuItem(R.drawable.delete_download_task, context.getString(R.string.delete_text), object : BaseAbstractCommand() {
-
-            override fun execute() {
-                super.execute()
-
-                deleteFile(abstractFile, position)
-            }
-
-        }))
-
-        val dialog = FileMenuBottomDialogFactory(abstractFile, bottomMenuItems, {
-
-            FileDetailActivity.start(abstractFile as AbstractRemoteFile, context)
-
-        }).createDialog(context)
-
-        dialog.show()
-
-    }
-
-    private fun rename(abstractFile: AbstractFile, position: Int) {
-
-        val editText = EditText(context)
-        editText.hint = abstractFile.name
-
-        AlertDialog.Builder(context).setTitle(context.getString(R.string.rename))
-                .setView(editText)
-                .setPositiveButton(R.string.rename, { dialog, which ->
-
-                    val oldName = abstractFile.name
-                    val newName = editText.text.toString()
-
-                    if (newName.isEmpty()) {
-                        SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.new_name_empty_hint)
-                    } else if (oldName != newName) {
-                        doRename(oldName, newName, abstractFile, position)
-                    }
-
-                })
-                .setNegativeButton(R.string.cancel, { dialog, which -> })
-                .create().show()
-
-    }
-
-    private fun doRename(oldName: String, newName: String, abstractFile: AbstractFile, position: Int) {
-
-        baseView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.rename)))
-
-        fileDataSource.renameFile(oldName, newName, rootFolderUUID, currentFolderUUID, object : BaseOperateCallback {
-
-            override fun onFail(operationResult: OperationResult?) {
-
-                baseView.dismissDialog()
-                SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT,
-                        messageStr = operationResult!!.getResultMessage(context))
-            }
-
-            override fun onSucceed() {
-
-                baseView.dismissDialog()
-
-                abstractFile.name = newName
-
-                fileRecyclerViewAdapter.notifyItemChanged(position)
-
-            }
-
-        })
-
-    }
-
-
-    private fun enterMovePage(abstractFile: AbstractFile) {
-
-        mSelectFiles.add(abstractFile)
-
-        MoveFileActivity.start(fileView.getActivity(), mSelectFiles, FILE_OPERATE_MOVE)
-
-    }
-
-    private fun enterCopyPage(abstractFile: AbstractFile) {
-
-        mSelectFiles.add(abstractFile)
-
-        MoveFileActivity.start(fileView.getActivity(), mSelectFiles, FILE_OPERATE_COPY)
-
-    }
-
-    private fun enterShareToSharedFolderPage(abstractFile: AbstractFile) {
-
-        mSelectFiles.add(abstractFile)
-
-        MoveFileActivity.start(fileView.getActivity(), mSelectFiles, FILE_OPERATE_SHARE_TO_SHARED_FOLDER)
-
-    }
-
-    private fun deleteFile(abstractFile: AbstractFile, position: Int) {
-
-        AlertDialog.Builder(context).setTitle(R.string.delete_or_not)
-                .setPositiveButton(R.string.delete_text,
-                        { dialog, which ->
-
-                            doDeleteFile(abstractFile, position)
-                        })
-                .setNegativeButton(R.string.cancel, null)
-                .create().show()
-
-    }
-
-    private fun doDeleteFile(abstractFile: AbstractFile, position: Int) {
-
-        baseView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.delete_text)))
-
-        fileDataSource.deleteFile(abstractFile.name, rootFolderUUID, currentFolderUUID, object : BaseOperateCallback {
-
-            override fun onFail(operationResult: OperationResult?) {
-
-                baseView.dismissDialog()
-                SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT,
-                        messageStr = operationResult!!.getResultMessage(context))
-            }
-
-            override fun onSucceed() {
-
-                baseView.dismissDialog()
-
-                viewItems.removeAt(position)
-
-                fileRecyclerViewAdapter.setItemList(viewItems)
-
-                fileRecyclerViewAdapter.notifyItemRemoved(position)
-
-            }
-
-        })
-
-    }
-
     fun enterMovePageWhenSelectMode() {
 
         if (mSelectFiles.isEmpty())
@@ -1395,7 +1122,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
                 val itemFile = viewItem as ItemFile
 
                 itemFile.fileItemViewModel.doHandleMoreBtnOnClick = {
-                    doHandleMoreBtnOnClick(itemFile.getFile(), position)
+                    doHandleMoreBtnOnClick(itemFile.getFile(), holder!!.adapterPosition)
                 }
 
                 itemFile.fileItemViewModel.isSelectMode.set(isSelectMode)
@@ -1407,7 +1134,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 rootView?.setOnClickListener {
 
-                    handleItemOnClick(itemFile.getFile(), position)
+                    handleItemOnClick(itemFile.getFile(), holder.adapterPosition)
 
                 }
 
@@ -1426,7 +1153,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
                 val itemFolder = viewItem as ItemFolder
 
                 itemFolder.folderFileTitleViewModel.doHandleMoreBtnOnClick = {
-                    doHandleMoreBtnOnClick(itemFolder.getFile(), position)
+                    doHandleMoreBtnOnClick(itemFolder.getFile(), holder!!.adapterPosition)
                 }
 
                 val isSelected = selectFiles.contains(itemFolder.getFile())
@@ -1457,7 +1184,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 rootView?.setOnClickListener {
 
-                    handleItemOnClick(itemFolder.getFile(), position)
+                    handleItemOnClick(itemFolder.getFile(), holder.adapterPosition)
 
                 }
 

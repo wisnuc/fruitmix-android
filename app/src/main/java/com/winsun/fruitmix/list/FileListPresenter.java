@@ -273,7 +273,7 @@ public class FileListPresenter {
 
                     if (FileUtil.checkFileExistInDownloadFolder(currentUserUUID,abstractRemoteFile.getName())) {
 
-                        if (!abstractRemoteFile.openAbstractRemoteFile(context)) {
+                        if (!FileUtil.openAbstractRemoteFile(context,abstractRemoteFile.getName())) {
                             ToastUtil.showToast(context, context.getString(R.string.open_file_failed));
                         }
 

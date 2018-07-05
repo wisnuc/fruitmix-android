@@ -23,7 +23,7 @@ import java.util.*
 
 class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSource,
                            val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel,
-                           val offlineFileView: OfflineFileView,val currentUserUUID:String) {
+                           val offlineFileView: OfflineFileView, val currentUserUUID: String) {
 
     private val offlineFileAdapter = OfflineFileAdapter()
 
@@ -32,7 +32,8 @@ class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSou
     private val rootFolderPath = FileUtil.getDownloadFileFolderPath(currentUserUUID)
 
     private val rootFilterFolderPath = listOf<String>(FileUtil.getAudioRecordFolderPath(), FileUtil.getLocalPhotoMiniThumbnailFolderPath(),
-            FileUtil.getLocalPhotoThumbnailFolderPath(), FileUtil.getOriginalPhotoFolderPath())
+            FileUtil.getLocalPhotoThumbnailFolderPath(), FileUtil.getOriginalPhotoFolderPath(),
+            ".download")
 
     private val retrieveFolderPath = mutableListOf<String>()
 
@@ -226,15 +227,14 @@ class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSou
 
             itemView?.folderNameTv?.text = abstractLocalFile.name
 
-            itemView?.setOnClickListener {
+            itemView?.contentLayout?.setOnClickListener {
 
                 if (abstractLocalFile.isFolder) {
 
                     enterFolder(abstractLocalFile.path, Collections.emptyList())
 
                 } else
-                    FileUtil.openAbstractRemoteFile(itemView.context, abstractLocalFile.name)
-
+                    FileUtil.openDownloadedFile(itemView.context,File(abstractLocalFile.path))
             }
 
             itemView?.deleteLayout?.setOnClickListener {

@@ -896,6 +896,8 @@
 
     <string name="add_task_hint">The task was successfully created, please confirm in the transfer task list</string>
 
+    <string name="file_and_so_on">%1$s and so on</string>
+
     <!-- select mode -->
     <string name="no_select_file">Please select file</string>
 

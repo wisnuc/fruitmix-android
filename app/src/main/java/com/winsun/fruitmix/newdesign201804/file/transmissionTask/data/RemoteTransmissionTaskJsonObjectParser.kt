@@ -41,6 +41,7 @@ class RemoteTransmissionTaskJsonObjectParser(val threadManager: ThreadManager, v
         }
 
         val remoteFile = RemoteFile()
+
         remoteFile.name = entries.optString(0)
         remoteFile.rootFolderUUID = srcRootUUID
         remoteFile.parentFolderUUID = srcFolderUUID

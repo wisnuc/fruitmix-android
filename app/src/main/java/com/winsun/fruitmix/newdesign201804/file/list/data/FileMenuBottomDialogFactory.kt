@@ -93,8 +93,14 @@ class FileMenuBottomDialogFactory(val abstractFile: AbstractFile, bottomMenuItem
 
                     view?.switchBtn?.visibility = if (bottomMenuItem.isShowSwitchBtn()) View.VISIBLE else View.INVISIBLE
 
+                    val isSwitchEnabled = bottomMenuItem.isSwitchEnabled()
+
+                    view?.switchBtn?.isChecked = isSwitchEnabled
+
                     view?.switchBtn?.setOnClickListener {
+
                         bottomMenuItem.switchOnClick(bottomMenuItem)
+
                     }
 
                 }

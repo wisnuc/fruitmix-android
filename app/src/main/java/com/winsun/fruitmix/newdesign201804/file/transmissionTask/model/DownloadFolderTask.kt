@@ -216,7 +216,7 @@ class DownloadFolderTask(val stationFileRepository: StationFileRepository,
 
     private fun doCreateFolder(abstractRemoteFile: AbstractRemoteFile) {
 
-        FileUtil.createFolderIfNotExist(abstractRemoteFile.getDownloadFileFolderRootPath(createUserUUID))
+        FileUtil.createFolderIfNotExist(FileUtil.getDownloadFileFolderPath(createUserUUID))
         FileUtil.createFolderIfNotExist(abstractRemoteFile.getDownloadFileFolderParentFolderPath(createUserUUID))
 
         val path = abstractRemoteFile.getDownloadedFile(createUserUUID).absolutePath

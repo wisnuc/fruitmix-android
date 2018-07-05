@@ -29,6 +29,7 @@ import com.winsun.fruitmix.newdesign201804.file.move.MoveFileActivity
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.thread.manage.ThreadManager
+import com.winsun.fruitmix.util.FileTool
 import com.winsun.fruitmix.util.FileUtil
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
@@ -47,7 +48,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
             override fun execute() {
                 super.execute()
 
-                rename(context,abstractFile, position)
+                rename(context, abstractFile, position)
             }
         }))
 
@@ -60,23 +61,22 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
 
         if (!abstractFile.isFolder) {
 
+            val abstractRemoteFile = abstractFile as AbstractRemoteFile
+
             val bottomMenuItem = FileWithSwitchBottomItem(R.drawable.offline_available, context.getString(R.string.offline_available),
                     object : BaseAbstractCommand() {}, {
 
-                val abstractRemoteFile = abstractFile as AbstractRemoteFile
-
-                val fileDownloadParam = abstractRemoteFile.createFileDownloadParam()
-
-                val downloadTask = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractRemoteFile, fileDataSource, fileDownloadParam,
-                         threadManager)
-
-                transmissionTaskDataSource.addTransmissionTask(downloadTask)
-
-                SnackbarUtil.showSnackBar(view, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
+                if (it.isSwitchEnabled()) {
+                    deleteDownloadedFile(abstractRemoteFile)
+                } else {
+                    downloadFile(abstractRemoteFile)
+                }
 
                 it.dismissDialog()
 
             })
+
+            bottomMenuItem.setSwitchEnableState(abstractRemoteFile.getDownloadedFile(currentUserUUID).exists())
 
             bottomMenuItems.add(bottomMenuItem)
 
@@ -135,14 +135,14 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
             override fun execute() {
                 super.execute()
 
-                deleteFile(context,abstractFile, position)
+                deleteFile(context, abstractFile, position)
             }
 
         }))
 
         val dialog = FileMenuBottomDialogFactory(abstractFile, bottomMenuItems, {
 
-            FileDetailActivity.start(abstractFile as AbstractRemoteFile,context)
+            FileDetailActivity.start(abstractFile as AbstractRemoteFile, context)
 
         }).createDialog(context)
 
@@ -150,16 +150,47 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
 
     }
 
-    private fun openFileAfterOnClick(abstractFile: AbstractRemoteFile) {
-        if (FileUtil.checkFileExistInDownloadFolder(abstractFile.name,currentUserUUID))
-            FileUtil.openAbstractRemoteFile(fileOperationView.getActivity(), abstractFile.name)
+    private fun deleteDownloadedFile(abstractFile: AbstractRemoteFile) {
+
+        val result = FileTool.getInstance().deleteFile(abstractFile.getDownloadedFile(currentUserUUID).absolutePath)
+
+        if (result) {
+
+            SnackbarUtil.showSnackBar(view, Snackbar.LENGTH_SHORT,
+                    messageStr = baseView.getString(R.string.success, baseView.getString(R.string.delete_file)))
+
+        } else {
+            SnackbarUtil.showSnackBar(view, Snackbar.LENGTH_SHORT,
+                    messageStr = baseView.getString(R.string.fail, baseView.getString(R.string.delete_file)))
+        }
+
+    }
+
+    private fun downloadFile(abstractRemoteFile: AbstractRemoteFile) {
+        val fileDownloadParam = abstractRemoteFile.createFileDownloadParam()
+
+        val downloadTask = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractRemoteFile, fileDataSource, fileDownloadParam,
+                threadManager)
+
+        transmissionTaskDataSource.addTransmissionTask(downloadTask)
+
+        SnackbarUtil.showSnackBar(view, Snackbar.LENGTH_SHORT, R.string.add_task_hint)
+    }
+
+    fun openFileAfterOnClick(abstractFile: AbstractRemoteFile) {
+
+        val downloadedFile = abstractFile.getDownloadedFile(currentUserUUID)
+
+        if (downloadedFile.exists())
+
+            FileUtil.openDownloadedFile(fileOperationView.getActivity(), downloadedFile)
         else {
 
             val fileDownloadParam = FileFromStationFolderDownloadParam(abstractFile.uuid,
                     abstractFile.parentFolderUUID, abstractFile.rootFolderUUID, abstractFile.name)
 
             val task = DownloadTask(Util.createLocalUUid(), currentUserUUID, abstractFile, fileDataSource, fileDownloadParam,
-                     threadManager)
+                    threadManager)
 
             task.init()
 
@@ -180,7 +211,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
             taskProgressDialog.max = 100
 
             task.registerObserver(object : TaskStateObserver {
-                override fun notifyStateChanged(currentState: TaskState,preState:TaskState) {
+                override fun notifyStateChanged(currentState: TaskState, preState: TaskState) {
 
                     if (currentState is StartingTaskState) {
 
@@ -192,7 +223,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
 
                         taskProgressDialog.dismiss()
 
-                        FileUtil.openAbstractRemoteFile(fileOperationView.getActivity(), abstractFile.name)
+                        FileUtil.openDownloadedFile(fileOperationView.getActivity(), abstractFile.getDownloadedFile(currentUserUUID))
 
                         task.unregisterObserver(this)
 
@@ -208,7 +239,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
         }
     }
 
-    private fun rename(context: Context,abstractFile: AbstractFile, position: Int) {
+    private fun rename(context: Context, abstractFile: AbstractFile, position: Int) {
 
         val editText = EditText(context)
         editText.hint = abstractFile.name
@@ -223,7 +254,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
                     if (newName.isEmpty()) {
                         SnackbarUtil.showSnackBar(view, Snackbar.LENGTH_SHORT, R.string.new_name_empty_hint)
                     } else if (oldName != newName) {
-                        doRename(context,oldName, newName, abstractFile, position)
+                        doRename(context, oldName, newName, abstractFile, position)
                     }
 
                 })
@@ -232,7 +263,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
 
     }
 
-    private fun doRename(context: Context,oldName: String, newName: String, abstractFile: AbstractFile, position: Int) {
+    private fun doRename(context: Context, oldName: String, newName: String, abstractFile: AbstractFile, position: Int) {
 
         baseView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.rename)))
 
@@ -286,20 +317,20 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
 
     }
 
-    private fun deleteFile(context: Context,abstractFile: AbstractFile, position: Int) {
+    private fun deleteFile(context: Context, abstractFile: AbstractFile, position: Int) {
 
         AlertDialog.Builder(context).setTitle(R.string.delete_or_not)
                 .setPositiveButton(R.string.delete_text,
                         { dialog, which ->
 
-                            doDeleteFile(context,abstractFile, position)
+                            doDeleteFile(context, abstractFile, position)
                         })
                 .setNegativeButton(R.string.cancel, null)
                 .create().show()
 
     }
 
-    private fun doDeleteFile(context: Context,abstractFile: AbstractFile, position: Int) {
+    private fun doDeleteFile(context: Context, abstractFile: AbstractFile, position: Int) {
 
         baseView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.delete_text)))
 

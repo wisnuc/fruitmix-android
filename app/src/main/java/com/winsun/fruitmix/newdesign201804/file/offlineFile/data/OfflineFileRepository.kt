@@ -10,12 +10,12 @@ import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.util.FileUtil
 import java.io.File
 
-class OfflineFileRepository(threadManager: ThreadManager): BaseDataRepository(threadManager),OfflineFileDataSource {
+class OfflineFileRepository(threadManager: ThreadManager) : BaseDataRepository(threadManager), OfflineFileDataSource {
 
     override fun getFile(folderPath: String, filterPaths: List<String>, baseLoadDataCallback: BaseLoadDataCallback<AbstractLocalFile>) {
 
         mThreadManager.runOnCacheThread({
-            doGetFile(folderPath,filterPaths,createLoadCallbackRunOnMainThread(baseLoadDataCallback))
+            doGetFile(folderPath, filterPaths, createLoadCallbackRunOnMainThread(baseLoadDataCallback))
         })
 
     }
@@ -27,7 +27,17 @@ class OfflineFileRepository(threadManager: ThreadManager): BaseDataRepository(th
 
         if (files != null) {
 
-            val fileLists = files.filter { !filterPaths.contains(it.path) }
+            val fileLists = files.filter {
+
+                val file = it
+
+                !(filterPaths.any {
+
+                    file.path.contains(it)
+
+                })
+
+            }
 
             for (file in fileLists) {
 

@@ -14,6 +14,7 @@ import com.winsun.fruitmix.http.request.factory.HttpRequestFactory
 import com.winsun.fruitmix.model.operationResult.*
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.RemoteOneTransmissionTaskParser
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.ErrorTaskState
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.FinishTaskState
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.StartingTaskState
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task
 import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileInterface
@@ -206,7 +207,7 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
             return OperationJSONException()
         }
 
-        return handleUploadFileRequest(request,task)
+        return handleUploadFileRequest(request, task)
 
     }
 
@@ -216,9 +217,13 @@ class FileNewOperateDataSource(httpRequestFactory: HttpRequestFactory, iHttpUtil
 
             httpResponse = iHttpUtil.remoteCallRequest(request)
 
-            return if (httpResponse != null && httpResponse.responseCode == 200)
+            return if (httpResponse != null && httpResponse.responseCode == 200) {
+
+                task.setCurrentState(FinishTaskState(task.abstractFile.size, task))
+
                 OperationSuccess()
-            else {
+
+            } else {
 
                 task.setCurrentState(ErrorTaskState(task))
 

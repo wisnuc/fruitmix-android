@@ -15,10 +15,10 @@
             android:id="@+id/deleteTv"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
             android:background="#f44336"
             android:gravity="center"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
             android:text="@string/offline_unavailable"
             android:textColor="@color/eighty_seven_percent_white"
             android:textSize="16dp"
@@ -30,6 +30,7 @@
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/contentLayout"
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:background="@color/white">

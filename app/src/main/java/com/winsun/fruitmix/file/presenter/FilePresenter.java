@@ -1328,7 +1328,7 @@ public class FilePresenter implements OnViewSelectListener, ActiveView {
 
                         if (FileUtil.checkFileExistInDownloadFolder(abstractRemoteFile.getName(),currentUserUUID)) {
 
-                            if (!abstractRemoteFile.openAbstractRemoteFile(activity)) {
+                            if (!FileUtil.openAbstractRemoteFile(activity,abstractRemoteFile.getName())) {
                                 ToastUtil.showToast(activity, activity.getString(R.string.open_file_failed));
                             }
 
