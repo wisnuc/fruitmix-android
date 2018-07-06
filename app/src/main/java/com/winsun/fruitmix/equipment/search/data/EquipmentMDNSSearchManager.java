@@ -82,12 +82,16 @@ public class EquipmentMDNSSearchManager implements EquipmentSearchManager{
                     @Override
                     public void call(Throwable throwable) {
                         Log.e(TAG, "Equipment: " + throwable);
+
+                        throwable.printStackTrace();
                     }
                 });
 
     }
 
     public void stopDiscovery() {
+
+        Log.d(TAG, "stopDiscovery");
 
         if (mSubscription != null) {
             mSubscription.unsubscribe();

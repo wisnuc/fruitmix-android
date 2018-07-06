@@ -24,7 +24,6 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
-import com.github.druk.rxdnssd.BonjourService;
 import com.szysky.customize.siv.SImageView;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.GravityArcMotion;
@@ -33,19 +32,21 @@ import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.user.DefaultCommentUser;
 import com.winsun.fruitmix.user.User;
+import com.winsun.fruitmix.util.digestInputStream.DigestFileInputStream;
+import com.winsun.fruitmix.util.digestInputStream.DigestInputStream;
+import com.winsun.fruitmix.util.digestInputStream.DigestRandomAccessFileInputStream;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -273,32 +274,169 @@ public class Util {
         return metric;
     }
 
+    public static String calcSHA256OfFile(String filePath, long startPosition, long offset) {
+
+        byte[] digest = calcSHA256OfFileReturnByte(filePath, startPosition, offset);
+
+        return covertByteToString(digest);
+
+    }
+
+    public static String covertByteToString(byte[] digest) {
+
+        String digits = "0123456789abcdef";
+        int i;
+        StringBuilder st;
+
+        st = new StringBuilder();
+        for (i = 0; i < digest.length; i++) {
+            st.append(digits.charAt((digest[i] >> 4) & 0xf));
+            st.append(digits.charAt(digest[i] & 0xf));
+        }
+        return st.toString();
+    }
+
+    public static byte[] calcSHA256OfFileReturnByte(String filePath, long startPosition, long offset) {
+
+        byte[] digest = new byte[0];
+        MessageDigest md;
+        byte[] buffer;
+        int len = 0;
+
+        int currentReadCount = 0;
+
+        int bufferSize = 1024 * 1024;
+
+        try {
+
+            DigestInputStream digestInputStream;
+
+            if (startPosition > 0) {
+
+                RandomAccessFile randomAccessFile = new RandomAccessFile(filePath, "r");
+
+                randomAccessFile.seek(startPosition);
+                digestInputStream = new DigestRandomAccessFileInputStream(randomAccessFile);
+            } else {
+                digestInputStream = new DigestFileInputStream(new FileInputStream(filePath));
+            }
+
+            buffer = new byte[bufferSize];
+            md = MessageDigest.getInstance("SHA-256");
+            while (true) {
+
+                if (offset - currentReadCount < bufferSize) {
+
+                    int count = (int) offset - currentReadCount;
+
+                    buffer = new byte[count];
+
+                    len = digestInputStream.read(buffer, 0, count);
+
+                } else
+                    len = digestInputStream.read(buffer, 0, bufferSize);
+
+                currentReadCount += len;
+
+                if (len == -1)
+                    break;
+                else if (currentReadCount < offset) {
+                    md.update(buffer, 0, len);
+                } else if (currentReadCount == offset) {
+                    md.update(buffer, 0, len);
+                    break;
+                } else
+                    break;
+
+            }
+
+            Log.d(TAG, "calcSHA256OfFile: currentReadCount: " + currentReadCount);
+
+            digestInputStream.close();
+            digest = md.digest();
+
+            return digest;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        return digest;
+
+    }
 
     public static String calcSHA256OfFile(String filePath) {
-        MessageDigest md;
+
         FileInputStream fin;
+
+        try {
+
+            fin = new FileInputStream(filePath);
+
+            return calcSHA256OfFile(new DigestFileInputStream(fin));
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return "";
+
+    }
+
+    public static byte[] calcSHA256OfFileReturnByte(byte[] bytes) {
+
+        MessageDigest md;
+        byte[] digest = new byte[0];
+
+        try {
+            md = MessageDigest.getInstance("SHA-256");
+
+            md.update(bytes);
+
+            digest = md.digest();
+
+            return digest;
+
+        } catch (Exception e) {
+            return digest;
+        }
+
+    }
+
+    private static String calcSHA256OfFile(DigestInputStream digestInputStream) {
+        MessageDigest md;
         byte[] buffer;
         byte[] digest;
         String digits = "0123456789abcdef";
         int len, i;
-        String st;
+        StringBuilder st;
+
+        int currentReadCount = 0;
 
         try {
             buffer = new byte[15000];
             md = MessageDigest.getInstance("SHA-256");
-            fin = new FileInputStream(filePath);
-            len = 0;
-            while ((len = fin.read(buffer)) != -1) {
+
+            while ((len = digestInputStream.read(buffer)) != -1) {
+
+                currentReadCount += len;
                 md.update(buffer, 0, len);
             }
-            fin.close();
+
+            Log.d(TAG, "calcSHA256OfFile: currentReadCount: " + currentReadCount);
+
+            digestInputStream.close();
             digest = md.digest();
-            st = "";
+            st = new StringBuilder();
             for (i = 0; i < digest.length; i++) {
-                st += digits.charAt((digest[i] >> 4) & 0xf);
-                st += digits.charAt(digest[i] & 0xf);
+                st.append(digits.charAt((digest[i] >> 4) & 0xf));
+                st.append(digits.charAt(digest[i] & 0xf));
             }
-            return st;
+            return st.toString();
         } catch (Exception e) {
             return "";
         }
@@ -1065,7 +1203,7 @@ public class Util {
         }
     }
 
-    public static void fillGroupUserAvatar(PrivateGroup group, SImageView sImageView){
+    public static void fillGroupUserAvatar(PrivateGroup group, SImageView sImageView) {
 
         List<User> users = group.getUsers();
 

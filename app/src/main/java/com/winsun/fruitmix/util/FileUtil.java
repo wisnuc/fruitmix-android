@@ -72,7 +72,7 @@ public class FileUtil {
     private static final String ORIGINAL_PHOTO_FOLDER_NAME = "originalPhoto";
 
     private static final String AUDIO_RECORD_FOLDER_NAME = "audioRecord";
-    
+
     private static final String NO_MEDIA = ".nomedia";
 
     public static boolean checkExternalStorageState() {
