@@ -10,7 +10,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.file.data.model.RemoteFolder
 import com.winsun.fruitmix.model.operationResult.OperationResult
-import com.winsun.fruitmix.newdesign201804.component.inflateView
+import com.winsun.fruitmix.newdesign201804.util.inflateView
 import com.winsun.fruitmix.newdesign201804.file.transmission.TransmissionDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmission.model.Transmission
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource

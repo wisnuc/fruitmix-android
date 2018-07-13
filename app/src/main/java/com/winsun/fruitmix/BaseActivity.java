@@ -2,38 +2,20 @@ package com.winsun.fruitmix;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.databinding.ViewDataBinding;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.widget.Toast;
 
-import com.winsun.fruitmix.databinding.ActivityMaintenanceBinding;
-import com.winsun.fruitmix.databinding.NewFirmwareVersionPromptBinding;
 import com.winsun.fruitmix.databinding.ToolbarLayoutBinding;
-import com.winsun.fruitmix.dialog.DialogFactory;
 import com.winsun.fruitmix.eventbus.OperationEvent;
-import com.winsun.fruitmix.firmware.FirmwareActivity;
 import com.winsun.fruitmix.interfaces.BaseView;
-import com.winsun.fruitmix.login.InjectLoginUseCase;
-import com.winsun.fruitmix.logout.InjectLogoutUseCase;
-import com.winsun.fruitmix.network.InjectNetworkStateManager;
 import com.winsun.fruitmix.network.NetworkReceiver;
-import com.winsun.fruitmix.network.NetworkState;
-import com.winsun.fruitmix.services.ButlerService;
-import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
-import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
-import com.winsun.fruitmix.util.FNAS;
-import com.winsun.fruitmix.util.SnackbarUtil;
 import com.winsun.fruitmix.util.ToastUtil;
 import com.winsun.fruitmix.util.Util;
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel;
@@ -109,38 +91,6 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
 
         if (networkReceiver != null) {
             unregisterReceiver(networkReceiver);
-        }
-
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void handleOperationEvent(OperationEvent operationEvent) {
-
-        action = operationEvent.getAction();
-
-        switch (action) {
-            case Util.TOKEN_INVALID:
-                FNAS.handleLogout();
-                InjectLogoutUseCase.provideLogoutUseCase(this).logout();
-
-                InjectLoginUseCase.provideLoginUseCase(this).setAlreadyLogin(false);
-
-                showToast("token失效");
-
-                EquipmentSearchActivity.gotoEquipmentActivity(this, true);
-
-                break;
-            case Util.NETWORK_CHANGED:
-
-//            checkShowAutoUploadWhenConnectedWithMobileNetwork();
-
-                break;
-            case Util.KEY_STOP_CURRENT_ACTIVITY:
-
-                Log.d(TAG, "handleOperationEvent: call onBackPressed in current activity " + this);
-
-                break;
-
         }
 
     }

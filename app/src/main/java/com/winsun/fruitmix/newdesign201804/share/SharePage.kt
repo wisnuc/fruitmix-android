@@ -55,10 +55,6 @@ class SharePage(val activity: Activity) : MainPage {
 
     }
 
-    override fun canEnterSelectMode(): Boolean {
-        return false
-    }
-
     override fun toggleOrientation() {
 
     }

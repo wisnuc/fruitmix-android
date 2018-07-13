@@ -1,7 +1,7 @@
 package com.winsun.fruitmix.newdesign201804.file.transmissionTask.data
 
 import android.util.Log
-import com.winsun.fruitmix.BaseDataRepository
+import com.winsun.fruitmix.model.BaseDataRepository
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.callback.BaseOperateDataCallback

@@ -6,5 +6,3 @@ package com.winsun.fruitmix.equipment.search.data
 
 data class EquipmentBootInfo(val mode: String, val last: String, val state: String, val current: String, val error: String)
 
-data class EquipmentStorageInfo(val emptyVolumes:Boolean)
-

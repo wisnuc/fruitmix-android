@@ -3,13 +3,11 @@ package com.winsun.fruitmix.media;
 import android.util.Log;
 
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +36,7 @@ public class FilterLocalStationMediaStrategy {
 
         List<Media> result = new ArrayList<>(localMedias);
 
-        Map<String, Media> stationMediaMap = LocalCache.BuildMediaMapKeyIsUUID(stationMedias);
+        Map<String, Media> stationMediaMap = MediaUtil.BuildMediaMapKeyIsUUID(stationMedias);
 
         for (Media media : localMedias) {
 

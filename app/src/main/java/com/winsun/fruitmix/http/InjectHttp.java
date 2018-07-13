@@ -31,10 +31,6 @@ public class InjectHttp {
 
     }
 
-    public static IHttpFileUtil provideIHttpFileUtil() {
-        return OkHttpUtil.getInstance();
-    }
-
     public static UploadFileInterface provideUploadFileInterface() {
         return OkHttpUtil.getInstance();
     }

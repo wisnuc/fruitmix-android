@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.android.volley.toolbox.ImageRequest;
 import com.winsun.fruitmix.exception.NetworkException;
-import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.Task;
 import com.winsun.fruitmix.newdesign201804.file.upload.ProgressUploadRequestBody;
 import com.winsun.fruitmix.newdesign201804.file.upload.UploadFileInterface;
@@ -22,7 +21,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
-import okhttp3.FormBody;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -30,21 +28,20 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
  * Created by Administrator on 2016/12/22.
  */
 
-public class OkHttpUtil implements IHttpUtil, IHttpFileUtil, UploadFileInterface {
+public class OkHttpUtil implements IHttpUtil, UploadFileInterface {
 
     public static final String TAG = OkHttpUtil.class.getSimpleName();
 
     private OkHttpClient okHttpClient;
 
     private static final String APPLICATION_JSON_STRING = "application/json";
-    private static final String JPEG_STRING = "image/*";
+
 
     private static OkHttpUtil instance;
 
@@ -195,16 +192,6 @@ public class OkHttpUtil implements IHttpUtil, IHttpFileUtil, UploadFileInterface
         Request.Builder builder = generateRequestBuilder(httpRequest);
 
         return builder.post(requestBody).build();
-    }
-
-
-    @Override
-    public Request createUploadWithProgressRequest(HttpRequest httpRequest, RequestBody requestBody, FileUploadState fileUploadState) {
-        Request.Builder builder;
-
-        builder = generateRequestBuilder(httpRequest);
-
-        return builder.post(new ProgressRequestBody(requestBody, fileUploadState)).build();
     }
 
     @NotNull

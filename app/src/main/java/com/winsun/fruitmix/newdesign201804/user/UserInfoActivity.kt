@@ -30,7 +30,7 @@ fun startUserInfoActivity(toolbar: View?, activity: Activity, transitionView: Vi
 
     val pair = Pair(transitionView, TRANSITION_AVATAR_NAME)
 
-    val pairs = Util.createSafeTransitionPairs(toolbar, activity, false, pair)
+    val pairs = Util.createSafeTransitionPairs(toolbar, activity,  pair)
 
     val activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, *pairs)
 

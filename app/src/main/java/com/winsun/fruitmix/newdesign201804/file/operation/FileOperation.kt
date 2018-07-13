@@ -17,7 +17,7 @@ import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.BottomMenuItem
 import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
-import com.winsun.fruitmix.newdesign201804.component.createFileDownloadParam
+import com.winsun.fruitmix.newdesign201804.util.createFileDownloadParam
 import com.winsun.fruitmix.newdesign201804.file.detail.FileDetailActivity
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileMenuBottomDialogFactory

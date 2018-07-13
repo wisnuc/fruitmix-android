@@ -2,7 +2,7 @@ package com.winsun.fruitmix.invitation.data;
 
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.invitation.ConfirmInviteUser;
+import com.winsun.fruitmix.invitation.model.ConfirmInviteUser;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.util.Util;
 

@@ -29,7 +29,6 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.anim.GravityArcMotion;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.UserComment;
-import com.winsun.fruitmix.model.LoginType;
 import com.winsun.fruitmix.user.DefaultCommentUser;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.digestInputStream.DigestFileInputStream;
@@ -62,115 +61,33 @@ public class Util {
 
     public static final String TAG = Util.class.getSimpleName();
 
-    public static final String CUSTOM_ERROR_CODE_HEAD = "8";
-
-    public static final String CUSTOM_ERROR_CODE_UPLOAD_MEDIA = "01";
-    public static final String CUSTOM_ERROR_CODE_GET_UPLOADED_MEDIA = "02";
-    public static final String CUSTOM_ERROR_CODE_GET_ALL_MEDIA_I_CAN_VIEW = "03";
-    public static final String CUSTOM_ERROR_CODE_CREATE_FOLDER = "04";
-    public static final String CUSTOM_ERROR_CODE_GET_FOLDER = "05";
-
-    public static final String SHOW_ALBUM_TIPS = "show_album_tips";
-    public static final String USER_GROUP_NAME = "user_group_name";
-    public static final String USER_NAME = "user_child_name";
-    public static final String USER_BG_COLOR = "user_bg_color";
-    public static final String USER_IS_ADMIN = "user_is_admin";
-    public static final String USER_HOME = "user_home";
-    public static final String JWT = "jwt";
-    public static final String GATEWAY = "gateway";
-    public static final String USER_UUID = "user_uuid";
-
     public static final String SHA_256_STRING = "sha256";
     public static final String SIZE_STRING = "size";
     public static final String MANIFEST_STRING = "manifest";
 
-    public static final String AUTO_UPLOAD_OR_NOT = "auto_upload_or_not";
-
-    public static final String REMOTE_USER_CREATED = "remote_user_created";
-
-    public static final String DOWNLOADED_FILE_DELETED = "downloaded_file_deleted";
-
-    public static final String SHARED_PHOTO_THUMB_RETRIEVED = "shared_photo_thumb_retrieved";
-
-    public static final String NEW_LOCAL_MEDIA_IN_CAMERA_RETRIEVED = "new_local_media_in_camera_retrieved";
-
-    public static final String CALC_NEW_LOCAL_MEDIA_DIGEST_FINISHED = "calc_new_local_media_digest_finished";
-
     public static final String GET_NEW_COMMENT_FINISHED = "get_new_comment_finished";
-
-    public static final String LOCAL_MEDIA_RETRIEVED = "local_media_retrieved";
-    public static final String REMOTE_MEDIA_RETRIEVED = "remote_media_retrieved";
-    public static final String REMOTE_USER_RETRIEVED = "remote_user_retrieved";
-    public static final String REMOTE_TOKEN_RETRIEVED = "remote_token_retrieved";
-    public static final String REMOTE_DEVICE_ID_RETRIEVED = "remote_device_id_retrieved";
-    public static final String REMOTE_FILE_RETRIEVED = "remote_file_retrieved";
-    public static final String REMOTE_FILE_SHARE_RETRIEVED = "remote_file_share_retrieved";
-
-    public static final String REMOTE_CONFIRM_INVITE_USER_RETRIEVED = "remote_confirm_invite_user_retrieved";
 
     public static final String LOCAL_VIDEO_THUMBNAIL_RETRIEVED = "local_video_thumbnail_retrieved";
 
-    public static final String REFRESH_VIEW_AFTER_DATA_RETRIEVED = "refresh_view_after_data_retrieved";
-
-    public static final String DOWNLOADED_FILE_RETRIEVED = "downloaded_file_retrieved";
-
     public static final String LOGIN_STATE_CHANGED = "login_state_changed";
 
-    public static final String SET_CURRENT_LOGIN_USER_AFTER_LOGIN = "set_current_login_user_after_login";
-
-    public static final String RECOMMEND_ALBUM_CREATED = "recommend_album_created";
-
-    public static final String TOKEN_INVALID = "token_invalid";
-
-    public static final String NETWORK_CHANGED = "network_changed";
-
-    public static final String ONLY_UPLOAD_OR_DOWNLOAD_WITH_WIFI_SETTING_CHANGED = "only_upload_or_download_with_wifi_setting_changed";
-
-    public static final String KEY_STOP_CURRENT_ACTIVITY = "key_stop_current_activity";
-
-    public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
     public static final String KEY_AUTHORIZATION = "Authorization";
     public static final String KEY_JWT_HEAD = "JWT ";
     public static final String KEY_BASE_HEAD = "Basic ";
 
-    public static final String KEY_GROUP_UUID = "key_group_uuid";
-
-    public static final String ADD = "add";
-    public static final String DELETE = "delete";
-
-    public static final int KEY_CHOOSE_PHOTO_REQUEST_CODE = 102;
-    public static final int KEY_LOGIN_REQUEST_CODE = 103;
-
-    public static final int KEY_MANUAL_INPUT_IP_REQUEST_CODE = 107;
-    public static final int KEY_CREATE_USER_REQUEST_CODE = 108;
-
     public static final String HTTP = "http://";
-    public static final String MEDIA_PARAMETER = "/media";
-    public static final String ADMIN_USER_PARAMETER = "/admin/users";
-    public static final String ACCOUNT_PARAMETER = "/account";
+
     public static final String TOKEN_PARAMETER = "/token";
     public static final String USERS_PARAMETER = "/users";
-    public static final String DEVICE_ID_PARAMETER = "/libraries";
-    public static final String LIST_FILE_PARAMETER = "/files/fruitmix/list";
-    public static final String DOWNLOAD_FILE_PARAMETER = "/files/fruitmix/download";
-    public static final String FILE_SHARE_PARAMETER = "/share";
-    public static final String TICKETS_PARAMETER = "/station/tickets";
-
-    public static final String FILE_SHARED_WITH_ME_PARAMETER = "/sharedWithMe";
-    public static final String FILE_SHARED_WITH_OTHERS_PARAMETER = "/sharedWithOthers";
 
     public static final String FRUITMIX_SHAREDPREFERENCE_NAME = "fruitMix";
-
-    public static final String DEVICE_ID_MAP_NAME = "deviceID";
 
     public static final String HTTP_GET_METHOD = "GET";
     public static final String HTTP_POST_METHOD = "POST";
     public static final String HTTP_PATCH_METHOD = "PATCH";
     public static final String HTTP_DELETE_METHOD = "DELETE";
     public static final String HTTP_PUT_METHOD = "PUT";
-    public static final int HTTP_CONNECT_TIMEOUT = 30 * 1000;
 
-    public static final int HTTP_READ_TIMEOUT = 30 * 1000;
     public static final int HTTP_WRITE_TIMEOUT = 60 * 1000;
 
     public static final String INITIAL_PHOTO_POSITION = "initial_photo_position";
@@ -178,72 +95,13 @@ public class Util {
     public static final String CURRENT_MEDIA_KEY = "current_media_key";
     public static final String CURRENT_MEDIASHARE_TIME = "current_mediashare_time";
 
-    public static final String SWITCH_INBOX_MODULE_UMENG_EVENT_ID = "switch_inbox_module";
-    public static final String SWITCH_FILE_MODULE_UMENG_EVENT_ID = "switch_file_module";
-    public static final String SWITCH_GROUP_MODULE_UMENG_EVENT_ID = "switch_group_module";
-    public static final String SWITCH_MEDIA_MODULE_UMENG_EVENT_ID = "switch_media_module";
     public static final String SWITCH_ORIGINAL_MEDIA_UMENG_EVENT_ID = "switch_original_media";
 
     public static final String DEFAULT_DATE = "1916-01-01";
 
-    public static final String KEY_ALREADY_SELECTED_IMAGE_KEY_ARRAYLIST = "key_already_selected_image_key_arraylist";
-
     public static final String KEY_TRANSITION_PHOTO_NEED_SHOW_THUMB = "key_transition_photo_need_show_thumb";
 
     public static final String KEY_NEED_TRANSITION = "key_need_transition";
-
-    public static final String KEY_SHOW_SOFT_INPUT_WHEN_ENTER = "key_show_soft_input_when_enter";
-
-    public static final String KEY_MANUAL_INPUT_IP = "key_manual_input_ip";
-
-    public static final String KEY_SHOULD_STOP_SERVICE = "key_should_stop_service";
-
-    public static final int WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 1;
-
-    public static final String NEED_SHOW_AUTO_UPLOAD_DIALOG = "need_show_auto_upload_dialog";
-
-    public static final long DEFAULT_REFRESH_TICKET_DELAY_TIME = 20 * 1000;
-
-    public static long refreshTicketsDelayTime = DEFAULT_REFRESH_TICKET_DELAY_TIME;
-
-    public static final long MAX_REFRESH_MEDIA_SHARE_DELAY_TIME = 60 * 1000;
-
-    public static final int MAX_PHOTO_SIZE = 1000;
-
-    public static LoginType loginType = LoginType.LOGIN;
-
-    private static boolean localMediaInCameraLoaded = false;
-
-    private static boolean localMediaInDBLoaded = false;
-
-    private static boolean remoteMediaLoaded = false;
-
-    public static boolean isRemoteMediaLoaded() {
-        return remoteMediaLoaded;
-    }
-
-    public static void setRemoteMediaLoaded(boolean remoteMediaLoaded) {
-        Util.remoteMediaLoaded = remoteMediaLoaded;
-    }
-
-    public static boolean isLocalMediaInCameraLoaded() {
-        return localMediaInCameraLoaded;
-    }
-
-    public static void setLocalMediaInCameraLoaded(boolean localMediaInCameraLoaded) {
-        Util.localMediaInCameraLoaded = localMediaInCameraLoaded;
-    }
-
-    public static boolean isLocalMediaInDBLoaded() {
-        return localMediaInDBLoaded;
-    }
-
-    public static void setLocalMediaInDBLoaded(boolean localMediaInDBLoaded) {
-        Util.localMediaInDBLoaded = localMediaInDBLoaded;
-    }
-
-    public static boolean clearFileDownloadItem = false;
-
 
     /**
      * 将dp转化为px
@@ -272,14 +130,6 @@ public class Util {
         activity.getWindowManager().getDefaultDisplay().getMetrics(metric);
 
         return metric;
-    }
-
-    public static String calcSHA256OfFile(String filePath, long startPosition, long offset) {
-
-        byte[] digest = calcSHA256OfFileReturnByte(filePath, startPosition, offset);
-
-        return covertByteToString(digest);
-
     }
 
     public static String covertByteToString(byte[] digest) {
@@ -578,43 +428,10 @@ public class Util {
         return builder.toString();
     }
 
-    public static void hideSoftInput(Activity activity) {
-        InputMethodManager methodManager = (InputMethodManager) activity.getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (activity.getCurrentFocus() != null && methodManager != null) {
-            methodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
-        }
-    }
-
-    public static void showSoftInput(Activity activity, View view) {
-        InputMethodManager methodManager = (InputMethodManager) activity.getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        if (methodManager != null)
-            methodManager.showSoftInput(view, 0);
-    }
-
-    public static int[] formatPhotoWidthHeight(int width, int height) {
-//        if (width >= height) {
-//            width = width * 200 / height;
-//            height = 200;
-//        } else {
-//            height = height * 200 / width;
-//            width = 200;
-//        }
-
-        int actualWidth = 200;
-        int actualHeight = 200;
-
-        return new int[]{actualWidth, actualHeight};
-    }
 
     public static boolean checkRunningOnLollipopOrHigher() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
-
-    public static String removeWrap(String str) {
-        return str.replaceAll("\r|\n", "");
-    }
-
 
     public static String getVersionName(Context context) {
 
@@ -717,7 +534,7 @@ public class Util {
 
     }
 
-    public static Pair<View, String>[] createSafeTransitionPairs(View toolbar, Activity activity, boolean includeBottomNavigationView, Pair... otherPairs) {
+    public static Pair<View, String>[] createSafeTransitionPairs(View toolbar, Activity activity,  Pair... otherPairs) {
 
         // Avoid system UI glitches as described here:
         // https://plus.google.com/+AlexLockwood/posts/RPtwZ5nNebb
@@ -745,21 +562,6 @@ public class Util {
         if (toolbar != null) {
             Pair toolbarPair = new Pair<>(toolbar, activity.getString(R.string.transition_toolbar));
             pairs.add(toolbarPair);
-        }
-
-        if (includeBottomNavigationView) {
-
-            View bottomNavigationView = decor.findViewById(R.id.bottom_navigation_view);
-
-            if (bottomNavigationView != null) {
-
-                Pair bottomNavigationViewPair = new Pair<>(bottomNavigationView,
-                        activity.getString(R.string.transition_bottom_navigation_view));
-
-                pairs.add(bottomNavigationViewPair);
-
-            }
-
         }
 
         // only add transition participants if there's at least one none-null element
@@ -913,75 +715,10 @@ public class Util {
 
         return Patterns.IP_ADDRESS.matcher(ip).matches();
 
-/*        String ipRegularExpression = "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})";
-
-        Pattern pattern = Pattern.compile(ipRegularExpression);
-
-        Matcher matcher = pattern.matcher(ip);
-
-        boolean result =  matcher.matches();
-
-        if(!result)
-            return false;
-
-        String[] ips = ip.split("\\.");
-
-        for (String item:ips){
-
-            long num = Long.valueOf(item);
-
-            if(num > 255)
-                return false;
-
-        }
-
-        return true;*/
-
     }
-
 
     public static void startActivity(Context context, Class target) {
         context.startActivity(new Intent(context, target));
-    }
-
-    public static void setTopMargin(View view, int top) {
-        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
-
-            params.topMargin = top;
-
-            view.requestLayout();
-        }
-    }
-
-    public static void setLeftMargin(View view, int left) {
-        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
-
-            params.leftMargin = left;
-
-            view.requestLayout();
-        }
-    }
-
-    public static void setRightMargin(View view, int right) {
-        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
-
-            params.rightMargin = right;
-
-            view.requestLayout();
-        }
-    }
-
-    public static void setBottomMargin(View view, int bottom) {
-        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
-
-            params.bottomMargin = bottom;
-
-            view.requestLayout();
-        }
     }
 
     public static void setMargin(View view, int left, int top, int right, int bottom) {

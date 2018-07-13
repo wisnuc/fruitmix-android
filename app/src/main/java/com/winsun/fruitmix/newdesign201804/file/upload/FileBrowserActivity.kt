@@ -1,7 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.upload
 
 import android.app.Activity
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.view.View
@@ -9,7 +8,7 @@ import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.file.view.LocalFileFragment
-import com.winsun.fruitmix.newdesign201804.component.inflateView
+import com.winsun.fruitmix.newdesign201804.util.inflateView
 import com.winsun.fruitmix.newdesign201804.file.move.SelectMoveFileDataSource
 import kotlinx.android.synthetic.main.activity_file_browser.*
 

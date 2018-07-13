@@ -2,7 +2,7 @@ package com.winsun.fruitmix.user.datasource;
 
 import android.util.Log;
 
-import com.winsun.fruitmix.BaseDataRepository;
+import com.winsun.fruitmix.model.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
@@ -209,10 +209,6 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
         cacheUsers.clear();
     }
 
-    @Override
-    public boolean clearAllUsersInDB() {
-        return userDBDataSource.clearUsers();
-    }
 
     @Override
     public void getUsersByStationIDWithCloudAPI(final String stationID, final BaseLoadDataCallback<User> callback) {
@@ -251,15 +247,6 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
 
     }
 
-    @Override
-    public boolean updateUser(User user) {
-
-        boolean result = userDBDataSource.updateUser(user);
-
-        cacheUsers.put(user.getUuid(), user);
-
-        return result;
-    }
 
     @Override
     public User getUserByUUID(String userUUID) {
@@ -276,18 +263,6 @@ public class UserDataRepositoryImpl extends BaseDataRepository implements UserDa
         }
 
         return cacheUsers.get(userUUID);
-    }
-
-    @Override
-    public User getUserByGUID(String userGUID) {
-
-        for (User user : cacheUsers.values()) {
-
-            if (user.getAssociatedWeChatGUID().equals(userGUID))
-                return user;
-        }
-
-        return null;
     }
 
     @Override

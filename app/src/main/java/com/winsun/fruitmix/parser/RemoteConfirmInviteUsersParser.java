@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.parser;
 
-import com.winsun.fruitmix.invitation.ConfirmInviteUser;
+import com.winsun.fruitmix.invitation.model.ConfirmInviteUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;

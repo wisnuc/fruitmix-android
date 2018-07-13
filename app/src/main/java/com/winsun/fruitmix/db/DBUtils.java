@@ -8,22 +8,16 @@ import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.winsun.fruitmix.file.data.download.FinishedTaskItem;
-import com.winsun.fruitmix.file.data.download.FileDownloadItem;
 import com.winsun.fruitmix.file.data.model.AbstractFile;
 import com.winsun.fruitmix.file.data.model.AbstractLocalFile;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
 import com.winsun.fruitmix.file.data.station.StationFileRepository;
-import com.winsun.fruitmix.file.data.upload.FileUploadErrorState;
-import com.winsun.fruitmix.file.data.upload.FileUploadFinishedState;
-import com.winsun.fruitmix.file.data.upload.FileUploadItem;
-import com.winsun.fruitmix.file.data.upload.FileUploadPendingState;
-import com.winsun.fruitmix.file.data.upload.FileUploadState;
+
 import com.winsun.fruitmix.group.data.model.GroupUserWrapper;
 import com.winsun.fruitmix.group.data.model.PrivateGroup;
 import com.winsun.fruitmix.group.data.model.UserComment;
 import com.winsun.fruitmix.mediaModule.model.Media;
-import com.winsun.fruitmix.logged.in.user.LoggedInUser;
+
 import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource;
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileUploadParam;
@@ -36,7 +30,6 @@ import com.winsun.fruitmix.newdesign201804.user.preference.LocalUserPreferencePa
 import com.winsun.fruitmix.newdesign201804.user.preference.SortDirection;
 import com.winsun.fruitmix.newdesign201804.user.preference.SortMode;
 import com.winsun.fruitmix.newdesign201804.user.preference.UserPreference;
-import com.winsun.fruitmix.parser.FileFinishedTaskItemParser;
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.LocalDownloadTaskParser;
 import com.winsun.fruitmix.parser.LocalFakeGroupTweetParser;
 import com.winsun.fruitmix.parser.LocalGroupParser;
@@ -166,91 +159,6 @@ public class DBUtils {
         contentValues.put(DBHelper.USER_KEY_HOME, user.getHome());
         contentValues.put(DBHelper.USER_KEY_LIBRARY, user.getLibrary());
         contentValues.put(DBHelper.USER_KEY_IS_ADMIN, user.isAdmin() ? 1 : 0);
-
-        return contentValues;
-    }
-
-    public long insertLoggedInUserInDB(Collection<LoggedInUser> loggedInUsers) {
-
-        openWritableDB();
-
-        long returnValue = 0;
-
-        ContentValues contentValues;
-
-        for (LoggedInUser loggedInUser : loggedInUsers) {
-
-            contentValues = createLoggedInUserContentValues(loggedInUser);
-
-            returnValue = database.insert(DBHelper.LOGGED_IN_USER_TABLE_NAME, null, contentValues);
-        }
-
-        close();
-
-        return returnValue;
-
-    }
-
-    private ContentValues createLoggedInUserContentValues(LoggedInUser loggedInUser) {
-
-        ContentValues contentValues = createUserContentValues(loggedInUser.getUser());
-        contentValues.put(DBHelper.LOGGED_IN_USER_GATEWAY, loggedInUser.getGateway());
-        contentValues.put(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME, loggedInUser.getEquipmentName());
-        contentValues.put(DBHelper.LOGGED_IN_USER_TOKEN, loggedInUser.getToken());
-        contentValues.put(DBHelper.LOGGED_IN_USER_DEVICE_ID, loggedInUser.getDeviceID());
-
-        return contentValues;
-    }
-
-    public long insertFileUploadTaskItem(FinishedTaskItem finishedTaskItem) {
-
-        openWritableDB();
-
-        long returnValue = 0;
-
-        ContentValues contentValues = createFileFinishedTaskItemContentValues(finishedTaskItem);
-
-        FileUploadItem fileUploadItem = (FileUploadItem) finishedTaskItem.getFileTaskItem();
-
-        contentValues.put(DBHelper.FILE_KEY_PATH_SOURCE_FROM_OTHER_APP, fileUploadItem.getFilePath());
-
-        FileUploadState fileUploadState = fileUploadItem.getFileUploadState();
-
-        if (fileUploadState instanceof FileUploadPendingState)
-            contentValues.put(DBHelper.FILE_KEY_UPLOAD_TASK_STATE, FILE_UPLOAD_TASK_STATE_PENDING);
-        else if (fileUploadState instanceof FileUploadFinishedState)
-            contentValues.put(DBHelper.FILE_KEY_UPLOAD_TASK_STATE, FILE_UPLOAD_TASK_STATE_FINISHED);
-        else if (fileUploadState instanceof FileUploadErrorState)
-            contentValues.put(DBHelper.FILE_KEY_UPLOAD_TASK_STATE, FILE_UPLOAD_TASK_STATE_ERROR);
-        else
-            contentValues.put(DBHelper.FILE_KEY_UPLOAD_TASK_STATE, FILE_UPLOAD_TASK_STATE_UNKNOWN);
-
-        returnValue = database.insert(DBHelper.UPLOAD_FILE_TABLE_NAME, null, contentValues);
-
-        return returnValue;
-
-    }
-
-
-    public long insertDownloadedFile(FinishedTaskItem finishedTaskItem) {
-
-        openWritableDB();
-
-        long returnValue = 0;
-
-        returnValue = database.insert(DBHelper.DOWNLOADED_FILE_TABLE_NAME, null, createFileFinishedTaskItemContentValues(finishedTaskItem));
-
-        return returnValue;
-    }
-
-    private ContentValues createFileFinishedTaskItemContentValues(FinishedTaskItem finishedTaskItem) {
-
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.FILE_KEY_NAME, finishedTaskItem.getFileName());
-        contentValues.put(DBHelper.FILE_KEY_SIZE, finishedTaskItem.getFileSize());
-        contentValues.put(DBHelper.FILE_KEY_UUID, finishedTaskItem.getFileUUID());
-        contentValues.put(DBHelper.FILE_KEY_TIME, finishedTaskItem.getFileTaskItem().getFileTime());
-        contentValues.put(DBHelper.FILE_KEY_CREATOR_UUID, finishedTaskItem.getFileCreatorUUID());
 
         return contentValues;
     }
@@ -1204,136 +1112,6 @@ public class DBUtils {
         close();
 
         return users;
-    }
-
-    public List<LoggedInUser> getAllLoggedInUser() {
-        openReadableDB();
-
-        List<LoggedInUser> loggedInUsers = new ArrayList<>();
-
-        User user;
-        String gateway;
-        String equipmentName;
-        String token;
-        String deviceID;
-        LocalDataParser<User> parser = new LocalUserParser();
-
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOGGED_IN_USER_TABLE_NAME, null);
-
-        while (cursor.moveToNext()) {
-            user = parser.parse(cursor);
-
-            gateway = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_GATEWAY));
-            equipmentName = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME));
-            token = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_TOKEN));
-            deviceID = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_DEVICE_ID));
-
-            loggedInUsers.add(new LoggedInUser(deviceID, token, gateway, equipmentName, user));
-        }
-
-        cursor.close();
-
-        close();
-
-        return loggedInUsers;
-    }
-
-    public LoggedInUser getCurrentLoggedInUserByUUID(String userUUID) {
-        return getCurrentLoggedInUser(DBHelper.USER_KEY_UUID, userUUID);
-    }
-
-    public LoggedInUser getCurrentLoggedInUserByToken(String token) {
-        return getCurrentLoggedInUser(DBHelper.LOGGED_IN_USER_TOKEN, token);
-    }
-
-    private LoggedInUser getCurrentLoggedInUser(String where, String param) {
-        openReadableDB();
-
-        LoggedInUser loggedInUser = null;
-
-        User user;
-        String gateway;
-        String equipmentName;
-        String token;
-        String deviceID;
-        LocalDataParser<User> parser = new LocalUserParser();
-
-        Cursor cursor = database.rawQuery("select * from " + DBHelper.LOGGED_IN_USER_TABLE_NAME + " where " + where + " = ?", new String[]{param});
-
-        if (!cursor.moveToFirst())
-            return null;
-
-        user = parser.parse(cursor);
-
-        gateway = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_GATEWAY));
-        equipmentName = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_EQUIPMENT_NAME));
-        token = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_TOKEN));
-        deviceID = cursor.getString(cursor.getColumnIndex(DBHelper.LOGGED_IN_USER_DEVICE_ID));
-
-        loggedInUser = new LoggedInUser(deviceID, token, gateway, equipmentName, user);
-
-        cursor.close();
-
-        close();
-
-        return loggedInUser;
-    }
-
-
-    public List<FinishedTaskItem> getAllCurrentLoginUserDownloadedFile(String currentUserUUID) {
-
-        openReadableDB();
-
-        List<FinishedTaskItem> fileDownloadItems = new ArrayList<>();
-
-        Cursor cursor = database.rawQuery(String.format("select * from %s where %s = ?", DBHelper.DOWNLOADED_FILE_TABLE_NAME, DBHelper.FILE_KEY_CREATOR_UUID), new String[]{currentUserUUID});
-
-        while (cursor.moveToNext()) {
-
-            FileDownloadItem fileDownloadItem = new FileDownloadItem();
-
-            FileFinishedTaskItemParser parser = new FileFinishedTaskItemParser();
-
-            FinishedTaskItem finishedTaskItem = parser.fillFileTaskItem(fileDownloadItem, cursor, currentUserUUID);
-
-            fileDownloadItems.add(finishedTaskItem);
-        }
-
-        cursor.close();
-
-        close();
-
-        return fileDownloadItems;
-    }
-
-    public List<FinishedTaskItem> getAllCurrentLoginUserUploadedFile(String currentUserUUID) {
-
-        openReadableDB();
-
-        List<FinishedTaskItem> finishedTaskItems = new ArrayList<>();
-
-        Cursor cursor = database.rawQuery(String.format("select * from %s where %s = ? and %s = ?", DBHelper.UPLOAD_FILE_TABLE_NAME, DBHelper.FILE_KEY_CREATOR_UUID, DBHelper.FILE_KEY_UPLOAD_TASK_STATE), new String[]{currentUserUUID, FILE_UPLOAD_TASK_STATE_FINISHED + ""});
-
-        while (cursor.moveToNext()) {
-
-            String filePathSourceFromOtherApp = cursor.getString(cursor.getColumnIndex(DBHelper.FILE_KEY_PATH_SOURCE_FROM_OTHER_APP));
-
-            FileFinishedTaskItemParser parser = new FileFinishedTaskItemParser();
-
-            FileUploadItem fileUploadItem = new FileUploadItem();
-            fileUploadItem.setFilePath(filePathSourceFromOtherApp);
-
-            FinishedTaskItem finishedTaskItem = parser.fillFileTaskItem(fileUploadItem, cursor, currentUserUUID);
-
-            finishedTaskItems.add(finishedTaskItem);
-        }
-
-        cursor.close();
-
-        close();
-
-        return finishedTaskItems;
-
     }
 
 

@@ -10,7 +10,7 @@ import com.winsun.fruitmix.databinding.ActivitySearchBinding
 import com.winsun.fruitmix.file.data.model.*
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
-import com.winsun.fruitmix.newdesign201804.component.inflateView
+import com.winsun.fruitmix.newdesign201804.util.inflateView
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel

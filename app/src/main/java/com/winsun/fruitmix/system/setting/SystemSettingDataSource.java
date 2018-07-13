@@ -18,6 +18,8 @@ public class SystemSettingDataSource {
 
     private String showAutoUploadDialogKey = "showAutoUploadDialog";
 
+    public static final String AUTO_UPLOAD_OR_NOT = "auto_upload_or_not";
+
     private static final String CURRENT_UPLOAD_USER_UUID = "current_upload_user_uuid";
 
     private static final String CURRENT_LOGIN_USER_UUID = "current_login_user_uuid";
@@ -83,7 +85,7 @@ public class SystemSettingDataSource {
 
     public boolean getAutoUploadOrNot() {
 
-        return sharedPreferences.getBoolean(Util.AUTO_UPLOAD_OR_NOT, true);
+        return sharedPreferences.getBoolean(AUTO_UPLOAD_OR_NOT, true);
     }
 
     public void setAutoUploadOrNot(boolean autoUploadOrNot) {
@@ -91,7 +93,7 @@ public class SystemSettingDataSource {
         SharedPreferences.Editor editor;
 
         editor = sharedPreferences.edit();
-        editor.putBoolean(Util.AUTO_UPLOAD_OR_NOT, autoUploadOrNot);
+        editor.putBoolean(AUTO_UPLOAD_OR_NOT, autoUploadOrNot);
         editor.apply();
     }
 

@@ -97,13 +97,5 @@ public class FileTool {
 
     }
 
-    public boolean checkTemporaryUploadFolderNotEmpty(Context context, String currentUserUUID) {
-
-        File file = new File(getTemporaryUploadFolderPath(FileUtil.getTemporaryDataFolderParentFolderPath(context), currentUserUUID));
-
-        return file.exists() && file.list().length > 0;
-
-    }
-
 
 }

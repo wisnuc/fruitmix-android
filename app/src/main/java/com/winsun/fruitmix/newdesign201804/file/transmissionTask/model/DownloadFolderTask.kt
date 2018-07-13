@@ -8,7 +8,7 @@ import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.file.data.model.RemoteFolder
 import com.winsun.fruitmix.file.data.station.StationFileRepository
 import com.winsun.fruitmix.model.operationResult.OperationSuccessWithFile
-import com.winsun.fruitmix.newdesign201804.component.createFileDownloadParam
+import com.winsun.fruitmix.newdesign201804.util.createFileDownloadParam
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.util.FileTool

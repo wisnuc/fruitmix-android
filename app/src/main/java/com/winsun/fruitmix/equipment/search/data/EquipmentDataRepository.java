@@ -2,9 +2,8 @@ package com.winsun.fruitmix.equipment.search.data;
 
 import android.util.Log;
 
-import com.winsun.fruitmix.BaseDataRepository;
+import com.winsun.fruitmix.model.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
@@ -57,17 +56,6 @@ public class EquipmentDataRepository extends BaseDataRepository implements Equip
 
     }
 
-    @Override
-    public void checkEquipmentState(final String equipmentIP, final BaseOperateDataCallback<Integer> callback) {
-
-        mThreadManager.runOnCacheThread(new Runnable() {
-            @Override
-            public void run() {
-                equipmentRemoteDataSource.checkEquipmentState(equipmentIP, createOperateCallbackRunOnMainThread(callback));
-            }
-        });
-
-    }
 
     @Override
     public void getEquipmentTypeInfo(final String equipmentIP, final BaseLoadDataCallback<EquipmentTypeInfo> callback) {

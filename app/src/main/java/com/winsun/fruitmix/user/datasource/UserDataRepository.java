@@ -12,16 +12,10 @@ public interface UserDataRepository extends UserRemoteDataSource{
 
     void setCacheDirty();
 
-    boolean clearAllUsersInDB();
-
     void clearAllUsersInCache();
 
     User getUserByUUID(String userUUID);
 
-    User getUserByGUID(String userGUID);
-
     void insertUsers(Collection<User> users);
-
-    boolean updateUser(User user);
 
 }

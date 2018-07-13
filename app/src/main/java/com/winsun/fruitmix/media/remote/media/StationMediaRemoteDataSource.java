@@ -5,7 +5,6 @@ import com.winsun.fruitmix.exception.NetworkException;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
-import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.parser.RemoteMediaStreamParser;
@@ -27,12 +26,10 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
 
     private static StationMediaRemoteDataSource instance;
 
-    private IHttpFileUtil iHttpFileUtil;
-
-    public static StationMediaRemoteDataSource getInstance(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, IHttpFileUtil iHttpFileUtil) {
+    public static StationMediaRemoteDataSource getInstance(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
 
         if (instance == null)
-            instance = new StationMediaRemoteDataSource(iHttpUtil, httpRequestFactory, iHttpFileUtil);
+            instance = new StationMediaRemoteDataSource(iHttpUtil, httpRequestFactory);
 
         return instance;
     }
@@ -41,9 +38,9 @@ public class StationMediaRemoteDataSource extends BaseRemoteDataSourceImpl {
         instance = null;
     }
 
-    private StationMediaRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, IHttpFileUtil iHttpFileUtil) {
+    private StationMediaRemoteDataSource(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         super(iHttpUtil, httpRequestFactory);
-        this.iHttpFileUtil = iHttpFileUtil;
+
     }
 
     /*

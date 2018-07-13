@@ -39,172 +39,25 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".NavPagerActivity"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".mediaModule.PhotoSliderActivity"
             android:configChanges="orientation|screenSize" />
         <activity
             android:name=".SplashScreenActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".mediaModule.NewPicChooseActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".PersonInfoActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".user.manage.UserManageActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".EquipmentSearchActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".LoginActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateVisible|adjustPan" />
-        <activity android:name=".GalleryTestActivity" />
 
         <service
             android:name=".services.ButlerService"
             android:enabled="true"
             android:exported="false" />
-        <service
-            android:name=".services.RetrieveNewLocalMediaInCameraService"
-            android:exported="false" />
-        <service
-            android:name=".services.RetrieveLocalMediaService"
-            android:exported="false" />
 
-        <activity
-            android:name=".CreateNewEquipmentActivity"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateVisible|adjustPan" />
-
-        <service
-            android:name=".services.RetrieveDownloadedFileService"
-            android:exported="false" />
-        <service
-            android:name=".services.CalcNewLocalMediaDigestService"
-            android:exported="false" />
-
-        <activity
-            android:name=".CreateUserActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".SettingActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".AccountManageActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".TestPhotoListActivity"
-            android:screenOrientation="portrait" />
-
-        <service
-            android:name=".services.ReverseGeocodeService"
-            android:exported="false" />
-
-        <activity
-            android:name=".file.view.FileDownloadActivity"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait" />
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".invitation.ConfirmInviteUserActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".group.view.GroupContentActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".group.view.CreateGroupActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".group.view.OperatePinActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".group.view.PinContentActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".equipment.manage.EquipmentManageActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".equipment.manage.EquipmentInfoActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".TestReceiveActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="*/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="*/*" />
-                <data android:scheme="file" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".equipment.manage.ShutDownEquipmentActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ModifyUserNameActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ModifyUserPasswordActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".video.PlayVideoActivity"
             android:configChanges="orientation|screenSize"
             android:theme="@style/FullScreenAppTheme" />
-        <activity
-            android:name=".equipment.manage.ModifyEquipmentLabelActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".equipment.initial.InitialEquipmentActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".user.manage.ModifyUserStateActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".torrent.view.TorrentDownloadManageActivity"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".equipment.maintenance.MaintenanceActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".plugin.view.PluginManageActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".firmware.FirmwareActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".TranslucentActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/TranslucentTheme" />
-        <activity
-            android:name=".list.TweetContentListActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".contact.ContactListActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".group.setting.GroupSettingActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".group.TestMqttActivity"
-            android:screenOrientation="portrait" />
 
         <!-- mqtt service -->
         <service android:name="org.eclipse.paho.android.service.MqttService" />

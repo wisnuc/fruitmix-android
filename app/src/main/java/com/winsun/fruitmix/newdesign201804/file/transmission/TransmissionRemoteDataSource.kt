@@ -4,7 +4,6 @@ import com.google.gson.JsonObject
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl
-import com.winsun.fruitmix.http.IHttpFileUtil
 import com.winsun.fruitmix.http.IHttpUtil
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory
 import com.winsun.fruitmix.newdesign201804.file.transmission.model.Transmission

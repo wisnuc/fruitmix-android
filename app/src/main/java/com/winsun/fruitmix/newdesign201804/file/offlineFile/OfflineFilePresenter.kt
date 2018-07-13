@@ -2,25 +2,18 @@ package com.winsun.fruitmix.newdesign201804.file.offlineFile
 
 import android.support.design.widget.Snackbar
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.file.data.model.*
-import com.winsun.fruitmix.file.data.station.StationFileRepository
 import com.winsun.fruitmix.model.operationResult.OperationResult
-import com.winsun.fruitmix.newdesign201804.component.inflateView
-import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
-import com.winsun.fruitmix.newdesign201804.file.list.data.FileUploadParam
+import com.winsun.fruitmix.newdesign201804.util.inflateView
 import com.winsun.fruitmix.newdesign201804.file.offlineFile.data.OfflineFileDataSource
-import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.UploadMoreThanOneGBFileTask
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
-import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
 import com.winsun.fruitmix.util.FileTool
 import com.winsun.fruitmix.util.FileUtil
 import com.winsun.fruitmix.util.SnackbarUtil
-import com.winsun.fruitmix.util.Util
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 
@@ -215,7 +208,7 @@ class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSou
     }
 
     private inner class OfflineFileAdapter : BaseRecyclerViewAdapter<SimpleViewHolder, AbstractLocalFile>() {
-        
+
         override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): SimpleViewHolder {
 
             val view = parent?.inflateView(R.layout.offline_file_item)

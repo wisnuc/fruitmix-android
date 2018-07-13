@@ -9,6 +9,11 @@ import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.mediaModule.model.Media;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  * Created by Administrator on 2017/9/20.
  */
@@ -52,5 +57,22 @@ public class MediaUtil {
 
     }
 
+    public static ConcurrentMap<String, Media> BuildMediaMapKeyIsUUID(Collection<Media> medias) {
+
+        ConcurrentMap<String, Media> mediaConcurrentMap = new ConcurrentHashMap<>(medias.size());
+        for (Media media : medias) {
+            mediaConcurrentMap.put(media.getUuid(), media);
+        }
+        return mediaConcurrentMap;
+    }
+
+    public static <T extends Media >ConcurrentMap<String, T> BuildMediaMapKeyIsThumb(List<T> medias) {
+
+        ConcurrentMap<String, T> mediaConcurrentMap = new ConcurrentHashMap<>(medias.size());
+        for (T media : medias) {
+            mediaConcurrentMap.put(media.getOriginalPhotoPath(), media);
+        }
+        return mediaConcurrentMap;
+    }
 
 }

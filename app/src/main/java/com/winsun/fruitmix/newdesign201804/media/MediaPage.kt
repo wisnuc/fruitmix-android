@@ -51,10 +51,6 @@ class MediaPage(val activity: Activity) : MainPage {
     override fun onDestroy() {
     }
 
-    override fun canEnterSelectMode(): Boolean {
-        return false
-    }
-
     override fun toggleOrientation() {
 
     }

@@ -35,7 +35,7 @@ public class InjectMedia {
     private static StationMediaRepository provideStationMediaRepository(Context context) {
 
         return StationMediaRepository.getInstance(StationMediaDBDataSource.getInstance(DBUtils.getInstance(context)), StationMediaRemoteDataSource.getInstance(InjectHttp.provideIHttpUtil(context),
-                InjectHttp.provideHttpRequestFactory(context), InjectHttp.provideIHttpFileUtil()));
+                InjectHttp.provideHttpRequestFactory(context)));
     }
 
 }

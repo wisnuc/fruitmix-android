@@ -11,19 +11,14 @@ import com.winsun.fruitmix.group.data.source.GroupRepository;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.http.OkHttpUtil;
-import com.winsun.fruitmix.logged.in.user.LoggedInUserRepository;
-import com.winsun.fruitmix.login.LoginUseCase;
-import com.winsun.fruitmix.logout.LogoutUseCase;
 import com.winsun.fruitmix.media.MediaDataSourceRepositoryImpl;
 import com.winsun.fruitmix.media.local.media.LocalMediaRepository;
 import com.winsun.fruitmix.media.remote.media.StationMediaRemoteDataSource;
 import com.winsun.fruitmix.media.remote.media.StationMediaRepository;
 import com.winsun.fruitmix.mediaModule.model.NewMediaListDataLoader;
 import com.winsun.fruitmix.newdesign201804.init.InitNewDesignSystem;
-import com.winsun.fruitmix.services.ButlerService;
 import com.winsun.fruitmix.stations.StationsRemoteDataSource;
 import com.winsun.fruitmix.stations.StationsRepository;
-import com.winsun.fruitmix.upload.media.UploadMediaUseCase;
 import com.winsun.fruitmix.user.datasource.UserDataRepositoryImpl;
 import com.winsun.fruitmix.util.FileUtil;
 
@@ -40,10 +35,6 @@ public class InitSystem {
         HttpRequestFactory.destroyInstance();
 
         EquipmentMDNSSearchManager.destroyInstance();
-
-        LogoutUseCase.destroyInstance();
-
-        LoginUseCase.destroyInstance();
 
         OkHttpUtil.destroyInstance();
 
@@ -71,15 +62,9 @@ public class InitSystem {
 
         StationFileDataSourceImpl.destroyInstance();
 
-        LoggedInUserRepository.destroyInstance();
-
-        UploadMediaUseCase.destroyInstance();
-
         NewMediaListDataLoader.destroyInstance();
 
         InitNewDesignSystem.Companion.init();
-
-        ButlerService.startButlerService(context);
 
         boolean result = FileUtil.createDownloadFileStoreFolder();
 

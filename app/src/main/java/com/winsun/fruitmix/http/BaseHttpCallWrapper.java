@@ -18,7 +18,6 @@ import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException;
 import com.winsun.fruitmix.model.operationResult.OperationSucceedWithData;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.model.operationResult.OperationSuccessWithEquipmentBootInfo;
 import com.winsun.fruitmix.model.operationResult.OperationSuccessWithFile;
 import com.winsun.fruitmix.parser.RemoteDataParser;
 import com.winsun.fruitmix.parser.RemoteDataStreamParser;
@@ -320,48 +319,6 @@ public class BaseHttpCallWrapper {
 
     }
 
-    public <T> OperationResult loadCallWithData(HttpRequest httpRequest, RemoteDatasParser<T> parser) {
-
-        if (!checkUrl(httpRequest.getUrl()))
-            return new OperationMalformedUrlException();
-
-        try {
-
-            HttpResponse httpResponse = iHttpUtil.remoteCall(httpRequest);
-
-            if (httpResponse.getResponseCode() == 200) {
-
-                List<T> datas = parser.parse(httpResponse.getResponseData());
-
-                return new OperationSucceedWithData<>(datas);
-
-            } else {
-
-                return new OperationNetworkException(httpResponse);
-
-            }
-
-
-        } catch (MalformedURLException e) {
-
-            return new OperationMalformedUrlException();
-
-        } catch (SocketTimeoutException ex) {
-
-            return new OperationSocketTimeoutException();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            return new OperationIOException();
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            return new OperationJSONException();
-        }
-
-    }
 
     public OperationResult loadCall(HttpRequest httpRequest, RemoteDatasParser<AbstractRemoteFile> parser) {
 
@@ -406,49 +363,6 @@ public class BaseHttpCallWrapper {
 
     }
 
-    public OperationResult loadEquipmentBootInfo(HttpRequest httpRequest, RemoteDatasParser<EquipmentBootInfo> parser) {
-
-
-        if (!checkUrl(httpRequest.getUrl()))
-            return new OperationMalformedUrlException();
-
-        try {
-
-            HttpResponse httpResponse = iHttpUtil.remoteCall(httpRequest);
-
-            if (httpResponse.getResponseCode() == 200) {
-
-                List<EquipmentBootInfo> equipmentBootInfos = parser.parse(httpResponse.getResponseData());
-
-                return new OperationSuccessWithEquipmentBootInfo(equipmentBootInfos);
-
-            } else {
-
-                return new OperationNetworkException(httpResponse);
-
-            }
-
-
-        } catch (MalformedURLException e) {
-
-            return new OperationMalformedUrlException();
-
-        } catch (SocketTimeoutException ex) {
-
-            return new OperationSocketTimeoutException();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            return new OperationIOException();
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            return new OperationJSONException();
-        }
-
-    }
 
 
 }

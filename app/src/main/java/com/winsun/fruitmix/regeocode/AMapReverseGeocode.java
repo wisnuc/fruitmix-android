@@ -24,16 +24,21 @@ public class AMapReverseGeocode implements ReverseGeocode {
 
     public static final String TAG = AMapReverseGeocode.class.getSimpleName();
 
-    public static final String AMAP_REGEOCODE_URL = "http://restapi.amap.com/v3/geocode/regeo?key=8373302f9fcde931cbab8a3a3d5da158";
+    //TODO:need check map api is still work or not, key need update
 
-    public static final String PARAM_SEPARATOR = "&";
+    private static final String KEY = "";
 
-    public static final String LOCATION_SEPARATOR = "|";
+    private static final String AMAP_REGEOCODE_URL = "http://restapi.amap.com/v3/geocode/regeo?key=" + KEY;
 
-    public static final String LONGITUDE_LATITUDE_SEPARATOR = ",";
+    private static final String PARAM_SEPARATOR = "&";
+
+    private static final String LOCATION_SEPARATOR = "|";
+
+    private static final String LONGITUDE_LATITUDE_SEPARATOR = ",";
 
     @Override
     public boolean reverseGeocodeLongitudeLatitudeInMedias(List<Media> medias) {
+
 
         StringBuilder urlBuilder = new StringBuilder(AMAP_REGEOCODE_URL);
 

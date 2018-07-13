@@ -1,7 +1,5 @@
 package com.winsun.fruitmix.group.data.model;
 
-import com.winsun.fruitmix.util.FNAS;
-
 /**
  * Created by Administrator on 2017/7/20.
  */

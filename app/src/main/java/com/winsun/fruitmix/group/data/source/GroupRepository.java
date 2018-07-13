@@ -3,9 +3,8 @@ package com.winsun.fruitmix.group.data.source;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.winsun.fruitmix.BaseDataRepository;
+import com.winsun.fruitmix.model.BaseDataRepository;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
-import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
 import com.winsun.fruitmix.callback.BaseOperateCallbackImpl;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
@@ -26,7 +25,7 @@ import com.winsun.fruitmix.thread.manage.ThreadManager;
 import com.winsun.fruitmix.user.User;
 import com.winsun.fruitmix.util.FilterRule;
 import com.winsun.fruitmix.util.ItemFilterKt;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 
 import org.greenrobot.eventbus.EventBus;
@@ -780,7 +779,7 @@ public class GroupRepository extends BaseDataRepository {
 
         List<Media> mediasInComment = mediaComment.getMedias();
 
-        Map<String, Media> localMediaMaps = LocalCache.BuildMediaMapKeyIsUUID(localMedias);
+        Map<String, Media> localMediaMaps = MediaUtil.BuildMediaMapKeyIsUUID(localMedias);
 
         for (Media media : mediasInComment) {
 

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.databinding.DataBindingUtil;
 import android.databinding.ObservableBoolean;
@@ -15,7 +14,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.SharedElementCallback;
-import android.support.v4.util.ArrayMap;
 import android.support.v4.util.Pair;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
@@ -36,7 +34,6 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.ImageLoader;
@@ -50,27 +47,18 @@ import com.winsun.fruitmix.base.data.InjectBaseDataOperator;
 import com.winsun.fruitmix.base.data.SCloudTokenContainer;
 import com.winsun.fruitmix.base.data.retry.RefreshTokenRetryStrategy;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
-import com.winsun.fruitmix.callback.BaseOperateDataCallbackImpl;
 import com.winsun.fruitmix.command.AbstractCommand;
 import com.winsun.fruitmix.component.GifTouchNetworkImageView;
 import com.winsun.fruitmix.component.PinchImageView;
-import com.winsun.fruitmix.component.fab.menu.FabMenuItemOnClickDefaultListener;
-import com.winsun.fruitmix.component.fab.menu.FabMenuItemOnClickListener;
 import com.winsun.fruitmix.component.fab.menu.SelectedMediasListener;
 import com.winsun.fruitmix.databinding.ActivityPhotoSliderBinding;
 import com.winsun.fruitmix.dialog.DialogFactory;
 import com.winsun.fruitmix.dialog.PhotoOperationAlertDialogFactory;
-import com.winsun.fruitmix.dialog.ShareMenuBottomDialogFactory;
-import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.gif.GifLoader;
 import com.winsun.fruitmix.group.data.source.GroupRequestParam;
-import com.winsun.fruitmix.group.data.source.InjectGroupDataSource;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.InjectHttp;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
-import com.winsun.fruitmix.media.InjectMedia;
-import com.winsun.fruitmix.media.MediaDataSourceRepository;
-import com.winsun.fruitmix.mediaModule.fragment.NewPhotoList;
 import com.winsun.fruitmix.mediaModule.model.Media;
 import com.winsun.fruitmix.http.ImageGifLoaderInstance;
 import com.winsun.fruitmix.anim.CustomTransitionListener;
@@ -81,8 +69,6 @@ import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.token.manager.InjectSCloudTokenManager;
 import com.winsun.fruitmix.token.manager.TokenManager;
-import com.winsun.fruitmix.upload.media.CheckMediaIsUploadStrategy;
-import com.winsun.fruitmix.user.datasource.InjectUser;
 import com.winsun.fruitmix.util.FileUtil;
 import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.ToastUtil;
@@ -99,6 +85,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         SelectedMediasListener {
 
     public static final String TAG = "PhotoSliderActivity";
+
+    public static final String KEY_SHOW_COMMENT_BTN = "key_show_comment_btn";
+    public static final String KEY_GROUP_UUID = "key_group_uuid";
 
     private LinearLayout ivComment;
 
@@ -167,12 +156,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
     private boolean needTransition = true;
 
     private boolean hasStartPostPoneEnterTransition = false;
-
-    private Dialog mDialog;
-
-    private MediaDataSourceRepository mediaDataSourceRepository;
-
-    private CheckMediaIsUploadStrategy checkMediaIsUploadStrategy;
 
     private SystemSettingDataSource systemSettingDataSource;
 
@@ -305,7 +288,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         setMediaViewModels(transitionMediaViewModels);
 
         Intent intent = new Intent();
-        intent.putExtra(Util.KEY_GROUP_UUID, groupUUID);
+        intent.putExtra(KEY_GROUP_UUID, groupUUID);
         intent.putExtra(KEY_STATION_ID, stationID);
 
         startPhotoSliderActivity(toolbar, activity, intent, initialPhotoPosition, motionPosition, spanCount, transitionView, currentMedia);
@@ -329,7 +312,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
                                                  int motionPosition, int spanCount, NetworkImageView transitionView, Media currentMedia) {
 
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
-        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
+        intent.putExtra(KEY_SHOW_COMMENT_BTN, false);
         intent.setClass(activity, PhotoSliderActivity.class);
 
         if (transitionView == null || transitionView.isLoaded()) {
@@ -340,7 +323,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             Pair mediaPair = new Pair<>((View) transitionView, currentMedia.getKey());
 
-            Pair<View, String>[] pairs = Util.createSafeTransitionPairs(toolbar, activity, true, mediaPair);
+            Pair<View, String>[] pairs = Util.createSafeTransitionPairs(toolbar, activity,  mediaPair);
 
             ActivityOptionsCompat options = ActivityOptionsCompat.
                     makeSceneTransitionAnimation(activity, pairs);
@@ -368,7 +351,7 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         Intent intent = new Intent();
         intent.putExtra(Util.INITIAL_PHOTO_POSITION, initialPhotoPosition);
-        intent.putExtra(Util.KEY_SHOW_COMMENT_BTN, false);
+        intent.putExtra(KEY_SHOW_COMMENT_BTN, false);
 
         intent.putExtra(Util.KEY_NEED_TRANSITION, false);
 
@@ -383,8 +366,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     public static final String KEY_STATION_ID = "key_station_id";
 
-    private FabMenuItemOnClickListener mFabMenuItemOnClickListener;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -392,10 +373,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         playVideoFragments = new HashMap<>();
 
         mContext = this;
-
-        mediaDataSourceRepository = InjectMedia.provideMediaDataSourceRepository(mContext);
-
-        checkMediaIsUploadStrategy = CheckMediaIsUploadStrategy.getInstance();
 
         systemSettingDataSource = InjectSystemSettingDataSource.provideSystemSettingDataSource(mContext);
 
@@ -433,9 +410,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         initialPhotoPosition = getIntent().getIntExtra(Util.INITIAL_PHOTO_POSITION, 0);
 
-        boolean mShowCommentBtn = getIntent().getBooleanExtra(Util.KEY_SHOW_COMMENT_BTN, false);
+        boolean mShowCommentBtn = getIntent().getBooleanExtra(KEY_SHOW_COMMENT_BTN, false);
 
-        groupUUID = getIntent().getStringExtra(Util.KEY_GROUP_UUID);
+        groupUUID = getIntent().getStringExtra(KEY_GROUP_UUID);
 
         stationID = getIntent().getStringExtra(KEY_STATION_ID);
 
@@ -495,27 +472,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
         mBaseDataOperator = InjectBaseDataOperator.provideInstance(this,
                 tokenManager, this, new RefreshTokenRetryStrategy(tokenManager));
-
-        initFabMenuItemOnClickListener();
-
-    }
-
-    private void initFabMenuItemOnClickListener() {
-
-        mFabMenuItemOnClickListener = new FabMenuItemOnClickDefaultListener(
-                this, null, mediaDataSourceRepository, new AbstractCommand() {
-            @Override
-            public void execute() {
-
-            }
-
-            @Override
-            public void unExecute() {
-
-            }
-        }, systemSettingDataSource, InjectGroupDataSource.provideGroupRepository(this),
-                InjectUser.provideRepository(this)
-        );
 
     }
 
@@ -586,8 +542,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
         super.onDestroy();
 
         mContext = null;
-
-        NewPhotoList.mEnteringPhotoSlider = false;
 
         for (PlayVideoFragment playVideoFragment : playVideoFragments.values()) {
             playVideoFragment.stopPlayVideo();
@@ -695,42 +649,6 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
     private void showCreateShareBottomDialog() {
 
-        mFabMenuItemOnClickListener.systemShareBtnOnClick(mContext, FabMenuItemOnClickListener.ITEM_MEDIA);
-
-    }
-
-    @Override
-    public void handleOperationEvent(OperationEvent operationEvent) {
-
-        super.handleOperationEvent(operationEvent);
-
-        Log.i(TAG, "handleOperationEvent: action:" + action);
-
-        switch (action) {
-
-            case Util.SHARED_PHOTO_THUMB_RETRIEVED:
-
-//                handleDownloadMedia();
-
-                break;
-        }
-
-    }
-
-    private void handleDownloadMedia() {
-        if (mDialog == null || !mDialog.isShowing()) {
-            return;
-        }
-
-        dismissDialog();
-
-        String originalPhotoPath = mediaViewModels.get(currentPhotoPosition).getMedia().getOriginalPhotoPath();
-
-        if (originalPhotoPath.isEmpty()) {
-            ToastUtil.showToast(mContext, getString(R.string.download_original_photo_fail));
-        } else {
-            FileUtil.sendShareToOtherApp(mContext, Collections.singletonList(originalPhotoPath));
-        }
     }
 
     private void refreshReturnResizeVisibility() {
@@ -814,11 +732,9 @@ public class PhotoSliderActivity extends BaseActivity implements IImageLoadListe
 
             if (media.isLocal()) {
 
-                if (checkMediaIsUploadStrategy.isMediaUploaded(media)) {
-                    photoSliderViewModel.showCloudOff.set(false);
-                } else {
-                    photoSliderViewModel.showCloudOff.set(true);
-                }
+                //TODO:add logic check media is uploaded to toggle showCloudOff
+
+                photoSliderViewModel.showCloudOff.set(false);
 
             } else
                 photoSliderViewModel.showCloudOff.set(false);

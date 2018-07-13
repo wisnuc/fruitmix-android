@@ -10,7 +10,7 @@ import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSQLException;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.MediaUtil;
 import com.winsun.fruitmix.util.Util;
 
 import java.io.IOException;
@@ -94,7 +94,7 @@ public class StationMediaRepository {
 
                     mediaConcurrentMap.clear();
 
-                    mediaConcurrentMap.putAll(LocalCache.BuildMediaMapKeyIsUUID(data));
+                    mediaConcurrentMap.putAll(MediaUtil.BuildMediaMapKeyIsUUID(data));
 
                     Log.d(StationMediaRepository.TAG, "onSucceed: finish put all media to mediaConcurrentMap,"+ Util.getCurrentFormatTime());
 
@@ -131,7 +131,7 @@ public class StationMediaRepository {
 
                 mediaConcurrentMap.clear();
 
-                mediaConcurrentMap.putAll(LocalCache.BuildMediaMapKeyIsUUID(data));
+                mediaConcurrentMap.putAll(MediaUtil.BuildMediaMapKeyIsUUID(data));
 
                 cacheDirty = false;
 

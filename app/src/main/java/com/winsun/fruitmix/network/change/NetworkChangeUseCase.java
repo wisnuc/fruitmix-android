@@ -5,7 +5,6 @@ import android.util.Log;
 import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.eventbus.OperationEvent;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
-import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.network.NetworkState;
@@ -29,6 +28,8 @@ public class NetworkChangeUseCase {
 
     public static final String TAG = NetworkChangeUseCase.class.getSimpleName();
 
+    public static final String NETWORK_CHANGED = "network_changed";
+
     private SystemSettingDataSource systemSettingDataSource;
 
     private HttpRequestFactory httpRequestFactory;
@@ -39,17 +40,15 @@ public class NetworkChangeUseCase {
 
     private TokenDataSource tokenDataSource;
 
-    private LoginUseCase mLoginUseCase;
-
     public NetworkChangeUseCase(SystemSettingDataSource systemSettingDataSource, HttpRequestFactory httpRequestFactory,
                                 NetworkStateManager networkStateManager, StationsDataSource stationsDataSource,
-                                TokenDataSource tokenDataSource, LoginUseCase loginUseCase) {
+                                TokenDataSource tokenDataSource) {
         this.systemSettingDataSource = systemSettingDataSource;
         this.httpRequestFactory = httpRequestFactory;
         this.networkStateManager = networkStateManager;
         this.stationsDataSource = stationsDataSource;
         this.tokenDataSource = tokenDataSource;
-        mLoginUseCase = loginUseCase;
+
 
     }
 
@@ -57,13 +56,6 @@ public class NetworkChangeUseCase {
 
         Log.i(TAG, "handleNetworkChange: httpRequestFactory:" + httpRequestFactory);
 
-        if (!mLoginUseCase.isAlreadyLogin()) {
-
-            Log.i(TAG, "handleNetworkChange: not login,return");
-
-            return;
-
-        }
 
         NetworkState networkState = networkStateManager.getNetworkState();
 

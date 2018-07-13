@@ -6,7 +6,7 @@ import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.IHttpUtil;
-import com.winsun.fruitmix.invitation.ConfirmInviteUser;
+import com.winsun.fruitmix.invitation.model.ConfirmInviteUser;
 import com.winsun.fruitmix.parser.RemoteConfirmInviteUsersParser;
 import com.winsun.fruitmix.parser.RemoteConfirmTicketResultParser;
 import com.winsun.fruitmix.parser.RemoteTicketParser;

@@ -1,13 +1,12 @@
 package com.winsun.fruitmix.newdesign201804.file.offlineFile.data
 
-import com.winsun.fruitmix.BaseDataRepository
+import com.winsun.fruitmix.model.BaseDataRepository
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.file.data.model.AbstractLocalFile
 import com.winsun.fruitmix.file.data.model.LocalFile
 import com.winsun.fruitmix.file.data.model.LocalFolder
 import com.winsun.fruitmix.model.operationResult.OperationSuccess
 import com.winsun.fruitmix.thread.manage.ThreadManager
-import com.winsun.fruitmix.util.FileUtil
 import java.io.File
 
 class OfflineFileRepository(threadManager: ThreadManager) : BaseDataRepository(threadManager), OfflineFileDataSource {

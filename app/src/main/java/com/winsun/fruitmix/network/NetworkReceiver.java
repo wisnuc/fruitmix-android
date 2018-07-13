@@ -19,9 +19,8 @@ public class NetworkReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        EventBus.getDefault().post(new OperationEvent(Util.NETWORK_CHANGED, new OperationSuccess()));
-
-        //TODO:change way of notify:start service for handle network changed
+        //TODO:comment this for refactor NetworkChangeUseCase logic in new design 201804
+//        EventBus.getDefault().post(new OperationEvent(Util.NETWORK_CHANGED, new OperationSuccess()));
 
     }
 

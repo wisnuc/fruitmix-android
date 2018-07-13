@@ -17,6 +17,8 @@ public class Media extends AbstractRemoteFile {
 
     private static final String TAG = Media.class.getSimpleName();
 
+    public static final String MEDIA_PARAMETER = "/media";
+
     private static final String THUMB_PHOTO_FORMAT_CODE = "%1$s?alt=thumbnail&width=%2$s&height=%3$s&autoOrient=true&modifier=caret";
     private static final String THUMB_PHOTO_FORMAT_CODE_WITHOUT_WIDTH = "%1$s?alt=thumbnail&height=%2$s&autoOrient=true&modifier=caret";
     private static final String THUMB_PHOTO_FORMAT_CODE_WITHOUT_HEIGHT = "%1$s?alt=thumbnail&width=%2$s&autoOrient=true&modifier=caret";
@@ -330,13 +332,13 @@ public class Media extends AbstractRemoteFile {
         String httpPath;
 
         if (width == -1) {
-            httpPath = String.format(THUMB_PHOTO_FORMAT_CODE_WITHOUT_WIDTH, Util.MEDIA_PARAMETER + "/" + getUuid(),
+            httpPath = String.format(THUMB_PHOTO_FORMAT_CODE_WITHOUT_WIDTH, MEDIA_PARAMETER + "/" + getUuid(),
                     String.valueOf(height));
         } else if (height == -1) {
-            httpPath = String.format(THUMB_PHOTO_FORMAT_CODE_WITHOUT_HEIGHT, Util.MEDIA_PARAMETER + "/" + getUuid(),
+            httpPath = String.format(THUMB_PHOTO_FORMAT_CODE_WITHOUT_HEIGHT, MEDIA_PARAMETER + "/" + getUuid(),
                     String.valueOf(width));
         } else {
-            httpPath = String.format(THUMB_PHOTO_FORMAT_CODE, Util.MEDIA_PARAMETER + "/" + getUuid(),
+            httpPath = String.format(THUMB_PHOTO_FORMAT_CODE, MEDIA_PARAMETER + "/" + getUuid(),
                     String.valueOf(width), String.valueOf(height));
         }
 
@@ -382,7 +384,7 @@ public class Media extends AbstractRemoteFile {
     }
 
     private String getRemoteMediaRequestPath() {
-        return Util.MEDIA_PARAMETER + "/" + getUuid() + ALT_DATA;
+        return MEDIA_PARAMETER + "/" + getUuid() + ALT_DATA;
     }
 
 

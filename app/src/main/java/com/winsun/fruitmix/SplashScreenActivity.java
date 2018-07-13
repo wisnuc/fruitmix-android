@@ -6,13 +6,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.umeng.analytics.MobclickAgent;
 import com.winsun.fruitmix.callback.BaseOperateCallback;
-import com.winsun.fruitmix.callback.BaseOperateDataCallback;
 import com.winsun.fruitmix.init.system.InitSystem;
-import com.winsun.fruitmix.login.LoginUseCase;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.newdesign201804.introduction.ProductIntroductionActivity;
 import com.winsun.fruitmix.newdesign201804.login.usecase.InjectNewDesignLoginCase;
@@ -36,19 +33,11 @@ public class SplashScreenActivity extends AppCompatActivity {
 
     public static final String TAG = "SplashScreenActivity";
 
-    private String mUuid;
-    private String mGateway;
-    private String mToken;
-
     private Context mContext;
 
     public static final int WELCOME = 0x0010;
 
     public static final int DELAY_TIME_MILLISECOND = 3 * 1000;
-
-    private CustomHandler mHandler;
-
-    private boolean loginWithNoParamResult = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,70 +49,9 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         InitSystem.initSystem(this);
 
- /*       String[] items = new String[]{"这是一串测试用的字符串，用于测试一行能放多少字符串", "这是一串测试用的字符串，用于测试一行能放多少字符串"};
+        CustomHandler handler = new CustomHandler(this);
+        handler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
 
-        AlertDialog dialog;
-
-        final SelectItem selectItem = new SelectItem();
-        selectItem.setSelectItemPosition(0);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this).setTitle("选择一台wisnuc")
-                .setSingleChoiceItems(items, 0, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        selectItem.setSelectItemPosition(which);
-
-                    }
-                }).setPositiveButton(getString(R.string.login), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        Log.d(TAG, "onClick: selectItemPosition: " + selectItem.getSelectItemPosition());
-
-                        dialog.dismiss();
-
-                    }
-                }).setCancelable(false);
-
-        dialog = builder.create();
-
-        dialog.show();*/
-
-/*
-        final LoginUseCase loginUseCase = InjectLoginUseCase.provideLoginUseCase(this);
-
-        loginWithNoParamInThread(loginUseCase);
-
-*/
-
-
-        mHandler = new CustomHandler(this);
-        mHandler.sendEmptyMessageDelayed(WELCOME, DELAY_TIME_MILLISECOND);
-
-    }
-
-    private void loginWithNoParamInThread(LoginUseCase loginUseCase) {
-        loginUseCase.loginWithNoParam(new BaseOperateDataCallback<Boolean>() {
-            @Override
-            public void onSucceed(Boolean data, OperationResult result) {
-
-                loginWithNoParamResult = true;
-
-                welcome();
-            }
-
-            @Override
-            public void onFail(OperationResult result) {
-
-                Log.d(TAG, "onFail: " + result.getResultMessage(mContext));
-
-                loginWithNoParamResult = false;
-
-                welcome();
-
-            }
-        });
     }
 
     @Override

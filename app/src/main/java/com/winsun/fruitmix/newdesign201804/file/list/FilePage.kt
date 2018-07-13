@@ -9,7 +9,7 @@ import com.winsun.fruitmix.BaseActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.FilePageBinding
 import com.winsun.fruitmix.file.data.station.InjectStationFileRepository
-import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
+import com.winsun.fruitmix.newdesign201804.util.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.FilePresenter
 import com.winsun.fruitmix.newdesign201804.file.move.FILE_COPY_REQUEST_CODE
@@ -186,10 +186,6 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
 
     override fun onMapSharedElements(names: MutableList<String>?, sharedElements: MutableMap<String, View>?) {
 
-    }
-
-    override fun canEnterSelectMode(): Boolean {
-        return false
     }
 
     override fun useDefaultBackPressFunction(): Boolean {

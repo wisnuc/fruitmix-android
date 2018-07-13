@@ -23,6 +23,4 @@ public interface Page {
 
     void onDestroy();
 
-    boolean canEnterSelectMode();
-
 }

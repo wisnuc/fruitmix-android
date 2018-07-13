@@ -1,8 +1,7 @@
 package com.winsun.fruitmix.newdesign201804.search.data
 
-import com.winsun.fruitmix.BaseDataRepository
+import com.winsun.fruitmix.model.BaseDataRepository
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
-import com.winsun.fruitmix.file.data.model.AbstractFile
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
 import com.winsun.fruitmix.thread.manage.ThreadManager
 

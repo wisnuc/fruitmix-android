@@ -203,7 +203,7 @@ public class FabMenuLayoutViewComponent implements View.OnClickListener {
 
         new AnimatorBuilder(mContext, R.animator.fab_remote, fab).startAnimator();
 
-        if (currentItem != FabMenuItemOnClickDefaultListener.ITEM_FILE) {
+        if (currentItem != FabMenuItemOnClickListener.ITEM_FILE) {
 
             downloadFileBtn.setVisibility(View.GONE);
 

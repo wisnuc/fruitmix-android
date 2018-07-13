@@ -2,7 +2,6 @@ package com.winsun.fruitmix.newdesign201804.mainpage
 
 import android.content.Context
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.view.PagerAdapter
 import android.support.v4.view.ViewPager
@@ -11,22 +10,17 @@ import android.view.*
 import com.winsun.fruitmix.BaseActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.newdesign201804.component.FileSelectModeTitle
-import com.winsun.fruitmix.newdesign201804.component.getCurrentUserHome
+import com.winsun.fruitmix.newdesign201804.util.getCurrentUserHome
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.EQUIPMENT_IP_KEY
 import com.winsun.fruitmix.newdesign201804.equipment.reinitialization.EQUIPMENT_NAME_KEY
 import com.winsun.fruitmix.newdesign201804.file.list.FilePage
 import com.winsun.fruitmix.newdesign201804.file.list.FilePageActionListener
 import com.winsun.fruitmix.newdesign201804.file.list.FilePageSelectActionListener
-import com.winsun.fruitmix.newdesign201804.file.move.MoveFileActivity
 import com.winsun.fruitmix.newdesign201804.media.MediaPage
-import com.winsun.fruitmix.newdesign201804.search.SearchActivity
 import com.winsun.fruitmix.newdesign201804.search.startSearchActivity
 import com.winsun.fruitmix.newdesign201804.share.SharePage
-import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
-import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
-import com.winsun.fruitmix.util.Util
 import kotlinx.android.synthetic.main.activity_main_page.*
 import kotlinx.android.synthetic.main.main_page_layout.*
 import kotlinx.android.synthetic.main.navigation_menu_item.view.*

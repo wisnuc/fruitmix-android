@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.ActivityOfflineFileBinding
-import com.winsun.fruitmix.newdesign201804.component.getCurrentUserUUID
+import com.winsun.fruitmix.newdesign201804.util.getCurrentUserUUID
 import com.winsun.fruitmix.newdesign201804.file.offlineFile.data.InjectOfflineFileDataSource
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel

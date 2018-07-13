@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.stations;
 
-import com.winsun.fruitmix.BaseDataRepository;
+import com.winsun.fruitmix.model.BaseDataRepository;
 import com.winsun.fruitmix.R;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;

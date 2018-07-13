@@ -33,6 +33,4 @@ public class NetworkException extends Exception {
         return httpResponse.getResponseCode();
     }
 
-
-
 }

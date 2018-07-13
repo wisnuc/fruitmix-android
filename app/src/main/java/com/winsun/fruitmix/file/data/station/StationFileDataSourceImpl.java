@@ -1,30 +1,19 @@
 package com.winsun.fruitmix.file.data.station;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.winsun.fruitmix.base.data.SCloudTokenContainer;
 import com.winsun.fruitmix.callback.BaseLoadDataCallback;
 import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.exception.NetworkException;
-import com.winsun.fruitmix.file.data.download.FileDownloadErrorState;
-import com.winsun.fruitmix.file.data.download.FileDownloadItem;
-import com.winsun.fruitmix.file.data.download.FileDownloadState;
-import com.winsun.fruitmix.file.data.download.param.FileDownloadParam;
-import com.winsun.fruitmix.file.data.download.param.FileFromBoxDownloadParam;
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile;
-import com.winsun.fruitmix.file.data.model.LocalFile;
-import com.winsun.fruitmix.file.data.upload.FileUploadState;
 import com.winsun.fruitmix.http.BaseRemoteDataSourceImpl;
 import com.winsun.fruitmix.http.FileFormData;
 import com.winsun.fruitmix.http.HttpRequest;
 import com.winsun.fruitmix.http.TextFormData;
 import com.winsun.fruitmix.http.request.factory.HttpRequestFactory;
 import com.winsun.fruitmix.http.HttpResponse;
-import com.winsun.fruitmix.http.IHttpFileUtil;
 import com.winsun.fruitmix.http.IHttpUtil;
 import com.winsun.fruitmix.model.operationResult.OperationIOException;
-import com.winsun.fruitmix.model.operationResult.OperationJSONException;
 import com.winsun.fruitmix.model.operationResult.OperationMalformedUrlException;
 import com.winsun.fruitmix.model.operationResult.OperationNetworkException;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
@@ -32,21 +21,14 @@ import com.winsun.fruitmix.model.operationResult.OperationSocketTimeoutException
 import com.winsun.fruitmix.model.operationResult.OperationSuccess;
 import com.winsun.fruitmix.parser.RemoteFileFolderParser;
 import com.winsun.fruitmix.parser.RemoteRootDriveFoldersParser;
-import com.winsun.fruitmix.util.FileUtil;
-import com.winsun.fruitmix.util.Util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.util.Collections;
-
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 
 /**
  * Created by Administrator on 2017/7/19.
@@ -61,16 +43,14 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     private static final String MKDIR = "mkdir";
     private static final String DIRS = "/dirs/";
 
-    private IHttpFileUtil iHttpFileUtil;
-
     private static StationFileDataSource instance;
 
     private String mSCloudToken;
 
-    public static StationFileDataSource getInstance(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, IHttpFileUtil iHttpFileUtil) {
+    public static StationFileDataSource getInstance(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
 
         if (instance == null)
-            instance = new StationFileDataSourceImpl(iHttpUtil, httpRequestFactory, iHttpFileUtil);
+            instance = new StationFileDataSourceImpl(iHttpUtil, httpRequestFactory);
 
         return instance;
     }
@@ -82,9 +62,9 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
     }
 
 
-    private StationFileDataSourceImpl(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory, IHttpFileUtil iHttpFileUtil) {
+    private StationFileDataSourceImpl(IHttpUtil iHttpUtil, HttpRequestFactory httpRequestFactory) {
         super(iHttpUtil, httpRequestFactory);
-        this.iHttpFileUtil = iHttpFileUtil;
+
     }
 
     @Override
@@ -114,70 +94,6 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
         HttpRequest httpRequest = httpRequestFactory.createHttpGetRequest(ROOT_DRIVE_PARAMETER + "/" + rootUUID + DIRS + folderUUID);
 
         return wrapper.loadCall(httpRequest, new RemoteFileFolderParser());
-
-    }
-
-
-    /*
-     * WISNUC API:GET DIRENTRY
-     */
-    @Override
-    public void downloadFile(FileDownloadState fileDownloadState, BaseOperateDataCallback<FileDownloadItem> callback) throws MalformedURLException, IOException, SocketTimeoutException {
-
-        FileDownloadParam fileDownloadParam = fileDownloadState.getFileDownloadParam();
-
-        HttpRequest httpRequest;
-
-        if (fileDownloadParam instanceof FileFromBoxDownloadParam) {
-
-//            httpRequest = httpRequestFactory.createHttpGetRequest(fileDownloadParam.getFileDownloadPath(),
-//                    Util.KEY_JWT_HEAD + ((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken());
-
-//            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
-//                    getAuthorizationValue(((FileFromBoxDownloadParam) fileDownloadParam).getCloudToken()));
-
-            FileFromBoxDownloadParam fileFromBoxDownloadParam = (FileFromBoxDownloadParam) fileDownloadParam;
-
-            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath(),
-                    fileFromBoxDownloadParam.getBoxUUID(), fileFromBoxDownloadParam.getStationID(), mSCloudToken);
-
-        } else {
-
-            httpRequest = httpRequestFactory.createHttpGetFileRequest(fileDownloadParam.getFileDownloadPath());
-
-        }
-
-        if (!wrapper.checkPreCondition(httpRequest, callback))
-            return;
-
-        ResponseBody responseBody = null;
-
-        FileDownloadItem fileDownloadItem = fileDownloadState.getFileDownloadItem();
-
-        try {
-            responseBody = iHttpUtil.getHttpResponseBody(httpRequest).getResponseBody();
-
-            Log.d(TAG, "call: getHttpResponseBody");
-
-            boolean result = FileUtil.writeResponseBodyToFolder(responseBody, fileDownloadState);
-
-            Log.d(TAG, "call: download result:" + result);
-
-            if (result)
-                callback.onSucceed(fileDownloadItem, new OperationSuccess());
-            else
-                callback.onFail(new OperationIOException());
-
-        } catch (NetworkException e) {
-            e.printStackTrace();
-
-            fileDownloadItem.setFileTime(System.currentTimeMillis());
-
-            fileDownloadItem.setFileDownloadState(new FileDownloadErrorState(fileDownloadItem));
-
-            callback.onFail(new OperationNetworkException(e.getHttpResponse()));
-
-        }
 
     }
 
@@ -265,132 +181,6 @@ public class StationFileDataSourceImpl extends BaseRemoteDataSourceImpl implemen
 
         return null;
 
-    }
-
-
-    @Override
-    public OperationResult uploadFile(LocalFile file, String driveUUID, String dirUUID) {
-
-        HttpRequest httpRequest = createUploadFileHttpRequest(driveUUID, dirUUID);
-
-        if (!wrapper.checkUrl(httpRequest.getUrl())) {
-            return new OperationMalformedUrlException();
-        }
-
-        Log.i(TAG, "uploadFile: start upload: " + httpRequest.getUrl());
-
-        Request request;
-        try {
-            request = iHttpUtil.createPostRequest(httpRequest, getUploadFileRequestBody(httpRequest, file));
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            return new OperationJSONException();
-        }
-
-        return handleUploadFileRequest(request);
-
-    }
-
-    @NonNull
-    private OperationResult handleUploadFileRequest(Request request) {
-        HttpResponse httpResponse;
-        try {
-
-            httpResponse = iHttpUtil.remoteCallRequest(request);
-
-            if (httpResponse != null && httpResponse.getResponseCode() == 200)
-                return new OperationSuccess();
-            else
-                return new OperationNetworkException(httpResponse);
-
-        } catch (MalformedURLException e) {
-
-            return new OperationMalformedUrlException();
-
-        } catch (SocketTimeoutException ex) {
-
-            return new OperationSocketTimeoutException();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            return new OperationIOException();
-        }
-    }
-
-
-    private HttpRequest createUploadFileHttpRequest(String driveUUID, String dirUUID) {
-        String path = ROOT_DRIVE_PARAMETER + "/" + driveUUID + DIRS + dirUUID + "/entries";
-
-        return httpRequestFactory.createHttpPostFileRequest(path, "");
-    }
-
-    @Override
-    public OperationResult uploadFileWithProgress(LocalFile file, FileUploadState fileUploadState, String driveUUID, String dirUUID) {
-
-        HttpRequest httpRequest = createUploadFileHttpRequest(driveUUID, dirUUID);
-
-        if (!wrapper.checkUrl(httpRequest.getUrl())) {
-            return new OperationMalformedUrlException();
-        }
-
-        Log.i(TAG, "uploadFile: start upload: " + httpRequest.getUrl());
-
-        Request request;
-        try {
-            request = iHttpFileUtil.createUploadWithProgressRequest(httpRequest,
-                    getUploadFileRequestBody(httpRequest, file), fileUploadState);
-        } catch (JSONException e) {
-            e.printStackTrace();
-
-            return new OperationJSONException();
-        }
-
-        return handleUploadFileRequest(request);
-
-    }
-
-
-    @NonNull
-    private RequestBody getUploadFileRequestBody(HttpRequest httpRequest, LocalFile localFile) throws JSONException {
-        RequestBody requestBody;
-
-        if (httpRequest.getBody().length() != 0) {
-
-            JSONObject jsonObject = new JSONObject(httpRequest.getBody());
-
-            jsonObject.put(OP, "newfile");
-            jsonObject.put("toName", localFile.getName());
-            jsonObject.put(Util.SHA_256_STRING, localFile.getFileHash());
-            jsonObject.put(Util.SIZE_STRING, Long.valueOf(localFile.getSize()));
-
-            String jsonObjectStr = jsonObject.toString();
-
-            Log.d(TAG, "uploadFile: " + jsonObjectStr);
-
-            TextFormData textFormData = new TextFormData(Util.MANIFEST_STRING, jsonObjectStr);
-            FileFormData fileFormData = new FileFormData("", localFile.getName(), new File(localFile.getPath()));
-
-            requestBody = iHttpUtil.createFormDataRequestBody(Collections.singletonList(textFormData), Collections.singletonList(fileFormData));
-
-
-        } else {
-
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put(Util.SIZE_STRING, Long.valueOf(localFile.getSize()));
-            jsonObject.put(Util.SHA_256_STRING, localFile.getFileHash());
-
-            String jsonObjectStr = jsonObject.toString();
-
-            Log.d(TAG, "uploadFile: " + jsonObjectStr);
-
-            FileFormData fileFormData = new FileFormData(localFile.getName(), jsonObjectStr, new File(localFile.getPath()));
-
-            requestBody = iHttpUtil.createFormDataRequestBody(Collections.<TextFormData>emptyList(), Collections.singletonList(fileFormData));
-
-        }
-        return requestBody;
     }
 
     @Override

@@ -16,15 +16,6 @@ import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.winsun.fruitmix.R;
-import com.winsun.fruitmix.callback.BaseOperateDataCallback;
-import com.winsun.fruitmix.logged.in.user.LoggedInWeChatUser;
-import com.winsun.fruitmix.login.InjectLoginUseCase;
-import com.winsun.fruitmix.login.LoginUseCase;
-import com.winsun.fruitmix.model.OperationResultType;
-import com.winsun.fruitmix.model.operationResult.OperationFail;
-import com.winsun.fruitmix.model.operationResult.OperationMoreThanOneStation;
-import com.winsun.fruitmix.model.operationResult.OperationResult;
-import com.winsun.fruitmix.token.WeChatTokenUserWrapper;
 
 import java.util.List;
 
@@ -188,7 +179,6 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
         finish();
 
         wxEntryGetWeChatCodeCallback.fail(resID);
-
         wxEntryGetWeChatCodeCallback = null;
 
     }

@@ -10,7 +10,7 @@ import com.winsun.fruitmix.mediaModule.model.Video;
 import com.winsun.fruitmix.model.operationResult.OperationMediaDataChanged;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.thread.manage.ThreadManager;
-import com.winsun.fruitmix.util.LocalCache;
+import com.winsun.fruitmix.util.MediaUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,7 +93,7 @@ public class LocalMediaRepository {
 
                     mediaConcurrentMapKeyIsOriginalPath.clear();
 
-                    mediaConcurrentMapKeyIsOriginalPath.putAll(LocalCache.BuildMediaMapKeyIsThumb(data));
+                    mediaConcurrentMapKeyIsOriginalPath.putAll(MediaUtil.BuildMediaMapKeyIsThumb(data));
 
                     getLocalMediaInSystemDB(callback);
 
@@ -171,9 +171,9 @@ public class LocalMediaRepository {
                     result = new OperationMediaDataChanged();
                 }
 
-                mediaConcurrentMapKeyIsOriginalPath.putAll(LocalCache.BuildMediaMapKeyIsThumb(newMedia));
+                mediaConcurrentMapKeyIsOriginalPath.putAll(MediaUtil.BuildMediaMapKeyIsThumb(newMedia));
 
-                mediaConcurrentMapKeyIsOriginalPath.putAll(LocalCache.BuildMediaMapKeyIsThumb(newVideos));
+                mediaConcurrentMapKeyIsOriginalPath.putAll(MediaUtil.BuildMediaMapKeyIsThumb(newVideos));
 
                 List<Media> returnValue = new ArrayList<>(mediaConcurrentMapKeyIsOriginalPath.values());
 

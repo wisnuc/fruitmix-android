@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.file.data.model.AbstractRemoteFile
-import com.winsun.fruitmix.newdesign201804.component.inflateView
+import com.winsun.fruitmix.newdesign201804.util.inflateView
 import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder

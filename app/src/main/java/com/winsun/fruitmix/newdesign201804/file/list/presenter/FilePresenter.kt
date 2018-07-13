@@ -1,8 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.list.presenter
 
-import android.app.ProgressDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
@@ -21,17 +19,14 @@ import com.winsun.fruitmix.command.BaseAbstractCommand
 import com.winsun.fruitmix.databinding.*
 import com.winsun.fruitmix.dialog.BottomMenuGridDialogFactory
 import com.winsun.fruitmix.dialog.BottomMenuListDialogFactory
-import com.winsun.fruitmix.file.data.download.param.FileFromStationFolderDownloadParam
 import com.winsun.fruitmix.file.data.model.*
 import com.winsun.fruitmix.file.data.station.StationFileRepository
 import com.winsun.fruitmix.http.HttpResponse
 import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.BottomMenuItem
-import com.winsun.fruitmix.model.DivideBottomMenuItem
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
-import com.winsun.fruitmix.newdesign201804.component.createFileDownloadParam
-import com.winsun.fruitmix.newdesign201804.file.detail.FileDetailActivity
+import com.winsun.fruitmix.newdesign201804.util.createFileDownloadParam
 import com.winsun.fruitmix.newdesign201804.file.list.FilePageActionListener
 import com.winsun.fruitmix.newdesign201804.file.list.FilePageSelectActionListener
 import com.winsun.fruitmix.newdesign201804.file.list.FileView
@@ -53,7 +48,6 @@ import com.winsun.fruitmix.recyclerview.BindingViewHolder
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
 import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.user.datasource.InjectUser
-import com.winsun.fruitmix.util.FileUtil
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.util.Util
 import com.winsun.fruitmix.viewmodel.LoadingViewModel

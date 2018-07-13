@@ -1,12 +1,10 @@
 package com.winsun.fruitmix.newdesign201804.user.preference
 
-import com.winsun.fruitmix.BaseDataRepository
-import com.winsun.fruitmix.callback.BaseLoadDataCallback
+import com.winsun.fruitmix.model.BaseDataRepository
 import com.winsun.fruitmix.thread.manage.ThreadManager
-import com.winsun.fruitmix.user.User
 
 class UserPreferenceRepository(val userPreferenceDBDataSource: UserPreferenceDBDataSource,threadManager: ThreadManager)
-    :BaseDataRepository(threadManager),UserPreferenceDataSource{
+    : BaseDataRepository(threadManager),UserPreferenceDataSource{
 
     fun init(userUUID: String){
 

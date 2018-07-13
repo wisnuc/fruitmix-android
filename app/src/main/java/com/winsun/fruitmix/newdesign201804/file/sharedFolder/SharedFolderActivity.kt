@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import com.winsun.fruitmix.BaseToolbarActivity
 import com.winsun.fruitmix.R
 import com.winsun.fruitmix.databinding.ActivitySharedFolderBinding
-import com.winsun.fruitmix.newdesign201804.component.getCurrentUserHome
+import com.winsun.fruitmix.newdesign201804.util.getCurrentUserHome
 import com.winsun.fruitmix.newdesign201804.file.list.data.InjectFileDataSource
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.InjectSharedFolderDataSource
 import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.SharedFolderDataSource

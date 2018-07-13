@@ -1,6 +1,5 @@
 package com.winsun.fruitmix.newdesign201804.file.sharedFolder
 
-import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.support.v7.app.AlertDialog
@@ -8,7 +7,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
-import com.winsun.fruitmix.newdesign201804.component.inflateView
+import com.winsun.fruitmix.newdesign201804.util.inflateView
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.user.User

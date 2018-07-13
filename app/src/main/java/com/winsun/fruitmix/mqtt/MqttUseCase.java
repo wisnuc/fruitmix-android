@@ -29,13 +29,7 @@ public class MqttUseCase {
 
     private MqttAndroidClient mMqttAndroidClient;
 
-    private static final String TEST_SERVER_URI = "tcp://test.siyouqun.com";
-
-    private static final String PRODUCTION_SERVER_URI = "tcp://mqtt.siyouqun.com";
-
     private String subscriptionTopic = "";
-
-    private final String publishTopic = "presence";
 
     private static MqttUseCase mMqttUseCase;
 

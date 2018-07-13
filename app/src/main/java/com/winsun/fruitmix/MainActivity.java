@@ -38,37 +38,11 @@ public class MainActivity extends Activity {
         MobclickAgent.openActivityDurationTrack(false);
         MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL);
 
-        Util.setRemoteMediaLoaded(false);
-
         Intent intent = new Intent();
         intent.setClass(MainActivity.this, SplashScreenActivity.class);
         startActivity(intent);
         finish();
 
-    }
-
-    private static boolean checkPermission(Context context, String permission) {
-        boolean result = false;
-        if (Build.VERSION.SDK_INT >= 23) {
-            try {
-                Class<?> clazz = Class.forName("android.content.Context");
-                Method method = clazz.getMethod("checkSelfPermission", String.class);
-                int rest = (Integer) method.invoke(context, permission);
-                if (rest == PackageManager.PERMISSION_GRANTED) {
-                    result = true;
-                } else {
-                    result = false;
-                }
-            } catch (Exception e) {
-                result = false;
-            }
-        } else {
-            PackageManager pm = context.getPackageManager();
-            if (pm.checkPermission(permission, context.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
-                result = true;
-            }
-        }
-        return result;
     }
 
     public static String getDeviceInfo(Context context) {
@@ -126,5 +100,30 @@ public class MainActivity extends Activity {
         }
         return null;
     }
+
+    private static boolean checkPermission(Context context, String permission) {
+        boolean result = false;
+        if (Build.VERSION.SDK_INT >= 23) {
+            try {
+                Class<?> clazz = Class.forName("android.content.Context");
+                Method method = clazz.getMethod("checkSelfPermission", String.class);
+                int rest = (Integer) method.invoke(context, permission);
+                if (rest == PackageManager.PERMISSION_GRANTED) {
+                    result = true;
+                } else {
+                    result = false;
+                }
+            } catch (Exception e) {
+                result = false;
+            }
+        } else {
+            PackageManager pm = context.getPackageManager();
+            if (pm.checkPermission(permission, context.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
+                result = true;
+            }
+        }
+        return result;
+    }
+
 
 }

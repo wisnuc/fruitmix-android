@@ -1,6 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.file.transmission
 
-import com.winsun.fruitmix.BaseDataRepository
+import com.winsun.fruitmix.model.BaseDataRepository
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.callback.BaseOperateCallback
 import com.winsun.fruitmix.model.operationResult.OperationSuccess

@@ -29,69 +29,6 @@ import java.util.List;
 @Config(constants = BuildConfig.class, sdk = 23, application = MockApplication.class)
 public class RemoteDatasParserUnitTest {
 
-    @Test
-    public void parseRemoteMediaTest() {
-
-        String json = "[\n" +
-                "{\n" +
-                "        \"hash\": \"91e4ff515f445c16f2b5697040c79b980396248c057ea7e04ad761e635cae062\",\n" +
-                "        \"m\": \"JPEG\",\n" +
-                "        \"w\": 5203,\n" +
-                "        \"h\": 3451,\n" +
-                "        \"datetime\": \"2016:09:25 17:54:53\",\n" +
-                "        \"make\": \"Canon\",\n" +
-                "        \"model\": \"Canon EOS 5D Mark III\",\n" +
-                "        \"size\": 4676424\n" +
-                "    },\n" +
-                "    {\n" +
-                "        \"hash\": \"d2f9622b7e064cfcf51caa70fc08cc63a9e06591f98b5b2e85bd0880aaf8594c\",\n" +
-                "        \"m\": \"JPEG\",\n" +
-                "        \"w\": 707,\n" +
-                "        \"h\": 1200,\n" +
-                "        \"size\": 62162\n" +
-                "    },\n" +
-                "    {\n" +
-                "        \"hash\": \"621926b371ea3cfa246b64394c511459131f1ae39de243300ae3dc98682a4bbc\",\n" +
-                "        \"m\": \"JPEG\",\n" +
-                "        \"w\": 5184,\n" +
-                "        \"h\": 3456,\n" +
-                "        \"orient\": 1,\n" +
-                "        \"datetime\": \"2016:07:21 10:07:27\",\n" +
-                "        \"make\": \"Canon\",\n" +
-                "        \"model\": \"Canon EOS 600D\",\n" +
-                "        \"size\": 4890773\n" +
-                "    },\n" +
-                "    {\n" +
-                "        \"hash\": \"866688c5a93a2a9f0dfc16c6bbee0c6ecf3fa442a8d173be261ae721f3f7856f\",\n" +
-                "        \"m\": \"JPEG\",\n" +
-                "        \"w\": 5184,\n" +
-                "        \"h\": 3456,\n" +
-                "        \"orient\": 1,\n" +
-                "        \"datetime\": \"2016:07:15 14:43:36\",\n" +
-                "        \"make\": \"Canon\",\n" +
-                "        \"model\": \"Canon EOS 600D\",\n" +
-                "        \"size\": 5021723\n" +
-                "    }" +
-                "]";
-
-        RemoteDatasParser<Media> remoteDatasParser = new RemoteMediaParser();
-
-        List<Media> medias = new ArrayList<>();
-        try {
-            medias = remoteDatasParser.parse(json);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        assertFalse(medias.size() == 0);
-
-        Media media = medias.get(0);
-        assertEquals("91e4ff515f445c16f2b5697040c79b980396248c057ea7e04ad761e635cae062", media.getUuid());
-        assertEquals("5203", media.getWidth());
-        assertEquals("3451", media.getHeight());
-        assertEquals("2016-09-25 17:54:53", media.getFormattedTime());
-
-    }
 
     @Test
     public void parseRemoteFileFolderTest() {
