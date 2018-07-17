@@ -38,7 +38,7 @@ import java.util.*
 
 interface SearchEquipmentUIState {
 
-    fun startSearchState()
+    fun startSearchState(context: Context)
     fun searchTimeoutState(showEquipmentViewPager: Boolean)
     fun searchSucceedState()
 
@@ -93,29 +93,30 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
     private val typeArray: IntArray = intArrayOf(0, 1, 1, 2)
     private var type = 0
 
-    override fun startSearchState() {
+    override fun startSearchState(context: Context) {
 
         resetData()
 
 //        equipmentViewPagerAdapter.resetForceRefresh()
         equipmentViewPagerAdapter.resetFindFirstEquipment()
 
-        searchEquipmentUIState.startSearchState()
+        searchEquipmentUIState.startSearchState(context)
 
-        equipmentSearchManager.startDiscovery {
+        equipmentSearchManager.startDiscovery(context, {
 
             handleEquipmentFounded(it)
 
-        }
+        })
 
         customHandler.sendEmptyMessageDelayed(SEARCH_TIMEOUT, SEARCH_TIMEOUT_SECOND)
 
     }
 
-    private fun resetData(){
+    private fun resetData() {
+
+        type = 0
 
         baseNewEquipmentStates.clear()
-
         mEquipmentIps.clear()
         mEquipmentSerialNumbers.clear()
 
@@ -262,9 +263,11 @@ class AddEquipmentPresenter(private val equipmentSearchManager: EquipmentSearchM
 
     fun onPageSelect(position: Int) {
 
-        currentEquipmentState = baseNewEquipmentStates[position]
+        if (baseNewEquipmentStates.size > position) {
+            currentEquipmentState = baseNewEquipmentStates[position]
 
-        currentEquipmentState.refreshView()
+            currentEquipmentState.refreshView()
+        }
 
     }
 

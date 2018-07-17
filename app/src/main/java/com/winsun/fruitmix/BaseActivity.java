@@ -53,7 +53,6 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     protected void onStart() {
         super.onStart();
 
-        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -74,8 +73,6 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
 
     @Override
     protected void onStop() {
-
-        EventBus.getDefault().unregister(this);
 
         super.onStop();
 

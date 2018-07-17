@@ -1,12 +1,13 @@
 package com.winsun.fruitmix.newdesign201804.equipment.add.data
 
+import android.content.Context
 import com.winsun.fruitmix.equipment.search.data.Equipment
 import com.winsun.fruitmix.equipment.search.data.EquipmentFoundedListener
 import com.winsun.fruitmix.equipment.search.data.EquipmentSearchManager
 
 class FakeEquipmentSearchManger : EquipmentSearchManager {
 
-    override fun startDiscovery(equipmentFoundedListener: EquipmentFoundedListener?) {
+    override fun startDiscovery(context: Context,equipmentFoundedListener: EquipmentFoundedListener?) {
 
         val equipments = mutableListOf<Equipment>()
 

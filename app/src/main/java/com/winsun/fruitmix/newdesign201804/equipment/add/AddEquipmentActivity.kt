@@ -1,5 +1,6 @@
 package com.winsun.fruitmix.newdesign201804.equipment.add
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
@@ -39,6 +40,8 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
 
     private lateinit var addEquipmentPresenter: AddEquipmentPresenter
 
+    private val context = this
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -77,7 +80,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
 
         operate_btn.setOnClickListener {
 
-            addEquipmentPresenter.operateBtnOnClick(this, operate_btn)
+            addEquipmentPresenter.operateBtnOnClick(context, operate_btn)
 
         }
 
@@ -85,7 +88,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
                 ContextCompat.getColor(this, R.color.new_design_progressbar_color),
                 android.graphics.PorterDuff.Mode.SRC_IN)
 
-        addEquipmentPresenter.startSearchState()
+        addEquipmentPresenter.startSearchState(context)
 
     }
 
@@ -105,7 +108,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
         return getString(R.string.add_equipment)
     }
 
-    override fun startSearchState() {
+    override fun startSearchState(context: Context) {
 
         add_equipment_title.setText(R.string.searching_equipment)
 
@@ -145,7 +148,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
 
             refresh_layout.setOnClickListener {
 
-                addEquipmentPresenter.startSearchState()
+                addEquipmentPresenter.startSearchState(context)
 
             }
 
@@ -217,7 +220,7 @@ class AddEquipmentActivity : BaseToolbarActivity(), SearchEquipmentUIState, Equi
                 override fun execute() {
                     super.execute()
 
-                    addEquipmentPresenter.startSearchState()
+                    addEquipmentPresenter.startSearchState(context)
                 }
 
             }))

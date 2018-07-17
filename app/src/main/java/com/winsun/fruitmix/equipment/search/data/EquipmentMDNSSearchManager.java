@@ -17,7 +17,7 @@ import rx.schedulers.Schedulers;
  * Created by Administrator on 2017/5/16.
  */
 
-public class EquipmentMDNSSearchManager implements EquipmentSearchManager{
+public class EquipmentMDNSSearchManager implements EquipmentSearchManager {
 
     public static final String TAG = EquipmentMDNSSearchManager.class.getSimpleName();
 
@@ -31,7 +31,7 @@ public class EquipmentMDNSSearchManager implements EquipmentSearchManager{
 
     private EquipmentMDNSSearchManager(Context context) {
 
-        mRxDnssd = createDnssd(context);
+        initRxDnssd(context);
 
     }
 
@@ -52,10 +52,21 @@ public class EquipmentMDNSSearchManager implements EquipmentSearchManager{
         instance = null;
     }
 
-    public void startDiscovery(final EquipmentFoundedListener listener) {
+    private void initRxDnssd(Context context) {
+        if (mRxDnssd == null)
+            mRxDnssd = createDnssd(context);
+    }
+
+    private void destroyRxDnssd() {
+        mRxDnssd = null;
+    }
+
+    public void startDiscovery(Context context,final EquipmentFoundedListener listener) {
 
         Log.d(TAG, "Equipment: startDiscovery");
-        
+
+        initRxDnssd(context);
+
         mSubscription = mRxDnssd.browse(SERVICE_PORT, DEMAIN)
                 .compose(mRxDnssd.resolve())
                 .compose(mRxDnssd.queryRecords())
@@ -99,7 +110,7 @@ public class EquipmentMDNSSearchManager implements EquipmentSearchManager{
             mSubscription = null;
         }
 
-        destroyInstance();
+        destroyRxDnssd();
     }
 
 }
