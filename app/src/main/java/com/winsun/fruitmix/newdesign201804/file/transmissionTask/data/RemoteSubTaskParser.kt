@@ -25,7 +25,8 @@ class RemoteSubTaskParser {
 
         val errorJSONObject = jsonObject.optJSONObject("error")
 
-        val code = errorJSONObject.optString("code")
+        val code = if (errorJSONObject != null)
+            errorJSONObject.optString("code") else ""
 
         val subTaskError = SubTaskError(code)
 
