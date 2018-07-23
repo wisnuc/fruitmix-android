@@ -813,22 +813,22 @@ public class DBUtils {
 
     }
 
-    public long uploadUploadTaskState(String taskUUID, int taskState) {
-        return updateTaskState(DBHelper.UPLOAD_TASK_TABLE_NAME, taskUUID, taskState);
+    public long uploadUploadTaskState(String taskUUID, int taskStateTypeValue) {
+        return updateTaskState(DBHelper.UPLOAD_TASK_TABLE_NAME, taskUUID, taskStateTypeValue);
     }
 
-    public long uploadDownloadTaskState(String taskUUID, int taskState) {
-        return updateTaskState(DBHelper.DOWNLOAD_TASK_TABLE_NAME, taskUUID, taskState);
+    public long uploadDownloadTaskState(String taskUUID, int taskStateTypeValue) {
+        return updateTaskState(DBHelper.DOWNLOAD_TASK_TABLE_NAME, taskUUID, taskStateTypeValue);
     }
 
-    private long updateTaskState(String dbName, String taskUUID, int taskState) {
+    private long updateTaskState(String dbName, String taskUUID, int taskStateTypeValue) {
 
         openWritableDB();
 
         long returnValue = 0;
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(DBHelper.TASK_STATE, taskState);
+        contentValues.put(DBHelper.TASK_STATE, taskStateTypeValue);
 
         returnValue = database.update(dbName, contentValues,
                 DBHelper.TASK_UUID + " = ?", new String[]{taskUUID});
@@ -866,58 +866,6 @@ public class DBUtils {
 
         return returnValue;
 
-    }
-
-    public long deleteAllLoggedInUser() {
-        return deleteAllDataInTable(DBHelper.LOGGED_IN_USER_TABLE_NAME);
-    }
-
-    public long deleteLoggerUserByUserUUID(String userUUID) {
-
-        openWritableDB();
-
-        long returnValue = database.delete(DBHelper.LOGGED_IN_USER_TABLE_NAME, DBHelper.USER_KEY_UUID + " = ?", new String[]{userUUID});
-
-        close();
-
-        return returnValue;
-
-    }
-
-    public long deleteFileUploadTaskByUUIDAndCreatorUUID(String fileUUID, String fileCreatorUUID) {
-
-        return deleteFileFinishedTaskItem(DBHelper.UPLOAD_FILE_TABLE_NAME, fileUUID, fileCreatorUUID);
-
-    }
-
-    public long deleteFileDownloadedTaskByUUIDAndCreatorUUID(String fileUUID, String fileCreatorUUID) {
-
-        return deleteFileFinishedTaskItem(DBHelper.DOWNLOADED_FILE_TABLE_NAME, fileUUID, fileCreatorUUID);
-
-    }
-
-    private long deleteFileFinishedTaskItem(String tableName, String fileUUID, String fileCreatorUUID) {
-
-        openWritableDB();
-
-        long returnValue = database.delete(tableName, DBHelper.FILE_KEY_UUID + " = ? and " + DBHelper.FILE_KEY_CREATOR_UUID + " = ?", new String[]{fileUUID, fileCreatorUUID});
-
-        close();
-
-        return returnValue;
-
-    }
-
-
-    public long deleteDownloadedFileByUUID(String fileUUID) {
-
-        openWritableDB();
-
-        long returnValue = database.delete(DBHelper.DOWNLOADED_FILE_TABLE_NAME, DBHelper.FILE_KEY_UUID + " = ?", new String[]{fileUUID});
-
-        close();
-
-        return returnValue;
     }
 
     public long deleteWeChatUser(String token) {

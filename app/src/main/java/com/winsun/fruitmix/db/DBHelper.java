@@ -12,35 +12,35 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final String TAG = DBHelper.class.getSimpleName();
 
-    public static final int ADD_FILE_KEY_CREATOR_UUID_DB_VERSION = 21;
+    private static final int ADD_FILE_KEY_CREATOR_UUID_DB_VERSION = 21;
 
-    public static final int ADD_MEDIA_LATITUDE_LONGITUDE_DB_VERSION = 28;
+    private static final int ADD_MEDIA_LATITUDE_LONGITUDE_DB_VERSION = 28;
 
-    public static final int ADD_LOGGED_IN_WECHAT_USER_DB_VERSION = 30;
+    private static final int ADD_LOGGED_IN_WECHAT_USER_DB_VERSION = 30;
 
-    public static final int ADD_USER_ASSOCIATED_WECHAT_USER_NAME_DB_VERSION = 31;
+    private static final int ADD_USER_ASSOCIATED_WECHAT_USER_NAME_DB_VERSION = 31;
 
-    public static final int ADD_LOCAL_VIDEO_TABLE_VERSION = 32;
+    private static final int ADD_LOCAL_VIDEO_TABLE_VERSION = 32;
 
-    public static final int ADD_REMOTE_VIDEO_TABLE_VERSION = 33;
+    private static final int ADD_REMOTE_VIDEO_TABLE_VERSION = 33;
 
-    public static final int ADD_UPLOAD_FILE_TABLE_VERSION = 34;
+    private static final int ADD_UPLOAD_FILE_TABLE_VERSION = 34;
 
-    public static final int ADD_USER_IS_FIRST_USER_VERSION = 35;
+    private static final int ADD_USER_IS_FIRST_USER_VERSION = 35;
 
-    public static final int ADD_GROUP_STATION_AND_COMMENT_VERSION = 36;
+    private static final int ADD_GROUP_STATION_AND_COMMENT_VERSION = 36;
 
-    public static final int MODIFY_STATION_TABLE_COLUMN = 37;
+    private static final int MODIFY_STATION_TABLE_COLUMN = 37;
 
-    public static final int ADD_GROUP_LAST_RETRIEVE_COMMENT_INDEX_VERSION = 38;
+    private static final int ADD_GROUP_LAST_RETRIEVE_COMMENT_INDEX_VERSION = 38;
 
-    public static final int ADD_GROUP_COMMENT_DRAFT_TABLE_VERSION = 39;
+    private static final int ADD_GROUP_COMMENT_DRAFT_TABLE_VERSION = 39;
 
-    public static final int ADD_GROUP_COMMENT_DRAFT_KEY_IS_FAIL_VERSION = 40;
+    private static final int ADD_GROUP_COMMENT_DRAFT_KEY_IS_FAIL_VERSION = 40;
 
-    public static final int ADD_USER_PREFERENCE_TABLE_VERSION = 41;
+    private static final int ADD_USER_PREFERENCE_TABLE_VERSION = 41;
 
-    public static final int ADD_DOWNLOAD_UPLOAD_TASK_TABLE_VERSION = 42;
+    private static final int ADD_DOWNLOAD_UPLOAD_TASK_TABLE_VERSION = 42;
 
     public static final String USER_KEY_ID = "id";
     public static final String USER_KEY_USERNAME = "user_name";
@@ -327,6 +327,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         db.execSQL(DATABASE_REMOTE_MEDIA_CREATE);
         db.execSQL(DATABASE_LOCAL_MEDIA_CREATE);
+
         db.execSQL(DATABASE_REMOTE_USER_CREATE);
 
         db.execSQL(DATABASE_DOWNLOADED_FILE_CREATE);
