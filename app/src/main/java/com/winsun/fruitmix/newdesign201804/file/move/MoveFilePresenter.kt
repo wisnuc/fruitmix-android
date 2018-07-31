@@ -133,7 +133,7 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
 
     fun handleCreateFolderBtnOnClick() {
 
-        val createFolderUseCase = CreateFolderUseCase(fileDataSource, moveFileView, moveBtn,
+        val createFolderUseCase = CreateFolderUseCase(fileDataSource, moveFileView,currentFolderItems, activityMoveFileBinding.root,
                 {
 
                     newFolder ->

@@ -16,9 +16,10 @@ import com.winsun.fruitmix.parser.RemoteMkDirParser
 import com.winsun.fruitmix.util.SnackbarUtil
 
 class CreateFolderUseCase(val fileDataSource: FileDataSource, val baseView: BaseView,
-                          val view: View, val handleCreateSucceed:(newFolder:AbstractRemoteFile)->Unit){
+                          val folderItems: List<AbstractRemoteFile>,
+                          val view: View, val handleCreateSucceed: (newFolder: AbstractRemoteFile) -> Unit) {
 
-    fun createFolder(context:Context, parentFolder: AbstractRemoteFile) {
+    fun createFolder(context: Context, parentFolder: AbstractRemoteFile) {
 
         val editText = EditText(context)
 
@@ -33,11 +34,23 @@ class CreateFolderUseCase(val fileDataSource: FileDataSource, val baseView: Base
                     if (folderName.isEmpty())
                         folderName = editText.hint.toString()
 
-                    doCreateFolder(context,folderName,parentFolder)
+                    if (checkFolderNameExist(folderName)) {
+                        SnackbarUtil.showSnackBar(view, Snackbar.LENGTH_SHORT,
+                               R.string.folder_name_exist)
+                    } else
+                        doCreateFolder(context, folderName, parentFolder)
 
                 }
                 .setNegativeButton(R.string.cancel) { dialog, which -> }
                 .create().show()
+
+    }
+
+    private fun checkFolderNameExist(folderName: String): Boolean {
+
+        return folderItems.any {
+            it.name == folderName
+        }
 
     }
 

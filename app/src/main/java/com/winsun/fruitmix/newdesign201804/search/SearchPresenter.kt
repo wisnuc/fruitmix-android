@@ -246,7 +246,7 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
 
         var searchOrder = SearchOrder.NUll
 
-        if (currentInputText.isNotEmpty())
+        if (currentInputText.isNotEmpty() && classes.isEmpty() && types.isEmpty())
             searchOrder = SearchOrder.FIND
 
         searchDataSource.searchFile(name = if (currentInputText.isNotEmpty()) currentInputText else "", places = searchPlace,

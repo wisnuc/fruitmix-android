@@ -471,7 +471,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     private fun createFolder() {
 
-        val createFolderUseCase = CreateFolderUseCase(fileDataSource, baseView, filePageBinding.root,
+        val createFolderUseCase = CreateFolderUseCase(fileDataSource, baseView, currentFolderItems,filePageBinding.root,
                 { newFolder ->
 
                     currentFolderItems.add(newFolder)
@@ -507,39 +507,6 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     }
 
-    private fun doCreateFolder(folderName: String) {
-
-        baseView.showProgressDialog(context.getString(R.string.operating_title, context.getString(R.string.create)))
-
-        fileDataSource.createFolder(folderName, rootFolderUUID, currentFolderUUID, object : BaseOperateDataCallback<HttpResponse> {
-
-            override fun onSucceed(data: HttpResponse?, result: OperationResult?) {
-
-                baseView.dismissDialog()
-
-                val parser = RemoteMkDirParser()
-
-                val newFolder = parser.parse(data?.responseData)
-
-                currentFolderItems.add(newFolder)
-
-                refreshData()
-
-            }
-
-            override fun onFail(operationResult: OperationResult?) {
-
-                baseView.dismissDialog()
-
-                SnackbarUtil.showSnackBar(filePageBinding.root, Snackbar.LENGTH_SHORT,
-                        messageStr = operationResult?.getResultMessage(context)!!)
-
-            }
-
-        })
-
-
-    }
 
     private fun createMagnetTransmission() {
 

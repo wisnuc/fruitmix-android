@@ -903,7 +903,7 @@ public class FileUtil {
 
     }
 
-    public static boolean openDownloadedFile(Context context,File file){
+    public static boolean openDownloadedFile(Context context, File file) {
 
         try {
             FileUtil.openFile(context, file);
@@ -920,10 +920,15 @@ public class FileUtil {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(Intent.ACTION_VIEW);
         String type = getMIMEType(file.getName());
+
+        if (type.equalsIgnoreCase("*/*"))
+            type = "text/*";
+
         intent.setDataAndType(Uri.fromFile(file), type);
 
         context.startActivity(filterIntent(context, intent));
     }
+
 
     private static Intent filterIntent(Context context, Intent intent) {
 
