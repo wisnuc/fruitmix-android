@@ -6,4 +6,6 @@ interface FileView :FileOperationView {
 
     fun enterFileBrowserActivity()
 
+    fun setFileRecyclerViewVisibility(visibility:Int)
+
 }

@@ -25,6 +25,7 @@ import kotlinx.android.synthetic.main.activity_main_page.*
 import kotlinx.android.synthetic.main.main_page_layout.*
 import kotlinx.android.synthetic.main.navigation_menu_item.view.*
 import kotlinx.android.synthetic.main.search_file_card.*
+import java.util.*
 
 private const val PAGE_FILE = 0
 private const val PAGE_MEDIA = 1
@@ -279,7 +280,7 @@ class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListene
 
             searchTextView.text = getString(R.string.search_file)
             searchTextView.setOnClickListener {
-                startSearchActivity(getCurrentUserHome(), this)
+                startSearchActivity(ArrayList(Collections.singletonList(getCurrentUserHome())), this)
             }
 
             searchIv.visibility = View.GONE
@@ -296,7 +297,7 @@ class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListene
 
             searchIv.visibility = View.VISIBLE
             searchIv.setOnClickListener {
-                startSearchActivity(folderUUID, this)
+                startSearchActivity(ArrayList(Collections.singletonList(getCurrentUserHome())), this)
             }
 
         }

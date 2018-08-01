@@ -8,18 +8,26 @@ import com.winsun.fruitmix.R
 import com.winsun.fruitmix.callback.BaseLoadDataCallback
 import com.winsun.fruitmix.databinding.ActivitySearchBinding
 import com.winsun.fruitmix.file.data.model.*
+import com.winsun.fruitmix.interfaces.BaseView
 import com.winsun.fruitmix.model.ViewItem
 import com.winsun.fruitmix.model.operationResult.OperationResult
+import com.winsun.fruitmix.newdesign201804.file.list.data.FileDataSource
 import com.winsun.fruitmix.newdesign201804.util.inflateView
 import com.winsun.fruitmix.newdesign201804.file.list.presenter.*
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FileItemViewModel
 import com.winsun.fruitmix.newdesign201804.file.list.viewmodel.FolderItemViewModel
+import com.winsun.fruitmix.newdesign201804.file.operation.FileOperation
+import com.winsun.fruitmix.newdesign201804.file.operation.FileOperationView
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskRepository
+import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskRepository
 import com.winsun.fruitmix.newdesign201804.search.data.SearchDataSource
 import com.winsun.fruitmix.newdesign201804.search.data.SearchOrder
 import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
 import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
+import com.winsun.fruitmix.newdesign201804.util.getCurrentUserUUID
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
+import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import com.winsun.fruitmix.viewmodel.ToolbarViewModel
@@ -30,7 +38,10 @@ import kotlinx.android.synthetic.main.search_type_card.view.*
 
 class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, val toolbarViewModel: ToolbarViewModel,
                       val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel,
-                      val searchDataSource: SearchDataSource, val searchPlace: String) {
+                      val searchDataSource: SearchDataSource, val threadManager: ThreadManager,
+                      val transmissionTaskRepository: TransmissionTaskRepository, val fileDataSource: FileDataSource,
+                      val baseView: BaseView, val fileOperationView: FileOperationView,
+                      val searchPlaces: List<String>) {
 
     private val editText = activitySearchBinding.toolbar?.title!!
 
@@ -53,6 +64,10 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
     private lateinit var fileRecyclerViewAdapter: FileRecyclerViewAdapter
 
     private var currentInputText = ""
+
+    private lateinit var fileOperation: FileOperation
+
+    private val viewItems = mutableListOf<ViewItem>()
 
     fun initView() {
 
@@ -152,15 +167,56 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
 
     private fun initFileRecyclerView() {
 
+        fileOperation = FileOperation(context.getCurrentUserUUID(), threadManager, transmissionTaskRepository,
+                editText, fileDataSource, baseView, fileOperationView,
+                { position ->
+
+                    fileRecyclerViewAdapter.notifyItemChanged(position)
+                },
+                { position ->
+
+                    viewItems.removeAt(position)
+
+                    val itemSize = viewItems.filter {
+                        it is ItemFolder || it is ItemFile
+                    }.size
+
+                    if (itemSize == 0)
+                        noContentViewModel.showNoContent.set(true)
+                    else {
+
+                        fileRecyclerViewAdapter.setItemList(viewItems)
+
+                        fileRecyclerViewAdapter.notifyItemRemoved(position)
+
+                    }
+
+                })
+
         searchedFileRecyclerView.layoutManager = LinearLayoutManager(context)
 
-        fileRecyclerViewAdapter = FileRecyclerViewAdapter({ abstractFile, position ->
-        }, {}, { abstractFile, position ->
-        },sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
+        fileRecyclerViewAdapter = FileRecyclerViewAdapter(
+                { abstractFile, position ->
+                    handleItemOnClick(abstractFile, position)
+                },
+                {
+                    return@FileRecyclerViewAdapter false
+                },
+                { abstractFile, position ->
+                    fileOperation.doShowFileMenuBottomDialog(context, abstractFile, position)
+                },
+                sortPolicy = UserPreferenceContainer.userPreference.fileSortPolicy)
 
         fileRecyclerViewAdapter.fileViewMode = FileViewMode.LIST
 
         searchedFileRecyclerView.adapter = fileRecyclerViewAdapter
+
+    }
+
+    private fun handleItemOnClick(abstractFile: AbstractFile, position: Int) {
+
+        if (abstractFile is RemoteFile)
+            fileOperation.openFileAfterOnClick(abstractFile)
 
     }
 
@@ -249,7 +305,7 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
         if (currentInputText.isNotEmpty() && classes.isEmpty() && types.isEmpty())
             searchOrder = SearchOrder.FIND
 
-        searchDataSource.searchFile(name = if (currentInputText.isNotEmpty()) currentInputText else "", places = searchPlace,
+        searchDataSource.searchFile(name = if (currentInputText.isNotEmpty()) currentInputText else "", places = searchPlaces,
                 types = if (types.isNotEmpty()) types else "", searchClasses = if (classes.isNotEmpty()) classes else "",
                 searchOrder = searchOrder,
                 baseLoadDataCallback = object : BaseLoadDataCallback<AbstractRemoteFile> {
@@ -286,27 +342,25 @@ class SearchPresenter(private val activitySearchBinding: ActivitySearchBinding, 
         val folderViewItems = mutableListOf<ViewItem>()
         val fileViewItems = mutableListOf<ViewItem>()
 
+        viewItems.clear()
+
         abstractFiles.forEach {
 
             if (it.isFolder) {
 
                 val folderItemViewModel = FolderItemViewModel(it as RemoteFolder)
                 folderItemViewModel.showOfflineAvailableIv.set(true)
-                folderItemViewModel.showMoreBtn.set(false)
 
                 folderViewItems.add(ItemFolder(folderItemViewModel))
             } else {
 
                 val fileItemViewModel = FileItemViewModel(it as RemoteFile)
                 fileItemViewModel.showOfflineAvailableIv.set(true)
-                fileItemViewModel.showMoreBtn.set(false)
 
                 fileViewItems.add(ItemFile(fileItemViewModel))
             }
 
         }
-
-        val viewItems = mutableListOf<ViewItem>()
 
         viewItems.addAll(folderViewItems)
         viewItems.addAll(fileViewItems)

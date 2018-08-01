@@ -843,7 +843,7 @@
 
     <string name="no_title_folder">No title folder</string>
 
-    <string name="folder_name_exist">Folder name already exists</string>
+    <string name="name_already_exist">Name already exists</string>
 
     <!-- file detail -->
     <string name="key_type">Type</string>

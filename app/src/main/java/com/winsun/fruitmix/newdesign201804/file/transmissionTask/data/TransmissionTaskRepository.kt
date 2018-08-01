@@ -103,7 +103,7 @@ class TransmissionTaskRepository(private val taskManager: TaskManager, private v
 
         val result = taskManager.addTask(task)
 
-        if (task is DownloadTask || task is UploadTask) {
+        if (result && (task is DownloadTask || task is UploadTask)) {
 
             mThreadManager.runOnCacheThread {
                 val addTaskInDBResult = transmissionTaskDBDataSource.addTransmissionTask(task)

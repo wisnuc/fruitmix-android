@@ -18,9 +18,11 @@ import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.SharedFolderDa
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.InjectTransmissionTaskRepository
 import com.winsun.fruitmix.newdesign201804.search.startSearchActivity
 import com.winsun.fruitmix.thread.manage.ThreadManagerImpl
+import com.winsun.fruitmix.user.datasource.InjectUser
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
 import kotlinx.android.synthetic.main.activity_shared_folder.*
+import java.util.*
 
 class SharedFolderActivity : BaseToolbarActivity(), SharedFolderView {
 
@@ -48,7 +50,7 @@ class SharedFolderActivity : BaseToolbarActivity(), SharedFolderView {
 
         toolbarViewModel.setToolbarMenuBtnOnClickListener {
 
-            startSearchActivity(getCurrentUserHome(), this)
+            startSearchActivity(ArrayList(Collections.singletonList(getCurrentUserHome())), this)
 
         }
 
@@ -57,7 +59,8 @@ class SharedFolderActivity : BaseToolbarActivity(), SharedFolderView {
         sharedFolderPresenter = SharedFolderPresenter(
                 InjectFileDataSource.inject(this), this,
                 loadingViewModel, noContentViewModel,
-                sharedFolderDataSource,ThreadManagerImpl.getInstance(),InjectTransmissionTaskRepository.provideInstance(this))
+                sharedFolderDataSource,ThreadManagerImpl.getInstance(),InjectTransmissionTaskRepository.provideInstance(this),
+                InjectUser.provideRepository(this))
 
         recyclerView.layoutManager = LinearLayoutManager(this)
 

@@ -80,6 +80,7 @@ class MoveFilePresenter(val fileDataSource: FileDataSource, val transmissionTask
             gotoNextFolder(abstractRemoteFile as AbstractRemoteFile)
 
         }, {
+            return@FileRecyclerViewAdapter false
         }, { abstractRemoteFile, position ->
 
         }, handleSortBtnOnClick = {

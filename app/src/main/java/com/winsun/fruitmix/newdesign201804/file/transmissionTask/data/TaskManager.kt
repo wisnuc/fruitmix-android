@@ -32,6 +32,11 @@ object TaskManager : TaskStateObserver {
 
     fun addTask(task: Task): Boolean {
 
+        val sameNameTasks = getSameNameTasks(task)
+
+        if(sameNameTasks.any { it.getCurrentState().getType() == StateType.STARTING || it.getCurrentState().getType() == StateType.PAUSE })
+            return false
+
         renameFileNameIfNecessary(task)
 
         val result = tasks.add(task)
@@ -81,6 +86,12 @@ object TaskManager : TaskStateObserver {
         return taskMap[taskUUID]
     }
 
+    private fun getSameNameTasks(task: Task):List<Task>{
+
+        return tasks.filter { it.abstractFile.name == task.abstractFile.name }
+
+    }
+
     private fun renameFileNameIfNecessary(task: Task) {
         var code = 1
 
@@ -89,10 +100,16 @@ object TaskManager : TaskStateObserver {
 
         val list = tasks.filter { it is DownloadTask }
 
-        val result = list.filter { it.abstractFile.name == task.abstractFile.name }
+        while (true) {
 
-        if (result.size > 1) {
-            newName = FileUtil.renameFileName(code++, newName)
+            val result = list.filter { it.abstractFile.name == newName }
+
+            if (result.size > 1) {
+                newName = FileUtil.renameFileName(code, originalName)
+                code++
+            } else
+                break
+
         }
 
         if (task is DownloadTask) {
@@ -103,9 +120,10 @@ object TaskManager : TaskStateObserver {
 
                 val newFile = File(abstractRemoteFile.getDownloadFileFolderParentFolderPath(task.createUserUUID) + newName)
 
-                if (newFile.exists())
-                    newName = FileUtil.renameFileName(code++, newName)
-                else
+                if (newFile.exists()) {
+                    newName = FileUtil.renameFileName(code, originalName)
+                    code++
+                } else
                     break
 
             }

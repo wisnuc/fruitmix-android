@@ -11,7 +11,7 @@ enum class SearchOrder(val value:String){
 interface SearchDataSource {
 
     fun searchFile(searchOrder:SearchOrder = SearchOrder.NUll, starti:String="", starte:String="",
-                   last:String="", count:Int=100, places:String, searchClasses:String="",
+                   last:String="", count:Int=100, places:List<String>, searchClasses:String="",
                    types:String="",tags:String="",name:String="",fileOnly:Boolean=false,baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>)
 
 }

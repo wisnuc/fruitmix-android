@@ -26,10 +26,12 @@ import com.winsun.fruitmix.newdesign201804.file.sharedFolder.data.SharedFolderDa
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.user.preference.FileViewMode
 import com.winsun.fruitmix.newdesign201804.user.preference.UserPreferenceContainer
+import com.winsun.fruitmix.newdesign201804.util.getCurrentUserUUID
 import com.winsun.fruitmix.system.setting.InjectSystemSettingDataSource
 import com.winsun.fruitmix.thread.manage.ThreadManager
 import com.winsun.fruitmix.user.User
 import com.winsun.fruitmix.user.datasource.InjectUser
+import com.winsun.fruitmix.user.datasource.UserDataRepository
 import com.winsun.fruitmix.util.SnackbarUtil
 import com.winsun.fruitmix.viewmodel.LoadingViewModel
 import com.winsun.fruitmix.viewmodel.NoContentViewModel
@@ -37,7 +39,7 @@ import com.winsun.fruitmix.viewmodel.NoContentViewModel
 class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolderView: SharedFolderView,
                             val loadingViewModel: LoadingViewModel, val noContentViewModel: NoContentViewModel,
                             val sharedFolderDataSource: SharedFolderDataSource, val threadManager: ThreadManager,
-                            val transmissionTaskDataSource: TransmissionTaskDataSource) {
+                            val transmissionTaskDataSource: TransmissionTaskDataSource, userDataRepository: UserDataRepository) {
 
     private val sharedFolderRootUUID = "sharedFolderRootUUID"
 
@@ -45,7 +47,9 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
     private val retrieveFolders = mutableListOf<AbstractRemoteFile>()
 
-    private val currentUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(context).currentLoginUserUUID
+    private val currentUserUUID = context.getCurrentUserUUID()
+
+    private val currentUser = userDataRepository.getUserByUUID(currentUserUUID)
 
     private lateinit var fileRecyclerViewAdapter: FileRecyclerViewAdapter
 
@@ -83,7 +87,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
         }, {
 
-            abstractFile ->
+            return@FileRecyclerViewAdapter false
 
         }, { file, position ->
 
@@ -294,7 +298,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
                 val folderItemViewModel = FolderItemViewModel(it as RemoteFolder)
 
-                if (it is RemoteBuiltInDrive)
+                if (it is RemoteBuiltInDrive || !currentUser.isFirstUser)
                     folderItemViewModel.showMoreBtn.set(false)
                 else
                     folderItemViewModel.showMoreBtn.set(true)
@@ -422,7 +426,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
             override fun onSucceed(data: MutableList<User>?, operationResult: OperationResult?) {
                 super.onSucceed(data, operationResult)
 
-                CreateSharedFolderDialog(data!!, { selectedUsers, diskName ->
+                CreateSharedFolderDialog(data!!, currentFolderItems.map { it.name },{ selectedUsers, diskName ->
                     doCreateSharedDisk(selectedUsers, diskName)
                 }).createDialog(context)
 
@@ -432,6 +436,14 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
     }
 
     private fun doCreateSharedDisk(users: List<User>, diskName: String) {
+
+        if (currentFolderItems.any { it.name == diskName }) {
+
+            SnackbarUtil.showSnackBar(sharedFolderView.getViewForSnackBar(),Snackbar.LENGTH_SHORT,R.string.name_already_exist)
+
+            return
+
+        }
 
         sharedFolderView.showProgressDialog(context.getString(R.string.operating_title,
                 context.getString(R.string.create)))
@@ -457,7 +469,7 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
                 refreshData(currentFolderItems)
 
                 SnackbarUtil.showSnackBar(sharedFolderView.getViewForSnackBar(), Snackbar.LENGTH_SHORT,
-                        messageStr = result!!.getResultMessage(context))
+                        messageStr = context.getString(R.string.success, context.getString(R.string.create)))
 
             }
 

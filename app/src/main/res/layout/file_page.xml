@@ -13,6 +13,8 @@
             name="noContentViewModel"
             type="com.winsun.fruitmix.viewmodel.NoContentViewModel" />
 
+        <import type="android.view.View"/>
+
 
     </data>
 
@@ -24,6 +26,7 @@
             android:id="@+id/swipeRefreshLayout"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:visibility="@{loadingViewModel.showLoading?View.GONE:View.VISIBLE,default=gone}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -42,6 +45,7 @@
                     android:id="@+id/fileRecyclerView"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
+                    android:visibility="@{noContentViewModel.showNoContent?View.GONE:View.VISIBLE,default=gone}"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

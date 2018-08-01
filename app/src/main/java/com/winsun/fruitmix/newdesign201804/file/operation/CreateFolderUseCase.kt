@@ -36,7 +36,7 @@ class CreateFolderUseCase(val fileDataSource: FileDataSource, val baseView: Base
 
                     if (checkFolderNameExist(folderName)) {
                         SnackbarUtil.showSnackBar(view, Snackbar.LENGTH_SHORT,
-                               R.string.folder_name_exist)
+                               R.string.name_already_exist)
                     } else
                         doCreateFolder(context, folderName, parentFolder)
 

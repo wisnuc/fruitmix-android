@@ -161,6 +161,10 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
 
     }
 
+    override fun setFileRecyclerViewVisibility(visibility: Int) {
+        filePageBinding.fileRecyclerView.visibility = visibility
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
         if (requestCode == FILE_BROWSER_REQUEST_CODE && resultCode == Activity.RESULT_OK)

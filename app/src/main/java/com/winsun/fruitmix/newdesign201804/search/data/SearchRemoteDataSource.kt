@@ -15,7 +15,7 @@ class SearchRemoteDataSource(iHttpUtil: IHttpUtil, httpRequestFactory: HttpReque
     : BaseRemoteDataSourceImpl(iHttpUtil, httpRequestFactory), SearchDataSource {
 
     override fun searchFile(searchOrder: SearchOrder, starti: String, starte: String, last: String, count: Int,
-                            places: String, searchClasses:String, types: String, tags: String,
+                            places: List<String>, searchClasses:String, types: String, tags: String,
                             name: String, fileOnly: Boolean, baseLoadDataCallback: BaseLoadDataCallback<AbstractRemoteFile>) {
 
         val stringBuilder = StringBuilder("/files?")
@@ -35,8 +35,19 @@ class SearchRemoteDataSource(iHttpUtil: IHttpUtil, httpRequestFactory: HttpReque
         if(count > 0)
             stringBuilder.append("count=$count&")
 
-        if(places.isNotEmpty())
-            stringBuilder.append("places=$places&")
+        if(places.isNotEmpty()){
+
+            val placeStringBuilder = StringBuilder()
+            places.forEach {
+                placeStringBuilder.append(it)
+                placeStringBuilder.append(".")
+            }
+
+            val searchPlace = placeStringBuilder.substring(0,placeStringBuilder.lastIndex)
+
+            stringBuilder.append("places=$searchPlace&")
+
+        }
 
         if(searchClasses.isNotEmpty())
             stringBuilder.append("class=$searchClasses&")
@@ -59,7 +70,7 @@ class SearchRemoteDataSource(iHttpUtil: IHttpUtil, httpRequestFactory: HttpReque
 
         val httpRequest = httpRequestFactory.createHttpGetRequest(path)
 
-        wrapper.loadCall(httpRequest,baseLoadDataCallback,RemoteSearchResultParser())
+        wrapper.loadCall(httpRequest,baseLoadDataCallback,RemoteSearchResultParser(places))
 
     }
 

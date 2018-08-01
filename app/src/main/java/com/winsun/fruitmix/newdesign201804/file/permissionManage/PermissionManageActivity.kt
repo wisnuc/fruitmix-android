@@ -67,6 +67,8 @@ class PermissionManageActivity : BaseActivity() {
 
     private val context = this
 
+    private val currentUserUUID = context.getCurrentUserUUID()
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         sharedFolder = ManageSharedFolder.getSharedFolder()
@@ -201,6 +203,8 @@ class PermissionManageActivity : BaseActivity() {
             view?.userName?.text = user.userName
 
             view?.userCheckBox?.isChecked = selectedUserUUIDs.contains(user.uuid)
+
+            view?.userCheckBox?.isEnabled = user.uuid != currentUserUUID
 
             view?.userCheckBox?.setOnCheckedChangeListener { buttonView, isChecked ->
 

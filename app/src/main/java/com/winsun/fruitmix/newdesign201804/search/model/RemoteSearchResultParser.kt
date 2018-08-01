@@ -10,7 +10,7 @@ import com.winsun.fruitmix.parser.BaseRemoteDataParser
 import com.winsun.fruitmix.parser.RemoteDatasParser
 import org.json.JSONArray
 
-class RemoteSearchResultParser:BaseRemoteDataParser(),RemoteDatasParser<AbstractRemoteFile>{
+class RemoteSearchResultParser(val places: List<String>) : BaseRemoteDataParser(), RemoteDatasParser<AbstractRemoteFile> {
 
     override fun parse(json: String?): MutableList<AbstractRemoteFile> {
 
@@ -20,9 +20,9 @@ class RemoteSearchResultParser:BaseRemoteDataParser(),RemoteDatasParser<Abstract
 
         val rootJsonArray = JSONArray(root)
 
-        for (i in 0 until rootJsonArray.length()){
+        for (i in 0 until rootJsonArray.length()) {
 
-            val abstractRemoteFile:AbstractRemoteFile
+            val abstractRemoteFile: AbstractRemoteFile
 
             val jsonObject = rootJsonArray.getJSONObject(i)
 
@@ -36,51 +36,29 @@ class RemoteSearchResultParser:BaseRemoteDataParser(),RemoteDatasParser<Abstract
 
             val mTime = jsonObject.optLong("mtime")
 
+            val placeNum = jsonObject.optInt("place")
+
             val hash = jsonObject.optString("hash")
-
-            /*if(jsonObject.has("metadata")){
-
-                abstractRemoteFile = Media()
-
-                abstractRemoteFile.type = jsonObject.optString("type")
-                abstractRemoteFile.width = jsonObject.optLong("width").toString()
-                abstractRemoteFile.height = jsonObject.optLong("height").toString()
-
-                abstractRemoteFile.uuid = hash
-            }
-            else{
-
-                val type = jsonObject.optString("type")
-
-                if(type == "directory"){
-                    abstractRemoteFile = RemoteFolder()
-                }
-                else{
-                    abstractRemoteFile = RemoteFile()
-
-                    abstractRemoteFile.fileHash = hash
-                }
-
-            }
-
-*/
 
             val type = jsonObject.optString("type")
 
-            if(type == "directory"){
+            if (type == "directory") {
                 abstractRemoteFile = RemoteFolder()
-            }
-            else{
+            } else {
                 abstractRemoteFile = RemoteFile()
 
                 abstractRemoteFile.fileHash = hash
             }
-            abstractRemoteFile.uuid = uuid
 
+            abstractRemoteFile.uuid = uuid
             abstractRemoteFile.parentFolderUUID = parentUUID
-            abstractRemoteFile.name= name
+            abstractRemoteFile.name = name
             abstractRemoteFile.size = size
             abstractRemoteFile.time = mTime
+
+            //TODO:place must pass drive uuid,otherwise rootFolderUUID is wrong for call file api
+
+            abstractRemoteFile.rootFolderUUID = places[placeNum]
 
             abstractRemoteFiles.add(abstractRemoteFile)
 

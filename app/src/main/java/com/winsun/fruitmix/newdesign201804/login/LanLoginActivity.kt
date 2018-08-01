@@ -87,7 +87,6 @@ class LanLoginActivity : BaseToolbarActivity() {
         createAnimator(mActivityLanLoginBinding.forgetPasswordExplainLayout, 0, Util.dip2px(this, 100f))
                 .start()
 
-        R.layout.activity_lan_login
 
     }
 

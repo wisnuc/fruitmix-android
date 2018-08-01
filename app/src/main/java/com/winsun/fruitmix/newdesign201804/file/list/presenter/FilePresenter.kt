@@ -42,6 +42,7 @@ import com.winsun.fruitmix.newdesign201804.file.transmission.TransmissionDataSou
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskRepository
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.newdesign201804.user.preference.*
+import com.winsun.fruitmix.newdesign201804.util.getCurrentUserUUID
 import com.winsun.fruitmix.parser.RemoteMkDirParser
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.BindingViewHolder
@@ -112,8 +113,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     fun initView() {
 
-        val currentUserUUID = InjectSystemSettingDataSource.provideSystemSettingDataSource(context)
-                .currentLoginUserUUID
+        val currentUserUUID = context.getCurrentUserUUID()
 
         val currentUser = InjectUser.provideRepository(context).getUserByUUID(currentUserUUID)
 
@@ -471,7 +471,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     private fun createFolder() {
 
-        val createFolderUseCase = CreateFolderUseCase(fileDataSource, baseView, currentFolderItems,filePageBinding.root,
+        val createFolderUseCase = CreateFolderUseCase(fileDataSource, baseView, currentFolderItems, filePageBinding.root,
                 { newFolder ->
 
                     currentFolderItems.add(newFolder)
@@ -725,15 +725,16 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     }
 
-    private fun doHandleOnLongClick(abstractFile: AbstractFile) {
+    private fun doHandleOnLongClick(abstractFile: AbstractFile): Boolean {
 
         if (mIsSelectMode)
-            return
+            return false
 
         mSelectFiles.add(abstractFile)
 
         enterSelectMode()
 
+        return true
     }
 
 
@@ -801,9 +802,10 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
     }
 
     private fun refreshView() {
-        if (currentFolderItems.size == 0)
+        if (currentFolderItems.size == 0) {
             noContentViewModel.showNoContent.set(true)
-        else {
+
+        } else {
 
             noContentViewModel.showNoContent.set(false)
 
@@ -1009,7 +1011,7 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 }
 
 class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile, position: Int) -> Unit,
-                              val handleItemOnLongClick: (abstractFile: AbstractFile) -> Unit,
+                              val handleItemOnLongClick: (abstractFile: AbstractFile) -> Boolean,
                               val doHandleMoreBtnOnClick: (abstractFile: AbstractFile, position: Int) -> Unit,
                               val handleSortBtnOnClick: () -> Unit = {},
                               val sortPolicy: FileSortPolicy) : BaseRecyclerViewAdapter<BindingViewHolder, ViewItem>() {
@@ -1101,9 +1103,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 rootView?.setOnLongClickListener {
 
-                    handleItemOnLongClick(itemFile.getFile())
-
-                    return@setOnLongClickListener true
+                    return@setOnLongClickListener handleItemOnLongClick(itemFile.getFile())
 
                 }
 
@@ -1151,9 +1151,7 @@ class FileRecyclerViewAdapter(val handleItemOnClick: (abstractFile: AbstractFile
 
                 rootView?.setOnLongClickListener {
 
-                    handleItemOnLongClick(itemFolder.getFile())
-
-                    return@setOnLongClickListener true
+                    return@setOnLongClickListener handleItemOnLongClick(itemFolder.getFile())
 
                 }
 
