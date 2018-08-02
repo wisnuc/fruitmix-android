@@ -29,10 +29,8 @@ import com.winsun.fruitmix.newdesign201804.file.move.MoveFileActivity
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.data.TransmissionTaskDataSource
 import com.winsun.fruitmix.newdesign201804.file.transmissionTask.model.*
 import com.winsun.fruitmix.thread.manage.ThreadManager
-import com.winsun.fruitmix.util.FileTool
-import com.winsun.fruitmix.util.FileUtil
-import com.winsun.fruitmix.util.SnackbarUtil
-import com.winsun.fruitmix.util.Util
+import com.winsun.fruitmix.util.*
+import kotlinx.android.synthetic.main.name_edit_text_layout.view.*
 
 class FileOperation(val currentUserUUID: String, val threadManager: ThreadManager,
                     val transmissionTaskDataSource: TransmissionTaskDataSource,
@@ -85,7 +83,7 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
                 override fun execute() {
                     super.execute()
 
-                    openFileAfterOnClick(abstractFile as AbstractRemoteFile)
+                    openFileAfterOnClick(abstractFile)
 
                 }
 
@@ -241,25 +239,67 @@ class FileOperation(val currentUserUUID: String, val threadManager: ThreadManage
 
     private fun rename(context: Context, abstractFile: AbstractFile, position: Int) {
 
-        val editText = EditText(context)
-        editText.hint = abstractFile.name
+        val nameEditTextLayout = View.inflate(context, R.layout.name_edit_text_layout, null)
 
-        AlertDialog.Builder(context).setTitle(context.getString(R.string.rename))
-                .setView(editText)
+        val inputLayout = nameEditTextLayout.nameTextInputLayout
+        val editText = nameEditTextLayout.nameTextInputEditText
+
+        val oldName = abstractFile.name
+
+        editText.setText(oldName)
+        editText.setSelection(oldName.length)
+
+        val dialog = AlertDialog.Builder(context).setTitle(context.getString(R.string.rename))
+                .setView(nameEditTextLayout)
                 .setPositiveButton(R.string.rename, { dialog, which ->
 
-                    val oldName = abstractFile.name
                     val newName = editText.text.toString()
 
-                    if (newName.isEmpty()) {
-                        SnackbarUtil.showSnackBar(view, Snackbar.LENGTH_SHORT, R.string.new_name_empty_hint)
-                    } else if (oldName != newName) {
+                    if (oldName != newName)
                         doRename(context, oldName, newName, abstractFile, position)
-                    }
 
                 })
                 .setNegativeButton(R.string.cancel, { dialog, which -> })
-                .create().show()
+                .create()
+
+        editText.addTextChangedListener(object : SimpleTextWatcher() {
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                super.onTextChanged(s, start, before, count)
+
+                val newName = s.toString()
+
+                when {
+                    newName.isEmpty() -> {
+
+                        inputLayout.isErrorEnabled = true
+                        inputLayout.error = context.getString(R.string.name_can_not_be_empty)
+
+                        dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled = false
+                    }
+
+                    Util.checkNameFirstWordIsIllegal(newName) || Util.checkNameIsIllegal(newName) -> {
+
+                        inputLayout.isErrorEnabled = true
+                        inputLayout.error = context.getString(R.string.name_contains_illegal_char)
+
+                        dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled = false
+
+                    }
+                    else -> {
+
+                        inputLayout.isErrorEnabled = false
+
+                        dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled = true
+
+                    }
+                }
+
+            }
+
+        })
+
+        dialog.show()
 
     }
 

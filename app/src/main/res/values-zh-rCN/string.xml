@@ -815,6 +815,8 @@
     <string name="no_title_folder">无标题文件夹</string>
 
     <string name="name_already_exist">名称已存在</string>
+    <string name="name_can_not_be_empty">名称不能为空</string>
+    <string name="name_contains_illegal_char">名称包含非法字符</string>
 
     <!-- file detail -->
     <string name="key_type">类型</string>

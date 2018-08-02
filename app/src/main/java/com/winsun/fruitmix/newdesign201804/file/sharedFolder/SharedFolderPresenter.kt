@@ -83,7 +83,15 @@ class SharedFolderPresenter(val fileDataSource: FileDataSource, val sharedFolder
 
         fileRecyclerViewAdapter = FileRecyclerViewAdapter({ file, position ->
 
-            gotoNextFolder(file as AbstractRemoteFile)
+            if (file is RemoteFolder) {
+
+                gotoNextFolder(file)
+
+            } else if(file is RemoteFile){
+
+                fileOperation.openFileAfterOnClick(file)
+
+            }
 
         }, {
 

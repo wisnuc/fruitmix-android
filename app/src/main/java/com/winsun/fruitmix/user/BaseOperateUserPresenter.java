@@ -7,6 +7,7 @@ import com.winsun.fruitmix.callback.BaseLoadDataCallbackImpl;
 import com.winsun.fruitmix.model.operationResult.OperationResult;
 import com.winsun.fruitmix.system.setting.SystemSettingDataSource;
 import com.winsun.fruitmix.user.datasource.UserDataRepository;
+import com.winsun.fruitmix.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,23 +91,12 @@ public class BaseOperateUserPresenter {
     }
 
     private boolean checkUserNameFirstWordIsIllegal(String userName) {
-        Pattern pattern = Pattern.compile("^[-.]");
-
-        Matcher matcher = pattern.matcher(userName);
-
-        return matcher.lookingAt();
-
+        return Util.checkNameFirstWordIsIllegal(userName);
     }
 
 
     private boolean checkUserNameIsIllegal(String userName) {
-
-        Pattern pattern = Pattern.compile("[a-zA-Z0-9]+|[!()\\-.?[\\\\]_`~@#\"']+|[\\u4E00-\\u9FFF\\u3400-\\u4dbf\\uf900-\\ufaff\\u3040-\\u309f\\uac00-\\ud7af]");
-
-        Matcher matcher = pattern.matcher(userName);
-
-        return matcher.replaceAll("").length() != 0;
-
+        return Util.checkNameIsIllegal(userName);
     }
 
     protected boolean checkOperateUserPassword(Context context, String newPassword, String confirmPassword, OperateUserViewModel operateUserViewModel) {

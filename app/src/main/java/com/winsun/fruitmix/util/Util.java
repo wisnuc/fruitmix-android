@@ -534,7 +534,7 @@ public class Util {
 
     }
 
-    public static Pair<View, String>[] createSafeTransitionPairs(View toolbar, Activity activity,  Pair... otherPairs) {
+    public static Pair<View, String>[] createSafeTransitionPairs(View toolbar, Activity activity, Pair... otherPairs) {
 
         // Avoid system UI glitches as described here:
         // https://plus.google.com/+AlexLockwood/posts/RPtwZ5nNebb
@@ -973,6 +973,25 @@ public class Util {
         }
 
         return currentCount < totalCount;
+
+    }
+
+    public static boolean checkNameFirstWordIsIllegal(String name) {
+        Pattern pattern = Pattern.compile("^[-.]");
+
+        Matcher matcher = pattern.matcher(name);
+
+        return matcher.lookingAt();
+
+    }
+
+    public static boolean checkNameIsIllegal(String name) {
+
+        Pattern pattern = Pattern.compile("[a-zA-Z0-9]+|[!()\\-.?[\\\\]_`~@#\"']+|[\\u4E00-\\u9FFF\\u3400-\\u4dbf\\uf900-\\ufaff\\u3040-\\u309f\\uac00-\\ud7af]");
+
+        Matcher matcher = pattern.matcher(name);
+
+        return matcher.replaceAll("").length() != 0;
 
     }
 

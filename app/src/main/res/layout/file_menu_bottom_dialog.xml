@@ -28,14 +28,19 @@
 
         <TextView
             android:id="@+id/fileNameTextView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginLeft="32dp"
+            android:layout_marginRight="8dp"
             android:layout_marginStart="32dp"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="TextView"
             android:textColor="@color/eighty_seven_percent_black"
             android:textSize="16dp"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/detailImageView"
             app:layout_constraintStart_toEndOf="@+id/fileTypeIconIv"
             app:layout_constraintTop_toTopOf="parent" />
 

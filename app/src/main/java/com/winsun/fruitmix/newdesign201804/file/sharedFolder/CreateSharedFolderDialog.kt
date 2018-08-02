@@ -6,7 +6,6 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import com.winsun.fruitmix.R
@@ -15,6 +14,8 @@ import com.winsun.fruitmix.newdesign201804.util.inflateView
 import com.winsun.fruitmix.recyclerview.BaseRecyclerViewAdapter
 import com.winsun.fruitmix.recyclerview.SimpleViewHolder
 import com.winsun.fruitmix.user.User
+import com.winsun.fruitmix.util.SimpleTextWatcher
+import com.winsun.fruitmix.util.Util
 
 import kotlinx.android.synthetic.main.create_shared_folder_item.view.*
 import kotlinx.android.synthetic.main.create_shared_folder_layout.view.*
@@ -47,15 +48,14 @@ class CreateSharedFolderDialog(val users: List<User>, val alreadyExistSharedFold
         createShareAdapter.setItemList(users)
         createShareAdapter.notifyDataSetChanged()
 
-        sharedFolderNameEt.addTextChangedListener(object : TextWatcher {
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
+        sharedFolderNameEt.addTextChangedListener(object : SimpleTextWatcher() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
+                val name = s.toString()
+
                 when {
-                    alreadyExistSharedFolderNames.any { it == s.toString() } -> {
+                    alreadyExistSharedFolderNames.any { it == name } -> {
 
                         sharedFolderNameTextInputLayout.isErrorEnabled = true
                         sharedFolderNameTextInputLayout.error = context.getString(R.string.name_already_exist)
@@ -63,15 +63,26 @@ class CreateSharedFolderDialog(val users: List<User>, val alreadyExistSharedFold
                         dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled = false
 
                     }
-                    s != null && s.isEmpty() -> {
+
+                    name.isEmpty() -> {
 
                         sharedFolderNameTextInputLayout.isErrorEnabled = true
-                        sharedFolderNameTextInputLayout.error = context.getString(R.string.name_already_exist)
+                        sharedFolderNameTextInputLayout.error = context.getString(R.string.name_can_not_be_empty)
 
                         dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled = false
 
                     }
+                    Util.checkNameFirstWordIsIllegal(name) || Util.checkNameIsIllegal(name) -> {
+
+                        sharedFolderNameTextInputLayout.isErrorEnabled = true
+                        sharedFolderNameTextInputLayout.error = context.getString(R.string.name_contains_illegal_char)
+
+                        dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled = false
+
+                    }
+
                     else -> {
+
                         sharedFolderNameTextInputLayout.isErrorEnabled = false
 
                         dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled = true
@@ -79,9 +90,6 @@ class CreateSharedFolderDialog(val users: List<User>, val alreadyExistSharedFold
                     }
                 }
 
-            }
-
-            override fun afterTextChanged(s: Editable?) {
             }
 
         })
@@ -135,9 +143,6 @@ class CreateSharedFolderDialog(val users: List<User>, val alreadyExistSharedFold
                     selectUsers.add(user)
                 else
                     selectUsers.remove(user)
-
-                if (::dialog.isInitialized)
-                    dialog.getButton(DialogInterface.BUTTON_POSITIVE).isEnabled = !selectUsers.isEmpty()
 
             }
 
