@@ -113,8 +113,8 @@ class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListene
         fileSelectModeTitle = FileSelectModeTitle(file_select_mode_title,
                 { filePage.quitSelectMode() },
                 {
-                    enterMovePage()
-                    filePage.quitSelectMode()
+                    if (enterMovePage())
+                        filePage.quitSelectMode()
                 },
                 {
                     filePage.downloadBtnOnClick()
@@ -323,8 +323,8 @@ class MainPageActivity : BaseActivity(), DrawerView, FilePageSelectActionListene
 
     }
 
-    private fun enterMovePage() {
-        filePage.moveBtnOnClick()
+    private fun enterMovePage(): Boolean {
+        return filePage.moveBtnOnClick()
     }
 
 

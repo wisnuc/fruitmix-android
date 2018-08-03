@@ -236,9 +236,9 @@ class FilePage(val activity: BaseActivity) : MainPage, FileView {
         filePresenter.unregisterFilePageActionListener(filePageActionListener)
     }
 
-    fun moveBtnOnClick() {
+    fun moveBtnOnClick():Boolean {
 
-        filePresenter.enterMovePageWhenSelectMode()
+        return filePresenter.enterMovePageWhenSelectMode()
 
     }
 

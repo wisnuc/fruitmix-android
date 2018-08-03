@@ -254,7 +254,7 @@ class OfflineFilePresenter(private val offlineFileDataSource: OfflineFileDataSou
                     SnackbarUtil.showSnackBar(offlineFileView.getRootView(), Snackbar.LENGTH_SHORT,
                             messageStr = offlineFileView.getString(R.string.success, offlineFileView.getString(R.string.delete_file)))
 
-                    currentFileItems.removeAt(position)
+                    currentFileItems.removeAt(holder.adapterPosition)
                     offlineFileAdapter.setItemList(currentFileItems)
 
                     offlineFileAdapter.notifyItemRemoved(holder.adapterPosition)

@@ -965,12 +965,17 @@ class FilePresenter(val fileDataSource: FileDataSource, val noContentViewModel: 
 
     }
 
-    fun enterMovePageWhenSelectMode() {
+    fun enterMovePageWhenSelectMode():Boolean {
 
-        if (mSelectFiles.isEmpty())
+        return if (mSelectFiles.isEmpty()){
             SnackbarUtil.showSnackBar(contentLayout, Snackbar.LENGTH_SHORT, R.string.no_select_file)
+
+            false
+        }
         else {
             MoveFileActivity.start(fileView.getActivity(), mSelectFiles, FILE_OPERATE_MOVE)
+
+            true
         }
 
     }
